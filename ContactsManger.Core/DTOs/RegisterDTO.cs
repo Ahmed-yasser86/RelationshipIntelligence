@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using ContactsManger.Core.DTOs.Enums;
+using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 
 namespace ServiceContracts.DTOs
 {
@@ -11,6 +13,12 @@ namespace ServiceContracts.DTOs
 
         [Required(ErrorMessage = "Email can't be blank")]
         [EmailAddress(ErrorMessage = "Email should be in a proper email address format")]
+        [Remote(
+    action: "VerifayUserByEmail",
+    controller: "Account",
+    areaName: "Contacts",
+    ErrorMessage = "This email already exists"
+)]
         public string Email { get; set; }
 
 
@@ -27,7 +35,11 @@ namespace ServiceContracts.DTOs
 
         [Required(ErrorMessage = "Confirm Password can't be blank")]
         [DataType(DataType.Password)]
+        [Compare("Password", ErrorMessage = "Password and Confirm Password should be same")]
         public string ConfirmPassword { get; set; }
+
+        [Required(ErrorMessage = "User Type can't be blank")]
+        public UserTypeOptions UserType { get; set; } = UserTypeOptions.User;
 
     }
 }

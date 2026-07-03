@@ -1,0 +1,60 @@
+[
+  {
+    "ContainingType": "ContactsManager.API.Controllers.AccountController",
+    "Method": "PostLogin",
+    "RelativePath": "api/Account/PostLogin",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "loginDTO",
+        "Type": "ContactsManger.Core.DTOs.LoginDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ContactsManager.API.Controllers.AccountController",
+    "Method": "PostLogout",
+    "RelativePath": "api/Account/PostLogout",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ContactsManager.API.Controllers.AccountController",
+    "Method": "PostRegister",
+    "RelativePath": "api/Account/PostRegister",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "registerDTO",
+        "Type": "ServiceContracts.DTOs.RegisterDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ContactsManager.API.Controllers.AccountController",
+    "Method": "VerifayUserByEmail",
+    "RelativePath": "Contacts/Account/VerifayUserByEmail",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "email",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  }
+]

@@ -1,0 +1,13 @@
+C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManger.Core\bin\Debug\net9.0\ContactsManger.Core.deps.json
+C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManger.Core\bin\Debug\net9.0\ContactsManger.Core.dll
+C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManger.Core\bin\Debug\net9.0\ContactsManger.Core.pdb
+C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManger.Core\obj\Debug\net9.0\ContactsManger.Core.csproj.AssemblyReference.cache
+C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManger.Core\obj\Debug\net9.0\ContactsManger.Core.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManger.Core\obj\Debug\net9.0\ContactsManger.Core.AssemblyInfoInputs.cache
+C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManger.Core\obj\Debug\net9.0\ContactsManger.Core.AssemblyInfo.cs
+C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManger.Core\obj\Debug\net9.0\ContactsManger.Core.csproj.CoreCompileInputs.cache
+C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManger.Core\obj\Debug\net9.0\ContactsManger.Core.sourcelink.json
+C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManger.Core\obj\Debug\net9.0\ContactsManger.Core.dll
+C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManger.Core\obj\Debug\net9.0\refint\ContactsManger.Core.dll
+C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManger.Core\obj\Debug\net9.0\ContactsManger.Core.pdb
+C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManger.Core\obj\Debug\net9.0\ref\ContactsManger.Core.dll

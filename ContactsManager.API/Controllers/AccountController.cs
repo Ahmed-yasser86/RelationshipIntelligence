@@ -35,7 +35,7 @@ namespace ContactsManager.API.Controllers
         public async Task<IActionResult> VerifayUserByEmail(string email)
         {
             ApplicationUser user = await _userManager.FindByEmailAsync(email);
-            if (user != null)
+            if (user == null)
             {
                 return Ok(false);
             }

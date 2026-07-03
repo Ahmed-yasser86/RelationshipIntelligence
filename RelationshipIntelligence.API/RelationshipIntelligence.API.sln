@@ -13,6 +13,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ContactsManger.ServiceTests
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ContactsManager.ControllersTest", "..\ContactsManager.ControllersTest\ContactsManager.ControllersTest.csproj", "{01E49524-52F2-3C7C-6ED6-C2B0805AFA04}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{78FCCEB2-B893-427D-9B00-646EF3AE3F66}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -42,6 +46,12 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{59C44846-1566-F145-3378-24B1D86DFA3C} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{1112D6D9-9D53-A513-0978-496ABB06C50C} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{4D091DBB-51C5-F4F2-E114-E74E537BE571} = {78FCCEB2-B893-427D-9B00-646EF3AE3F66}
+		{01E49524-52F2-3C7C-6ED6-C2B0805AFA04} = {78FCCEB2-B893-427D-9B00-646EF3AE3F66}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {72E9FF24-AA02-4BF5-A8E4-5AE873E00D67}

@@ -1,4 +1,5 @@
-﻿using ContactsManger.Core.Domain.Entities.EEnums;
+﻿using ContactsManger.Core.CustomValidations;
+using ContactsManger.Core.Domain.Entities.EEnums;
 using Entities;
 using System;
 using System.Collections.Generic;
@@ -15,6 +16,7 @@ namespace ContactsManger.Core.Domain.Entities
         public Guid InteractionId { get; set; }
 
         [Required]
+        [EnumRange(typeof(EnInteractionType))]
         public EnInteractionType InteractionType { get; set; } 
 
         [Required]

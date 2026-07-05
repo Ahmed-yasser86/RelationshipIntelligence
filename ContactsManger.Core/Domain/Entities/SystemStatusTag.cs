@@ -1,4 +1,5 @@
-﻿using ContactsManger.Core.Domain.Entities.EEnums;
+﻿using ContactsManger.Core.CustomValidations;
+using ContactsManger.Core.Domain.Entities.EEnums;
 using Entities;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -10,6 +11,8 @@ namespace ContactsManger.Core.Domain.Entities
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+
+        [EnumRange(typeof(EnSystemStatusTag))]
 
         public EnSystemStatusTag StatusTagId { get; set; }= EnSystemStatusTag.Modratepriority;
 

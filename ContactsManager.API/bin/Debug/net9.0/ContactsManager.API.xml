@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>ContactsManager.API</name>
+    </assembly>
+    <members>
+        <member name="M:ContactsManager.API.Controllers.AccountController.PostRegister(ServiceContracts.DTOs.RegisterDTO)">
+            <summary>
+            Registers a new user account and returns a JWT token.
+            </summary>
+            <remarks>
+            IMPORTANT NOTE:
+            This method implements JWT authentication and authorization for the user after registration. 
+            The return object contains a JWT token used for authorization in future requests, 
+            along with other user information needed by the client.
+            
+            UserType Attribute:
+            This is an enum carrying values (0, 1, 2, 3, 4), where each value represents 
+            a specific user type (e.g., 0 = Admin, 1 = User).
+            </remarks>
+            <param name="registerDTO">The registration details.</param>
+            <returns>An object containing the JWT token and user info.</returns>
+        </member>
+    </members>
+</doc>

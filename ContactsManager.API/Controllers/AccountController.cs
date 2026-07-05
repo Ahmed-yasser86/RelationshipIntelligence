@@ -1,4 +1,6 @@
-﻿using ContactsManger.Core.Domain.IdentityEntities;
+﻿using ContactsManager.API.Filters;
+using ContactsManager.API.Filters.ContactsManager.API.Filters;
+using ContactsManger.Core.Domain.IdentityEntities;
 using ContactsManger.Core.DTOs;
 using ContactsManger.Core.DTOs.Enums;
 using ContactsManger.Core.ServiceContracts;
@@ -62,53 +64,49 @@ namespace ContactsManager.API.Controllers
             }
             return NoContent();
         }
-
         [HttpPost]
+
+        [TypeFilter(typeof(AccountsModelValidationActionFilter))]
         public async Task<IActionResult> PostLogin(LoginDTO loginDTO)
         {
-            if (!ModelState.IsValid)
+            var user = await _userManager.FindByEmailAsync(loginDTO.Email);
+
+            if (user == null || !await _userManager.CheckPasswordAsync(user, loginDTO.Password))
             {
-                string str = string.Join(", ", ModelState.Values.SelectMany(temp => temp.Errors).Select(temp => temp.ErrorMessage));
-                return Problem(str);
+                return Unauthorized(new
+                {
+                    message = "Invalid email or password."
+                });
             }
 
-            ApplicationUser user = await _userManager.FindByEmailAsync(loginDTO.Email);
+            var authenticationInformationObject = _jwtServices.Authenticate(user);
 
-            if (user != null && await _userManager.CheckPasswordAsync(user, loginDTO.Password))
-            {
-                var authenticationInformationObject = _jwtServices.Authenticate(user);
-                user.RefreshToken = authenticationInformationObject.refreshToken;
-                user.RefreshTokenExpirationTime = authenticationInformationObject.RefreshTokenExpirationTime;
-                await _userManager.UpdateAsync(user);
+            user.RefreshToken = authenticationInformationObject.refreshToken;
+            user.RefreshTokenExpirationTime = authenticationInformationObject.RefreshTokenExpirationTime;
 
-                return Ok(authenticationInformationObject);
-            }
+            await _userManager.UpdateAsync(user);
 
-            return Problem("Invalid email or password.");
+            return Ok(authenticationInformationObject);
         }
-
         /// <summary>
-        /// - IMPORTANT NOTE:
-        /// this method implments JWT authentiction and authorization
-        /// for the user after registration
-        /// and the return object is an object that
-        /// contains JWT token which is used for authorization in 
-        /// the future requests with some other user
-        /// information may be needed by the client side
-        /// 
-        /// - Another NOTE : UserType Attribute here is an enum which means it carries values like (0,1,2,3,4)
-        /// each value represents a user type like (Admin, User, etc..)
+        /// Registers a new user account and returns a JWT token.
         /// </summary>
-        /// <param name="registerDTO"></param>
-        /// <returns></returns>
+        /// <remarks>
+        /// IMPORTANT NOTE:
+        /// This method implements JWT authentication and authorization for the user after registration. 
+        /// The return object contains a JWT token used for authorization in future requests, 
+        /// along with other user information needed by the client.
+        /// 
+        /// UserType Attribute:
+        /// This is an enum carrying values (0, 1, 2, 3, 4), where each value represents 
+        /// a specific user type (e.g., 0 = Admin, 1 = User).
+        /// </remarks>
+        /// <param name="registerDTO">The registration details.</param>
+        /// <returns>An object containing the JWT token and user info.</returns>
         [HttpPost]
+        [TypeFilter(typeof(AccountsModelValidationActionFilter))]
         public async Task<IActionResult> PostRegister(RegisterDTO registerDTO)
         {
-            if (ModelState.IsValid == false)
-            {
-                string errors = string.Join(", ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
-                return Problem(errors);
-            }
 
             ApplicationUser applicationUser = new ApplicationUser() { Email = registerDTO.Email, PhoneNumber = registerDTO.Phone, UserName = registerDTO.Email, PersonName = registerDTO.PersonName };
 

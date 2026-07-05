@@ -59,7 +59,6 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddAuthorization();
 builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
-
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
@@ -68,7 +67,9 @@ builder.Services.AddSwaggerGen(options =>
         Version = "v1"
     });
 
-    var xmlPath = Path.Combine(AppContext.BaseDirectory, "api.xml");
+    var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFilename);
+
     if (File.Exists(xmlPath))
     {
         options.IncludeXmlComments(xmlPath);

@@ -1,5 +1,6 @@
 ﻿using Entities;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Entities
 {
@@ -7,6 +8,7 @@ namespace Entities
     {
 
         [Key]
+
         public Guid CountryId { get; set; }
         public string CountryName { get; set; }
 

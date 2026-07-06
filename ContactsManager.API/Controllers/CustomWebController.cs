@@ -12,5 +12,9 @@ namespace ContactsManager.API.Controllers
     public class CustomWebController : ControllerBase
     {
 
+
+
+
+
     }
 }

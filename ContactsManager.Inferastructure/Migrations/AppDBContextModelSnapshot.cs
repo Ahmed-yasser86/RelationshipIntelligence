@@ -811,6 +811,14 @@ namespace ContactsManager.Inferastructure.Migrations
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
                     b.ToTable("AspNetRoles", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("00000000-0000-0000-0000-000000000002"),
+                            Name = "User",
+                            NormalizedName = "USER"
+                        });
                 });
 
             modelBuilder.Entity("ContactsManger.Core.Domain.IdentityEntities.ApplicationUser", b =>
@@ -886,6 +894,25 @@ namespace ContactsManager.Inferastructure.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("00000000-0000-0000-0000-000000000001"),
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "STATIC-SEED-CONCURRENCY-STAMP-0001",
+                            Email = "testuser@contactsmanager.dev",
+                            EmailConfirmed = true,
+                            LockoutEnabled = false,
+                            NormalizedEmail = "TESTUSER@CONTACTSMANAGER.DEV",
+                            NormalizedUserName = "TESTUSER@CONTACTSMANAGER.DEV",
+                            PasswordHash = "AQAAAAIAAYagAAAAEP9N9FETj6XBlr2nCwBktgDVpDvbmOXLKGisPywjI8prNBnxoqoHbJ5eYAlzc98QUw==",
+                            PersonName = "Test User",
+                            PhoneNumberConfirmed = false,
+                            SecurityStamp = "STATIC-SEED-SECURITY-STAMP-0001",
+                            TwoFactorEnabled = false,
+                            UserName = "testuser@contactsmanager.dev"
+                        });
                 });
 
             modelBuilder.Entity("Entities.Country", b =>
@@ -965,6 +992,9 @@ namespace ContactsManager.Inferastructure.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<Guid>("ApplicationUserId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("ContextMemory")
                         .HasColumnType("nvarchar(max)");
 
@@ -979,8 +1009,12 @@ namespace ContactsManager.Inferastructure.Migrations
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
                     b.Property<string>("LinkedInProfile")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -991,7 +1025,8 @@ namespace ContactsManager.Inferastructure.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("Origin")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
 
                     b.Property<string>("OtherInformation")
                         .HasColumnType("nvarchar(max)");
@@ -1003,10 +1038,11 @@ namespace ContactsManager.Inferastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("phone")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("PersonId");
+
+                    b.HasIndex("ApplicationUserId");
 
                     b.HasIndex("CountryId");
 
@@ -1017,10 +1053,12 @@ namespace ContactsManager.Inferastructure.Migrations
                         {
                             PersonId = new Guid("10000001-0000-0000-0000-000000000000"),
                             Address = "Sydney, NSW",
+                            ApplicationUserId = new Guid("00000000-0000-0000-0000-000000000001"),
                             ContextMemory = "Great conversations on social phenomena",
                             CountryId = new Guid("c0000002-0000-0000-0000-000000000000"),
                             DateOfBirth = new DateTime(1998, 4, 12, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Gender = "Male",
+                            IsDeleted = false,
                             LinkedInProfile = "linkedin.com/in/ned-ibrahim",
                             Name = "Ned Ibrahim",
                             NewsLetter = true,
@@ -1032,10 +1070,12 @@ namespace ContactsManager.Inferastructure.Migrations
                         {
                             PersonId = new Guid("10000002-0000-0000-0000-000000000000"),
                             Address = "Cambridge, MA",
+                            ApplicationUserId = new Guid("00000000-0000-0000-0000-000000000001"),
                             ContextMemory = "Author of Why Nations Fail",
                             CountryId = new Guid("c0000003-0000-0000-0000-000000000000"),
                             DateOfBirth = new DateTime(1967, 9, 3, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Gender = "Male",
+                            IsDeleted = false,
                             LinkedInProfile = "linkedin.com/in/dacemoglu",
                             Name = "Daron Acemoglu",
                             NewsLetter = false,
@@ -1047,10 +1087,12 @@ namespace ContactsManager.Inferastructure.Migrations
                         {
                             PersonId = new Guid("10000003-0000-0000-0000-000000000000"),
                             Address = "Durham, NC",
+                            ApplicationUserId = new Guid("00000000-0000-0000-0000-000000000001"),
                             ContextMemory = "Excellent pedagogical style in lectures",
                             CountryId = new Guid("c0000003-0000-0000-0000-000000000000"),
                             DateOfBirth = new DateTime(1958, 9, 23, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Gender = "Male",
+                            IsDeleted = false,
                             LinkedInProfile = "linkedin.com/in/mmunger",
                             Name = "Michael Munger",
                             NewsLetter = false,
@@ -1062,10 +1104,12 @@ namespace ContactsManager.Inferastructure.Migrations
                         {
                             PersonId = new Guid("10000004-0000-0000-0000-000000000000"),
                             Address = "Berkeley, CA",
+                            ApplicationUserId = new Guid("00000000-0000-0000-0000-000000000001"),
                             ContextMemory = "Culture in Action sociology frameworks",
                             CountryId = new Guid("c0000003-0000-0000-0000-000000000000"),
                             DateOfBirth = new DateTime(1944, 12, 12, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Gender = "Female",
+                            IsDeleted = false,
                             LinkedInProfile = "linkedin.com/in/aswidler",
                             Name = "Ann Swidler",
                             NewsLetter = true,
@@ -1077,10 +1121,12 @@ namespace ContactsManager.Inferastructure.Migrations
                         {
                             PersonId = new Guid("10000005-0000-0000-0000-000000000000"),
                             Address = "Paris, France",
+                            ApplicationUserId = new Guid("00000000-0000-0000-0000-000000000001"),
                             ContextMemory = "Structural functionalism architect",
                             CountryId = new Guid("c0000008-0000-0000-0000-000000000000"),
                             DateOfBirth = new DateTime(1858, 4, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Gender = "Male",
+                            IsDeleted = false,
                             LinkedInProfile = "",
                             Name = "Emile Durkheim",
                             NewsLetter = false,
@@ -1092,10 +1138,12 @@ namespace ContactsManager.Inferastructure.Migrations
                         {
                             PersonId = new Guid("10000006-0000-0000-0000-000000000000"),
                             Address = "St. Louis, MO",
+                            ApplicationUserId = new Guid("00000000-0000-0000-0000-000000000001"),
                             ContextMemory = "Nobel laureate in economics",
                             CountryId = new Guid("c0000003-0000-0000-0000-000000000000"),
                             DateOfBirth = new DateTime(1920, 11, 5, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Gender = "Male",
+                            IsDeleted = false,
                             LinkedInProfile = "",
                             Name = "Douglass North",
                             NewsLetter = false,
@@ -1107,10 +1155,12 @@ namespace ContactsManager.Inferastructure.Migrations
                         {
                             PersonId = new Guid("10000007-0000-0000-0000-000000000000"),
                             Address = "Cairo, Egypt",
+                            ApplicationUserId = new Guid("00000000-0000-0000-0000-000000000001"),
                             ContextMemory = "Classmate in BIS academic program",
                             CountryId = new Guid("c0000001-0000-0000-0000-000000000000"),
                             DateOfBirth = new DateTime(2005, 8, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Gender = "Male",
+                            IsDeleted = false,
                             LinkedInProfile = "linkedin.com/in/youssef-bis",
                             Name = "Youssef",
                             NewsLetter = true,
@@ -1122,10 +1172,12 @@ namespace ContactsManager.Inferastructure.Migrations
                         {
                             PersonId = new Guid("10000008-0000-0000-0000-000000000000"),
                             Address = "Tokyo, Japan",
+                            ApplicationUserId = new Guid("00000000-0000-0000-0000-000000000001"),
                             ContextMemory = "Data Science program partner",
                             CountryId = new Guid("c0000004-0000-0000-0000-000000000000"),
                             DateOfBirth = new DateTime(2002, 1, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Gender = "Male",
+                            IsDeleted = false,
                             LinkedInProfile = "linkedin.com/in/kenji-data",
                             Name = "Kenji",
                             NewsLetter = true,
@@ -1137,10 +1189,12 @@ namespace ContactsManager.Inferastructure.Migrations
                         {
                             PersonId = new Guid("10000009-0000-0000-0000-000000000000"),
                             Address = "Cairo, Egypt",
+                            ApplicationUserId = new Guid("00000000-0000-0000-0000-000000000001"),
                             ContextMemory = "Software Engineering intern colleague",
                             CountryId = new Guid("c0000001-0000-0000-0000-000000000000"),
                             DateOfBirth = new DateTime(2006, 5, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Gender = "Female",
+                            IsDeleted = false,
                             LinkedInProfile = "linkedin.com/in/sarah-dev",
                             Name = "Sarah",
                             NewsLetter = false,
@@ -1152,10 +1206,12 @@ namespace ContactsManager.Inferastructure.Migrations
                         {
                             PersonId = new Guid("1000000a-0000-0000-0000-000000000000"),
                             Address = "Giza, Egypt",
+                            ApplicationUserId = new Guid("00000000-0000-0000-0000-000000000001"),
                             ContextMemory = "Met at Beit Yakan architectural tour",
                             CountryId = new Guid("c0000001-0000-0000-0000-000000000000"),
                             DateOfBirth = new DateTime(2001, 7, 22, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Gender = "Male",
+                            IsDeleted = false,
                             LinkedInProfile = "linkedin.com/in/omar-arch",
                             Name = "Omar",
                             NewsLetter = true,
@@ -1314,6 +1370,13 @@ namespace ContactsManager.Inferastructure.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("AspNetUserRoles", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            UserId = new Guid("00000000-0000-0000-0000-000000000001"),
+                            RoleId = new Guid("00000000-0000-0000-0000-000000000002")
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
@@ -1646,11 +1709,19 @@ namespace ContactsManager.Inferastructure.Migrations
 
             modelBuilder.Entity("Entities.Person", b =>
                 {
+                    b.HasOne("ContactsManger.Core.Domain.IdentityEntities.ApplicationUser", "ApplicationUser")
+                        .WithMany()
+                        .HasForeignKey("ApplicationUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("Entities.Country", "Country")
                         .WithMany("Persons")
                         .HasForeignKey("CountryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("ApplicationUser");
 
                     b.Navigation("Country");
                 });

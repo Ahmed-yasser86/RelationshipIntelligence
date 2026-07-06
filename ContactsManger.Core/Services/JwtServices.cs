@@ -43,8 +43,7 @@ namespace ContactsManger.Core.Services
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(JwtRegisteredClaimNames.Iat,DateTime.UtcNow.ToString()),
-                new Claim(ClaimTypes.NameIdentifier,user.Email.ToString()),
+new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64),                new Claim(ClaimTypes.NameIdentifier,user.Email.ToString()),
                 new Claim(ClaimTypes.Name,user.PersonName.ToString()),
 
             };

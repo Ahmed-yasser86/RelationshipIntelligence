@@ -1,6 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Threading.Tasks;
+using ContactsManger.Core.Domain.Entities;
+using ContactsManger.Core.Domain.Entities.EEnums;
 using Entities;
 using Microsoft.Extensions.Logging;
 using ServiceContracts;
@@ -14,11 +18,31 @@ namespace Servicess
     public class PersonAdderService : IPersonAdderService
     {
         private readonly PersonRepositryContract PersonRipository;
+        private readonly CircleRepositryContract _circleRepository;
+        private readonly ContactItemRoleRepositryContract _contactItemRoleRepository;
+        private readonly ConnectionChannelRepositryContract _connectionChannelRepository;
+        private readonly UserDefinedTagsRepositryContract _userDefinedTagsRepository;
+        private readonly SystemStatusTagRepositryContract _systemStatusTagRepository;
+        private readonly ICurrentUserService _currentUserService;
         private readonly ILogger<PersonAdderService> _logger;
 
-        public PersonAdderService(PersonRepositryContract personRipository, ILogger<PersonAdderService> logger)
+        public PersonAdderService(
+            PersonRepositryContract personRipository,
+            CircleRepositryContract circleRepository,
+            ContactItemRoleRepositryContract contactItemRoleRepository,
+            ConnectionChannelRepositryContract connectionChannelRepository,
+            UserDefinedTagsRepositryContract userDefinedTagsRepository,
+            SystemStatusTagRepositryContract systemStatusTagRepository,
+            ICurrentUserService currentUserService,
+            ILogger<PersonAdderService> logger)
         {
             PersonRipository = personRipository;
+            _circleRepository = circleRepository;
+            _contactItemRoleRepository = contactItemRoleRepository;
+            _connectionChannelRepository = connectionChannelRepository;
+            _userDefinedTagsRepository = userDefinedTagsRepository;
+            _systemStatusTagRepository = systemStatusTagRepository;
+            _currentUserService = currentUserService;
             _logger = logger;
         }
 
@@ -41,21 +65,60 @@ namespace Servicess
                     ValidationHelpers.ValidationFunction(personAddRequest);
 
                     _logger.LogDebug("Converting PersonAddRequest to Person entity");
-                    var Person = personAddRequest.ToPerson();
-                    Person.PersonId = Guid.NewGuid();
+                    var person = personAddRequest.ToPerson();
+                    person.PersonId = Guid.NewGuid();
+
+                    // ApplicationUserId comes ONLY from the authenticated user's
+                    // ID, never from client-submitted request data -- a client
+                    // must never be able to claim ownership of a Person on
+                    // someone else's behalf.
+                    if (_currentUserService.UserId == Guid.Empty)
+                    {
+                        _logger.LogWarning("AddPerson called with no authenticated user context");
+                        throw new UnauthorizedAccessException("Cannot add a person without an authenticated user.");
+                    }
+                    if (!_currentUserService.UserId.HasValue)
+                    {
+                        throw new UnauthorizedAccessException("No authenticated user context is available.");
+                    }
+
+                    person.ApplicationUserId = _currentUserService.UserId.Value;
+
+                    // Resolve all four independent lookup collections concurrently.
+                    // Each Resolve* method does exactly ONE batched DB round-trip
+                    // (WHERE ... IN (...)) instead of one round-trip per name, and
+                    // since Circles/ConnectionChannels/UserDefinedTags/SystemStatusTags
+                    // don't depend on each other, there's no reason to await them
+                    // one at a time either.
+                    var circlesTask = ResolveCircles(personAddRequest.Organizations);
+                    var channelsTask = ResolveConnectionChannels(personAddRequest.ConnectionChannels);
+                    var tagsTask = ResolveUserDefinedTags(personAddRequest.UserDefinedTags);
+                    var statusTagsTask = ResolveSystemStatusTags(personAddRequest.SystemStatusTags);
+
+                    await Task.WhenAll(circlesTask, channelsTask, tagsTask, statusTagsTask);
+
+                    foreach (var circle in circlesTask.Result) person.Circles.Add(circle);
+                    foreach (var channel in channelsTask.Result) person.ConnectionChannels.Add(channel);
+                    foreach (var tag in tagsTask.Result) person.UserDefinedTags.Add(tag);
+                    foreach (var statusTag in statusTagsTask.Result) person.SystemStatusTags.Add(statusTag);
+
+                    // Purely local, no DB access -- fine to run synchronously
+                    // after the batch above.
+                    ResolveContactItemRoles(person, personAddRequest.CurrentRoles);
+                    ResolveSocialMediaAccounts(person, personAddRequest.SocialMediaAccounts);
 
                     _logger.LogDebug("Adding new person with ID: {PersonId}, Name: {PersonName}",
-                        Person.PersonId, Person.Name);
+                        person.PersonId, person.Name);
 
-                    await PersonRipository.AddPerson(Person);
+                    await PersonRipository.AddPerson(person);
 
-                    var PersonResponsType = Person.ConvertToPersonRespons();
-                    PersonResponsType.CountryName = Person.Country?.CountryName;
+                    var result = person.ConvertToPersonRespons();
+                    result.CountryName = person.Country?.CountryName;
 
                     _logger.LogInformation("Successfully added new person. ID: {PersonId}, Name: {PersonName}, Country: {CountryName}",
-                        PersonResponsType.PersonId, PersonResponsType.Name, PersonResponsType.CountryName);
+                        result.PersonId, result.Name, result.CountryName);
 
-                    return PersonResponsType;
+                    return result;
                 }
                 catch (ValidationException ex)
                 {
@@ -67,6 +130,127 @@ namespace Servicess
                     _logger.LogError(ex, "Unexpected error occurred in AddPerson for request: {@PersonAddRequest}", personAddRequest);
                     throw;
                 }
+            }
+        }
+
+        /// <summary>
+        /// Get-or-create against Circle by name (Organization), batched into a
+        /// single query for every requested name instead of one query per name.
+        /// </summary>
+        private async Task<List<Circle>> ResolveCircles(List<string>? organizationNames)
+        {
+            var names = (organizationNames ?? new List<string>())
+                .Where(n => !string.IsNullOrWhiteSpace(n))
+                .Distinct()
+                .ToList();
+
+            if (names.Count == 0) return new List<Circle>();
+
+            var existing = (await _circleRepository.GetCirclesByNames(names)).ToList();
+            var existingNames = existing.Select(c => c.Name).ToHashSet();
+
+            var result = new List<Circle>(existing);
+            foreach (var name in names.Where(n => !existingNames.Contains(n)))
+            {
+                result.Add(new Circle { CircleId = Guid.NewGuid(), Name = name });
+            }
+
+            return result;
+        }
+
+        private async Task<List<ConnectionChannel>> ResolveConnectionChannels(List<string>? channelNames)
+        {
+            var names = (channelNames ?? new List<string>())
+                .Where(n => !string.IsNullOrWhiteSpace(n))
+                .Distinct()
+                .ToList();
+
+            if (names.Count == 0) return new List<ConnectionChannel>();
+
+            var existing = (await _connectionChannelRepository.GetConnectionChannelsByNames(names)).ToList();
+            var existingNames = existing.Select(c => c.ConnectionChannelName).ToHashSet();
+
+            var result = new List<ConnectionChannel>(existing);
+            foreach (var name in names.Where(n => !existingNames.Contains(n)))
+            {
+                result.Add(new ConnectionChannel { ConnectionChannelId = Guid.NewGuid(), ConnectionChannelName = name });
+            }
+
+            return result;
+        }
+
+        private async Task<List<UserDefinedTags>> ResolveUserDefinedTags(List<string>? tagNames)
+        {
+            var names = (tagNames ?? new List<string>())
+                .Where(n => !string.IsNullOrWhiteSpace(n))
+                .Distinct()
+                .ToList();
+
+            if (names.Count == 0) return new List<UserDefinedTags>();
+
+            var existing = (await _userDefinedTagsRepository.GetUserDefinedTagsByNames(names)).ToList();
+            var existingNames = existing.Select(t => t.TagName).ToHashSet();
+
+            var result = new List<UserDefinedTags>(existing);
+            foreach (var name in names.Where(n => !existingNames.Contains(n)))
+            {
+                result.Add(new UserDefinedTags { TagId = Guid.NewGuid(), TagName = name });
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// SystemStatusTag rows are fixed reference/seed data keyed by enum value
+        /// -- there is no "create" path here. Any requested enum with no seeded
+        /// row is skipped (with a warning logged inside the repository), rather
+        /// than fabricating rows for reference data this service doesn't own.
+        /// </summary>
+        private async Task<List<SystemStatusTag>> ResolveSystemStatusTags(List<EnSystemStatusTag>? statusTags)
+        {
+            var ids = (statusTags ?? new List<EnSystemStatusTag>()).Distinct().ToList();
+
+            if (ids.Count == 0) return new List<SystemStatusTag>();
+
+            return (await _systemStatusTagRepository.GetSystemStatusTagsByEnums(ids)).ToList();
+        }
+
+        /// <summary>
+        /// ContactItemRole is scoped per-person (not a shared lookup), so there's
+        /// nothing to batch-fetch for a brand-new person -- every role text becomes
+        /// a fresh row tied to this PersonId. No DB call, so no async needed.
+        /// </summary>
+        private void ResolveContactItemRoles(Person person, List<string>? roleNames)
+        {
+            if (roleNames == null) return;
+
+            foreach (var role in roleNames.Where(r => !string.IsNullOrWhiteSpace(r)))
+            {
+                person.ContactItemRoles.Add(new ContactItemRole
+                {
+                    ContactsRoleId = Guid.NewGuid(),
+                    Role = role,
+                    PersonId = person.PersonId
+                });
+            }
+        }
+
+        /// <summary>
+        /// Social media accounts aren't deduplicated/looked-up -- each submitted
+        /// URL becomes its own new row tied to this person.
+        /// </summary>
+        private void ResolveSocialMediaAccounts(Person person, List<SocialMediaAccountAddRequest>? accounts)
+        {
+            if (accounts == null) return;
+
+            foreach (var account in accounts.Where(a => !string.IsNullOrWhiteSpace(a.Url)))
+            {
+                person.OtherSocialMediaAccounts.Add(new SocialMediaAccount
+                {
+                    SocialMediaAccountId = Guid.NewGuid(),
+                    Platform = account.Platform,
+                    Url = account.Url
+                });
             }
         }
     }

@@ -22,5 +22,7 @@ namespace RepositryContracts
 
         Task<bool> DeletePerson(Guid? id);
 
+        Task<(List<Person> Items, int TotalCount)> GetPersonsPaged(int pageNumber, int pageSize);
+
     }
 }

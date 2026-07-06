@@ -158,14 +158,53 @@ namespace Repositories
             }
         }
 
-        public Task<Country> UpdateCountry(Country country)
+        public async Task<Country> UpdateCountry(Country country)
         {
-            using (Operation.Time("UpdateCountry called (NOT IMPLEMENTED)"))
+            using (Operation.Time("UpdateCountry database operation for Country: {CountryName}", country?.CountryName))
             {
-                _logger.LogWarning("Executing {MethodName} method at {Timestamp} - NOT IMPLEMENTED. Country: {@Country}",
+                _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Country: {@Country}",
                     nameof(UpdateCountry), DateTime.UtcNow, country);
 
-                throw new NotImplementedException("UpdateCountry method is not implemented in CountryRepository");
+                try
+                {
+                    if (country == null)
+                    {
+                        _logger.LogWarning("UpdateCountry called with null country parameter");
+                        throw new ArgumentNullException(nameof(country));
+                    }
+
+                    var existingCountry = await _db.Countries.FindAsync(country.CountryId);
+
+                    if (existingCountry == null)
+                    {
+                        _logger.LogWarning("UpdateCountry called for non-existent Country ID: {CountryId}", country.CountryId);
+                        throw new InvalidOperationException($"Country with ID {country.CountryId} does not exist.");
+                    }
+
+                    _db.Entry(existingCountry).CurrentValues.SetValues(country);
+                    await _db.SaveChangesAsync();
+
+                    _logger.LogInformation("Successfully updated country with ID: {CountryId}, Name: {CountryName}",
+                        existingCountry.CountryId, existingCountry.CountryName);
+
+                    return existingCountry;
+                }
+                catch (DbUpdateException ex)
+                {
+                    _logger.LogError(ex, "Database update error while updating country. Country: {@Country}. Error: {ErrorMessage}",
+                        country, ex.Message);
+                    throw;
+                }
+                catch (InvalidOperationException)
+                {
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Unexpected error occurred in {MethodName} for country: {@Country}",
+                        nameof(UpdateCountry), country);
+                    throw;
+                }
             }
         }
     }

@@ -1,13 +1,14 @@
-﻿using System;
+﻿using ContactsManger.Core.DTOs.PersonDTOs;
+using Entities;
+using Microsoft.Extensions.Logging;
+using RepositryContracts;
+using SerilogTimings;
+using ServiceContracts;
+using ServiceContracts.DTOs;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Entities;
-using Microsoft.Extensions.Logging;
-using ServiceContracts;
-using ServiceContracts.DTOs;
-using RepositryContracts;
-using SerilogTimings;
 
 namespace Servicess
 {
@@ -21,6 +22,54 @@ namespace Servicess
             PersonRipository = personRipository;
             _logger = logger;
         }
+
+        public async Task<PagedResult<PersonViewDTO>> GetPersonsViewBatched(int pageNumber, int pageSize)
+        {
+            using (Operation.Time("Get paged persons operation. Page: {PageNumber}, Size: {PageSize}", pageNumber, pageSize))
+            {
+                _logger.LogInformation("Executing {MethodName} method at {Timestamp}. PageNumber: {PageNumber}, PageSize: {PageSize}",
+                    nameof(GetPersonsViewBatched), DateTime.UtcNow, pageNumber, pageSize);
+
+                try
+                {
+                    if (pageNumber < 1)
+                    {
+                        _logger.LogWarning("GetPersonsViewBatched called with invalid PageNumber: {PageNumber}. Clamping to 1.", pageNumber);
+                        pageNumber = 1;
+                    }
+
+                    if (pageSize < 1)
+                    {
+                        _logger.LogWarning("GetPersonsViewBatched called with invalid PageSize: {PageSize}. Clamping to 1.", pageSize);
+                        pageSize = 1;
+                    }
+
+                    var (items, totalCount) = await PersonRipository.GetPersonsPaged(pageNumber, pageSize);
+
+                    var result = new PagedResult<PersonViewDTO>
+                    {
+                        Items = items.Select(p => p.ConvertToPersonViewDTO()).ToList(),
+                        TotalCount = totalCount,
+                        PageNumber = pageNumber,
+                        PageSize = pageSize
+                    };
+
+                    _logger.LogInformation("{MethodName} completed successfully. Retrieved {Count} of {TotalCount} persons (page {PageNumber})",
+                        nameof(GetPersonsViewBatched), result.Items.Count, totalCount, pageNumber);
+
+                    return result;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error occurred in {MethodName} method. PageNumber: {PageNumber}, PageSize: {PageSize}",
+                        nameof(GetPersonsViewBatched), pageNumber, pageSize);
+                    throw;
+                }
+            }
+        }
+
+
+
 
         public async Task<List<PersonRespones>> GetAllPersons()
         {

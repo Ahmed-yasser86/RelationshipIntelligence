@@ -9,6 +9,11 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
+using Repositories;
+using RepositryContracts;
+using ServiceContracts;
+using Servicess;
 using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -25,6 +30,16 @@ builder.Services.AddControllers(options =>
 });
 
 builder.Services.AddTransient<IjwtAuthentication, JwtServices>();
+
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ServiceContracts.ICurrentUserService, Servicess.CurrentUserService>();
+//builder.Services.AddScoped<IPersonQuickAdderService, PersonQuickAdderService  >();
+
+// Add this line to register your repository
+builder.Services.AddScoped<PersonRepositryContract, PersonRepository>();
+
+// You likely already have this line right below it
+builder.Services.AddScoped<IPersonGetterService, PersonGetterService>();
 
 builder.Services.AddDbContext<AppDBContext>(options =>
 {
@@ -61,6 +76,32 @@ builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
+
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Enter 'Bearer' followed by a space and your JWT. Example: \"Bearer eyJhbGci...\""
+    });
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] {}
+        }
+    });
+
     options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
     {
         Title = "Contacts Manager API",

@@ -6,17 +6,12 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
 namespace ServiceContracts.DTOs
 {
-    public class PersonUpdateRequest
+    public class PersonAddRequest
     {
-
-        [Required]
-        public Guid? PersonId { get; set; }
-
         [Required(ErrorMessage = "Name is required")]
-        [StringLength(40, ErrorMessage = "Name cannot exceed 40 characters")]
+        [StringLength(100, ErrorMessage = "Name cannot exceed 100 characters")]
         public string? Name { get; set; }
 
         [Required(ErrorMessage = "Date of Birth is required")]
@@ -28,6 +23,7 @@ namespace ServiceContracts.DTOs
         public string? email { get; set; }
 
         [Phone(ErrorMessage = "Invalid phone number format")]
+
         public string? phone { get; set; }
 
         [Required(ErrorMessage = "Gender is required")]
@@ -41,6 +37,29 @@ namespace ServiceContracts.DTOs
 
         public bool? NewsLetter { get; set; }
 
+        public string? ContextMemory { get; set; }
+
+        public string? ProfileImagePath { get; set; }
+
+        [StringLength(500, ErrorMessage = "Source context is too long")]
+        public string? Origin { get; set; }
+
+        public string? LinkedInProfile { get; set; }
+
+        public string? OtherInformation { get; set; }
+
+        public List<string>? Organizations { get; set; }
+
+        public List<string>? CurrentRoles { get; set; }
+
+        public List<SocialMediaAccountAddRequest>? SocialMediaAccounts { get; set; }
+
+        public List<string>? ConnectionChannels { get; set; }
+
+        public List<ContactsManger.Core.Domain.Entities.EEnums.EnSystemStatusTag>? SystemStatusTags { get; set; }
+
+        public List<string>? UserDefinedTags { get; set; }
+
         public Person ToPerson()
         {
             return new Person
@@ -52,11 +71,22 @@ namespace ServiceContracts.DTOs
                 Gender = this.Gender.ToString(),
                 Address = this.Address,
                 CountryId = (Guid)this.CountryId,
-                NewsLetter = this.NewsLetter
-
+                NewsLetter = this.NewsLetter,
+                ContextMemory = this.ContextMemory,
+                ProfileImagePath = this.ProfileImagePath,
+                Origin = this.Origin,
+                LinkedInProfile = this.LinkedInProfile,
+                OtherInformation = this.OtherInformation
             };
-
         }
     }
-}
 
+    public class SocialMediaAccountAddRequest
+    {
+        public string? Platform { get; set; }
+
+        [Required(ErrorMessage = "URL is required")]
+        [Url(ErrorMessage = "Invalid URL format")]
+        public string Url { get; set; }
+    }
+}

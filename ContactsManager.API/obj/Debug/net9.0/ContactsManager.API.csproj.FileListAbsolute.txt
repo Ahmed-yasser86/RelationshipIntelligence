@@ -6,6 +6,7 @@ C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.API\bin\Debug\net9
 C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.API\bin\Debug\net9.0\ContactsManager.API.runtimeconfig.json
 C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.API\bin\Debug\net9.0\ContactsManager.API.dll
 C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.API\bin\Debug\net9.0\ContactsManager.API.pdb
+C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.API\bin\Debug\net9.0\ContactsManager.API.xml
 C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.API\bin\Debug\net9.0\Asp.Versioning.Abstractions.dll
 C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.API\bin\Debug\net9.0\Asp.Versioning.Http.dll
 C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.API\bin\Debug\net9.0\Asp.Versioning.Mvc.dll
@@ -203,8 +204,7 @@ C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.API\obj\Debug\net9
 C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.API\obj\Debug\net9.0\Contacts.BC4DBFDE.Up2Date
 C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.API\obj\Debug\net9.0\ContactsManager.API.dll
 C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.API\obj\Debug\net9.0\refint\ContactsManager.API.dll
+C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.API\obj\Debug\net9.0\ContactsManager.API.xml
 C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.API\obj\Debug\net9.0\ContactsManager.API.pdb
 C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.API\obj\Debug\net9.0\ContactsManager.API.genruntimeconfig.cache
 C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.API\obj\Debug\net9.0\ref\ContactsManager.API.dll
-C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.API\bin\Debug\net9.0\ContactsManager.API.xml
-C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.API\obj\Debug\net9.0\ContactsManager.API.xml

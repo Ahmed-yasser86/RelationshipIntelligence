@@ -21,5 +21,13 @@
             <param name="registerDTO">The registration details.</param>
             <returns>An object containing the JWT token and user info.</returns>
         </member>
+        <member name="M:ContactsManager.API.Controllers.ContactsController.GetContactsGrid(System.Int32,System.Int32)">
+            <summary>
+            Contacts Data Grid(dashboard) API Endpoint
+            </summary>
+            <param name="pageNumber">Page number (default 1)</param>
+            <param name="pageSize">Number of records per page (default 10)</param>
+            <returns>Paged list of persons for the dashboard grid</returns>
+        </member>
     </members>
 </doc>

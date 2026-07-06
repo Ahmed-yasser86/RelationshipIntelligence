@@ -66,7 +66,7 @@ namespace ContactsManager.API.Controllers
         }
         [HttpPost]
 
-        [TypeFilter(typeof(AccountsModelValidationActionFilter))]
+        [TypeFilter(typeof(ModelValidationActionFilter))]
         public async Task<IActionResult> PostLogin(LoginDTO loginDTO)
         {
             var user = await _userManager.FindByEmailAsync(loginDTO.Email);
@@ -104,7 +104,7 @@ namespace ContactsManager.API.Controllers
         /// <param name="registerDTO">The registration details.</param>
         /// <returns>An object containing the JWT token and user info.</returns>
         [HttpPost]
-        [TypeFilter(typeof(AccountsModelValidationActionFilter))]
+        [TypeFilter(typeof(ModelValidationActionFilter))]
         public async Task<IActionResult> PostRegister(RegisterDTO registerDTO)
         {
 

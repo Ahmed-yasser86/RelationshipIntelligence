@@ -1,6 +1,7 @@
 ﻿using ContactsManger.Core.Domain.Entities;
 using ContactsManger.Core.Domain.Entities.EEnums;
 using ContactsManger.Core.Domain.IdentityEntities;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -10,9 +11,15 @@ namespace Entities
 {
     public class AppDBContext : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>
     {
-        public AppDBContext(DbContextOptions<AppDBContext> options)
-        : base(options)
+
+        private readonly Guid? _currentUserId;
+
+        public AppDBContext(DbContextOptions<AppDBContext> options, ServiceContracts.ICurrentUserService currentUserService)
+            : base(options)
         {
+            _currentUserId = currentUserService.UserId;
+            Console.WriteLine($"[DEBUG] AppDBContext constructed with _currentUserId = {_currentUserId}");
+
         }
 
         public virtual DbSet<Person> Persons { get; set; }
@@ -43,6 +50,17 @@ namespace Entities
             modelBuilder.Entity<Interaction>().ToTable("Interactions");
             modelBuilder.Entity<SocialMediaAccount>().ToTable("SocialMediaAccounts");
 
+
+            modelBuilder.Entity<Person>()
+                .HasQueryFilter(p => p.ApplicationUserId == _currentUserId && !p.IsDeleted);
+
+            modelBuilder.Entity<Person>()
+                .HasOne(p => p.ApplicationUser)
+                .WithMany()
+                .HasForeignKey(p => p.ApplicationUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+
             // ==========================================
             // 2. MANY-TO-MANY RELATIONSHIPS
             // ==========================================
@@ -50,6 +68,7 @@ namespace Entities
                 .HasMany(c => c.People)
                 .WithMany(p => p.ConnectionChannels)
                 .UsingEntity(j => j.ToTable("PersonConnectionChannels"));
+
 
             modelBuilder.Entity<Person>()
                 .HasMany(p => p.UserDefinedTags)
@@ -135,6 +154,55 @@ namespace Entities
     Guid.Parse("90000009-0000-0000-0000-000000000000"),
     Guid.Parse("9000000a-0000-0000-0000-000000000000")
 };
+
+            // ==========================================
+            // 3b. SEED TEST USER + ROLE
+            // ==========================================
+            // A fixed-Guid ApplicationUser so the 10 seeded Persons below can
+            // be linked to a REAL, loggable-in account via ApplicationUserId
+            // (now a required FK). HasData() cannot use runtime-generated
+            // values (e.g. _userManager.CreateAsync's auto Guid), so this user
+            // has to be seeded directly with a Guid we control, and a
+            // pre-computed PasswordHash matching ASP.NET Core Identity's
+            // format -- see GenerateSeedPasswordHash.csx for how that hash
+            // was produced.
+            var seedUserId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+            var seedRoleId = Guid.Parse("00000000-0000-0000-0000-000000000002");
+
+            modelBuilder.Entity<ApplicationRole>().HasData(
+                new ApplicationRole
+                {
+                    Id = seedRoleId,
+                    Name = "User",
+                    NormalizedName = "USER"
+                }
+            );
+
+            modelBuilder.Entity<ApplicationUser>().HasData(
+                new ApplicationUser
+                {
+                    Id = seedUserId,
+                    UserName = "testuser@contactsmanager.dev",
+                    NormalizedUserName = "TESTUSER@CONTACTSMANAGER.DEV",
+                    Email = "testuser@contactsmanager.dev",
+                    NormalizedEmail = "TESTUSER@CONTACTSMANAGER.DEV",
+                    EmailConfirmed = true,
+                    PersonName = "Test User",
+                    SecurityStamp = "STATIC-SEED-SECURITY-STAMP-0001",
+                    ConcurrencyStamp = "STATIC-SEED-CONCURRENCY-STAMP-0001",          
+                    PasswordHash = "AQAAAAIAAYagAAAAEP9N9FETj6XBlr2nCwBktgDVpDvbmOXLKGisPywjI8prNBnxoqoHbJ5eYAlzc98QUw=="
+                }
+            );
+
+            // pass is test@123456
+            modelBuilder.Entity<Microsoft.AspNetCore.Identity.IdentityUserRole<Guid>>().HasData(
+                new Microsoft.AspNetCore.Identity.IdentityUserRole<Guid>
+                {
+                    UserId = seedUserId,
+                    RoleId = seedRoleId
+                }
+            );
+
             // ==========================================
             // 4. LOOKUP SEED DATA
             // ==========================================
@@ -246,6 +314,11 @@ namespace Entities
             // ==========================================
             // 5. CORE BUSINESS SEED DATA (Updated Persons)
             // ==========================================
+            // Every seeded Person is now linked to the seed test user via
+            // ApplicationUserId = seedUserId, so logging in as
+            // testuser@contactsmanager.dev and hitting any GET /Person
+            // endpoint returns exactly these 10 contacts (thanks to the
+            // HasQueryFilter above).
 
             modelBuilder.Entity<Person>().HasData(
                 new Person
@@ -261,7 +334,8 @@ namespace Entities
                     Origin = "Met online to discuss cultural differences",
                     ContextMemory = "Great conversations on social phenomena",
                     LinkedInProfile = "linkedin.com/in/ned-ibrahim",
-                    Address = "Sydney, NSW"
+                    Address = "Sydney, NSW",
+                    ApplicationUserId = seedUserId
                 },
                 new Person
                 {
@@ -276,7 +350,8 @@ namespace Entities
                     Origin = "Institutional Economics research",
                     ContextMemory = "Author of Why Nations Fail",
                     LinkedInProfile = "linkedin.com/in/dacemoglu",
-                    Address = "Cambridge, MA"
+                    Address = "Cambridge, MA",
+                    ApplicationUserId = seedUserId
                 },
                 new Person
                 {
@@ -291,7 +366,8 @@ namespace Entities
                     Origin = "Academic lectures contact",
                     ContextMemory = "Excellent pedagogical style in lectures",
                     LinkedInProfile = "linkedin.com/in/mmunger",
-                    Address = "Durham, NC"
+                    Address = "Durham, NC",
+                    ApplicationUserId = seedUserId
                 },
                 new Person
                 {
@@ -306,7 +382,8 @@ namespace Entities
                     Origin = "UC Berkeley Audit",
                     ContextMemory = "Culture in Action sociology frameworks",
                     LinkedInProfile = "linkedin.com/in/aswidler",
-                    Address = "Berkeley, CA"
+                    Address = "Berkeley, CA",
+                    ApplicationUserId = seedUserId
                 },
                 new Person
                 {
@@ -321,7 +398,8 @@ namespace Entities
                     Origin = "Sociology foundational reading",
                     ContextMemory = "Structural functionalism architect",
                     LinkedInProfile = "",
-                    Address = "Paris, France"
+                    Address = "Paris, France",
+                    ApplicationUserId = seedUserId
                 },
                 new Person
                 {
@@ -336,7 +414,8 @@ namespace Entities
                     Origin = "Institutional constraints research",
                     ContextMemory = "Nobel laureate in economics",
                     LinkedInProfile = "",
-                    Address = "St. Louis, MO"
+                    Address = "St. Louis, MO",
+                    ApplicationUserId = seedUserId
                 },
                 new Person
                 {
@@ -351,7 +430,8 @@ namespace Entities
                     Origin = "Capital University BIS",
                     ContextMemory = "Classmate in BIS academic program",
                     LinkedInProfile = "linkedin.com/in/youssef-bis",
-                    Address = "Cairo, Egypt"
+                    Address = "Cairo, Egypt",
+                    ApplicationUserId = seedUserId
                 },
                 new Person
                 {
@@ -366,7 +446,8 @@ namespace Entities
                     Origin = "Tokyo GCI Cohort",
                     ContextMemory = "Data Science program partner",
                     LinkedInProfile = "linkedin.com/in/kenji-data",
-                    Address = "Tokyo, Japan"
+                    Address = "Tokyo, Japan",
+                    ApplicationUserId = seedUserId
                 },
                 new Person
                 {
@@ -381,7 +462,8 @@ namespace Entities
                     Origin = "Proceedit Internship",
                     ContextMemory = "Software Engineering intern colleague",
                     LinkedInProfile = "linkedin.com/in/sarah-dev",
-                    Address = "Cairo, Egypt"
+                    Address = "Cairo, Egypt",
+                    ApplicationUserId = seedUserId
                 },
                 new Person
                 {
@@ -396,7 +478,8 @@ namespace Entities
                     Origin = "Historic Cairo Explorers",
                     ContextMemory = "Met at Beit Yakan architectural tour",
                     LinkedInProfile = "linkedin.com/in/omar-arch",
-                    Address = "Giza, Egypt"
+                    Address = "Giza, Egypt",
+                    ApplicationUserId = seedUserId
                 }
             );
 

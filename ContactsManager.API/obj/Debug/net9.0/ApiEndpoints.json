@@ -42,6 +42,27 @@
     "ReturnTypes": []
   },
   {
+    "ContainingType": "ContactsManager.API.Controllers.ContactsController",
+    "Method": "GetContactsGrid",
+    "RelativePath": "api/Contacts/GetContactsGrid",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "pageNumber",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "pageSize",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "ContactsManager.API.Controllers.AccountController",
     "Method": "VerifayUserByEmail",
     "RelativePath": "Contacts/Account/VerifayUserByEmail",

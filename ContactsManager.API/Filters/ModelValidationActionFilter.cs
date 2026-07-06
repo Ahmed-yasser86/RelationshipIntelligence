@@ -10,7 +10,7 @@ namespace ContactsManager.API.Filters
 
     namespace ContactsManager.API.Filters
     {
-        public class AccountsModelValidationActionFilter : IAsyncActionFilter
+        public class ModelValidationActionFilter : IAsyncActionFilter
         {
             public async Task OnActionExecutionAsync(
                 ActionExecutingContext context,

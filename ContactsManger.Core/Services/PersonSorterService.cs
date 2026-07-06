@@ -49,6 +49,8 @@ namespace Servicess
                             nameof(PersonRespones.Age) => persons.OrderBy(p => p.Age).ToList(),
                             nameof(PersonRespones.PersonId) => persons.OrderBy(p => p.PersonId).ToList(),
                             nameof(PersonRespones.Address) => persons.OrderBy(p => p.Address).ToList(),
+                            nameof(PersonRespones.Organizations) => persons.OrderBy(p => p.Organizations).ToList(),
+
                             _ => persons
                         },
                         (sortedListOp.Descending, _) => sortBy switch
@@ -61,6 +63,8 @@ namespace Servicess
                             nameof(PersonRespones.Age) => persons.OrderByDescending(p => p.Age).ToList(),
                             nameof(PersonRespones.PersonId) => persons.OrderByDescending(p => p.PersonId).ToList(),
                             nameof(PersonRespones.Address) => persons.OrderByDescending(p => p.Address).ToList(),
+                            nameof(PersonRespones.Organizations) => persons.OrderByDescending(p => p.Organizations).ToList(),
+
                             _ => persons
                         },
                         _ => persons

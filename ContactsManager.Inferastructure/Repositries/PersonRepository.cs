@@ -2,273 +2,163 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using RepositryContracts;
-using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using SerilogTimings;
 
 namespace Repositories
 {
     public class PersonRepository : PersonRepositryContract
     {
         private readonly AppDBContext _db;
-        private readonly ILogger<PersonRepository> _logger;
 
-        public PersonRepository(AppDBContext db, ILogger<PersonRepository> logger)
+        public PersonRepository(AppDBContext db)
         {
             _db = db;
-            _logger = logger;
         }
+
+        /// <summary>
+        /// Applies every Include() needed so PersonRespones.ConvertToPersonRespons()
+        /// never sees an unintentionally empty collection. Centralized here so all
+        /// read paths (GetAll, GetById, GetFiltered) stay consistent.
+        /// </summary>
+        /// 
+
+
+        private IQueryable<Person> PersonWithAllIncludes()
+        {
+            return _db.Persons
+                .Include(p => p.Country)
+                .Include(p => p.Circles)
+                .Include(p => p.ContactItemRoles)
+                .Include(p => p.OtherSocialMediaAccounts)
+                .Include(p => p.ConnectionChannels)
+                .Include(p => p.SystemStatusTags)
+                .Include(p => p.UserDefinedTags)
+                .Include(p => p.Notes)
+                .Include(p => p.Interactions)
+                .AsSplitQuery();
+        }
+
+
+        public async Task<(List<Person> Items, int TotalCount)> GetPersonsPaged(int pageNumber, int pageSize)
+        {
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1) pageSize = 1;
+
+            // Count against the unfiltered-by-Skip/Take base query (still respects
+            // the global IsDeleted query filter automatically). This is one query;
+            // the page itself is a second query. Two round-trips total, not N.
+            var baseQuery = PersonWithAllIncludes();
+
+            int totalCount = await baseQuery.CountAsync();
+
+            var items = await baseQuery
+                .OrderBy(p => p.Name) 
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (items, totalCount);
+        }
+
 
         public async Task<Person> AddPerson(Person person)
         {
-            using (Operation.Time("AddPerson database operation for Person: {PersonName}", person?.Name))
-            {
-                _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Person: {@Person}",
-                    nameof(AddPerson), DateTime.UtcNow, person);
-
-                try
-                {
-                    if (person == null)
-                    {
-                        _logger.LogWarning("AddPerson called with null person parameter");
-                        throw new ArgumentNullException(nameof(person));
-                    }
-
-                    _logger.LogDebug("Adding person with ID: {PersonId}, Name: {PersonName} to database",
-                        person.PersonId, person.Name);
-
-                    await _db.Persons.AddAsync(person);
-                    await _db.SaveChangesAsync();
-
-                    _logger.LogInformation("Successfully added person with ID: {PersonId}, Name: {PersonName}",
-                        person.PersonId, person.Name);
-
-                    return person;
-                }
-                catch (DbUpdateException ex)
-                {
-                    _logger.LogError(ex, "Database update error while adding person. Person: {@Person}. Error: {ErrorMessage}",
-                        person, ex.Message);
-                    throw;
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Unexpected error occurred in {MethodName} for person: {@Person}",
-                        nameof(AddPerson), person);
-                    throw;
-                }
-            }
+            await _db.Persons.AddAsync(person);
+            await _db.SaveChangesAsync();
+            return person;
         }
 
         public async Task<bool> DeletePerson(Guid? id)
         {
-            using (Operation.Time("DeletePerson database operation for ID: {PersonId}", id))
-            {
-                _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Person ID: {PersonId}",
-                    nameof(DeletePerson), DateTime.UtcNow, id);
+            if (id == null)
+                return false;
 
-                try
-                {
-                    if (id == null)
-                    {
-                        _logger.LogWarning("DeletePerson called with null ID");
-                        return false;
-                    }
+            var person = await _db.Persons.FindAsync(id);
+            if (person == null || person.IsDeleted)
+                return false;
 
-                    _logger.LogDebug("Searching for person with ID: {PersonId}", id);
-                    var person = await _db.Persons.FindAsync(id);
-
-                    if (person == null)
-                    {
-                        _logger.LogInformation("No person found to delete with ID: {PersonId}", id);
-                        return false;
-                    }
-
-                    _logger.LogDebug("Found person with ID: {PersonId}, Name: {PersonName}. Removing from database.",
-                        person.PersonId, person.Name);
-
-                    _db.Persons.Remove(person);
-                    await _db.SaveChangesAsync();
-
-                    _logger.LogInformation("Successfully deleted person with ID: {PersonId}, Name: {PersonName}",
-                        person.PersonId, person.Name);
-
-                    return true;
-                }
-                catch (DbUpdateException ex)
-                {
-                    _logger.LogError(ex, "Database update error while deleting person with ID: {PersonId}", id);
-                    throw;
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Unexpected error occurred in {MethodName} for Person ID: {PersonId}",
-                        nameof(DeletePerson), id);
-                    throw;
-                }
-            }
+            person.IsDeleted = true;
+            await _db.SaveChangesAsync();
+            return true;
         }
 
         public async Task<IEnumerable<Person>> GetAllPersons()
         {
-            using (Operation.Time("GetAllPersons database operation with Include"))
-            {
-                _logger.LogInformation("Executing {MethodName} method at {Timestamp}",
-                    nameof(GetAllPersons), DateTime.UtcNow);
-
-                try
-                {
-                    _logger.LogDebug("Retrieving all persons with country data (using Include)");
-                    var persons = await _db.Persons.Include(c => c.Country).ToListAsync();
-
-                    _logger.LogInformation("{MethodName} completed successfully. Retrieved {Count} persons (with country data)",
-                        nameof(GetAllPersons), persons.Count);
-
-                    return persons;
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Error occurred in {MethodName} method", nameof(GetAllPersons));
-                    throw;
-                }
-            }
+            return await PersonWithAllIncludes().ToListAsync();
         }
 
-        public async Task<List<Person?>> GetFilteredPersons(Expression<Func<Person, bool>> predicate)
+
+
+        public async Task<List<Person>> GetFilteredPersons(Expression<Func<Person, bool>> predicate)
         {
-            using (Operation.Time("GetFilteredPersons database operation"))
-            {
-                _logger.LogInformation("Executing {MethodName} method at {Timestamp}",
-                    nameof(GetFilteredPersons), DateTime.UtcNow);
-
-                try
-                {
-                    if (predicate == null)
-                    {
-                        _logger.LogWarning("GetFilteredPersons called with null predicate");
-                        throw new ArgumentNullException(nameof(predicate));
-                    }
-
-                    _logger.LogDebug("Executing filtered query on Persons with country data (using Include)");
-                    var persons = await _db.Persons.Include(c => c.Country).Where(predicate).ToListAsync();
-
-                    _logger.LogInformation("{MethodName} completed successfully. Retrieved {Count} persons matching filter",
-                        nameof(GetFilteredPersons), persons.Count);
-
-                    // Log the predicate expression for debugging (can be verbose, consider using Debug level)
-                    _logger.LogDebug("Filter predicate used: {Predicate}", predicate.ToString());
-
-                    return persons;
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Error occurred in {MethodName} method with predicate: {Predicate}",
-                        nameof(GetFilteredPersons), predicate?.ToString());
-                    throw;
-                }
-            }
+            return await PersonWithAllIncludes().Where(predicate).ToListAsync();
         }
 
         public async Task<Person?> GetPersonById(Guid? id)
         {
-            using (Operation.Time("GetPersonById database query for ID: {PersonId}", id))
-            {
-                _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Person ID: {PersonId}",
-                    nameof(GetPersonById), DateTime.UtcNow, id);
+            if (id == null)
+                return null;
 
-                try
-                {
-                    if (id == null)
-                    {
-                        _logger.LogWarning("GetPersonById called with null ID");
-                        return null;
-                    }
-
-                    _logger.LogDebug("Retrieving person with ID: {PersonId}", id);
-                    var person = await _db.Persons.FindAsync(id);
-
-                    if (person == null)
-                    {
-                        _logger.LogInformation("No person found with ID: {PersonId}", id);
-                    }
-                    else
-                    {
-                        _logger.LogInformation("Successfully retrieved person with ID: {PersonId}, Name: {PersonName}",
-                            person.PersonId, person.Name);
-                    }
-
-                    return person;
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Error occurred in {MethodName} for Person ID: {PersonId}",
-                        nameof(GetPersonById), id);
-                    throw;
-                }
-            }
+            // FirstOrDefaultAsync lets us eagerly load every navigation collection
+            // the response DTO depends on.
+            return await PersonWithAllIncludes()
+                .FirstOrDefaultAsync(p => p.PersonId == id);
         }
 
+        /// <summary>
+        /// Persists an already-fully-resolved Person (scalar fields + navigation
+        /// collections containing real tracked-or-new entities). This method does
+        /// NOT perform any get-or-create / lookup logic for Circles, ContactItemRoles,
+        /// tags, etc. — that resolution is the Service layer's responsibility, per
+        /// Clean Architecture: the Repository only persists what it's given.
+        /// </summary>
         public async Task<Person> UpdatePerson(Person person)
         {
-            using (Operation.Time("UpdatePerson database operation for Person ID: {PersonId}", person?.PersonId))
+            var existingPerson = await PersonWithAllIncludes()
+                .FirstOrDefaultAsync(p => p.PersonId == person.PersonId);
+
+            if (existingPerson == null)
+                throw new InvalidOperationException($"Person with ID {person.PersonId} does not exist.");
+
+            // CurrentValues.SetValues only copies scalar/primitive properties;
+            // it intentionally does not touch navigation collections.
+            _db.Entry(existingPerson).CurrentValues.SetValues(person);
+
+            // Navigation collections must be synced explicitly. We replace the
+            // tracked collection's contents with whatever the incoming Person
+            // carries. EF Core's change tracker diffs this against the DB state
+            // on SaveChanges (additions/removals of join rows for the M:N sets,
+            // and FK reassignment for the 1:N ContactItemRoles).
+            SyncCollection(existingPerson.Circles, person.Circles);
+            SyncCollection(existingPerson.ContactItemRoles, person.ContactItemRoles);
+            SyncCollection(existingPerson.OtherSocialMediaAccounts, person.OtherSocialMediaAccounts);
+            SyncCollection(existingPerson.ConnectionChannels, person.ConnectionChannels);
+            SyncCollection(existingPerson.SystemStatusTags, person.SystemStatusTags);
+            SyncCollection(existingPerson.UserDefinedTags, person.UserDefinedTags);
+            SyncCollection(existingPerson.Notes, person.Notes);
+            SyncCollection(existingPerson.Interactions, person.Interactions);
+
+            await _db.SaveChangesAsync();
+            return existingPerson;
+        }
+
+        /// <summary>
+        /// Replaces the contents of a tracked navigation collection with the
+        /// incoming set, without swapping out the collection instance itself
+        /// (EF Core needs the tracked ICollection reference to stay stable).
+        /// </summary>
+        private static void SyncCollection<T>(ICollection<T> tracked, ICollection<T>? incoming)
+        {
+            if (incoming == null)
+                return;
+
+            tracked.Clear();
+            foreach (var item in incoming)
             {
-                _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Person: {@Person}",
-                    nameof(UpdatePerson), DateTime.UtcNow, person);
-
-                try
-                {
-                    if (person == null)
-                    {
-                        _logger.LogWarning("UpdatePerson called with null person parameter");
-                        throw new ArgumentNullException(nameof(person));
-                    }
-
-                    if (person.PersonId == Guid.Empty)
-                    {
-                        _logger.LogWarning("UpdatePerson called with person having empty GUID");
-                        throw new ArgumentException("Person ID cannot be empty", nameof(person.PersonId));
-                    }
-
-                    _logger.LogDebug("Updating person with ID: {PersonId}, Name: {PersonName}",
-                        person.PersonId, person.Name);
-
-                    // Check if person exists before update
-                    var existingPerson = await _db.Persons.FindAsync(person.PersonId);
-                    if (existingPerson == null)
-                    {
-                        _logger.LogWarning("Attempted to update non-existent person with ID: {PersonId}", person.PersonId);
-                        throw new InvalidOperationException($"Person with ID {person.PersonId} does not exist.");
-                    }
-
-                    _db.Persons.Update(person);
-                    await _db.SaveChangesAsync();
-
-                    _logger.LogInformation("Successfully updated person with ID: {PersonId}, Name: {PersonName}",
-                        person.PersonId, person.Name);
-
-                    return person;
-                }
-                catch (DbUpdateException ex)
-                {
-                    _logger.LogError(ex, "Database update error while updating person. Person: {@Person}. Error: {ErrorMessage}",
-                        person, ex.Message);
-                    throw;
-                }
-                catch (InvalidOperationException ex)
-                {
-                    _logger.LogWarning(ex, "Invalid operation while updating person: {@Person}", person);
-                    throw;
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Unexpected error occurred in {MethodName} for person: {@Person}",
-                        nameof(UpdatePerson), person);
-                    throw;
-                }
+                tracked.Add(item);
             }
         }
     }

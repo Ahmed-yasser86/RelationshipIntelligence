@@ -34,6 +34,8 @@ builder.Services.AddTransient<IjwtAuthentication, JwtServices>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ServiceContracts.ICurrentUserService, Servicess.CurrentUserService>();
 //builder.Services.AddScoped<IPersonQuickAdderService, PersonQuickAdderService  >();
+builder.Services.AddScoped<IPersonSearcherService, PersonSearcherService>();
+
 
 // Add this line to register your repository
 builder.Services.AddScoped<PersonRepositryContract, PersonRepository>();

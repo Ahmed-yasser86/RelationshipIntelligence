@@ -37,9 +37,7 @@ namespace Entities
         {
             base.OnModelCreating(modelBuilder);
 
-            // ==========================================
-            // 1. TABLE CONFIGURATIONS
-            // ==========================================
+
             modelBuilder.Entity<Country>().ToTable("Countries");
             modelBuilder.Entity<Person>().ToTable("Persons");
             modelBuilder.Entity<ContactItemRole>().ToTable("ContactItemRoles");

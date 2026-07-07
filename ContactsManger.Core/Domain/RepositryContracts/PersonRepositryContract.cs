@@ -20,6 +20,8 @@ namespace RepositryContracts
 
         Task<List<Person?>> GetFilteredPersons(Expression<Func<Person, bool>> predicate);
 
+        Task<(List<Person> Items, int TotalCount)> GetFilteredPersonsPaged(int pageNumber, int pageSize , Expression<Func<Person, bool>> predicate);
+
         Task<bool> DeletePerson(Guid? id);
 
         Task<(List<Person> Items, int TotalCount)> GetPersonsPaged(int pageNumber, int pageSize);

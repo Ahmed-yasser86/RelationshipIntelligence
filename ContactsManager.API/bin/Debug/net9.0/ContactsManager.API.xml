@@ -23,11 +23,69 @@
         </member>
         <member name="M:ContactsManager.API.Controllers.ContactsController.GetContactsGrid(System.Int32,System.Int32)">
             <summary>
-            Contacts Data Grid(dashboard) API Endpoint
+            Retrieves a paginated list of contacts optimized for the Dashboard Data Grid.
             </summary>
-            <param name="pageNumber">Page number (default 1)</param>
-            <param name="pageSize">Number of records per page (default 10)</param>
-            <returns>Paged list of persons for the dashboard grid</returns>
+            <remarks>
+            **Dashboard Grid Endpoint**
+            This endpoint is specifically designed to feed the main data grid on the admin dashboard. 
+            
+            **Pagination Defaults:**
+            - `pageNumber`: Defaults to 1 if not provided.
+            - `pageSize`: Defaults to 10 if not provided.
+            </remarks>
+            <param name="pageNumber">The current page number (default: 1)</param>
+            <param name="pageSize">The number of records per page (default: 10)</param>
+            <returns>A paginated list of persons formatted for the dashboard grid.</returns>
+        </member>
+        <member name="M:ContactsManager.API.Controllers.ContactsController.GetContactsFilteredByBatches(System.String,System.String,System.Int32,System.Int32)">
+             <summary>
+             Retrieves contacts using server-side pagination and optional filtering.
+             </summary>
+            
+             <remarks>
+             **IMPORTANT:**
+             This endpoint never loads the entire contacts table into memory.
+             Only the requested page of matching contacts is retrieved from the database,
+             making this endpoint suitable for large datasets.
+             
+             **Pagination examples:**
+             - `pageNumber = 1` and `pageSize = 10` returns the first 10 matching contacts.
+             - `pageNumber = 2` and `pageSize = 10` returns contacts 11–20 that match the search criteria.
+             
+             **Example request:**
+             ```
+             GET /api/Contacts?pageNumber=1&amp;pageSize=10&amp;SearchBy=Name&amp;QueryParameter=Ahmed
+             ```
+             </remarks>
+            
+             <param name="pageNumber">The page number to retrieve. The first page is 1.</param>
+             <param name="pageSize">The maximum number of contacts returned per page.</param>
+             <param name="SearchBy">
+             Specifies which contact field should be searched.
+             
+             **Valid values:**
+             - `Name`
+             - `email`
+             - `phone`
+             - `DateOfBirth`
+             - `Circles`
+             - `ContactItemRoles`
+             - `SystemStatusTags`
+             - `UserDefinedTags`
+             
+             The latest supported values can also be retrieved from the `GET /api/Contacts/search-fields` endpoint.
+             </param>
+             <param name="QueryParamter">The value to search for within the selected field. Examples: Ahmed, Microsoft, META.</param>
+             <returns>A paginated collection of contacts that match the specified search criteria.</returns>
+        </member>
+        <member name="T:PersonOwnershipFilter">
+            <summary>
+            this action filter is used to validate the ownership of a person entity based on the current user.
+            its used with an action method that has a parameter named "id" of type Guid, which represents the person id.
+            so it works with action methods like GetPersonById(Guid id), UpdatePerson(Guid id, PersonUpdateRequest request), DeletePerson(Guid id) etc.
+            but never use it with actions like CreatePerson(PersonCreateRequest request) ,
+            GetAllPersons().......etc because there is no person id to validate ownership for a new person.
+            </summary>
         </member>
     </members>
 </doc>

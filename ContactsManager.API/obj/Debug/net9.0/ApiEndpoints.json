@@ -43,6 +43,37 @@
   },
   {
     "ContainingType": "ContactsManager.API.Controllers.ContactsController",
+    "Method": "GetContactsFilteredByBatches",
+    "RelativePath": "api/Contacts/GetContactsFilteredByBatches",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "QueryParamter",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "SearchBy",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "pageNumber",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "pageSize",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ContactsManager.API.Controllers.ContactsController",
     "Method": "GetContactsGrid",
     "RelativePath": "api/Contacts/GetContactsGrid",
     "HttpMethod": "GET",
@@ -60,6 +91,16 @@
         "IsRequired": false
       }
     ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ContactsManager.API.Controllers.ContactsController",
+    "Method": "GetValidSearchFields",
+    "RelativePath": "api/Contacts/GetValidSearchFields",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
     "ReturnTypes": []
   },
   {

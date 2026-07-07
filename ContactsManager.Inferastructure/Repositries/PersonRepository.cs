@@ -25,7 +25,7 @@ namespace Repositories
         /// </summary>
         /// 
 
-
+        // reduced the latency from 30 seconds to 1/3 second by using AsSplitQuery() to avoid the cartesian product problem
         private IQueryable<Person> PersonWithAllIncludes()
         {
             return _db.Persons
@@ -41,24 +41,50 @@ namespace Repositories
                 .AsSplitQuery();
         }
 
+        public async Task<(List<Person> Items, int TotalCount)> GetFilteredPersonsPaged(int pageNumber, int pageSize, Expression<Func<Person, bool>> predicate)
+        {
+
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1) pageSize = 1;
+
+
+            var baseQuery = PersonWithAllIncludes().Where(predicate) ;
+
+            int totalCount = await _db.Persons.Where(predicate).CountAsync();
+
+            var items = await baseQuery
+                .OrderBy(p => p.Name)
+                .ThenBy(p => p.PersonId)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (items, totalCount);
+        }
+
+        [Obsolete]
+        public async Task<List<Person>> GetFilteredPersons(Expression<Func<Person, bool>> predicate)
+        {
+            return await PersonWithAllIncludes().Where(predicate).ToListAsync();
+        }
+
 
         public async Task<(List<Person> Items, int TotalCount)> GetPersonsPaged(int pageNumber, int pageSize)
         {
             if (pageNumber < 1) pageNumber = 1;
             if (pageSize < 1) pageSize = 1;
 
-            // Count against the unfiltered-by-Skip/Take base query (still respects
-            // the global IsDeleted query filter automatically). This is one query;
-            // the page itself is a second query. Two round-trips total, not N.
+          
             var baseQuery = PersonWithAllIncludes();
 
-            int totalCount = await baseQuery.CountAsync();
+            int totalCount = await _db.Persons.CountAsync();
 
             var items = await baseQuery
-                .OrderBy(p => p.Name) 
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
+               .OrderBy(p => p.Name)
+               .ThenBy(p => p.PersonId)
+               .Skip((pageNumber - 1) * pageSize)
+               .Take(pageSize)
+               .ToListAsync();
 
             return (items, totalCount);
         }
@@ -84,7 +110,7 @@ namespace Repositories
             await _db.SaveChangesAsync();
             return true;
         }
-
+        [Obsolete]
         public async Task<IEnumerable<Person>> GetAllPersons()
         {
             return await PersonWithAllIncludes().ToListAsync();
@@ -92,10 +118,7 @@ namespace Repositories
 
 
 
-        public async Task<List<Person>> GetFilteredPersons(Expression<Func<Person, bool>> predicate)
-        {
-            return await PersonWithAllIncludes().Where(predicate).ToListAsync();
-        }
+   
 
         public async Task<Person?> GetPersonById(Guid? id)
         {
@@ -161,5 +184,7 @@ namespace Repositories
                 tracked.Add(item);
             }
         }
+
+      
     }
 }

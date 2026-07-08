@@ -1,5 +1,6 @@
 ﻿using ContactsManager.API.Filters.ContactsManager.API.Filters;
 using ContactsManger.Core.Domain.IdentityEntities;
+using ContactsManger.Core.DTOs.PersonDTOs;
 using ContactsManger.Core.ServiceContracts;
 using Entities;
 using Microsoft.AspNetCore.Authorization;
@@ -18,12 +19,14 @@ namespace ContactsManager.API.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IPersonGetterService _personGetterService;
         private readonly IPersonSearcherService _personSearcherService;
+        private readonly ISystemTagsGetter _systemTagsGetter;
 
-        public ContactsController(UserManager<ApplicationUser> userManager, IPersonGetterService personGetterService, IPersonSearcherService personSearcher)
+        public ContactsController(UserManager<ApplicationUser> userManager, IPersonGetterService personGetterService, IPersonSearcherService personSearcher , ISystemTagsGetter systemTagsGetter)
         {
             _userManager = userManager;
             _personGetterService = personGetterService;
             _personSearcherService = personSearcher;
+            _systemTagsGetter = systemTagsGetter;
         }
 
         /// <summary>
@@ -49,6 +52,31 @@ namespace ContactsManager.API.Controllers
             return Ok(result);
         }
 
+       
+
+        /// <summary>
+        /// Retrieves all predefined system status tags available in the application.
+        /// </summary>
+        /// <remarks>
+        /// **System Lookup Endpoint**
+        /// This endpoint fetches system-global tags (like "HighPriority", "Leads", etc.) used to categorize contacts.
+        /// Commonly used to populate multi-select dropdowns or filter badges on the UI.
+        /// 
+        /// this has to be used with GetContactsFilteredByBatches() and  QueryContactsByCompositeFilter() only
+        /// </remarks>
+        /// <returns>A list of available system status tags.</returns>
+
+        [HttpGet]
+        public async Task<IActionResult> GetSystemStatusTags()
+        {
+
+            var systemtages = await _systemTagsGetter.GetSystemTags();
+
+
+            return Ok(systemtages);
+
+        }
+
         /// <summary>
         /// Retrieves contacts using server-side pagination and optional filtering.
         /// </summary>
@@ -63,10 +91,10 @@ namespace ContactsManager.API.Controllers
         /// - `pageNumber = 1` and `pageSize = 10` returns the first 10 matching contacts.
         /// - `pageNumber = 2` and `pageSize = 10` returns contacts 11–20 that match the search criteria.
         /// 
-        /// **Example request:**
-        /// ```
-        /// GET /api/Contacts/GetContactsFilteredByBatches?pageNumber=1&pageSize=10&SearchBy=Name&QueryParamter=Ned
-        /// ```
+        ///
+        /// 
+        /// 
+        /// 
         /// </remarks>
         ///
         /// <param name="pageNumber">The page number to retrieve. The first page is 1.</param>
@@ -96,17 +124,87 @@ namespace ContactsManager.API.Controllers
 
         }
 
+        /// <summary>
+        /// Retrieves contacts matching multiple filter conditions at once (e.g.
+        /// Name + Tag, Phone + Tag), combined with server-side pagination.
+        /// </summary>
+        ///
+        /// <remarks>
+        /// **Composite Filtering**
+        /// Unlike <c>GetContactsFilteredByBatches</c>, which searches exactly one
+        /// field at a time, this endpoint accepts any combination of filter
+        /// fields and ANDs them together. Only the fields you actually set are
+        /// applied -- leave a field null/empty to skip it entirely.
+        ///
+        /// **Same pagination guarantee as the other endpoints:**
+        /// only the requested page of matching contacts is loaded from the
+        /// database; the full table is never pulled into memory.
+        ///
+        /// **Example request body:**
+        /// ```json
+        /// {
+        ///   "name": "Ahmed",
+        ///   "userDefinedTagName": "VIP"
+        /// }
+        /// ```
+        /// This returns contacts whose Name contains "Ahmed" **and** who have a
+        /// UserDefinedTag containing "VIP". Any field left null is ignored, so
+        /// sending just <c>circleName</c> alone filters by Organization only.
+        ///
+        /// **Available filter fields (all optional, all substring-match):**
+        /// - `name`
+        /// - `email`
+        /// - `phone`
+        /// - `circleName` (Organization)
+        /// - `contactItemRole` (Role)
+        /// - `systemStatusTagName`
+        /// - `userDefinedTagName`
+        /// plz plz plz insure that other fields are empty and doesn't containe  any dumy value like (string,empty...etc)
+        /// and only the fields that entred by user has value
+        /// **Example request:**
+        /// ```
+        /// 
+        /// {
+        ///   "phone": "010",
+        ///   "systemStatusTagName": "HighPriority"
+        /// }
+        /// ```
+        /// </remarks>
+        ///
+        /// <param name="filter">The set of filter conditions to AND together. Any subset of fields may be provided.</param>
+        /// <param name="pageNumber">The page number to retrieve. The first page is 1.</param>
+        /// <param name="pageSize">The maximum number of contacts returned per page.</param>
+        /// <returns>A paginated collection of contacts matching every filter condition supplied.</returns>
+        [HttpPost]
+        public async Task<IActionResult> QueryContactsByCompositeFilter(
+            [FromBody] PersonCompositeFilter filter,
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            var result = await _personSearcherService.SearchPersonsByCompositeFilter(filter, pageNumber, pageSize);
+            return Ok(result);
+        }
 
 
+
+        /// <summary>
+        /// Retrieves the list of targetable field names supported by the single-field batch filter endpoint.
+        /// </summary>
+        /// <remarks>
+        /// **Metadata Discovery**
+        /// Use this endpoint dynamically on the client side to populate your "Search By" dropdown menus. 
+        /// Any string returned by this list is guaranteed to be a valid argument for the <c>SearchBy</c> parameter 
+        /// in the <c>GetContactsFilteredByBatches</c> action.
+        /// </remarks>
+        /// <returns>An array of valid property strings mapping to lookups on the Contact schema.</returns>
         [HttpGet]
         public IActionResult GetValidSearchFields()
         {
             var fields = new List<string>
                                    {
-        nameof(PersonRespones.Name),
-        nameof(PersonRespones.email),
-        nameof(PersonRespones.phone),
-        nameof(PersonRespones.DateOfBirth),
+        nameof(Person.Name),
+        nameof(Person.email),
+        nameof(Person.phone),
         nameof(Person.Circles),
         nameof(Person.ContactItemRoles),
         nameof(Person.SystemStatusTags),
@@ -115,8 +213,102 @@ namespace ContactsManager.API.Controllers
 
             return Ok(fields);
         }
+        /// <summary>
+        /// Retrieves the schema property names accepted by the Composite Filter payload.
+        /// </summary>
+        /// <remarks>
+        /// **Metadata Discovery**
+        /// Returns the exact, case-sensitive keys required when assembling a JSON body for 
+        /// the <c>POST /api/Contacts/composite-filter</c> endpoint.
+        /// </remarks>
+        /// <returns>An array of valid property names representing the structure of a <see cref="PersonCompositeFilter"/>.</returns>
+        [HttpGet]
+        public IActionResult GetValidCompositeFilterFields()
+        {
+            var fields = new List<string>
+            {
+                nameof(PersonCompositeFilter.Name),
+                nameof(PersonCompositeFilter.Email),
+                nameof(PersonCompositeFilter.Phone),
+                nameof(PersonCompositeFilter.CircleName),
+                nameof(PersonCompositeFilter.ContactItemRole),
+                nameof(PersonCompositeFilter.SystemStatusTagName),
+                nameof(PersonCompositeFilter.UserDefinedTagName)
+            };
+
+            return Ok(fields);
+        }
 
 
+
+        /// <summary>
+        /// Retrieves the list of field names supported by the sortBy parameter
+        /// on GetPeople.
+        /// </summary>
+        /// <remarks>
+        /// **Metadata Discovery**
+        /// Use this endpoint dynamically on the client side to populate your "Sort By"
+        /// dropdown menus. Any string returned by this list is guaranteed to be a
+        /// valid argument for the <c>sortBy</c> parameter in the
+        /// <c>GetPeople</c> action.
+        ///
+        /// Only fields SearchSortedPeopleBy actually has a case for are listed here --
+        /// nameof(Person.Interactions) and nameof(Person.SystemStatusTags) map to
+        /// special aggregate sort keys (last interaction date, most important tag
+        /// respectively), and nameof(Person.Name) is the plain default/fallback sort.
+        /// Any other string passed as sortBy silently falls back to sorting by Name,
+        /// so this list intentionally does NOT advertise fields like email or phone
+        /// until SearchSortedPeopleBy is extended to actually handle them -- keeping
+        /// this list in sync with the switch avoids offering the frontend sort
+        /// options that quietly do nothing.
+        /// </remarks>
+        /// <returns>An array of valid sortBy strings for GetSearchSortedPeopleBy.</returns>
+        [HttpGet]
+        public IActionResult GetValidSortFields()
+        {
+            var fields = new List<string>
+    {
+        nameof(Person.Name),
+        nameof(Person.Interactions),
+        nameof(Person.SystemStatusTags)
+    };
+            return Ok(fields);
+        }
+
+
+        /// <summary>
+        /// Retrieves contacts sorted by complex dynamic keys with server-side pagination.
+        /// </summary>
+        /// <remarks>
+        /// **Dynamic Server-Side Sorting**
+        /// Pushes the sorting logic completely down to the database provider. Supports scalar fields as well as complex aggregate relationship fields (e.g., sorting by latest interaction).
+        /// 
+        /// **Sort Fallback:**
+        /// If an unrecognized property is passed into the `sortBy` parameter, the database will silently fall back to sorting by `Name` to maintain contract stability.
+        /// </remarks>
+        /// <param name="page">The requested page number (default: 1).</param>
+        /// <param name="size">The total number of entries per page slice (default: 10).</param>
+        /// <param name="sortBy">
+        /// The field key to sort the dataset by.
+        /// 
+        /// **Advertised Supported Keys:**
+        /// - `Name` (Plain alphabetical sort)
+        /// - `Interactions` (Maps to subquery sorting by the most recent interaction timestamp)
+        /// - `SystemStatusTags` (Maps to subquery sorting by highest priority tag)
+        /// </param>
+        /// <returns>A sorted and sliced page result of contacts.</returns>
+
+        [HttpGet]
+        public async Task<IActionResult> GetSearchSortedPeopleBy([FromQuery] int page = 1, [FromQuery] int size = 10, [FromQuery] string sortBy = nameof( Person.Name))
+        {
+            var pagedResult = await _personSearcherService.SearchSortedPeopleBy(page, size, sortBy);
+
+            return Ok(pagedResult);
+        }
+
+
+
+      
 
     }
 }

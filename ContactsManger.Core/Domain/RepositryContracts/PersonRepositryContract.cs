@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using Entities;
+using ContactsManger.Core.Domain.Entities.EEnums.SortDirection;
 namespace RepositryContracts
 {
     public interface PersonRepositryContract
@@ -22,6 +23,12 @@ namespace RepositryContracts
 
         Task<(List<Person> Items, int TotalCount)> GetFilteredPersonsPaged(int pageNumber, int pageSize , Expression<Func<Person, bool>> predicate);
 
+        public  Task<(List<Person> Items, int TotalCount)> GetSortedFilteredPersonsPaged(
+             int pageNumber,
+             int pageSize,
+             Expression<Func<Person, bool>> predicate,
+             string sortBy,
+             SortDirection sortDirection = SortDirection.Ascending);
         Task<bool> DeletePerson(Guid? id);
 
         Task<(List<Person> Items, int TotalCount)> GetPersonsPaged(int pageNumber, int pageSize);

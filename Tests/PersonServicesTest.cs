@@ -1,6 +1,7 @@
 ﻿using AutoFixture;
 using AutoFixture.Kernel;
 using ContactsManger.Core.Domain.Entities;
+using ContactsManger.Core.DTOs.PersonDTOs;
 using Entities;
 using EntityFrameworkCoreMock;
 using FluentAssertions;
@@ -346,7 +347,7 @@ namespace CRUDTests
         public async Task AddPerson_WithMissingSystemStatusTagSeed_SkipsTagWithoutThrowing()
         {
             // Arrange
-            var requestedEnum = ContactsManger.Core.Domain.Entities.EEnums.EnSystemStatusTag.Modratepriority;
+            var requestedEnum = ContactsManger.Core.Domain.Entities.EEnums.EnSystemStatusTag.ModeratePriority;
 
             PersonAddRequest? personAddRequest = _fixture.Build<PersonAddRequest>()
                 .With(p => p.email, "test@example.com")
@@ -927,10 +928,10 @@ namespace CRUDTests
                     .Create()
             };
 
-            var personToSort = persons.Select(p => p.ConvertToPersonRespons()).ToList();
+            var personToSort = persons.Select(p => p.ConvertToPersonViewDTO()).ToList();
 
             // Act
-            List<PersonRespones> actualList = await _personSorterService.getPersonsSorted(personToSort, nameof(Person.Name), sortedListOp.Descending);
+            List<PersonViewDTO> actualList = await _personSorterService.getPersonsSorted(personToSort, nameof(Person.Name), sortedListOp.Descending);
 
             // Assert
             actualList.Should().BeInDescendingOrder(p => p.Name);

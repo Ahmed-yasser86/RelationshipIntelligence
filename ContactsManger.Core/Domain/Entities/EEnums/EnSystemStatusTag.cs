@@ -1,58 +1,61 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ContactsManger.Core.Domain.Entities.EEnums
 {
     public enum EnSystemStatusTag
     {
         /// <summary>
-        /// for users need follow up with this contact
+        /// For contacts that have high priority,
+        /// need to be addressed immediately,
+        /// and trigger real-time notifications and alerts.
         /// </summary>
-        FollowUp = 1,
+        HighPriority = 1,
+
         /// <summary>
-        /// for urgent follow up
+        /// For urgent follow up.
         /// </summary>
         Urgent = 2,
+
         /// <summary>
-        /// for contacts that have been reached out to recently
+        /// For contacts that connected with you and you 
+        /// have not yet replied.
         /// </summary>
-        ContactedRecently = 3,
+        HaveNotReplied = 3,
+
         /// <summary>
-        /// for contacts that need to be answered or responded to
+        /// For contacts that need to be answered or responded to.
         /// </summary>
         ShouldReply = 4,
+
         /// <summary>
-        /// for contacts that have already been replied to or responded to
+        /// For users needing standard follow up with this contact.
         /// </summary>
-        AlreadyReplied = 5,
+        FollowUp = 5,
+
         /// <summary>
-        /// for contacts that connected with you and you 
-        /// have not yet replied 
+        /// For contacts that have moderate priority.
         /// </summary>
-        HaveNotReplied = 6,
+        ModeratePriority = 6,
+
         /// <summary>
-        /// for contacts that you highlite to ignore
+        /// For contacts that have been reached out to recently.
         /// </summary>
-        Ignored = 7,
+        ContactedRecently = 7,
+
         /// <summary>
-        /// for contacts that have high priority
-        /// and need to be addressed immediately
-        /// and get reltime notifications and alerts about them
+        /// For contacts that have already been replied to or responded to.
         /// </summary>
-        HighPriority = 8,
+        AlreadyReplied = 8,
+
         /// <summary>
-        /// for contacts that have low priority
-        /// and can be addressed later
+        /// For contacts that have low priority
+        /// and can be addressed later.
         /// </summary>
         LowPriority = 9,
 
         /// <summary>
-        /// for contacts that have moderate priority
+        /// For contacts that you highlight to ignore.
         /// </summary>
-        Modratepriority = 10,
-
+        Ignored = 10
     }
 }

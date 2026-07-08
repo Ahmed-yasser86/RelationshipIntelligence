@@ -241,7 +241,7 @@ namespace Entities
                 new SystemStatusTag { StatusTagId = EnSystemStatusTag.Ignored, Name = "Ignored", Description = "Skipped intentionally" },
                 new SystemStatusTag { StatusTagId = EnSystemStatusTag.HighPriority, Name = "High Priority", Description = "Immediate attention needed" },
                 new SystemStatusTag { StatusTagId = EnSystemStatusTag.LowPriority, Name = "Low Priority", Description = "Get to it later" },
-                new SystemStatusTag { StatusTagId = EnSystemStatusTag.Modratepriority, Name = "Moderate Priority", Description = "Standard priority attention" }
+                new SystemStatusTag { StatusTagId = EnSystemStatusTag.ModeratePriority, Name = "Moderate Priority", Description = "Standard priority attention" }
             );
 
             modelBuilder.Entity<UserDefinedTags>().HasData(
@@ -494,6 +494,9 @@ namespace Entities
                 new ContactItemRole { ContactsRoleId = roles[9], PersonId = persons[9] }
             );
 
+
+
+
             // ==========================================
             // 6. JUNCTION TABLE MAPPINGS
             // ==========================================
@@ -518,7 +521,7 @@ namespace Entities
                 new { PeoplePersonId = persons[3], SystemStatusTagsStatusTagId = EnSystemStatusTag.HighPriority },
                 new { PeoplePersonId = persons[4], SystemStatusTagsStatusTagId = EnSystemStatusTag.Ignored },
                 new { PeoplePersonId = persons[5], SystemStatusTagsStatusTagId = EnSystemStatusTag.LowPriority },
-                new { PeoplePersonId = persons[6], SystemStatusTagsStatusTagId = EnSystemStatusTag.Modratepriority },
+                new { PeoplePersonId = persons[6], SystemStatusTagsStatusTagId = EnSystemStatusTag.ModeratePriority },
                 new { PeoplePersonId = persons[7], SystemStatusTagsStatusTagId = EnSystemStatusTag.Urgent },
                 new { PeoplePersonId = persons[8], SystemStatusTagsStatusTagId = EnSystemStatusTag.AlreadyReplied },
                 new { PeoplePersonId = persons[9], SystemStatusTagsStatusTagId = EnSystemStatusTag.HaveNotReplied }

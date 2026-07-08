@@ -1,4 +1,6 @@
-﻿using ContactsManger.Core.DTOs.PersonDTOs;
+﻿using ContactsManger.Core.Domain.Entities.EEnums.SortDirection;
+using ContactsManger.Core.DTOs.PersonDTOs;
+using ContactsManger.Core.Helpers;
 using Entities;
 using Microsoft.Extensions.Logging;
 using RepositryContracts;
@@ -8,12 +10,14 @@ using ServiceContracts.DTOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace Servicess
 {
     public class PersonSearcherService : IPersonSearcherService
     {
+
         private readonly PersonRepositryContract PersonRipository;
         private readonly ILogger<PersonSearcherService> _logger;
 
@@ -22,7 +26,33 @@ namespace Servicess
             PersonRipository = personRipository;
             _logger = logger;
         }
-        // DON'T FORGET FUNCTION OF sort by interactions DES/ACEDN
+
+        public async Task<PagedResult<PersonViewDTO>> SearchSortedPeopleBy(int page, int size, string sortBy)
+        {
+            Expression<Func<Person, bool>> filter = p => !p.IsDeleted;
+
+            var (items, totalCount) =  await PersonRipository.GetSortedFilteredPersonsPaged(
+                pageNumber: page,
+                pageSize: size,
+                predicate: filter,
+                sortBy: sortBy, 
+                sortDirection: SortDirection.Descending
+            );
+
+            List<PersonViewDTO> personViewDTOs = items
+                .Where(p => p != null)
+                .Select(p => p!.ConvertToPersonViewDTO())
+                .ToList();
+
+            return new PagedResult<PersonViewDTO>
+            {
+                Items = personViewDTOs,
+                TotalCount = totalCount,
+                PageNumber = page,
+                PageSize = size,
+            };
+        }
+
 
         public async Task<PagedResult<PersonViewDTO>> SearchPersonsBy_Batched(string? PersonParamter, string SearchBy, int pageNumber, int pageSize)
         {
@@ -281,6 +311,75 @@ namespace Servicess
                     throw;
                 }
             }
+
         }
+
+
+public async Task<PagedResult<PersonViewDTO>> SearchPersonsByCompositeFilter(
+    PersonCompositeFilter filter, int pageNumber, int pageSize)
+        {
+            using (Operation.Time("Composite filter search. Page: {PageNumber}, Size: {PageSize}", pageNumber, pageSize))
+            {
+                _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Filter: {@Filter}",
+                    nameof(SearchPersonsByCompositeFilter), DateTime.UtcNow, filter);
+
+                try
+                {
+                    if (filter == null)
+                    {
+                        _logger.LogWarning("SearchPersonsByCompositeFilter called with null filter");
+                        throw new ArgumentNullException(nameof(filter));
+                    }
+
+
+                    Expression<Func<Person, bool>> predicate = PredicateBuilder.True<Person>();
+
+                    if (!string.IsNullOrWhiteSpace(filter.Name))
+                        predicate = predicate.And(p => p.Name != null && p.Name.Contains(filter.Name));
+
+                    if (!string.IsNullOrWhiteSpace(filter.Email))
+                        predicate = predicate.And(p => p.email != null && p.email.Contains(filter.Email));
+
+                    if (!string.IsNullOrWhiteSpace(filter.Phone))
+                        predicate = predicate.And(p => p.phone != null && p.phone.Contains(filter.Phone));
+
+                    if (!string.IsNullOrWhiteSpace(filter.CircleName))
+                        predicate = predicate.And(p => p.Circles.Any(c => c.Name.Contains(filter.CircleName)));
+
+                    if (!string.IsNullOrWhiteSpace(filter.ContactItemRole))
+                        predicate = predicate.And(p => p.ContactItemRoles.Any(r => r.Role.Contains(filter.ContactItemRole)));
+
+                    if (!string.IsNullOrWhiteSpace(filter.SystemStatusTagName))
+                        predicate = predicate.And(p => p.SystemStatusTags.Any(t => t.Name.Contains(filter.SystemStatusTagName)));
+
+                    if (!string.IsNullOrWhiteSpace(filter.UserDefinedTagName))
+                        predicate = predicate.And(p => p.UserDefinedTags.Any(t => t.TagName.Contains(filter.UserDefinedTagName)));
+
+                    // Single call, single combined predicate -- GetFilteredPersonsPaged
+                    // doesn't need to know or care how many conditions went into it.
+                    var (people, totalCount) = await PersonRipository.GetFilteredPersonsPaged(pageNumber, pageSize, predicate);
+
+                    var result = new PagedResult<PersonViewDTO>
+                    {
+                        Items = people.Where(p => p != null).Select(p => p!.ConvertToPersonViewDTO()).ToList(),
+                        TotalCount = totalCount,
+                        PageNumber = pageNumber,
+                        PageSize = pageSize
+                    };
+
+                    _logger.LogInformation("{MethodName} completed successfully. Found {Count} of {TotalCount} results",
+                        nameof(SearchPersonsByCompositeFilter), result.Items.Count, totalCount);
+
+                    return result;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error occurred in {MethodName} method. Filter: {@Filter}", nameof(SearchPersonsByCompositeFilter), filter);
+                    throw;
+                }
+            }
+        }
+
+
     }
 }

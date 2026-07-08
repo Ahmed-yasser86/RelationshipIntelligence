@@ -37,11 +37,11 @@ builder.Services.AddScoped<ServiceContracts.ICurrentUserService, Servicess.Curre
 builder.Services.AddScoped<IPersonSearcherService, PersonSearcherService>();
 
 
-// Add this line to register your repository
 builder.Services.AddScoped<PersonRepositryContract, PersonRepository>();
 
-// You likely already have this line right below it
 builder.Services.AddScoped<IPersonGetterService, PersonGetterService>();
+builder.Services.AddScoped<SystemStatusTagRepositryContract, SystemStatusTagRepository>();
+builder.Services.AddScoped<ISystemTagsGetter, SystemTagsGetterService>();
 
 builder.Services.AddDbContext<AppDBContext>(options =>
 {

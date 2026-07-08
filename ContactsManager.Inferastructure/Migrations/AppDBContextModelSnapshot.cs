@@ -657,7 +657,7 @@ namespace ContactsManager.Inferastructure.Migrations
                     b.HasData(
                         new
                         {
-                            StatusTagId = 1,
+                            StatusTagId = 5,
                             Description = "Needs follow up",
                             Name = "Follow Up"
                         },
@@ -669,7 +669,7 @@ namespace ContactsManager.Inferastructure.Migrations
                         },
                         new
                         {
-                            StatusTagId = 3,
+                            StatusTagId = 7,
                             Description = "Spoke to them lately",
                             Name = "Recently Contacted"
                         },
@@ -681,25 +681,25 @@ namespace ContactsManager.Inferastructure.Migrations
                         },
                         new
                         {
-                            StatusTagId = 5,
+                            StatusTagId = 8,
                             Description = "Awaiting their response",
                             Name = "Already Replied"
                         },
                         new
                         {
-                            StatusTagId = 6,
+                            StatusTagId = 3,
                             Description = "They haven't replied",
                             Name = "Ignored Me"
                         },
                         new
                         {
-                            StatusTagId = 7,
+                            StatusTagId = 10,
                             Description = "Skipped intentionally",
                             Name = "Ignored"
                         },
                         new
                         {
-                            StatusTagId = 8,
+                            StatusTagId = 1,
                             Description = "Immediate attention needed",
                             Name = "High Priority"
                         },
@@ -711,7 +711,7 @@ namespace ContactsManager.Inferastructure.Migrations
                         },
                         new
                         {
-                            StatusTagId = 10,
+                            StatusTagId = 6,
                             Description = "Standard priority attention",
                             Name = "Moderate Priority"
                         });
@@ -1550,7 +1550,7 @@ namespace ContactsManager.Inferastructure.Migrations
                         new
                         {
                             PeoplePersonId = new Guid("10000001-0000-0000-0000-000000000000"),
-                            SystemStatusTagsStatusTagId = 3
+                            SystemStatusTagsStatusTagId = 7
                         },
                         new
                         {
@@ -1560,17 +1560,17 @@ namespace ContactsManager.Inferastructure.Migrations
                         new
                         {
                             PeoplePersonId = new Guid("10000003-0000-0000-0000-000000000000"),
-                            SystemStatusTagsStatusTagId = 1
+                            SystemStatusTagsStatusTagId = 5
                         },
                         new
                         {
                             PeoplePersonId = new Guid("10000004-0000-0000-0000-000000000000"),
-                            SystemStatusTagsStatusTagId = 8
+                            SystemStatusTagsStatusTagId = 1
                         },
                         new
                         {
                             PeoplePersonId = new Guid("10000005-0000-0000-0000-000000000000"),
-                            SystemStatusTagsStatusTagId = 7
+                            SystemStatusTagsStatusTagId = 10
                         },
                         new
                         {
@@ -1580,7 +1580,7 @@ namespace ContactsManager.Inferastructure.Migrations
                         new
                         {
                             PeoplePersonId = new Guid("10000007-0000-0000-0000-000000000000"),
-                            SystemStatusTagsStatusTagId = 10
+                            SystemStatusTagsStatusTagId = 6
                         },
                         new
                         {
@@ -1590,12 +1590,12 @@ namespace ContactsManager.Inferastructure.Migrations
                         new
                         {
                             PeoplePersonId = new Guid("10000009-0000-0000-0000-000000000000"),
-                            SystemStatusTagsStatusTagId = 5
+                            SystemStatusTagsStatusTagId = 8
                         },
                         new
                         {
                             PeoplePersonId = new Guid("1000000a-0000-0000-0000-000000000000"),
-                            SystemStatusTagsStatusTagId = 6
+                            SystemStatusTagsStatusTagId = 3
                         });
                 });
 

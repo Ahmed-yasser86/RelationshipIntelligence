@@ -1,12 +1,13 @@
-﻿using ServiceContracts.DTOs;
+﻿using ContactsManger.Core.DTOs.PersonDTOs;
+using ServiceContracts.DTOs;
 using ServiceContracts.DTOs.Enums;
 
 namespace ServiceContracts
 {
     public interface IPersonSorterService
     {
-        Task<List<PersonRespones>> getPersonsSorted(
-            List<PersonRespones> persons,
+        Task<List<PersonViewDTO>> getPersonsSorted(
+            List<PersonViewDTO> persons,
             string? sortBy,
             sortedListOp sortOrder
         );

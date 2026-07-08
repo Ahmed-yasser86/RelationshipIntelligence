@@ -1,5 +1,11 @@
 C:\Users\DELL\Downloads\projectwebapi\Project\Tests\bin\Debug\net9.0\.msCoverageSourceRootsMapping_ContactsManger.ServiceTests
 C:\Users\DELL\Downloads\projectwebapi\Project\Tests\bin\Debug\net9.0\CoverletSourceRootsMapping_ContactsManger.ServiceTests
+C:\Users\DELL\Downloads\projectwebapi\Project\Tests\obj\Debug\net9.0\ContactsManger.ServiceTests.csproj.AssemblyReference.cache
+C:\Users\DELL\Downloads\projectwebapi\Project\Tests\obj\Debug\net9.0\ContactsManger.ServiceTests.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\DELL\Downloads\projectwebapi\Project\Tests\obj\Debug\net9.0\ContactsManger.ServiceTests.AssemblyInfoInputs.cache
+C:\Users\DELL\Downloads\projectwebapi\Project\Tests\obj\Debug\net9.0\ContactsManger.ServiceTests.AssemblyInfo.cs
+C:\Users\DELL\Downloads\projectwebapi\Project\Tests\obj\Debug\net9.0\ContactsManger.ServiceTests.csproj.CoreCompileInputs.cache
+C:\Users\DELL\Downloads\projectwebapi\Project\Tests\obj\Debug\net9.0\ContactsManger.ServiceTests.sourcelink.json
 C:\Users\DELL\Downloads\projectwebapi\Project\Tests\bin\Debug\net9.0\testhost.dll
 C:\Users\DELL\Downloads\projectwebapi\Project\Tests\bin\Debug\net9.0\testhost.exe
 C:\Users\DELL\Downloads\projectwebapi\Project\Tests\bin\Debug\net9.0\xunit.runner.visualstudio.testadapter.dll
@@ -182,12 +188,6 @@ C:\Users\DELL\Downloads\projectwebapi\Project\Tests\bin\Debug\net9.0\ContactsMan
 C:\Users\DELL\Downloads\projectwebapi\Project\Tests\bin\Debug\net9.0\ContactsManger.Core.dll
 C:\Users\DELL\Downloads\projectwebapi\Project\Tests\bin\Debug\net9.0\ContactsManager.Inferastructure.pdb
 C:\Users\DELL\Downloads\projectwebapi\Project\Tests\bin\Debug\net9.0\ContactsManger.Core.pdb
-C:\Users\DELL\Downloads\projectwebapi\Project\Tests\obj\Debug\net9.0\ContactsManger.ServiceTests.csproj.AssemblyReference.cache
-C:\Users\DELL\Downloads\projectwebapi\Project\Tests\obj\Debug\net9.0\ContactsManger.ServiceTests.GeneratedMSBuildEditorConfig.editorconfig
-C:\Users\DELL\Downloads\projectwebapi\Project\Tests\obj\Debug\net9.0\ContactsManger.ServiceTests.AssemblyInfoInputs.cache
-C:\Users\DELL\Downloads\projectwebapi\Project\Tests\obj\Debug\net9.0\ContactsManger.ServiceTests.AssemblyInfo.cs
-C:\Users\DELL\Downloads\projectwebapi\Project\Tests\obj\Debug\net9.0\ContactsManger.ServiceTests.csproj.CoreCompileInputs.cache
-C:\Users\DELL\Downloads\projectwebapi\Project\Tests\obj\Debug\net9.0\ContactsManger.ServiceTests.sourcelink.json
 C:\Users\DELL\Downloads\projectwebapi\Project\Tests\obj\Debug\net9.0\Contacts.823A21AA.Up2Date
 C:\Users\DELL\Downloads\projectwebapi\Project\Tests\obj\Debug\net9.0\ContactsManger.ServiceTests.dll
 C:\Users\DELL\Downloads\projectwebapi\Project\Tests\obj\Debug\net9.0\refint\ContactsManger.ServiceTests.dll

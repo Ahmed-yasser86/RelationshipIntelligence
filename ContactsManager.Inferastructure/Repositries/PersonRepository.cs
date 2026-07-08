@@ -1,11 +1,13 @@
-﻿using Entities;
+﻿using ContactsManger.Core.Domain.Entities.EEnums;
+using ContactsManger.Core.Domain.Entities.EEnums.SortDirection;
+using Entities;
+using Microsoft.EntityFrameworkCore;
+using RepositryContracts;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using RepositryContracts;
-using Microsoft.EntityFrameworkCore;
 
 namespace Repositories
 {
@@ -41,16 +43,16 @@ namespace Repositories
                 .AsSplitQuery();
         }
 
-        public async Task<(List<Person> Items, int TotalCount)> GetFilteredPersonsPaged(int pageNumber, int pageSize, Expression<Func<Person, bool>> predicate)
-        {
 
+        public async Task<(List<Person> Items, int TotalCount)> GetFilteredPersonsPaged(
+            int pageNumber, int pageSize, Expression<Func<Person, bool>> predicate)
+        {
             if (pageNumber < 1) pageNumber = 1;
             if (pageSize < 1) pageSize = 1;
 
+            var baseQuery = PersonWithAllIncludes().Where(predicate);
 
-            var baseQuery = PersonWithAllIncludes().Where(predicate) ;
-
-            int totalCount = await _db.Persons.Where(predicate).CountAsync();
+            int totalCount = await baseQuery.CountAsync();
 
             var items = await baseQuery
                 .OrderBy(p => p.Name)
@@ -61,6 +63,54 @@ namespace Repositories
 
             return (items, totalCount);
         }
+
+        public async Task<(List<Person> Items, int TotalCount)> GetSortedFilteredPersonsPaged(
+       int pageNumber,
+       int pageSize,
+       Expression<Func<Person, bool>> predicate,
+       string sortBy, 
+       SortDirection sortDirection = SortDirection.Ascending)
+        {
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1) pageSize = 1;
+
+            var baseQuery = PersonWithAllIncludes()
+                            .Where(p => !p.IsDeleted)
+                            .Where(predicate);
+
+            int totalCount = await baseQuery.CountAsync();
+
+            IOrderedQueryable<Person> orderedQuery;
+
+            if (sortDirection == SortDirection.Ascending)
+            {
+                orderedQuery = sortBy switch
+                {
+                    nameof(Person.Interactions) => baseQuery.OrderBy(p => p.Interactions.Max(i => (DateTime?)i.TimeOfInteraction) ?? DateTime.MinValue),
+                    nameof(Person.SystemStatusTags) => baseQuery.OrderBy(p => p.SystemStatusTags.Min(t => (int?)t.StatusTagId) ?? int.MaxValue),
+                    _ => baseQuery.OrderBy(p => p.Name) 
+                };
+            }
+            else
+            {
+                orderedQuery = sortBy switch
+                {
+                    nameof(Person.Interactions) => baseQuery.OrderByDescending(p => p.Interactions.Max(i => (DateTime?)i.TimeOfInteraction) ?? DateTime.MinValue),
+                    nameof(Person.SystemStatusTags) => baseQuery.OrderByDescending(p => p.SystemStatusTags.Min(t => (int?)t.StatusTagId) ?? int.MaxValue),
+                    _ => baseQuery.OrderByDescending(p => p.Name) 
+                };
+            }
+
+            var items = await orderedQuery
+                .ThenBy(p => p.PersonId)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (items, totalCount);
+        }
+
+
 
         [Obsolete]
         public async Task<List<Person>> GetFilteredPersons(Expression<Func<Person, bool>> predicate)

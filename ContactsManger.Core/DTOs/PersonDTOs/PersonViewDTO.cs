@@ -20,9 +20,9 @@ namespace ContactsManger.Core.DTOs.PersonDTOs
 
         public string CountryName { get; set; }
 
-        public List<CircleResponse> Organizations { get; set; } = new List<CircleResponse>();
+        public List<CircleResponse> Circles { get; set; } = new List<CircleResponse>();
    
-        public List<ContactItemRoleResponse> CurrentRoles { get; set; } = new List<ContactItemRoleResponse>();
+        public List<ContactItemRoleResponse> ContactItemRoles { get; set; } = new List<ContactItemRoleResponse>();
 
         /// <summary>
         /// this indecate the main connection channels of the person where i mainlly connect with him /her like email, phone, social media accounts, etc.
@@ -52,8 +52,8 @@ namespace ContactsManger.Core.DTOs.PersonDTOs
                 email = person.email,
                 phone = person.phone,
                 CountryName = person.Country?.CountryName,
-                Organizations = person.Circles?.Select(c => c.ConvertToDto()).ToList() ?? new List<CircleResponse>(),
-                CurrentRoles = person.ContactItemRoles?.Select(r => r.ConvertToDto()).ToList() ?? new List<ContactItemRoleResponse>(),
+                Circles = person.Circles?.Select(c => c.ConvertToDto()).ToList() ?? new List<CircleResponse>(),
+                ContactItemRoles = person.ContactItemRoles?.Select(r => r.ConvertToDto()).ToList() ?? new List<ContactItemRoleResponse>(),
                 ConnectionChannels = person.ConnectionChannels?.Select(c => c.ConvertToDto()).ToList() ?? new List<ConnectionChannelResponse>(),
                 SystemStatusTags = person.SystemStatusTags?.Select(s => s.ConvertToDto()).ToList() ?? new List<SystemStatusTagResponse>(),
                 UserDefinedTags = person.UserDefinedTags?.Select(t => t.ConvertToDto()).ToList() ?? new List<UserDefinedTagsResponse>(),

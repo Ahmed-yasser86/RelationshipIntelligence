@@ -27,4 +27,8 @@
     <ProjectReference Include="..\ContactsManger.Core\ContactsManger.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Repositries\Enums\" />
+  </ItemGroup>
+
 </Project>

@@ -325,8 +325,8 @@ namespace CRUDTests
             PersonViewDTO dto = result.Items.Single();
             dto.PersonId.Should().Be(person.PersonId);
             dto.CountryName.Should().Be("Egypt");
-            dto.Organizations.Should().ContainSingle(o => o.Name == "Acme Inc");
-            dto.CurrentRoles.Should().ContainSingle(r => r.Role == "Engineer");
+            dto.Circles.Should().ContainSingle(o => o.Name == "Acme Inc");
+            dto.ContactItemRoles.Should().ContainSingle(r => r.Role == "Engineer");
         }
 
         #endregion

@@ -20,13 +20,22 @@ namespace ContactsManager.API.Controllers
         private readonly IPersonGetterService _personGetterService;
         private readonly IPersonSearcherService _personSearcherService;
         private readonly ISystemTagsGetter _systemTagsGetter;
+        private readonly IPersonQuickAdderService _personQuickAdderService;
+        private readonly ICountryGetterService _countryGetterService;
+        private readonly IPersonAdderService _personAdderService;
 
-        public ContactsController(UserManager<ApplicationUser> userManager, IPersonGetterService personGetterService, IPersonSearcherService personSearcher , ISystemTagsGetter systemTagsGetter)
+        public ContactsController(UserManager<ApplicationUser> userManager, IPersonGetterService personGetterService,
+            IPersonSearcherService personSearcher , ISystemTagsGetter systemTagsGetter,
+            IPersonQuickAdderService personQuickAdder, ICountryGetterService getCountries,
+            IPersonAdderService PersoneAdderService)
         {
             _userManager = userManager;
             _personGetterService = personGetterService;
             _personSearcherService = personSearcher;
             _systemTagsGetter = systemTagsGetter;
+            _personQuickAdderService = personQuickAdder;
+            _countryGetterService = getCountries;
+            _personAdderService = PersoneAdderService;
         }
 
         /// <summary>
@@ -307,8 +316,84 @@ namespace ContactsManager.API.Controllers
         }
 
 
+        [HttpGet]
+        public async Task<IActionResult> GetContactByContactID(Guid? ID)
+        {
+            PersonRespones? ContactObj;
+            try
+            {
 
+                ContactObj = await _personGetterService.GetPersonByPersonId(ID);
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+
+            return Ok(ContactObj);
+
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="person"></param>
+        /// <remarks>
+        /// take care bec this return person respones object that has Many empty
+        /// field as this request doesn't include all the information of the user
+        /// </remarks>
+        /// <returns></returns>
+        [HttpPost]
+        public async Task<IActionResult> PostQuickAddContact([FromBody]PersonQuickAddRequest person)
+        {
+            if (_personQuickAdderService == null)
+                throw new Exception("_personQuickAdderService is NULL");
+
+
+            var PersonRespons = await _personQuickAdderService.QuickAddPerson(person);
+
+                return Ok(PersonRespons);
+         
+
+        }
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="person"></param>
+        /// <remarks>
+        /// u could utlize this for retriving all countries in the data base and thier GUID 
+        /// and use it for operations like persone update request ..etc 
+        /// </remarks>
+        /// <returns></returns>
+
+
+        [HttpGet]
+        public async Task<IActionResult> GetAllCountries()
+        {
+
+            var countries = await _countryGetterService.Countries();
+
+          return  Ok(countries);
+
+        }
+
+        [HttpPost]
+        public async Task <IActionResult> AddPersoneRequest([FromBody] PersonAddRequest? PersoneAddRequest)
+        {
+            var PersonRespones = await _personAdderService.AddPerson(PersoneAddRequest);
+
+            return Ok(PersonRespones);
+
+
+        }
+
+
+        
+     }
       
 
-    }
+    
 }

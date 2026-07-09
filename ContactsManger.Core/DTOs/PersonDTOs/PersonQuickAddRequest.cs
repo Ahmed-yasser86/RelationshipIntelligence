@@ -5,6 +5,10 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ServiceContracts.DTOs
 {
+
+
+
+
     /// <summary>
     /// Minimal-friction contact capture. Only the essentials needed to save
     /// a person quickly; everything else can be filled in later via the
@@ -45,6 +49,7 @@ namespace ServiceContracts.DTOs
                 Name = this.Name,
                 email = this.email,
                 Origin = this.Origin
+
             };
         }
     }

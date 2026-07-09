@@ -85,8 +85,6 @@ namespace ServiceContracts.DTOs
     {
         public string? Platform { get; set; }
 
-        [Required(ErrorMessage = "URL is required")]
-        [Url(ErrorMessage = "Invalid URL format")]
-        public string Url { get; set; }
+        public string? Url { get; set; }
     }
 }

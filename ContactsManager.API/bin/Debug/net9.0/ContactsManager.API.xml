@@ -214,6 +214,28 @@
             </param>
             <returns>A sorted and sliced page result of contacts.</returns>
         </member>
+        <member name="M:ContactsManager.API.Controllers.ContactsController.PostQuickAddContact(ServiceContracts.DTOs.PersonQuickAddRequest)">
+            <summary>
+            
+            </summary>
+            <param name="person"></param>
+            <remarks>
+            take care bec this return person respones object that has Many empty
+            field as this request doesn't include all the information of the user
+            </remarks>
+            <returns></returns>
+        </member>
+        <member name="M:ContactsManager.API.Controllers.ContactsController.GetAllCountries">
+            <summary>
+            
+            </summary>
+            <param name="person"></param>
+            <remarks>
+            u could utlize this for retriving all countries in the data base and thier GUID 
+            and use it for operations like persone update request ..etc 
+            </remarks>
+            <returns></returns>
+        </member>
         <member name="T:PersonOwnershipFilter">
             <summary>
             this action filter is used to validate the ownership of a person entity based on the current user.

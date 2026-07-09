@@ -43,6 +43,48 @@
   },
   {
     "ContainingType": "ContactsManager.API.Controllers.ContactsController",
+    "Method": "AddPersoneRequest",
+    "RelativePath": "api/Contacts/AddPersoneRequest",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "PersoneAddRequest",
+        "Type": "ServiceContracts.DTOs.PersonAddRequest",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ContactsManager.API.Controllers.ContactsController",
+    "Method": "GetAllCountries",
+    "RelativePath": "api/Contacts/GetAllCountries",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ContactsManager.API.Controllers.ContactsController",
+    "Method": "GetContactByContactID",
+    "RelativePath": "api/Contacts/GetContactByContactID",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "ID",
+        "Type": "System.Nullable\u00601[[System.Guid, System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ContactsManager.API.Controllers.ContactsController",
     "Method": "GetContactsFilteredByBatches",
     "RelativePath": "api/Contacts/GetContactsFilteredByBatches",
     "HttpMethod": "GET",
@@ -157,6 +199,22 @@
     "IsController": true,
     "Order": 0,
     "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ContactsManager.API.Controllers.ContactsController",
+    "Method": "PostQuickAddContact",
+    "RelativePath": "api/Contacts/PostQuickAddContact",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "person",
+        "Type": "ServiceContracts.DTOs.PersonQuickAddRequest",
+        "IsRequired": true
+      }
+    ],
     "ReturnTypes": []
   },
   {

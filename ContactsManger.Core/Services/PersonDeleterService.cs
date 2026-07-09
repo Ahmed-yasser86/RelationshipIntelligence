@@ -9,7 +9,6 @@ namespace Servicess
 {
 
 
-    //when i remove person i have to remove all the related data like contact items and roles and circles (if not linked to any enitity )
     public class PersonDeleterService : IPersonDeleterService
     {
         private readonly PersonRepositryContract PersonRipository;

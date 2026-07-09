@@ -84,28 +84,26 @@ namespace Servicess
 
                     person.ApplicationUserId = _currentUserService.UserId.Value;
 
-                    // Resolve all four independent lookup collections concurrently.
-                    // Each Resolve* method does exactly ONE batched DB round-trip
-                    // (WHERE ... IN (...)) instead of one round-trip per name, and
-                    // since Circles/ConnectionChannels/UserDefinedTags/SystemStatusTags
-                    // don't depend on each other, there's no reason to await them
-                    // one at a time either.
-                    var circlesTask = ResolveCircles(personAddRequest.Organizations);
-                    var channelsTask = ResolveConnectionChannels(personAddRequest.ConnectionChannels);
-                    var tagsTask = ResolveUserDefinedTags(personAddRequest.UserDefinedTags);
-                    var statusTagsTask = ResolveSystemStatusTags(personAddRequest.SystemStatusTags);
+                    
+                    var circles = await ResolveCircles(personAddRequest.Organizations);
+                    var channels = await ResolveConnectionChannels(personAddRequest.ConnectionChannels);
+                    var tags = await ResolveUserDefinedTags(personAddRequest.UserDefinedTags);
+                    var statusTags = await ResolveSystemStatusTags(personAddRequest.SystemStatusTags);
 
-                    await Task.WhenAll(circlesTask, channelsTask, tagsTask, statusTagsTask);
+                    foreach (var circle in circles)
+                        person.Circles.Add(circle);
 
-                    foreach (var circle in circlesTask.Result) person.Circles.Add(circle);
-                    foreach (var channel in channelsTask.Result) person.ConnectionChannels.Add(channel);
-                    foreach (var tag in tagsTask.Result) person.UserDefinedTags.Add(tag);
-                    foreach (var statusTag in statusTagsTask.Result) person.SystemStatusTags.Add(statusTag);
+                    foreach (var channel in channels)
+                        person.ConnectionChannels.Add(channel);
 
-                    // Purely local, no DB access -- fine to run synchronously
-                    // after the batch above.
-                    ResolveContactItemRoles(person, personAddRequest.CurrentRoles);
-                    ResolveSocialMediaAccounts(person, personAddRequest.SocialMediaAccounts);
+                    foreach (var tag in tags)
+                        person.UserDefinedTags.Add(tag);
+
+                    foreach (var statusTag in statusTags)
+                        person.SystemStatusTags.Add(statusTag);
+
+                await    ResolveContactItemRoles(person, personAddRequest.CurrentRoles);
+                   await  ResolveSocialMediaAccounts(person, personAddRequest.SocialMediaAccounts);
 
                     _logger.LogDebug("Adding new person with ID: {PersonId}, Name: {PersonName}",
                         person.PersonId, person.Name);
@@ -220,7 +218,7 @@ namespace Servicess
         /// nothing to batch-fetch for a brand-new person -- every role text becomes
         /// a fresh row tied to this PersonId. No DB call, so no async needed.
         /// </summary>
-        private void ResolveContactItemRoles(Person person, List<string>? roleNames)
+        private async Task ResolveContactItemRoles(Person person, List<string>? roleNames)
         {
             if (roleNames == null) return;
 
@@ -239,7 +237,7 @@ namespace Servicess
         /// Social media accounts aren't deduplicated/looked-up -- each submitted
         /// URL becomes its own new row tied to this person.
         /// </summary>
-        private void ResolveSocialMediaAccounts(Person person, List<SocialMediaAccountAddRequest>? accounts)
+        private async Task ResolveSocialMediaAccounts(Person person, List<SocialMediaAccountAddRequest>? accounts)
         {
             if (accounts == null) return;
 

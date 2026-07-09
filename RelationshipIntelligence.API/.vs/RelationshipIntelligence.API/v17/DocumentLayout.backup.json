@@ -3,28 +3,97 @@
   "WorkspaceRootPath": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\RelationshipIntelligence.API\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{59C44846-1566-F145-3378-24B1D86DFA3C}|..\\ContactsManager.Inferastructure\\ContactsManager.Inferastructure.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanager.inferastructure\\repositries\\personrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{EF5102C3-8CB6-CA5E-4E61-9386655996E0}|..\\ContactsManager.API\\ContactsManager.API.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanager.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{1112D6D9-9D53-A513-0978-496ABB06C50C}|..\\ContactsManger.Core\\ContactsManger.Core.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanger.core\\dtos\\persondtos\\relatedentityresponse.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{EF5102C3-8CB6-CA5E-4E61-9386655996E0}|..\\ContactsManager.API\\ContactsManager.API.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanager.api\\controllers\\contactscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{59C44846-1566-F145-3378-24B1D86DFA3C}|..\\ContactsManager.Inferastructure\\ContactsManager.Inferastructure.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanager.inferastructure\\dbcontext\\appdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{EF5102C3-8CB6-CA5E-4E61-9386655996E0}|..\\ContactsManager.API\\ContactsManager.API.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanager.api\\controllers\\contactscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{59C44846-1566-F145-3378-24B1D86DFA3C}|..\\ContactsManager.Inferastructure\\ContactsManager.Inferastructure.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanager.inferastructure\\repositries\\personrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1112D6D9-9D53-A513-0978-496ABB06C50C}|..\\ContactsManger.Core\\ContactsManger.Core.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanger.core\\services\\personadderservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{59C44846-1566-F145-3378-24B1D86DFA3C}|..\\ContactsManager.Inferastructure\\ContactsManager.Inferastructure.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanager.inferastructure\\repositries\\connectionchannelrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1112D6D9-9D53-A513-0978-496ABB06C50C}|..\\ContactsManger.Core\\ContactsManger.Core.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanger.core\\dtos\\persondtos\\personaddrequest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{59C44846-1566-F145-3378-24B1D86DFA3C}|..\\ContactsManager.Inferastructure\\ContactsManager.Inferastructure.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanager.inferastructure\\repositries\\countryrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EF5102C3-8CB6-CA5E-4E61-9386655996E0}|..\\ContactsManager.API\\ContactsManager.API.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanager.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EF5102C3-8CB6-CA5E-4E61-9386655996E0}|..\\ContactsManager.API\\ContactsManager.API.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanager.api\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1112D6D9-9D53-A513-0978-496ABB06C50C}|..\\ContactsManger.Core\\ContactsManger.Core.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanger.core\\dtos\\persondtos\\personrespones.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1112D6D9-9D53-A513-0978-496ABB06C50C}|..\\ContactsManger.Core\\ContactsManger.Core.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanger.core\\services\\persondeleterservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1112D6D9-9D53-A513-0978-496ABB06C50C}|..\\ContactsManger.Core\\ContactsManger.Core.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanger.core\\services\\countrygetterservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1112D6D9-9D53-A513-0978-496ABB06C50C}|..\\ContactsManger.Core\\ContactsManger.Core.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanger.core\\domain\\entities\\person.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1112D6D9-9D53-A513-0978-496ABB06C50C}|..\\ContactsManger.Core\\ContactsManger.Core.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanger.core\\domain\\entities\\socialmediaaccount.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.Inferastructure\\Migrations\\20260709061641_add-migration kkk.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1112D6D9-9D53-A513-0978-496ABB06C50C}|..\\ContactsManger.Core\\ContactsManger.Core.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanger.core\\services\\personquickadderservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EF5102C3-8CB6-CA5E-4E61-9386655996E0}|..\\ContactsManager.API\\ContactsManager.API.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanager.api\\filters\\globalexceptionfilter.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EF5102C3-8CB6-CA5E-4E61-9386655996E0}|..\\ContactsManager.API\\ContactsManager.API.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanager.api\\filters\\modelvalidationactionfilter.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1112D6D9-9D53-A513-0978-496ABB06C50C}|..\\ContactsManger.Core\\ContactsManger.Core.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanger.core\\domain\\entities\\circle.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1112D6D9-9D53-A513-0978-496ABB06C50C}|..\\ContactsManger.Core\\ContactsManger.Core.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanger.core\\dtos\\persondtos\\relatedentityresponse.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1112D6D9-9D53-A513-0978-496ABB06C50C}|..\\ContactsManger.Core\\ContactsManger.Core.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanger.core\\dtos\\pagedresult.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1112D6D9-9D53-A513-0978-496ABB06C50C}|..\\ContactsManger.Core\\ContactsManger.Core.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanger.core\\services\\currentuserservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EF5102C3-8CB6-CA5E-4E61-9386655996E0}|..\\ContactsManager.API\\ContactsManager.API.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanager.api\\controllers\\customwebcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EF5102C3-8CB6-CA5E-4E61-9386655996E0}|..\\ContactsManager.API\\ContactsManager.API.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanager.api\\filters\\personownershipfilter.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1112D6D9-9D53-A513-0978-496ABB06C50C}|..\\ContactsManger.Core\\ContactsManger.Core.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanger.core\\dtos\\persondtos\\personquickaddrequest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1112D6D9-9D53-A513-0978-496ABB06C50C}|..\\ContactsManger.Core\\ContactsManger.Core.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanger.core\\servicecontracts\\ipersonquickadderservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1112D6D9-9D53-A513-0978-496ABB06C50C}|..\\ContactsManger.Core\\ContactsManger.Core.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanger.core\\services\\persongetterservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1112D6D9-9D53-A513-0978-496ABB06C50C}|..\\ContactsManger.Core\\ContactsManger.Core.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanger.core\\dtos\\persondtos\\personviewdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EF5102C3-8CB6-CA5E-4E61-9386655996E0}|..\\ContactsManager.API\\ContactsManager.API.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanager.api\\controllers\\accountcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{1112D6D9-9D53-A513-0978-496ABB06C50C}|..\\ContactsManger.Core\\ContactsManger.Core.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanger.core\\services\\systemtagsgetterservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{1112D6D9-9D53-A513-0978-496ABB06C50C}|..\\ContactsManger.Core\\ContactsManger.Core.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanger.core\\servicecontracts\\isystemtagsgetter.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{1112D6D9-9D53-A513-0978-496ABB06C50C}|..\\ContactsManger.Core\\ContactsManger.Core.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanger.core\\dtos\\persondtos\\personrespones.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{1112D6D9-9D53-A513-0978-496ABB06C50C}|..\\ContactsManger.Core\\ContactsManger.Core.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanger.core\\domain\\entities\\systemstatustag.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
@@ -36,9 +105,6 @@
       "AbsoluteMoniker": "D:0:0:{59C44846-1566-F145-3378-24B1D86DFA3C}|..\\ContactsManager.Inferastructure\\ContactsManager.Inferastructure.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanager.inferastructure\\repositries\\systemstatustagrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{EF5102C3-8CB6-CA5E-4E61-9386655996E0}|..\\ContactsManager.API\\ContactsManager.API.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanager.api\\controllers\\accountcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/Contect_Manager/True/SqlTable/dbo.SystemStatusTags.sql||{0058A1F7-65F3-4DB9-B3D0-CA7E64DD73CD}"
     },
     {
@@ -46,9 +112,6 @@
     },
     {
       "AbsoluteMoniker": "D:0:0:{1112D6D9-9D53-A513-0978-496ABB06C50C}|..\\ContactsManger.Core\\ContactsManger.Core.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanger.core\\services\\personsorterservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{1112D6D9-9D53-A513-0978-496ABB06C50C}|..\\ContactsManger.Core\\ContactsManger.Core.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanger.core\\dtos\\persondtos\\personviewdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{1112D6D9-9D53-A513-0978-496ABB06C50C}|..\\ContactsManger.Core\\ContactsManger.Core.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanger.core\\domain\\entities\\eenums\\ensystemstatustag.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
@@ -60,13 +123,7 @@
       "AbsoluteMoniker": "D:0:0:{1112D6D9-9D53-A513-0978-496ABB06C50C}|..\\ContactsManger.Core\\ContactsManger.Core.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanger.core\\helpers\\predicatebuilder.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{EF5102C3-8CB6-CA5E-4E61-9386655996E0}|..\\ContactsManager.API\\ContactsManager.API.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanager.api\\controllers\\customwebcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{1112D6D9-9D53-A513-0978-496ABB06C50C}|..\\ContactsManger.Core\\ContactsManger.Core.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanger.core\\dtos\\persondtos\\personcompositefilter.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{1112D6D9-9D53-A513-0978-496ABB06C50C}|..\\ContactsManger.Core\\ContactsManger.Core.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanger.core\\dtos\\pagedresult.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{1112D6D9-9D53-A513-0978-496ABB06C50C}|..\\ContactsManger.Core\\ContactsManger.Core.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanger.core\\domain\\entities\\connectionchannel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
@@ -75,22 +132,7 @@
       "AbsoluteMoniker": "D:0:0:{1112D6D9-9D53-A513-0978-496ABB06C50C}|..\\ContactsManger.Core\\ContactsManger.Core.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanger.core\\domain\\entities\\contactitemrole.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{1112D6D9-9D53-A513-0978-496ABB06C50C}|..\\ContactsManger.Core\\ContactsManger.Core.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanger.core\\domain\\entities\\socialmediaaccount.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{EF5102C3-8CB6-CA5E-4E61-9386655996E0}|..\\ContactsManager.API\\ContactsManager.API.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanager.api\\properties\\launchsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{EF5102C3-8CB6-CA5E-4E61-9386655996E0}|..\\ContactsManager.API\\ContactsManager.API.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanager.api\\filters\\globalexceptionfilter.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{EF5102C3-8CB6-CA5E-4E61-9386655996E0}|..\\ContactsManager.API\\ContactsManager.API.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanager.api\\filters\\personownershipfilter.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{1112D6D9-9D53-A513-0978-496ABB06C50C}|..\\ContactsManger.Core\\ContactsManger.Core.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanger.core\\services\\personadderservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{1112D6D9-9D53-A513-0978-496ABB06C50C}|..\\ContactsManger.Core\\ContactsManger.Core.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanger.core\\services\\currentuserservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{1112D6D9-9D53-A513-0978-496ABB06C50C}|..\\ContactsManger.Core\\ContactsManger.Core.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanger.core\\servicecontracts\\icurrentuserservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
@@ -102,16 +144,10 @@
       "AbsoluteMoniker": "D:0:0:{1112D6D9-9D53-A513-0978-496ABB06C50C}|..\\ContactsManger.Core\\ContactsManger.Core.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanger.core\\domain\\repositrycontracts\\connectionchannelrepositrycontract.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{1112D6D9-9D53-A513-0978-496ABB06C50C}|..\\ContactsManger.Core\\ContactsManger.Core.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanger.core\\services\\personquickadderservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{1112D6D9-9D53-A513-0978-496ABB06C50C}|..\\ContactsManger.Core\\ContactsManger.Core.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanger.core\\domain\\identityentities\\applicationuser.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{1112D6D9-9D53-A513-0978-496ABB06C50C}|..\\ContactsManger.Core\\ContactsManger.Core.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanger.core\\domain\\identityentities\\applicationrole.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{1112D6D9-9D53-A513-0978-496ABB06C50C}|..\\ContactsManger.Core\\ContactsManger.Core.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanger.core\\domain\\entities\\person.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\DELL\\Downloads\\SQLQuery675.sql||{CC5D8DF0-88F4-4BB2-9DBB-B48CEE65C30A}|"
@@ -141,13 +177,7 @@
       "AbsoluteMoniker": "D:0:0:{1112D6D9-9D53-A513-0978-496ABB06C50C}|..\\ContactsManger.Core\\ContactsManger.Core.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanger.core\\dtos\\persondtos\\personupdaterequest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{1112D6D9-9D53-A513-0978-496ABB06C50C}|..\\ContactsManger.Core\\ContactsManger.Core.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanger.core\\dtos\\persondtos\\personaddrequest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{1112D6D9-9D53-A513-0978-496ABB06C50C}|..\\ContactsManger.Core\\ContactsManger.Core.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanger.core\\services\\personupdaterservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{1112D6D9-9D53-A513-0978-496ABB06C50C}|..\\ContactsManger.Core\\ContactsManger.Core.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanger.core\\services\\persondeleterservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/Contect_Manager/True/SqlTable/dbo.AspNetRoles.sql||{0058A1F7-65F3-4DB9-B3D0-CA7E64DD73CD}"
@@ -174,9 +204,6 @@
       "AbsoluteMoniker": "D:0:0:{1112D6D9-9D53-A513-0978-496ABB06C50C}|..\\ContactsManger.Core\\ContactsManger.Core.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanger.core\\domain\\repositrycontracts\\userdefinedtagrepositrycontract.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{59C44846-1566-F145-3378-24B1D86DFA3C}|..\\ContactsManager.Inferastructure\\ContactsManager.Inferastructure.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanager.inferastructure\\repositries\\connectionchannelrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{1112D6D9-9D53-A513-0978-496ABB06C50C}|..\\ContactsManger.Core\\ContactsManger.Core.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanger.core\\domain\\repositrycontracts\\countryrepositrycontract.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
@@ -186,9 +213,6 @@
       "AbsoluteMoniker": "D:0:0:{1112D6D9-9D53-A513-0978-496ABB06C50C}|..\\ContactsManger.Core\\ContactsManger.Core.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanger.core\\domain\\repositrycontracts\\contactitemrolerepositrycontract.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{1112D6D9-9D53-A513-0978-496ABB06C50C}|..\\ContactsManger.Core\\ContactsManger.Core.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanger.core\\services\\countrygetterservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{1112D6D9-9D53-A513-0978-496ABB06C50C}|..\\ContactsManger.Core\\ContactsManger.Core.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanger.core\\services\\countryadderservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
@@ -196,9 +220,6 @@
     },
     {
       "AbsoluteMoniker": "D:0:0:{1112D6D9-9D53-A513-0978-496ABB06C50C}|..\\ContactsManger.Core\\ContactsManger.Core.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanger.core\\helpers\\orderextensions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{1112D6D9-9D53-A513-0978-496ABB06C50C}|..\\ContactsManger.Core\\ContactsManger.Core.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanger.core\\servicecontracts\\ipersonquickadderservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{1112D6D9-9D53-A513-0978-496ABB06C50C}|..\\ContactsManger.Core\\ContactsManger.Core.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanger.core\\servicecontracts\\ipersonadderservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
@@ -213,16 +234,10 @@
       "AbsoluteMoniker": "D:0:0:{59C44846-1566-F145-3378-24B1D86DFA3C}|..\\ContactsManager.Inferastructure\\ContactsManager.Inferastructure.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanager.inferastructure\\repositries\\contactitemrolerepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{59C44846-1566-F145-3378-24B1D86DFA3C}|..\\ContactsManager.Inferastructure\\ContactsManager.Inferastructure.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanager.inferastructure\\repositries\\countryrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{1112D6D9-9D53-A513-0978-496ABB06C50C}|..\\ContactsManger.Core\\ContactsManger.Core.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanger.core\\domain\\entities\\note.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{1112D6D9-9D53-A513-0978-496ABB06C50C}|..\\ContactsManger.Core\\ContactsManger.Core.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanger.core\\domain\\entities\\country.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{1112D6D9-9D53-A513-0978-496ABB06C50C}|..\\ContactsManger.Core\\ContactsManger.Core.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanger.core\\domain\\entities\\circle.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{1112D6D9-9D53-A513-0978-496ABB06C50C}|..\\ContactsManger.Core\\ContactsManger.Core.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanger.core\\customvalidations\\enumrangeattribute.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
@@ -259,6 +274,9 @@
     },
     {
       "AbsoluteMoniker": "D:0:0:{59C44846-1566-F145-3378-24B1D86DFA3C}|..\\ContactsManager.Inferastructure\\ContactsManager.Inferastructure.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanager.inferastructure\\migrations\\20260707113932_updatedbvalues.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{59C44846-1566-F145-3378-24B1D86DFA3C}|..\\ContactsManager.Inferastructure\\ContactsManager.Inferastructure.csproj|c:\\users\\dell\\downloads\\projectwebapi\\project\\contactsmanager.inferastructure\\migrations\\20260709014902_mmm.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -268,7 +286,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 2,
+          "SelectedChildIndex": 6,
           "Children": [
             {
               "$type": "Bookmark",
@@ -280,1029 +298,68 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "PersonRepository.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.Inferastructure\\Repositries\\PersonRepository.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManager.Inferastructure\\Repositries\\PersonRepository.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.Inferastructure\\Repositries\\PersonRepository.cs",
-              "RelativeToolTip": "..\\ContactsManager.Inferastructure\\Repositries\\PersonRepository.cs",
-              "ViewState": "AgIAACcAAAAAAAAAAAAAADYAAAA6AAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-08T12:55:31.304Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "SystemTagsGetterService.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Services\\SystemTagsGetterService.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Services\\SystemTagsGetterService.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Services\\SystemTagsGetterService.cs",
-              "RelativeToolTip": "..\\ContactsManger.Core\\Services\\SystemTagsGetterService.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAqwBAAAAAmAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-07T11:45:42.332Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "Program.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.API\\Program.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManager.API\\Program.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.API\\Program.cs",
-              "RelativeToolTip": "..\\ContactsManager.API\\Program.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABkAAAAxAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-07T12:10:58.603Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "RelatedEntityResponse.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\DTOs\\PersonDTOs\\RelatedEntityResponse.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\DTOs\\PersonDTOs\\RelatedEntityResponse.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\DTOs\\PersonDTOs\\RelatedEntityResponse.cs",
-              "RelativeToolTip": "..\\ContactsManger.Core\\DTOs\\PersonDTOs\\RelatedEntityResponse.cs",
-              "ViewState": "AgIAAEUAAAAAAAAAAAAmwFQAAAAtAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-05T22:58:11.116Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "ISystemTagsGetter.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\ServiceContracts\\ISystemTagsGetter.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\ServiceContracts\\ISystemTagsGetter.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\ServiceContracts\\ISystemTagsGetter.cs",
-              "RelativeToolTip": "..\\ContactsManger.Core\\ServiceContracts\\ISystemTagsGetter.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAqwA0AAAA3AAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-07T11:46:30.956Z"
-            },
-            {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{0ad07096-bba9-4900-a651-0598d26f6d24}"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "ContactsController.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.API\\Controllers\\ContactsController.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManager.API\\Controllers\\ContactsController.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.API\\Controllers\\ContactsController.cs",
-              "RelativeToolTip": "..\\ContactsManager.API\\Controllers\\ContactsController.cs",
-              "ViewState": "AgIAAC0AAAAAAAAAAAAAAHYAAAARAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-06T04:33:04.682Z"
-            },
-            {
-              "$type": "Document",
               "DocumentIndex": 3,
-              "Title": "AppDBContext.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.Inferastructure\\DBContext\\AppDBContext.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManager.Inferastructure\\DBContext\\AppDBContext.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.Inferastructure\\DBContext\\AppDBContext.cs",
-              "RelativeToolTip": "..\\ContactsManager.Inferastructure\\DBContext\\AppDBContext.cs",
-              "ViewState": "AgIAAEIBAAAAAAAAAAAAAPEBAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-07T04:10:57.431Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 7,
-              "Title": "PersonRespones.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\DTOs\\PersonDTOs\\PersonRespones.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\DTOs\\PersonDTOs\\PersonRespones.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\DTOs\\PersonDTOs\\PersonRespones.cs",
-              "RelativeToolTip": "..\\ContactsManger.Core\\DTOs\\PersonDTOs\\PersonRespones.cs",
-              "ViewState": "AgIAAGIAAAAAAAAAAAAAADUAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-05T22:56:58.338Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 9,
-              "Title": "IPersonUpdaterService.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\ServiceContracts\\IPersonUpdaterService.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\ServiceContracts\\IPersonUpdaterService.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\ServiceContracts\\IPersonUpdaterService.cs",
-              "RelativeToolTip": "..\\ContactsManger.Core\\ServiceContracts\\IPersonUpdaterService.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-07T11:47:21.104Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 12,
-              "Title": "dbo.SystemStatusTags.sql",
-              "DocumentMoniker": "ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/Contect_Manager/True/SqlTable/dbo.SystemStatusTags.sql",
-              "ToolTip": "ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/Contect_Manager/True/SqlTable/dbo.SystemStatusTags.sql",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000826|",
-              "WhenOpened": "2026-07-07T11:41:19.404Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 8,
-              "Title": "SystemStatusTag.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\Entities\\SystemStatusTag.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Domain\\Entities\\SystemStatusTag.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\Entities\\SystemStatusTag.cs",
-              "RelativeToolTip": "..\\ContactsManger.Core\\Domain\\Entities\\SystemStatusTag.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABcAAAAwAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-05T07:29:32.378Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 11,
-              "Title": "AccountController.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.API\\Controllers\\AccountController.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManager.API\\Controllers\\AccountController.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.API\\Controllers\\AccountController.cs",
-              "RelativeToolTip": "..\\ContactsManager.API\\Controllers\\AccountController.cs",
-              "ViewState": "AgIAAHcAAAAAAAAAAAAswJYAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-07T04:12:36.724Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 10,
-              "Title": "SystemStatusTagRepository.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.Inferastructure\\Repositries\\SystemStatusTagRepository.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManager.Inferastructure\\Repositries\\SystemStatusTagRepository.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.Inferastructure\\Repositries\\SystemStatusTagRepository.cs",
-              "RelativeToolTip": "..\\ContactsManager.Inferastructure\\Repositries\\SystemStatusTagRepository.cs",
-              "ViewState": "AgIAADkAAAAAAAAAAAAAAB4AAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-05T23:56:09.993Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 85,
-              "Title": "20260707113932_UpdateDbValues.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.Inferastructure\\Migrations\\20260707113932_UpdateDbValues.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManager.Inferastructure\\Migrations\\20260707113932_UpdateDbValues.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.Inferastructure\\Migrations\\20260707113932_UpdateDbValues.cs",
-              "RelativeToolTip": "..\\ContactsManager.Inferastructure\\Migrations\\20260707113932_UpdateDbValues.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-07T11:39:33.141Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 13,
-              "Title": "PersonServicesTest.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\Tests\\PersonServicesTest.cs",
-              "RelativeDocumentMoniker": "..\\Tests\\PersonServicesTest.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\Tests\\PersonServicesTest.cs",
-              "RelativeToolTip": "..\\Tests\\PersonServicesTest.cs",
-              "ViewState": "AgIAAD4DAAAAAAAAAAAAAFIDAAAmAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-06T09:05:11.694Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 14,
-              "Title": "PersonSorterService.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Services\\PersonSorterService.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Services\\PersonSorterService.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Services\\PersonSorterService.cs",
-              "RelativeToolTip": "..\\ContactsManger.Core\\Services\\PersonSorterService.cs",
-              "ViewState": "AgIAABoAAAAAAAAAAAAcwIIAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-07T10:47:28.492Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 15,
-              "Title": "PersonViewDTO.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\DTOs\\PersonDTOs\\PersonViewDTO.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\DTOs\\PersonDTOs\\PersonViewDTO.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\DTOs\\PersonDTOs\\PersonViewDTO.cs",
-              "RelativeToolTip": "..\\ContactsManger.Core\\DTOs\\PersonDTOs\\PersonViewDTO.cs",
-              "ViewState": "AgIAAAsAAAAAAAAAAAAAABgAAAA9AAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-06T03:59:37.858Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 16,
-              "Title": "EnSystemStatusTag.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\Entities\\EEnums\\EnSystemStatusTag.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Domain\\Entities\\EEnums\\EnSystemStatusTag.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\Entities\\EEnums\\EnSystemStatusTag.cs",
-              "RelativeToolTip": "..\\ContactsManger.Core\\Domain\\Entities\\EEnums\\EnSystemStatusTag.cs",
-              "ViewState": "AgIAABwAAAAAAAAAAAAUwDwAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-05T07:06:02.255Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 17,
-              "Title": "IPersonSorterService.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\ServiceContracts\\IPersonSorterService.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\ServiceContracts\\IPersonSorterService.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\ServiceContracts\\IPersonSorterService.cs",
-              "RelativeToolTip": "..\\ContactsManger.Core\\ServiceContracts\\IPersonSorterService.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-07T09:56:25.164Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 19,
-              "Title": "CustomWebController.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.API\\Controllers\\CustomWebController.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManager.API\\Controllers\\CustomWebController.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.API\\Controllers\\CustomWebController.cs",
-              "RelativeToolTip": "..\\ContactsManager.API\\Controllers\\CustomWebController.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABQAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-05T04:21:00.486Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 18,
-              "Title": "PredicateBuilder.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Helpers\\PredicateBuilder.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Helpers\\PredicateBuilder.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Helpers\\PredicateBuilder.cs",
-              "RelativeToolTip": "..\\ContactsManger.Core\\Helpers\\PredicateBuilder.cs",
-              "ViewState": "AgIAABIAAAAAAAAAAADwvx8AAABDAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-07T05:33:02.793Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 20,
-              "Title": "PersonCompositeFilter.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\DTOs\\PersonDTOs\\PersonCompositeFilter.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\DTOs\\PersonDTOs\\PersonCompositeFilter.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\DTOs\\PersonDTOs\\PersonCompositeFilter.cs",
-              "RelativeToolTip": "..\\ContactsManger.Core\\DTOs\\PersonDTOs\\PersonCompositeFilter.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAA/AAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-07T05:30:35.824Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 21,
-              "Title": "PagedResult.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\DTOs\\PagedResult.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\DTOs\\PagedResult.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\DTOs\\PagedResult.cs",
-              "RelativeToolTip": "..\\ContactsManger.Core\\DTOs\\PagedResult.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAfAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-06T04:22:39.115Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 22,
-              "Title": "ConnectionChannel.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\Entities\\ConnectionChannel.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Domain\\Entities\\ConnectionChannel.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\Entities\\ConnectionChannel.cs",
-              "RelativeToolTip": "..\\ContactsManger.Core\\Domain\\Entities\\ConnectionChannel.cs",
-              "ViewState": "AgIAAAYAAAAAAAAAAAAUwBEAAAAbAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-05T06:18:09.464Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 23,
-              "Title": "ContactItemRole.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\Entities\\ContactItemRole.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Domain\\Entities\\ContactItemRole.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\Entities\\ContactItemRole.cs",
-              "RelativeToolTip": "..\\ContactsManger.Core\\Domain\\Entities\\ContactItemRole.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-07T04:22:48.668Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 24,
-              "Title": "SocialMediaAccount.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\Entities\\SocialMediaAccount.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Domain\\Entities\\SocialMediaAccount.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\Entities\\SocialMediaAccount.cs",
-              "RelativeToolTip": "..\\ContactsManger.Core\\Domain\\Entities\\SocialMediaAccount.cs",
-              "ViewState": "AgIAABAAAAAAAAAAAAAAABQAAAAyAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-05T10:26:58.118Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 25,
-              "Title": "launchSettings.json",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.API\\Properties\\launchSettings.json",
-              "RelativeDocumentMoniker": "..\\ContactsManager.API\\Properties\\launchSettings.json",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.API\\Properties\\launchSettings.json",
-              "RelativeToolTip": "..\\ContactsManager.API\\Properties\\launchSettings.json",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAfAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2026-07-07T03:34:33.768Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 26,
-              "Title": "GlobalExceptionFilter.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.API\\Filters\\GlobalExceptionFilter.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManager.API\\Filters\\GlobalExceptionFilter.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.API\\Filters\\GlobalExceptionFilter.cs",
-              "RelativeToolTip": "..\\ContactsManager.API\\Filters\\GlobalExceptionFilter.cs",
-              "ViewState": "AgIAAA8AAAAAAAAAAAAQwCMAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-05T04:44:12.46Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 27,
-              "Title": "PersonOwnershipFilter.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.API\\Filters\\PersonOwnershipFilter.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManager.API\\Filters\\PersonOwnershipFilter.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.API\\Filters\\PersonOwnershipFilter.cs",
-              "RelativeToolTip": "..\\ContactsManager.API\\Filters\\PersonOwnershipFilter.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABUAAAAtAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-06T11:55:18.884Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 28,
               "Title": "PersonAdderService.cs",
               "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Services\\PersonAdderService.cs",
               "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Services\\PersonAdderService.cs",
               "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Services\\PersonAdderService.cs",
               "RelativeToolTip": "..\\ContactsManger.Core\\Services\\PersonAdderService.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAABAAAAAAAAAA==",
+              "ViewState": "AgIAAFkAAAAAAAAAAAAAAG8AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-05T23:56:59.645Z"
+              "WhenOpened": "2026-07-05T23:56:59.645Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 30,
-              "Title": "ICurrentUserService.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\ServiceContracts\\ICurrentUserService.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\ServiceContracts\\ICurrentUserService.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\ServiceContracts\\ICurrentUserService.cs",
-              "RelativeToolTip": "..\\ContactsManger.Core\\ServiceContracts\\ICurrentUserService.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAqwAUAAAAVAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-06T05:38:49.294Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 29,
-              "Title": "CurrentUserService.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Services\\CurrentUserService.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Services\\CurrentUserService.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Services\\CurrentUserService.cs",
-              "RelativeToolTip": "..\\ContactsManger.Core\\Services\\CurrentUserService.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-06T05:39:35.341Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 31,
-              "Title": "CircleRepositryContract.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\RepositryContracts\\CircleRepositryContract.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Domain\\RepositryContracts\\CircleRepositryContract.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\RepositryContracts\\CircleRepositryContract.cs",
-              "RelativeToolTip": "..\\ContactsManger.Core\\Domain\\RepositryContracts\\CircleRepositryContract.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAyAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-06T00:26:09.004Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 32,
-              "Title": "ConnectionChannelRepositryContract.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\RepositryContracts\\ConnectionChannelRepositryContract.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Domain\\RepositryContracts\\ConnectionChannelRepositryContract.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\RepositryContracts\\ConnectionChannelRepositryContract.cs",
-              "RelativeToolTip": "..\\ContactsManger.Core\\Domain\\RepositryContracts\\ConnectionChannelRepositryContract.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAgwA4AAABlAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-06T00:05:31.031Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 33,
-              "Title": "PersonQuickAdderService.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Services\\PersonQuickAdderService.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Services\\PersonQuickAdderService.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Services\\PersonQuickAdderService.cs",
-              "RelativeToolTip": "..\\ContactsManger.Core\\Services\\PersonQuickAdderService.cs",
-              "ViewState": "AgIAAC4AAAAAAAAAAAAlwD8AAABPAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-06T00:30:34.141Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 34,
-              "Title": "ApplicationUser.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\IdentityEntities\\ApplicationUser.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Domain\\IdentityEntities\\ApplicationUser.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\IdentityEntities\\ApplicationUser.cs",
-              "RelativeToolTip": "..\\ContactsManger.Core\\Domain\\IdentityEntities\\ApplicationUser.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABIAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-06T05:01:13.004Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 35,
-              "Title": "ApplicationRole.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\IdentityEntities\\ApplicationRole.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Domain\\IdentityEntities\\ApplicationRole.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\IdentityEntities\\ApplicationRole.cs",
-              "RelativeToolTip": "..\\ContactsManger.Core\\Domain\\IdentityEntities\\ApplicationRole.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-06T05:31:43.792Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 36,
-              "Title": "Person.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\Entities\\Person.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Domain\\Entities\\Person.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\Entities\\Person.cs",
-              "RelativeToolTip": "..\\ContactsManger.Core\\Domain\\Entities\\Person.cs",
-              "ViewState": "AgIAAEEAAAAAAAAAAAAgwEoAAAATAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-05T06:01:24.544Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 39,
-              "Title": "dbo.Persons.sql",
-              "DocumentMoniker": "ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/Contect_Manager/True/SqlTable/dbo.Persons.sql",
-              "ToolTip": "ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/Contect_Manager/True/SqlTable/dbo.Persons.sql",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000826|",
-              "WhenOpened": "2026-07-06T07:50:01.271Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 37,
-              "Title": "SQLQuery675.sql",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\SQLQuery675.sql",
-              "RelativeDocumentMoniker": "..\\..\\..\\SQLQuery675.sql",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\SQLQuery675.sql",
-              "RelativeToolTip": "..\\..\\..\\SQLQuery675.sql",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000826|",
-              "WhenOpened": "2026-07-06T08:41:58.147Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 38,
-              "Title": "dbo.AspNetUsers.sql",
-              "DocumentMoniker": "ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/Contect_Manager/True/SqlTable/dbo.AspNetUsers.sql",
-              "ToolTip": "ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/Contect_Manager/True/SqlTable/dbo.AspNetUsers.sql",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000826|",
-              "WhenOpened": "2026-07-06T07:52:34.396Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 40,
-              "Title": "ICountryServices.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\ServiceContracts\\ICountryServices.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\ServiceContracts\\ICountryServices.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\ServiceContracts\\ICountryServices.cs",
-              "RelativeToolTip": "..\\ContactsManger.Core\\ServiceContracts\\ICountryServices.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-06T07:56:38.138Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 82,
-              "Title": "20260706080255_updatedb.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.Inferastructure\\Migrations\\20260706080255_updatedb.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManager.Inferastructure\\Migrations\\20260706080255_updatedb.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.Inferastructure\\Migrations\\20260706080255_updatedb.cs",
-              "RelativeToolTip": "..\\ContactsManager.Inferastructure\\Migrations\\20260706080255_updatedb.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-06T08:02:56.087Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 43,
-              "Title": "JwtServices.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Services\\JwtServices.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Services\\JwtServices.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Services\\JwtServices.cs",
-              "RelativeToolTip": "..\\ContactsManger.Core\\Services\\JwtServices.cs",
-              "ViewState": "AgIAABkAAAAAAAAAAAAAAC0AAAB4AAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-06T01:17:49.506Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 41,
-              "Title": "RegisterDTO.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\DTOs\\AccountDTOs\\RegisterDTO.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\DTOs\\AccountDTOs\\RegisterDTO.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\DTOs\\AccountDTOs\\RegisterDTO.cs",
-              "RelativeToolTip": "..\\ContactsManger.Core\\DTOs\\AccountDTOs\\RegisterDTO.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAC0AAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-06T05:33:40.017Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 42,
-              "Title": "LoginDTO.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\DTOs\\AccountDTOs\\LoginDTO.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\DTOs\\AccountDTOs\\LoginDTO.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\DTOs\\AccountDTOs\\LoginDTO.cs",
-              "RelativeToolTip": "..\\ContactsManger.Core\\DTOs\\AccountDTOs\\LoginDTO.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABkAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-06T05:33:29.839Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 44,
-              "Title": "AuthentocationRespones.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\DTOs\\AccountDTOs\\AuthentocationRespones.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\DTOs\\AccountDTOs\\AuthentocationRespones.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\DTOs\\AccountDTOs\\AuthentocationRespones.cs",
-              "RelativeToolTip": "..\\ContactsManger.Core\\DTOs\\AccountDTOs\\AuthentocationRespones.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABYAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-05T23:07:28.609Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 45,
-              "Title": "PersonUpdateRequest.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\DTOs\\PersonDTOs\\PersonUpdateRequest.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\DTOs\\PersonDTOs\\PersonUpdateRequest.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\DTOs\\PersonDTOs\\PersonUpdateRequest.cs",
-              "RelativeToolTip": "..\\ContactsManger.Core\\DTOs\\PersonDTOs\\PersonUpdateRequest.cs",
-              "ViewState": "AgIAADoAAAAAAAAAAAAAADEAAAAHAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-05T22:54:38.157Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 46,
+              "DocumentIndex": 5,
               "Title": "PersonAddRequest.cs",
               "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\DTOs\\PersonDTOs\\PersonAddRequest.cs",
               "RelativeDocumentMoniker": "..\\ContactsManger.Core\\DTOs\\PersonDTOs\\PersonAddRequest.cs",
               "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\DTOs\\PersonDTOs\\PersonAddRequest.cs",
               "RelativeToolTip": "..\\ContactsManger.Core\\DTOs\\PersonDTOs\\PersonAddRequest.cs",
-              "ViewState": "AgIAABEAAAAAAAAAAAAAAC4AAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAEMAAAAAAAAAAAAAAFUAAAAtAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-05T22:55:55.832Z"
+              "WhenOpened": "2026-07-05T22:55:55.832Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 83,
-              "Title": "20260706063520_updatedseeddata.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.Inferastructure\\Migrations\\20260706063520_updatedseeddata.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManager.Inferastructure\\Migrations\\20260706063520_updatedseeddata.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.Inferastructure\\Migrations\\20260706063520_updatedseeddata.cs",
-              "RelativeToolTip": "..\\ContactsManager.Inferastructure\\Migrations\\20260706063520_updatedseeddata.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-06T06:35:20.524Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 47,
-              "Title": "PersonUpdaterService.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Services\\PersonUpdaterService.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Services\\PersonUpdaterService.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Services\\PersonUpdaterService.cs",
-              "RelativeToolTip": "..\\ContactsManger.Core\\Services\\PersonUpdaterService.cs",
-              "ViewState": "AgIAAA0AAAAAAAAAAAAAABkAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-06T01:17:45.886Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 48,
-              "Title": "PersonDeleterService.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Services\\PersonDeleterService.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Services\\PersonDeleterService.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Services\\PersonDeleterService.cs",
-              "RelativeToolTip": "..\\ContactsManger.Core\\Services\\PersonDeleterService.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABQAAAAdAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-06T03:42:57.168Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 49,
-              "Title": "dbo.AspNetRoles.sql",
-              "DocumentMoniker": "ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/Contect_Manager/True/SqlTable/dbo.AspNetRoles.sql",
-              "ToolTip": "ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/Contect_Manager/True/SqlTable/dbo.AspNetRoles.sql",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000826|",
-              "WhenOpened": "2026-07-06T06:41:12.888Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 50,
-              "Title": "PersonPaginationTest.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\Tests\\PersonPaginationTest.cs",
-              "RelativeDocumentMoniker": "..\\Tests\\PersonPaginationTest.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\Tests\\PersonPaginationTest.cs",
-              "RelativeToolTip": "..\\Tests\\PersonPaginationTest.cs",
-              "ViewState": "AgIAAKIBAAAAAAAAAAAAAKUBAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-06T04:30:20.43Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 51,
-              "Title": "ContactsManager.ControllersTest.csproj",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.ControllersTest\\ContactsManager.ControllersTest.csproj",
-              "RelativeDocumentMoniker": "..\\ContactsManager.ControllersTest\\ContactsManager.ControllersTest.csproj",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.ControllersTest\\ContactsManager.ControllersTest.csproj",
-              "RelativeToolTip": "..\\ContactsManager.ControllersTest\\ContactsManager.ControllersTest.csproj",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2026-07-06T05:51:11.34Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 52,
-              "Title": "ContactsManger.ServiceTests.csproj",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\Tests\\ContactsManger.ServiceTests.csproj",
-              "RelativeDocumentMoniker": "..\\Tests\\ContactsManger.ServiceTests.csproj",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\Tests\\ContactsManger.ServiceTests.csproj",
-              "RelativeToolTip": "..\\Tests\\ContactsManger.ServiceTests.csproj",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2026-07-06T03:31:13.351Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 53,
-              "Title": "IjwtAuthentication.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\ServiceContracts\\IjwtAuthentication.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\ServiceContracts\\IjwtAuthentication.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\ServiceContracts\\IjwtAuthentication.cs",
-              "RelativeToolTip": "..\\ContactsManger.Core\\ServiceContracts\\IjwtAuthentication.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-06T05:31:22.889Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 54,
-              "Title": "Interaction.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\Entities\\Interaction.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Domain\\Entities\\Interaction.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\Entities\\Interaction.cs",
-              "RelativeToolTip": "..\\ContactsManger.Core\\Domain\\Entities\\Interaction.cs",
-              "ViewState": "AgIAAAQAAAAAAAAAAAAkwB8AAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-05T08:06:30.875Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 84,
-              "Title": "20260706033625_updated_withnewdatabase.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.Inferastructure\\Migrations\\20260706033625_updated_withnewdatabase.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManager.Inferastructure\\Migrations\\20260706033625_updated_withnewdatabase.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.Inferastructure\\Migrations\\20260706033625_updated_withnewdatabase.cs",
-              "RelativeToolTip": "..\\ContactsManager.Inferastructure\\Migrations\\20260706033625_updated_withnewdatabase.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-06T03:36:25.893Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 55,
-              "Title": "UserDefinedTagsRepository.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.Inferastructure\\Repositries\\UserDefinedTagsRepository.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManager.Inferastructure\\Repositries\\UserDefinedTagsRepository.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.Inferastructure\\Repositries\\UserDefinedTagsRepository.cs",
-              "RelativeToolTip": "..\\ContactsManager.Inferastructure\\Repositries\\UserDefinedTagsRepository.cs",
-              "ViewState": "AgIAABoAAAAAAAAAAAAUwDoAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-05T23:55:01.978Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 56,
-              "Title": "UserDefinedTagRepositryContract.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\RepositryContracts\\UserDefinedTagRepositryContract.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Domain\\RepositryContracts\\UserDefinedTagRepositryContract.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\RepositryContracts\\UserDefinedTagRepositryContract.cs",
-              "RelativeToolTip": "..\\ContactsManger.Core\\Domain\\RepositryContracts\\UserDefinedTagRepositryContract.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAiwA8AAABgAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-06T00:03:02.913Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 57,
+              "DocumentIndex": 4,
               "Title": "ConnectionChannelRepository.cs",
               "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.Inferastructure\\Repositries\\ConnectionChannelRepository.cs",
               "RelativeDocumentMoniker": "..\\ContactsManager.Inferastructure\\Repositries\\ConnectionChannelRepository.cs",
               "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.Inferastructure\\Repositries\\ConnectionChannelRepository.cs",
               "RelativeToolTip": "..\\ContactsManager.Inferastructure\\Repositries\\ConnectionChannelRepository.cs",
-              "ViewState": "AgIAABoAAAAAAAAAAAAUwDoAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAABoAAAAAAAAAAAAuwCkAAAAUAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-05T23:54:30.946Z"
+              "WhenOpened": "2026-07-05T23:54:30.946Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 58,
-              "Title": "CountryRepositryContract.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\RepositryContracts\\CountryRepositryContract.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Domain\\RepositryContracts\\CountryRepositryContract.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\RepositryContracts\\CountryRepositryContract.cs",
-              "RelativeToolTip": "..\\ContactsManger.Core\\Domain\\RepositryContracts\\CountryRepositryContract.cs",
-              "ViewState": "AgIAAAIAAAAAAAAAAAAAwAgAAAAAAAAAAAAAAA==",
+              "DocumentIndex": 1,
+              "Title": "AppDBContext.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.Inferastructure\\DBContext\\AppDBContext.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManager.Inferastructure\\DBContext\\AppDBContext.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.Inferastructure\\DBContext\\AppDBContext.cs",
+              "RelativeToolTip": "..\\ContactsManager.Inferastructure\\DBContext\\AppDBContext.cs",
+              "ViewState": "AgIAAF4AAAAAAAAAAAAAAGYAAABAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-05T22:18:47.462Z"
+              "WhenOpened": "2026-07-07T04:10:57.431Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 59,
-              "Title": "CircleRepository.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.Inferastructure\\Repositries\\CircleRepository.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManager.Inferastructure\\Repositries\\CircleRepository.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.Inferastructure\\Repositries\\CircleRepository.cs",
-              "RelativeToolTip": "..\\ContactsManager.Inferastructure\\Repositries\\CircleRepository.cs",
-              "ViewState": "AgIAABoAAAAAAAAAAAAAADkAAAAJAAAAAAAAAA==",
+              "DocumentIndex": 0,
+              "Title": "ContactsController.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.API\\Controllers\\ContactsController.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManager.API\\Controllers\\ContactsController.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.API\\Controllers\\ContactsController.cs",
+              "RelativeToolTip": "..\\ContactsManager.API\\Controllers\\ContactsController.cs",
+              "ViewState": "AgIAADwBAAAAAAAAAAAAAHgBAAAhAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-06T00:24:54.213Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 60,
-              "Title": "ContactItemRoleRepositryContract.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\RepositryContracts\\ContactItemRoleRepositryContract.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Domain\\RepositryContracts\\ContactItemRoleRepositryContract.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\RepositryContracts\\ContactItemRoleRepositryContract.cs",
-              "RelativeToolTip": "..\\ContactsManger.Core\\Domain\\RepositryContracts\\ContactItemRoleRepositryContract.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAgwBQAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-06T00:06:10.149Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 61,
-              "Title": "CountryGetterService.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Services\\CountryGetterService.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Services\\CountryGetterService.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Services\\CountryGetterService.cs",
-              "RelativeToolTip": "..\\ContactsManger.Core\\Services\\CountryGetterService.cs",
-              "ViewState": "AgIAABEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-06T01:17:59.353Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 62,
-              "Title": "CountryAdderService.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Services\\CountryAdderService.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Services\\CountryAdderService.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Services\\CountryAdderService.cs",
-              "RelativeToolTip": "..\\ContactsManger.Core\\Services\\CountryAdderService.cs",
-              "ViewState": "AgIAAAsAAAAAAAAAAAAAABQAAAA9AAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-06T01:18:03.285Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 63,
-              "Title": "ValidationHelpers.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Helpers\\ValidationHelpers.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Helpers\\ValidationHelpers.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Helpers\\ValidationHelpers.cs",
-              "RelativeToolTip": "..\\ContactsManger.Core\\Helpers\\ValidationHelpers.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-06T01:16:53.659Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 64,
-              "Title": "OrderExtensions.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Helpers\\OrderExtensions.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Helpers\\OrderExtensions.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Helpers\\OrderExtensions.cs",
-              "RelativeToolTip": "..\\ContactsManger.Core\\Helpers\\OrderExtensions.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-06T01:16:52.638Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 65,
-              "Title": "IPersonQuickAdderService.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\ServiceContracts\\IPersonQuickAdderService.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\ServiceContracts\\IPersonQuickAdderService.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\ServiceContracts\\IPersonQuickAdderService.cs",
-              "RelativeToolTip": "..\\ContactsManger.Core\\ServiceContracts\\IPersonQuickAdderService.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-06T00:28:21.349Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 66,
-              "Title": "IPersonAdderService.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\ServiceContracts\\IPersonAdderService.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\ServiceContracts\\IPersonAdderService.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\ServiceContracts\\IPersonAdderService.cs",
-              "RelativeToolTip": "..\\ContactsManger.Core\\ServiceContracts\\IPersonAdderService.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-06T00:29:25.375Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 67,
-              "Title": "SocialMediaAccountRepositryContract.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\RepositryContracts\\SocialMediaAccountRepositryContract.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Domain\\RepositryContracts\\SocialMediaAccountRepositryContract.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\RepositryContracts\\SocialMediaAccountRepositryContract.cs",
-              "RelativeToolTip": "..\\ContactsManger.Core\\Domain\\RepositryContracts\\SocialMediaAccountRepositryContract.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAgwA0AAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-06T00:02:27.653Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 68,
-              "Title": "SocialMediaAccountRepository.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.Inferastructure\\Repositries\\SocialMediaAccountRepository.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManager.Inferastructure\\Repositries\\SocialMediaAccountRepository.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.Inferastructure\\Repositries\\SocialMediaAccountRepository.cs",
-              "RelativeToolTip": "..\\ContactsManager.Inferastructure\\Repositries\\SocialMediaAccountRepository.cs",
-              "ViewState": "AgIAADMAAAAAAAAAAAAAAHYAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-05T23:55:30.881Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 69,
-              "Title": "ContactItemRoleRepository.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.Inferastructure\\Repositries\\ContactItemRoleRepository.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManager.Inferastructure\\Repositries\\ContactItemRoleRepository.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.Inferastructure\\Repositries\\ContactItemRoleRepository.cs",
-              "RelativeToolTip": "..\\ContactsManager.Inferastructure\\Repositries\\ContactItemRoleRepository.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAZAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-05T23:53:35.948Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 70,
-              "Title": "CountryRepository.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.Inferastructure\\Repositries\\CountryRepository.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManager.Inferastructure\\Repositries\\CountryRepository.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.Inferastructure\\Repositries\\CountryRepository.cs",
-              "RelativeToolTip": "..\\ContactsManager.Inferastructure\\Repositries\\CountryRepository.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAANIAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-05T06:01:02.02Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 71,
-              "Title": "Note.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\Entities\\Note.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Domain\\Entities\\Note.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\Entities\\Note.cs",
-              "RelativeToolTip": "..\\ContactsManger.Core\\Domain\\Entities\\Note.cs",
-              "ViewState": "AgIAABAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-05T08:36:59.894Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 72,
-              "Title": "Country.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\Entities\\Country.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Domain\\Entities\\Country.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\Entities\\Country.cs",
-              "RelativeToolTip": "..\\ContactsManger.Core\\Domain\\Entities\\Country.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-05T06:06:54.255Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 73,
-              "Title": "Circle.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\Entities\\Circle.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Domain\\Entities\\Circle.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\Entities\\Circle.cs",
-              "RelativeToolTip": "..\\ContactsManger.Core\\Domain\\Entities\\Circle.cs",
-              "ViewState": "AgIAAAgAAAAAAAAAAAAUwAwAAAAFAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-05T08:02:08.937Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 74,
-              "Title": "EnumRangeAttribute.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\CustomValidations\\EnumRangeAttribute.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\CustomValidations\\EnumRangeAttribute.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\CustomValidations\\EnumRangeAttribute.cs",
-              "RelativeToolTip": "..\\ContactsManger.Core\\CustomValidations\\EnumRangeAttribute.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-05T10:24:59.705Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 75,
-              "Title": "EnNoteType.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\Entities\\EEnums\\EnNoteType.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Domain\\Entities\\EEnums\\EnNoteType.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\Entities\\EEnums\\EnNoteType.cs",
-              "RelativeToolTip": "..\\ContactsManger.Core\\Domain\\Entities\\EEnums\\EnNoteType.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-05T08:31:49.855Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 76,
-              "Title": "GenderOptions.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\DTOs\\Enums\\GenderOptions.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\DTOs\\Enums\\GenderOptions.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\DTOs\\Enums\\GenderOptions.cs",
-              "RelativeToolTip": "..\\ContactsManger.Core\\DTOs\\Enums\\GenderOptions.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-05T10:18:47.659Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 78,
-              "Title": "sortedListOp.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\DTOs\\Enums\\sortedListOp.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\DTOs\\Enums\\sortedListOp.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\DTOs\\Enums\\sortedListOp.cs",
-              "RelativeToolTip": "..\\ContactsManger.Core\\DTOs\\Enums\\sortedListOp.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-05T10:18:43.88Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 79,
-              "Title": "20260705085427_Update-Entities.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.Inferastructure\\Migrations\\20260705085427_Update-Entities.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManager.Inferastructure\\Migrations\\20260705085427_Update-Entities.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.Inferastructure\\Migrations\\20260705085427_Update-Entities.cs",
-              "RelativeToolTip": "..\\ContactsManager.Inferastructure\\Migrations\\20260705085427_Update-Entities.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-05T08:54:28.618Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 77,
-              "Title": "UserTypeOptions.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\DTOs\\Enums\\UserTypeOptions.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\DTOs\\Enums\\UserTypeOptions.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\DTOs\\Enums\\UserTypeOptions.cs",
-              "RelativeToolTip": "..\\ContactsManger.Core\\DTOs\\Enums\\UserTypeOptions.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-05T07:31:35.32Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 80,
-              "Title": "EnInteractionType.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\Entities\\EEnums\\EnInteractionType.cs",
-              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Domain\\Entities\\EEnums\\EnInteractionType.cs",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\Entities\\EEnums\\EnInteractionType.cs",
-              "RelativeToolTip": "..\\ContactsManger.Core\\Domain\\Entities\\EEnums\\EnInteractionType.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-05T08:23:28.324Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 81,
-              "Title": "ContactsManager.API.csproj",
-              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.API\\ContactsManager.API.csproj",
-              "RelativeDocumentMoniker": "..\\ContactsManager.API\\ContactsManager.API.csproj",
-              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.API\\ContactsManager.API.csproj",
-              "RelativeToolTip": "..\\ContactsManager.API\\ContactsManager.API.csproj",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAlwAwAAAARAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2026-07-05T05:47:18.729Z"
+              "WhenOpened": "2026-07-09T07:44:09.556Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Bookmark",
@@ -1315,6 +372,1066 @@
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{d78612c7-9962-4b83-95d9-268046dad23a}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{0ad07096-bba9-4900-a651-0598d26f6d24}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:1:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "CountryRepository.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.Inferastructure\\Repositries\\CountryRepository.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManager.Inferastructure\\Repositries\\CountryRepository.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.Inferastructure\\Repositries\\CountryRepository.cs",
+              "RelativeToolTip": "..\\ContactsManager.Inferastructure\\Repositries\\CountryRepository.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-05T06:01:02.02Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "PersonRepository.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.Inferastructure\\Repositries\\PersonRepository.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManager.Inferastructure\\Repositries\\PersonRepository.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.Inferastructure\\Repositries\\PersonRepository.cs",
+              "RelativeToolTip": "..\\ContactsManager.Inferastructure\\Repositries\\PersonRepository.cs",
+              "ViewState": "AgIAAIIAAAAAAAAAAAAmwJEAAAAMAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-09T07:32:13.905Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "CountryGetterService.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Services\\CountryGetterService.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Services\\CountryGetterService.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Services\\CountryGetterService.cs",
+              "RelativeToolTip": "..\\ContactsManger.Core\\Services\\CountryGetterService.cs",
+              "ViewState": "AgIAAA0AAAAAAAAAAAAAABQAAAA8AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-06T01:17:59.353Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "PersonRespones.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\DTOs\\PersonDTOs\\PersonRespones.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\DTOs\\PersonDTOs\\PersonRespones.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\DTOs\\PersonDTOs\\PersonRespones.cs",
+              "RelativeToolTip": "..\\ContactsManger.Core\\DTOs\\PersonDTOs\\PersonRespones.cs",
+              "ViewState": "AgIAABYAAAAAAAAAAAAAABcAAAAUAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-05T22:56:58.338Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.API\\Program.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManager.API\\Program.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.API\\Program.cs",
+              "RelativeToolTip": "..\\ContactsManager.API\\Program.cs",
+              "ViewState": "AgIAACgAAAAAAAAAAAAswEcAAABGAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-07T12:10:58.603Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.API\\appsettings.json",
+              "RelativeDocumentMoniker": "..\\ContactsManager.API\\appsettings.json",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.API\\appsettings.json",
+              "RelativeToolTip": "..\\ContactsManager.API\\appsettings.json",
+              "ViewState": "AgIAAB8AAAAAAAAAAAAmwDoAAAATAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2026-07-09T01:43:59.742Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "PersonDeleterService.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Services\\PersonDeleterService.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Services\\PersonDeleterService.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Services\\PersonDeleterService.cs",
+              "RelativeToolTip": "..\\ContactsManger.Core\\Services\\PersonDeleterService.cs",
+              "ViewState": "AgIAAAUAAAAAAAAAAAAAAAsAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-06T03:42:57.168Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "Person.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\Entities\\Person.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Domain\\Entities\\Person.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\Entities\\Person.cs",
+              "RelativeToolTip": "..\\ContactsManger.Core\\Domain\\Entities\\Person.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABgAAAA8AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-05T06:01:24.544Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "SocialMediaAccount.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\Entities\\SocialMediaAccount.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Domain\\Entities\\SocialMediaAccount.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\Entities\\SocialMediaAccount.cs",
+              "RelativeToolTip": "..\\ContactsManger.Core\\Domain\\Entities\\SocialMediaAccount.cs",
+              "ViewState": "AgIAABAAAAAAAAAAAAAAABQAAAAyAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-05T10:26:58.118Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "20260709061641_add-migration kkk.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.Inferastructure\\Migrations\\20260709061641_add-migration kkk.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManager.Inferastructure\\Migrations\\20260709061641_add-migration kkk.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.Inferastructure\\Migrations\\20260709061641_add-migration kkk.cs",
+              "RelativeToolTip": "..\\ContactsManager.Inferastructure\\Migrations\\20260709061641_add-migration kkk.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-09T06:16:41.563Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "PersonQuickAdderService.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Services\\PersonQuickAdderService.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Services\\PersonQuickAdderService.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Services\\PersonQuickAdderService.cs",
+              "RelativeToolTip": "..\\ContactsManger.Core\\Services\\PersonQuickAdderService.cs",
+              "ViewState": "AgIAABcAAAAAAAAAAAA4wCYAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-06T00:30:34.141Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "GlobalExceptionFilter.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.API\\Filters\\GlobalExceptionFilter.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManager.API\\Filters\\GlobalExceptionFilter.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.API\\Filters\\GlobalExceptionFilter.cs",
+              "RelativeToolTip": "..\\ContactsManager.API\\Filters\\GlobalExceptionFilter.cs",
+              "ViewState": "AgIAAAUAAAAAAAAAAAAiwBIAAAAMAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-05T04:44:12.46Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "ModelValidationActionFilter.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.API\\Filters\\ModelValidationActionFilter.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManager.API\\Filters\\ModelValidationActionFilter.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.API\\Filters\\ModelValidationActionFilter.cs",
+              "RelativeToolTip": "..\\ContactsManager.API\\Filters\\ModelValidationActionFilter.cs",
+              "ViewState": "AgIAAAoAAAAAAAAAAAAqwCkAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-09T05:53:23.006Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 18,
+              "Title": "Circle.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\Entities\\Circle.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Domain\\Entities\\Circle.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\Entities\\Circle.cs",
+              "RelativeToolTip": "..\\ContactsManger.Core\\Domain\\Entities\\Circle.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABsAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-05T08:02:08.937Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 19,
+              "Title": "RelatedEntityResponse.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\DTOs\\PersonDTOs\\RelatedEntityResponse.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\DTOs\\PersonDTOs\\RelatedEntityResponse.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\DTOs\\PersonDTOs\\RelatedEntityResponse.cs",
+              "RelativeToolTip": "..\\ContactsManger.Core\\DTOs\\PersonDTOs\\RelatedEntityResponse.cs",
+              "ViewState": "AgIAAGkAAAAAAAAAAAAqwIgAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-05T22:58:11.116Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 20,
+              "Title": "PagedResult.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\DTOs\\PagedResult.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\DTOs\\PagedResult.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\DTOs\\PagedResult.cs",
+              "RelativeToolTip": "..\\ContactsManger.Core\\DTOs\\PagedResult.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAfAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-06T04:22:39.115Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 21,
+              "Title": "CurrentUserService.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Services\\CurrentUserService.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Services\\CurrentUserService.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Services\\CurrentUserService.cs",
+              "RelativeToolTip": "..\\ContactsManger.Core\\Services\\CurrentUserService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-06T05:39:35.341Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 22,
+              "Title": "CustomWebController.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.API\\Controllers\\CustomWebController.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManager.API\\Controllers\\CustomWebController.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.API\\Controllers\\CustomWebController.cs",
+              "RelativeToolTip": "..\\ContactsManager.API\\Controllers\\CustomWebController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABQAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-05T04:21:00.486Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 23,
+              "Title": "PersonOwnershipFilter.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.API\\Filters\\PersonOwnershipFilter.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManager.API\\Filters\\PersonOwnershipFilter.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.API\\Filters\\PersonOwnershipFilter.cs",
+              "RelativeToolTip": "..\\ContactsManager.API\\Filters\\PersonOwnershipFilter.cs",
+              "ViewState": "AgIAAB8AAAAAAAAAAAAAABUAAAAtAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-06T11:55:18.884Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 24,
+              "Title": "PersonQuickAddRequest.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\DTOs\\PersonDTOs\\PersonQuickAddRequest.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\DTOs\\PersonDTOs\\PersonQuickAddRequest.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\DTOs\\PersonDTOs\\PersonQuickAddRequest.cs",
+              "RelativeToolTip": "..\\ContactsManger.Core\\DTOs\\PersonDTOs\\PersonQuickAddRequest.cs",
+              "ViewState": "AgIAABoAAAAAAAAAAAAUwDcAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-09T05:11:33.923Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 25,
+              "Title": "IPersonQuickAdderService.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\ServiceContracts\\IPersonQuickAdderService.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\ServiceContracts\\IPersonQuickAdderService.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\ServiceContracts\\IPersonQuickAdderService.cs",
+              "RelativeToolTip": "..\\ContactsManger.Core\\ServiceContracts\\IPersonQuickAdderService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-09T05:41:44.682Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 26,
+              "Title": "PersonGetterService.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Services\\PersonGetterService.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Services\\PersonGetterService.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Services\\PersonGetterService.cs",
+              "RelativeToolTip": "..\\ContactsManger.Core\\Services\\PersonGetterService.cs",
+              "ViewState": "AgIAAGsAAAAAAAAAAAAAAHcAAAAkAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-09T00:51:07.328Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 27,
+              "Title": "PersonViewDTO.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\DTOs\\PersonDTOs\\PersonViewDTO.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\DTOs\\PersonDTOs\\PersonViewDTO.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\DTOs\\PersonDTOs\\PersonViewDTO.cs",
+              "RelativeToolTip": "..\\ContactsManger.Core\\DTOs\\PersonDTOs\\PersonViewDTO.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAoAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-06T03:59:37.858Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 28,
+              "Title": "AccountController.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.API\\Controllers\\AccountController.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManager.API\\Controllers\\AccountController.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.API\\Controllers\\AccountController.cs",
+              "RelativeToolTip": "..\\ContactsManager.API\\Controllers\\AccountController.cs",
+              "ViewState": "AgIAABkAAAAAAAAAAAAAAJYAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-07T04:12:36.724Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 91,
+              "Title": "20260709014902_mmm.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.Inferastructure\\Migrations\\20260709014902_mmm.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManager.Inferastructure\\Migrations\\20260709014902_mmm.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.Inferastructure\\Migrations\\20260709014902_mmm.cs",
+              "RelativeToolTip": "..\\ContactsManager.Inferastructure\\Migrations\\20260709014902_mmm.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-09T01:49:03.099Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 30,
+              "Title": "ISystemTagsGetter.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\ServiceContracts\\ISystemTagsGetter.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\ServiceContracts\\ISystemTagsGetter.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\ServiceContracts\\ISystemTagsGetter.cs",
+              "RelativeToolTip": "..\\ContactsManger.Core\\ServiceContracts\\ISystemTagsGetter.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAqwA0AAAA3AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-07T11:46:30.956Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 29,
+              "Title": "SystemTagsGetterService.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Services\\SystemTagsGetterService.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Services\\SystemTagsGetterService.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Services\\SystemTagsGetterService.cs",
+              "RelativeToolTip": "..\\ContactsManger.Core\\Services\\SystemTagsGetterService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAqwBAAAAAmAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-07T11:45:42.332Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 32,
+              "Title": "IPersonUpdaterService.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\ServiceContracts\\IPersonUpdaterService.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\ServiceContracts\\IPersonUpdaterService.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\ServiceContracts\\IPersonUpdaterService.cs",
+              "RelativeToolTip": "..\\ContactsManger.Core\\ServiceContracts\\IPersonUpdaterService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-07T11:47:21.104Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 34,
+              "Title": "dbo.SystemStatusTags.sql",
+              "DocumentMoniker": "ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/Contect_Manager/True/SqlTable/dbo.SystemStatusTags.sql",
+              "ToolTip": "ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/Contect_Manager/True/SqlTable/dbo.SystemStatusTags.sql",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000826|",
+              "WhenOpened": "2026-07-07T11:41:19.404Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 31,
+              "Title": "SystemStatusTag.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\Entities\\SystemStatusTag.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Domain\\Entities\\SystemStatusTag.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\Entities\\SystemStatusTag.cs",
+              "RelativeToolTip": "..\\ContactsManger.Core\\Domain\\Entities\\SystemStatusTag.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABcAAAAwAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-05T07:29:32.378Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 33,
+              "Title": "SystemStatusTagRepository.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.Inferastructure\\Repositries\\SystemStatusTagRepository.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManager.Inferastructure\\Repositries\\SystemStatusTagRepository.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.Inferastructure\\Repositries\\SystemStatusTagRepository.cs",
+              "RelativeToolTip": "..\\ContactsManager.Inferastructure\\Repositries\\SystemStatusTagRepository.cs",
+              "ViewState": "AgIAADkAAAAAAAAAAAAAAB4AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-05T23:56:09.993Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 90,
+              "Title": "20260707113932_UpdateDbValues.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.Inferastructure\\Migrations\\20260707113932_UpdateDbValues.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManager.Inferastructure\\Migrations\\20260707113932_UpdateDbValues.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.Inferastructure\\Migrations\\20260707113932_UpdateDbValues.cs",
+              "RelativeToolTip": "..\\ContactsManager.Inferastructure\\Migrations\\20260707113932_UpdateDbValues.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-07T11:39:33.141Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 35,
+              "Title": "PersonServicesTest.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\Tests\\PersonServicesTest.cs",
+              "RelativeDocumentMoniker": "..\\Tests\\PersonServicesTest.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\Tests\\PersonServicesTest.cs",
+              "RelativeToolTip": "..\\Tests\\PersonServicesTest.cs",
+              "ViewState": "AgIAAD4DAAAAAAAAAAAAAFIDAAAmAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-06T09:05:11.694Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 36,
+              "Title": "PersonSorterService.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Services\\PersonSorterService.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Services\\PersonSorterService.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Services\\PersonSorterService.cs",
+              "RelativeToolTip": "..\\ContactsManger.Core\\Services\\PersonSorterService.cs",
+              "ViewState": "AgIAABoAAAAAAAAAAAAcwIIAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-07T10:47:28.492Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 37,
+              "Title": "EnSystemStatusTag.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\Entities\\EEnums\\EnSystemStatusTag.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Domain\\Entities\\EEnums\\EnSystemStatusTag.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\Entities\\EEnums\\EnSystemStatusTag.cs",
+              "RelativeToolTip": "..\\ContactsManger.Core\\Domain\\Entities\\EEnums\\EnSystemStatusTag.cs",
+              "ViewState": "AgIAABwAAAAAAAAAAAAUwDwAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-05T07:06:02.255Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 38,
+              "Title": "IPersonSorterService.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\ServiceContracts\\IPersonSorterService.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\ServiceContracts\\IPersonSorterService.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\ServiceContracts\\IPersonSorterService.cs",
+              "RelativeToolTip": "..\\ContactsManger.Core\\ServiceContracts\\IPersonSorterService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-07T09:56:25.164Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 39,
+              "Title": "PredicateBuilder.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Helpers\\PredicateBuilder.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Helpers\\PredicateBuilder.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Helpers\\PredicateBuilder.cs",
+              "RelativeToolTip": "..\\ContactsManger.Core\\Helpers\\PredicateBuilder.cs",
+              "ViewState": "AgIAABIAAAAAAAAAAADwvx8AAABDAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-07T05:33:02.793Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 40,
+              "Title": "PersonCompositeFilter.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\DTOs\\PersonDTOs\\PersonCompositeFilter.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\DTOs\\PersonDTOs\\PersonCompositeFilter.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\DTOs\\PersonDTOs\\PersonCompositeFilter.cs",
+              "RelativeToolTip": "..\\ContactsManger.Core\\DTOs\\PersonDTOs\\PersonCompositeFilter.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAA/AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-07T05:30:35.824Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 41,
+              "Title": "ConnectionChannel.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\Entities\\ConnectionChannel.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Domain\\Entities\\ConnectionChannel.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\Entities\\ConnectionChannel.cs",
+              "RelativeToolTip": "..\\ContactsManger.Core\\Domain\\Entities\\ConnectionChannel.cs",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAUwBEAAAAbAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-05T06:18:09.464Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 42,
+              "Title": "ContactItemRole.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\Entities\\ContactItemRole.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Domain\\Entities\\ContactItemRole.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\Entities\\ContactItemRole.cs",
+              "RelativeToolTip": "..\\ContactsManger.Core\\Domain\\Entities\\ContactItemRole.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-07T04:22:48.668Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 43,
+              "Title": "launchSettings.json",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.API\\Properties\\launchSettings.json",
+              "RelativeDocumentMoniker": "..\\ContactsManager.API\\Properties\\launchSettings.json",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.API\\Properties\\launchSettings.json",
+              "RelativeToolTip": "..\\ContactsManager.API\\Properties\\launchSettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAfAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2026-07-07T03:34:33.768Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 44,
+              "Title": "ICurrentUserService.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\ServiceContracts\\ICurrentUserService.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\ServiceContracts\\ICurrentUserService.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\ServiceContracts\\ICurrentUserService.cs",
+              "RelativeToolTip": "..\\ContactsManger.Core\\ServiceContracts\\ICurrentUserService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAqwAUAAAAVAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-06T05:38:49.294Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 45,
+              "Title": "CircleRepositryContract.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\RepositryContracts\\CircleRepositryContract.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Domain\\RepositryContracts\\CircleRepositryContract.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\RepositryContracts\\CircleRepositryContract.cs",
+              "RelativeToolTip": "..\\ContactsManger.Core\\Domain\\RepositryContracts\\CircleRepositryContract.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAyAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-06T00:26:09.004Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 46,
+              "Title": "ConnectionChannelRepositryContract.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\RepositryContracts\\ConnectionChannelRepositryContract.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Domain\\RepositryContracts\\ConnectionChannelRepositryContract.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\RepositryContracts\\ConnectionChannelRepositryContract.cs",
+              "RelativeToolTip": "..\\ContactsManger.Core\\Domain\\RepositryContracts\\ConnectionChannelRepositryContract.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAgwA4AAABlAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-06T00:05:31.031Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 47,
+              "Title": "ApplicationUser.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\IdentityEntities\\ApplicationUser.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Domain\\IdentityEntities\\ApplicationUser.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\IdentityEntities\\ApplicationUser.cs",
+              "RelativeToolTip": "..\\ContactsManger.Core\\Domain\\IdentityEntities\\ApplicationUser.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABIAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-06T05:01:13.004Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 48,
+              "Title": "ApplicationRole.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\IdentityEntities\\ApplicationRole.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Domain\\IdentityEntities\\ApplicationRole.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\IdentityEntities\\ApplicationRole.cs",
+              "RelativeToolTip": "..\\ContactsManger.Core\\Domain\\IdentityEntities\\ApplicationRole.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-06T05:31:43.792Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 51,
+              "Title": "dbo.Persons.sql",
+              "DocumentMoniker": "ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/Contect_Manager/True/SqlTable/dbo.Persons.sql",
+              "ToolTip": "ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/Contect_Manager/True/SqlTable/dbo.Persons.sql",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000826|",
+              "WhenOpened": "2026-07-06T07:50:01.271Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 49,
+              "Title": "SQLQuery675.sql",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\SQLQuery675.sql",
+              "RelativeDocumentMoniker": "..\\..\\..\\SQLQuery675.sql",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\SQLQuery675.sql",
+              "RelativeToolTip": "..\\..\\..\\SQLQuery675.sql",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000826|",
+              "WhenOpened": "2026-07-06T08:41:58.147Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 50,
+              "Title": "dbo.AspNetUsers.sql",
+              "DocumentMoniker": "ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/Contect_Manager/True/SqlTable/dbo.AspNetUsers.sql",
+              "ToolTip": "ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/Contect_Manager/True/SqlTable/dbo.AspNetUsers.sql",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000826|",
+              "WhenOpened": "2026-07-06T07:52:34.396Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 52,
+              "Title": "ICountryServices.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\ServiceContracts\\ICountryServices.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\ServiceContracts\\ICountryServices.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\ServiceContracts\\ICountryServices.cs",
+              "RelativeToolTip": "..\\ContactsManger.Core\\ServiceContracts\\ICountryServices.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-06T07:56:38.138Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 87,
+              "Title": "20260706080255_updatedb.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.Inferastructure\\Migrations\\20260706080255_updatedb.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManager.Inferastructure\\Migrations\\20260706080255_updatedb.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.Inferastructure\\Migrations\\20260706080255_updatedb.cs",
+              "RelativeToolTip": "..\\ContactsManager.Inferastructure\\Migrations\\20260706080255_updatedb.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-06T08:02:56.087Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 55,
+              "Title": "JwtServices.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Services\\JwtServices.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Services\\JwtServices.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Services\\JwtServices.cs",
+              "RelativeToolTip": "..\\ContactsManger.Core\\Services\\JwtServices.cs",
+              "ViewState": "AgIAABkAAAAAAAAAAAAAAC0AAAB4AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-06T01:17:49.506Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 53,
+              "Title": "RegisterDTO.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\DTOs\\AccountDTOs\\RegisterDTO.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\DTOs\\AccountDTOs\\RegisterDTO.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\DTOs\\AccountDTOs\\RegisterDTO.cs",
+              "RelativeToolTip": "..\\ContactsManger.Core\\DTOs\\AccountDTOs\\RegisterDTO.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAC0AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-06T05:33:40.017Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 54,
+              "Title": "LoginDTO.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\DTOs\\AccountDTOs\\LoginDTO.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\DTOs\\AccountDTOs\\LoginDTO.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\DTOs\\AccountDTOs\\LoginDTO.cs",
+              "RelativeToolTip": "..\\ContactsManger.Core\\DTOs\\AccountDTOs\\LoginDTO.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABkAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-06T05:33:29.839Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 56,
+              "Title": "AuthentocationRespones.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\DTOs\\AccountDTOs\\AuthentocationRespones.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\DTOs\\AccountDTOs\\AuthentocationRespones.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\DTOs\\AccountDTOs\\AuthentocationRespones.cs",
+              "RelativeToolTip": "..\\ContactsManger.Core\\DTOs\\AccountDTOs\\AuthentocationRespones.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABYAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-05T23:07:28.609Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 57,
+              "Title": "PersonUpdateRequest.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\DTOs\\PersonDTOs\\PersonUpdateRequest.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\DTOs\\PersonDTOs\\PersonUpdateRequest.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\DTOs\\PersonDTOs\\PersonUpdateRequest.cs",
+              "RelativeToolTip": "..\\ContactsManger.Core\\DTOs\\PersonDTOs\\PersonUpdateRequest.cs",
+              "ViewState": "AgIAADoAAAAAAAAAAAAAADEAAAAHAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-05T22:54:38.157Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 88,
+              "Title": "20260706063520_updatedseeddata.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.Inferastructure\\Migrations\\20260706063520_updatedseeddata.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManager.Inferastructure\\Migrations\\20260706063520_updatedseeddata.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.Inferastructure\\Migrations\\20260706063520_updatedseeddata.cs",
+              "RelativeToolTip": "..\\ContactsManager.Inferastructure\\Migrations\\20260706063520_updatedseeddata.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-06T06:35:20.524Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 58,
+              "Title": "PersonUpdaterService.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Services\\PersonUpdaterService.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Services\\PersonUpdaterService.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Services\\PersonUpdaterService.cs",
+              "RelativeToolTip": "..\\ContactsManger.Core\\Services\\PersonUpdaterService.cs",
+              "ViewState": "AgIAAA0AAAAAAAAAAAAAABkAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-06T01:17:45.886Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 59,
+              "Title": "dbo.AspNetRoles.sql",
+              "DocumentMoniker": "ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/Contect_Manager/True/SqlTable/dbo.AspNetRoles.sql",
+              "ToolTip": "ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/Contect_Manager/True/SqlTable/dbo.AspNetRoles.sql",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000826|",
+              "WhenOpened": "2026-07-06T06:41:12.888Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 60,
+              "Title": "PersonPaginationTest.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\Tests\\PersonPaginationTest.cs",
+              "RelativeDocumentMoniker": "..\\Tests\\PersonPaginationTest.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\Tests\\PersonPaginationTest.cs",
+              "RelativeToolTip": "..\\Tests\\PersonPaginationTest.cs",
+              "ViewState": "AgIAAKIBAAAAAAAAAAAAAKUBAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-06T04:30:20.43Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 61,
+              "Title": "ContactsManager.ControllersTest.csproj",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.ControllersTest\\ContactsManager.ControllersTest.csproj",
+              "RelativeDocumentMoniker": "..\\ContactsManager.ControllersTest\\ContactsManager.ControllersTest.csproj",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.ControllersTest\\ContactsManager.ControllersTest.csproj",
+              "RelativeToolTip": "..\\ContactsManager.ControllersTest\\ContactsManager.ControllersTest.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2026-07-06T05:51:11.34Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 62,
+              "Title": "ContactsManger.ServiceTests.csproj",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\Tests\\ContactsManger.ServiceTests.csproj",
+              "RelativeDocumentMoniker": "..\\Tests\\ContactsManger.ServiceTests.csproj",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\Tests\\ContactsManger.ServiceTests.csproj",
+              "RelativeToolTip": "..\\Tests\\ContactsManger.ServiceTests.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2026-07-06T03:31:13.351Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 63,
+              "Title": "IjwtAuthentication.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\ServiceContracts\\IjwtAuthentication.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\ServiceContracts\\IjwtAuthentication.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\ServiceContracts\\IjwtAuthentication.cs",
+              "RelativeToolTip": "..\\ContactsManger.Core\\ServiceContracts\\IjwtAuthentication.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-06T05:31:22.889Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 64,
+              "Title": "Interaction.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\Entities\\Interaction.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Domain\\Entities\\Interaction.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\Entities\\Interaction.cs",
+              "RelativeToolTip": "..\\ContactsManger.Core\\Domain\\Entities\\Interaction.cs",
+              "ViewState": "AgIAAAQAAAAAAAAAAAAkwB8AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-05T08:06:30.875Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 89,
+              "Title": "20260706033625_updated_withnewdatabase.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.Inferastructure\\Migrations\\20260706033625_updated_withnewdatabase.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManager.Inferastructure\\Migrations\\20260706033625_updated_withnewdatabase.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.Inferastructure\\Migrations\\20260706033625_updated_withnewdatabase.cs",
+              "RelativeToolTip": "..\\ContactsManager.Inferastructure\\Migrations\\20260706033625_updated_withnewdatabase.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-06T03:36:25.893Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 65,
+              "Title": "UserDefinedTagsRepository.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.Inferastructure\\Repositries\\UserDefinedTagsRepository.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManager.Inferastructure\\Repositries\\UserDefinedTagsRepository.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.Inferastructure\\Repositries\\UserDefinedTagsRepository.cs",
+              "RelativeToolTip": "..\\ContactsManager.Inferastructure\\Repositries\\UserDefinedTagsRepository.cs",
+              "ViewState": "AgIAABoAAAAAAAAAAAAUwDoAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-05T23:55:01.978Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 66,
+              "Title": "UserDefinedTagRepositryContract.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\RepositryContracts\\UserDefinedTagRepositryContract.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Domain\\RepositryContracts\\UserDefinedTagRepositryContract.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\RepositryContracts\\UserDefinedTagRepositryContract.cs",
+              "RelativeToolTip": "..\\ContactsManger.Core\\Domain\\RepositryContracts\\UserDefinedTagRepositryContract.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAiwA8AAABgAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-06T00:03:02.913Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 67,
+              "Title": "CountryRepositryContract.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\RepositryContracts\\CountryRepositryContract.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Domain\\RepositryContracts\\CountryRepositryContract.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\RepositryContracts\\CountryRepositryContract.cs",
+              "RelativeToolTip": "..\\ContactsManger.Core\\Domain\\RepositryContracts\\CountryRepositryContract.cs",
+              "ViewState": "AgIAAAIAAAAAAAAAAAAAwAgAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-05T22:18:47.462Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 68,
+              "Title": "CircleRepository.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.Inferastructure\\Repositries\\CircleRepository.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManager.Inferastructure\\Repositries\\CircleRepository.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.Inferastructure\\Repositries\\CircleRepository.cs",
+              "RelativeToolTip": "..\\ContactsManager.Inferastructure\\Repositries\\CircleRepository.cs",
+              "ViewState": "AgIAABoAAAAAAAAAAAAAADkAAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-06T00:24:54.213Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 69,
+              "Title": "ContactItemRoleRepositryContract.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\RepositryContracts\\ContactItemRoleRepositryContract.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Domain\\RepositryContracts\\ContactItemRoleRepositryContract.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\RepositryContracts\\ContactItemRoleRepositryContract.cs",
+              "RelativeToolTip": "..\\ContactsManger.Core\\Domain\\RepositryContracts\\ContactItemRoleRepositryContract.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAgwBQAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-06T00:06:10.149Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 70,
+              "Title": "CountryAdderService.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Services\\CountryAdderService.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Services\\CountryAdderService.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Services\\CountryAdderService.cs",
+              "RelativeToolTip": "..\\ContactsManger.Core\\Services\\CountryAdderService.cs",
+              "ViewState": "AgIAAAsAAAAAAAAAAAAAABQAAAA9AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-06T01:18:03.285Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 71,
+              "Title": "ValidationHelpers.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Helpers\\ValidationHelpers.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Helpers\\ValidationHelpers.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Helpers\\ValidationHelpers.cs",
+              "RelativeToolTip": "..\\ContactsManger.Core\\Helpers\\ValidationHelpers.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-06T01:16:53.659Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 72,
+              "Title": "OrderExtensions.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Helpers\\OrderExtensions.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Helpers\\OrderExtensions.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Helpers\\OrderExtensions.cs",
+              "RelativeToolTip": "..\\ContactsManger.Core\\Helpers\\OrderExtensions.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-06T01:16:52.638Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 73,
+              "Title": "IPersonAdderService.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\ServiceContracts\\IPersonAdderService.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\ServiceContracts\\IPersonAdderService.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\ServiceContracts\\IPersonAdderService.cs",
+              "RelativeToolTip": "..\\ContactsManger.Core\\ServiceContracts\\IPersonAdderService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-06T00:29:25.375Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 74,
+              "Title": "SocialMediaAccountRepositryContract.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\RepositryContracts\\SocialMediaAccountRepositryContract.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Domain\\RepositryContracts\\SocialMediaAccountRepositryContract.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\RepositryContracts\\SocialMediaAccountRepositryContract.cs",
+              "RelativeToolTip": "..\\ContactsManger.Core\\Domain\\RepositryContracts\\SocialMediaAccountRepositryContract.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAgwA0AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-06T00:02:27.653Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 75,
+              "Title": "SocialMediaAccountRepository.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.Inferastructure\\Repositries\\SocialMediaAccountRepository.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManager.Inferastructure\\Repositries\\SocialMediaAccountRepository.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.Inferastructure\\Repositries\\SocialMediaAccountRepository.cs",
+              "RelativeToolTip": "..\\ContactsManager.Inferastructure\\Repositries\\SocialMediaAccountRepository.cs",
+              "ViewState": "AgIAADMAAAAAAAAAAAAAAHYAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-05T23:55:30.881Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 76,
+              "Title": "ContactItemRoleRepository.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.Inferastructure\\Repositries\\ContactItemRoleRepository.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManager.Inferastructure\\Repositries\\ContactItemRoleRepository.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.Inferastructure\\Repositries\\ContactItemRoleRepository.cs",
+              "RelativeToolTip": "..\\ContactsManager.Inferastructure\\Repositries\\ContactItemRoleRepository.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAZAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-05T23:53:35.948Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 77,
+              "Title": "Note.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\Entities\\Note.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Domain\\Entities\\Note.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\Entities\\Note.cs",
+              "RelativeToolTip": "..\\ContactsManger.Core\\Domain\\Entities\\Note.cs",
+              "ViewState": "AgIAABAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-05T08:36:59.894Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 78,
+              "Title": "Country.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\Entities\\Country.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Domain\\Entities\\Country.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\Entities\\Country.cs",
+              "RelativeToolTip": "..\\ContactsManger.Core\\Domain\\Entities\\Country.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-05T06:06:54.255Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 79,
+              "Title": "EnumRangeAttribute.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\CustomValidations\\EnumRangeAttribute.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\CustomValidations\\EnumRangeAttribute.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\CustomValidations\\EnumRangeAttribute.cs",
+              "RelativeToolTip": "..\\ContactsManger.Core\\CustomValidations\\EnumRangeAttribute.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-05T10:24:59.705Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 80,
+              "Title": "EnNoteType.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\Entities\\EEnums\\EnNoteType.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Domain\\Entities\\EEnums\\EnNoteType.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\Entities\\EEnums\\EnNoteType.cs",
+              "RelativeToolTip": "..\\ContactsManger.Core\\Domain\\Entities\\EEnums\\EnNoteType.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-05T08:31:49.855Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 81,
+              "Title": "GenderOptions.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\DTOs\\Enums\\GenderOptions.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\DTOs\\Enums\\GenderOptions.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\DTOs\\Enums\\GenderOptions.cs",
+              "RelativeToolTip": "..\\ContactsManger.Core\\DTOs\\Enums\\GenderOptions.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-05T10:18:47.659Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 83,
+              "Title": "sortedListOp.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\DTOs\\Enums\\sortedListOp.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\DTOs\\Enums\\sortedListOp.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\DTOs\\Enums\\sortedListOp.cs",
+              "RelativeToolTip": "..\\ContactsManger.Core\\DTOs\\Enums\\sortedListOp.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-05T10:18:43.88Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 84,
+              "Title": "20260705085427_Update-Entities.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.Inferastructure\\Migrations\\20260705085427_Update-Entities.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManager.Inferastructure\\Migrations\\20260705085427_Update-Entities.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.Inferastructure\\Migrations\\20260705085427_Update-Entities.cs",
+              "RelativeToolTip": "..\\ContactsManager.Inferastructure\\Migrations\\20260705085427_Update-Entities.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-05T08:54:28.618Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 82,
+              "Title": "UserTypeOptions.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\DTOs\\Enums\\UserTypeOptions.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\DTOs\\Enums\\UserTypeOptions.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\DTOs\\Enums\\UserTypeOptions.cs",
+              "RelativeToolTip": "..\\ContactsManger.Core\\DTOs\\Enums\\UserTypeOptions.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-05T07:31:35.32Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 85,
+              "Title": "EnInteractionType.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\Entities\\EEnums\\EnInteractionType.cs",
+              "RelativeDocumentMoniker": "..\\ContactsManger.Core\\Domain\\Entities\\EEnums\\EnInteractionType.cs",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManger.Core\\Domain\\Entities\\EEnums\\EnInteractionType.cs",
+              "RelativeToolTip": "..\\ContactsManger.Core\\Domain\\Entities\\EEnums\\EnInteractionType.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-05T08:23:28.324Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 86,
+              "Title": "ContactsManager.API.csproj",
+              "DocumentMoniker": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.API\\ContactsManager.API.csproj",
+              "RelativeDocumentMoniker": "..\\ContactsManager.API\\ContactsManager.API.csproj",
+              "ToolTip": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.API\\ContactsManager.API.csproj",
+              "RelativeToolTip": "..\\ContactsManager.API\\ContactsManager.API.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAlwAwAAAARAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2026-07-05T05:47:18.729Z"
             }
           ]
         }

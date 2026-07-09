@@ -50,7 +50,7 @@ namespace Repositories
             if (pageNumber < 1) pageNumber = 1;
             if (pageSize < 1) pageSize = 1;
 
-            var baseQuery = PersonWithAllIncludes().Where(predicate);
+            var baseQuery = PersonWithAllIncludes().AsNoTracking().Where(predicate);
 
             int totalCount = await baseQuery.CountAsync();
 
@@ -74,7 +74,7 @@ namespace Repositories
             if (pageNumber < 1) pageNumber = 1;
             if (pageSize < 1) pageSize = 1;
 
-            var baseQuery = PersonWithAllIncludes()
+            var baseQuery = PersonWithAllIncludes().AsNoTracking()
                             .Where(p => !p.IsDeleted)
                             .Where(predicate);
 
@@ -115,7 +115,7 @@ namespace Repositories
         [Obsolete]
         public async Task<List<Person>> GetFilteredPersons(Expression<Func<Person, bool>> predicate)
         {
-            return await PersonWithAllIncludes().Where(predicate).ToListAsync();
+            return await PersonWithAllIncludes().AsNoTracking().Where(predicate).ToListAsync();
         }
 
 
@@ -125,7 +125,7 @@ namespace Repositories
             if (pageSize < 1) pageSize = 1;
 
           
-            var baseQuery = PersonWithAllIncludes();
+            var baseQuery = PersonWithAllIncludes().AsNoTracking();
 
             int totalCount = await _db.Persons.CountAsync();
 
@@ -163,7 +163,7 @@ namespace Repositories
         [Obsolete]
         public async Task<IEnumerable<Person>> GetAllPersons()
         {
-            return await PersonWithAllIncludes().ToListAsync();
+            return await PersonWithAllIncludes().AsNoTracking().ToListAsync();
         }
 
 
@@ -175,8 +175,7 @@ namespace Repositories
             if (id == null)
                 return null;
 
-            // FirstOrDefaultAsync lets us eagerly load every navigation collection
-            // the response DTO depends on.
+         
             return await PersonWithAllIncludes()
                 .FirstOrDefaultAsync(p => p.PersonId == id);
         }

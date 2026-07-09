@@ -998,14 +998,13 @@ namespace ContactsManager.Inferastructure.Migrations
                     b.Property<string>("ContextMemory")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("CountryId")
+                    b.Property<Guid?>("CountryId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime?>("DateOfBirth")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Gender")
-                        .IsRequired()
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)");
 
@@ -1717,9 +1716,7 @@ namespace ContactsManager.Inferastructure.Migrations
 
                     b.HasOne("Entities.Country", "Country")
                         .WithMany("Persons")
-                        .HasForeignKey("CountryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("CountryId");
 
                     b.Navigation("ApplicationUser");
 

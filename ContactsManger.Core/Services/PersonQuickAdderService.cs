@@ -35,6 +35,7 @@ namespace Servicess
 
         public async Task<PersonRespones> QuickAddPerson(PersonQuickAddRequest? personQuickAddRequest)
         {
+
             using (Operation.Time("Quick add person operation for: {PersonName}", personQuickAddRequest?.Name ?? "null"))
             {
                 _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Request data: {@PersonQuickAddRequest}",
@@ -64,7 +65,7 @@ namespace Servicess
                     person.ApplicationUserId = _currentUserService.UserId.Value;
 
                     await ResolveCircles(person, personQuickAddRequest.Organizations);
-                    ResolveContactItemRoles(person, personQuickAddRequest.CurrentRoles);
+                    await  ResolveContactItemRoles(person, personQuickAddRequest.CurrentRoles);
 
                     _logger.LogDebug("Quick-adding new person with ID: {PersonId}, Name: {PersonName}",
                         person.PersonId, person.Name);
@@ -96,6 +97,7 @@ namespace Servicess
         {
             if (organizationNames == null) return;
 
+
             foreach (var name in organizationNames.Where(n => !string.IsNullOrWhiteSpace(n)))
             {
                 var existing = await _circleRepository.GetCircleByName(name);
@@ -103,7 +105,7 @@ namespace Servicess
             }
         }
 
-        private void ResolveContactItemRoles(Person person, List<string>? roleNames)
+        private async Task ResolveContactItemRoles(Person person, List<string>? roleNames)
         {
             if (roleNames == null) return;
 

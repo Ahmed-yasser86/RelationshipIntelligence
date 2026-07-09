@@ -46,14 +46,14 @@ namespace Entities
         public string? phone { get; set; }
 
         [StringLength(10)]
-        public string Gender { get; set; }
+        public string? Gender { get; set; }
 
         public bool? NewsLetter { get; set; }
 
         [StringLength(200)]
         public string? Address { get; set; }
 
-        public Guid CountryId { get; set; }
+        public Guid? CountryId { get; set; }
 
         [ForeignKey("CountryId")]
         public Country? Country { get; set; }

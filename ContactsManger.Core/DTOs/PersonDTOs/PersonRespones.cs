@@ -21,7 +21,7 @@ namespace ServiceContracts.DTOs
 
         public string? Address { get; set; }
 
-        public Guid CountryId { get; set; }
+        public Guid? CountryId { get; set; }
 
         public string CountryName { get; set; }
 

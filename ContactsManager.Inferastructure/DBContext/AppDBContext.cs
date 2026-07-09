@@ -18,7 +18,7 @@ namespace Entities
             : base(options)
         {
             _currentUserId = currentUserService.UserId;
-            Console.WriteLine($"[DEBUG] AppDBContext constructed with _currentUserId = {_currentUserId}");
+      //    Console.WriteLine($"[DEBUG] AppDBContext constructed with _currentUserId = {_currentUserId}");
 
         }
 

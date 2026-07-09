@@ -1,4 +1,4 @@
-using ContactsManger.Core.Domain.IdentityEntities;
+﻿using ContactsManger.Core.Domain.IdentityEntities;
 using ContactsManger.Core.ServiceContracts;
 using ContactsManger.Core.Services;
 using Entities;
@@ -14,6 +14,7 @@ using Repositories;
 using RepositryContracts;
 using ServiceContracts;
 using Servicess;
+using System;
 using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -35,13 +36,40 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ServiceContracts.ICurrentUserService, Servicess.CurrentUserService>();
 //builder.Services.AddScoped<IPersonQuickAdderService, PersonQuickAdderService  >();
 builder.Services.AddScoped<IPersonSearcherService, PersonSearcherService>();
-
-
+builder.Services.AddScoped<IPersonQuickAdderService, PersonQuickAdderService>();
+builder.Services.AddScoped<CircleRepositryContract, CircleRepository>();
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddScoped<PersonRepositryContract, PersonRepository>();
+builder.Services.AddScoped<ICountryAdderService, CountryAdderService>();
+builder.Services.AddScoped<ICountryGetterService, CountryGetterService>();
+builder.Services.AddScoped<IPersonAdderService, PersonAdderService>();
+builder.Services.AddScoped<CountryRepositryContract, CountryRepository>();
+builder.Services.AddScoped<PersonRepositryContract, PersonRepository>();
+builder.Services.AddScoped<CircleRepositryContract, CircleRepository>();
+builder.Services.AddScoped<CountryRepositryContract, CountryRepository>();
 
-builder.Services.AddScoped<IPersonGetterService, PersonGetterService>();
+builder.Services.AddScoped<ContactItemRoleRepositryContract, ContactItemRoleRepository>();
+builder.Services.AddScoped<ConnectionChannelRepositryContract, ConnectionChannelRepository>();
+builder.Services.AddScoped<SocialMediaAccountRepositryContract, SocialMediaAccountRepository>();
+builder.Services.AddScoped<SystemStatusTagRepositryContract, SystemStatusTagRepository>();
+builder.Services.AddScoped<UserDefinedTagsRepositryContract, UserDefinedTagsRepository>(); builder.Services.AddScoped<IPersonGetterService, PersonGetterService>();
 builder.Services.AddScoped<SystemStatusTagRepositryContract, SystemStatusTagRepository>();
 builder.Services.AddScoped<ISystemTagsGetter, SystemTagsGetterService>();
+builder.Services.AddScoped<IPersonAdderService, PersonAdderService>();
+builder.Services.AddScoped<IPersonUpdaterService, PersonUpdaterService>();
+builder.Services.AddScoped<IPersonGetterService, PersonGetterService>();
+builder.Services.AddScoped<IPersonSearcherService, PersonSearcherService>();
+builder.Services.AddScoped<IPersonSorterService, PersonSorterService>();
+builder.Services.AddScoped<IPersonQuickAdderService, PersonQuickAdderService>();
+builder.Services.AddScoped<IPersonDeleterService, PersonDeleterService>();
+
+builder.Services.AddScoped<ICountryAdderService, CountryAdderService>();
+builder.Services.AddScoped<ICountryGetterService, CountryGetterService>();
+
+builder.Services.AddScoped<ISystemTagsGetter, SystemTagsGetterService>();
+
+builder.Services.AddScoped<IjwtAuthentication, JwtServices>();
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
 builder.Services.AddDbContext<AppDBContext>(options =>
 {
@@ -139,6 +167,7 @@ builder.Services.AddCors(options =>
     });
 });
 
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -154,11 +183,13 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseRouting();
-app.UseCors();
-
+app.UseCors("CorsPolicy"); 
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+
+
 
 app.Run();

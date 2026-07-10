@@ -27,7 +27,6 @@ namespace Repositories
         /// </summary>
         /// 
 
-        // reduced the latency from 30 seconds to 1/3 second by using AsSplitQuery() to avoid the cartesian product problem
         private IQueryable<Person> PersonWithAllIncludes()
         {
             return _db.Persons
@@ -42,6 +41,53 @@ namespace Repositories
                 .Include(p => p.Interactions)
                 .AsSplitQuery();
         }
+
+
+
+
+        public async Task<Person> AddPerson(Person person)
+        {
+        
+            _db.Persons.Add(person);
+            return person;
+        }
+
+        public async Task<bool> DeletePerson(Guid? id)
+        {
+            if (id == null)
+                return false;
+
+            var person = await _db.Persons.FindAsync(id);
+            if (person == null || person.IsDeleted)
+                return false;
+
+            person.IsDeleted = true;
+            return true;
+        }
+
+   
+        public async Task<Person> UpdatePerson(Person person)
+        {
+            var existingPerson = await PersonWithAllIncludes()
+                .FirstOrDefaultAsync(p => p.PersonId == person.PersonId);
+
+            if (existingPerson == null)
+                throw new InvalidOperationException($"Person with ID {person.PersonId} does not exist.");
+
+            _db.Entry(existingPerson).CurrentValues.SetValues(person);
+
+            await SyncCollection(existingPerson.Circles, person.Circles, n => n.CircleId);
+            await SyncCollection(existingPerson.ContactItemRoles, person.ContactItemRoles, n => n.ContactsRoleId);
+            await SyncCollection(existingPerson.OtherSocialMediaAccounts, person.OtherSocialMediaAccounts, n => n.SocialMediaAccountId);
+            await SyncCollection(existingPerson.ConnectionChannels, person.ConnectionChannels, n => n.ConnectionChannelId);
+            await SyncCollection(existingPerson.SystemStatusTags, person.SystemStatusTags, n => n.StatusTagId);
+            await SyncCollection(existingPerson.UserDefinedTags, person.UserDefinedTags, n => n.TagId);
+            await SyncCollection(existingPerson.Notes, person.Notes, n => n.NoteId);
+            await SyncCollection(existingPerson.Interactions, person.Interactions, n => n.InteractionId);
+
+            return existingPerson;
+        }
+
 
 
         public async Task<(List<Person> Items, int TotalCount)> GetFilteredPersonsPaged(
@@ -140,26 +186,6 @@ namespace Repositories
         }
 
 
-        public async Task<Person> AddPerson(Person person)
-        {
-            await _db.Persons.AddAsync(person);
-            await _db.SaveChangesAsync();
-            return person;
-        }
-
-        public async Task<bool> DeletePerson(Guid? id)
-        {
-            if (id == null)
-                return false;
-
-            var person = await _db.Persons.FindAsync(id);
-            if (person == null || person.IsDeleted)
-                return false;
-
-            person.IsDeleted = true;
-            await _db.SaveChangesAsync();
-            return true;
-        }
         [Obsolete]
         public async Task<IEnumerable<Person>> GetAllPersons()
         {
@@ -180,60 +206,40 @@ namespace Repositories
                 .FirstOrDefaultAsync(p => p.PersonId == id);
         }
 
-        /// <summary>
-        /// Persists an already-fully-resolved Person (scalar fields + navigation
-        /// collections containing real tracked-or-new entities). This method does
-        /// NOT perform any get-or-create / lookup logic for Circles, ContactItemRoles,
-        /// tags, etc. — that resolution is the Service layer's responsibility, per
-        /// Clean Architecture: the Repository only persists what it's given.
-        /// </summary>
-        public async Task<Person> UpdatePerson(Person person)
-        {
-            var existingPerson = await PersonWithAllIncludes()
-                .FirstOrDefaultAsync(p => p.PersonId == person.PersonId);
-
-            if (existingPerson == null)
-                throw new InvalidOperationException($"Person with ID {person.PersonId} does not exist.");
-
-            // CurrentValues.SetValues only copies scalar/primitive properties;
-            // it intentionally does not touch navigation collections.
-            _db.Entry(existingPerson).CurrentValues.SetValues(person);
-
-            // Navigation collections must be synced explicitly. We replace the
-            // tracked collection's contents with whatever the incoming Person
-            // carries. EF Core's change tracker diffs this against the DB state
-            // on SaveChanges (additions/removals of join rows for the M:N sets,
-            // and FK reassignment for the 1:N ContactItemRoles).
-            SyncCollection(existingPerson.Circles, person.Circles);
-            SyncCollection(existingPerson.ContactItemRoles, person.ContactItemRoles);
-            SyncCollection(existingPerson.OtherSocialMediaAccounts, person.OtherSocialMediaAccounts);
-            SyncCollection(existingPerson.ConnectionChannels, person.ConnectionChannels);
-            SyncCollection(existingPerson.SystemStatusTags, person.SystemStatusTags);
-            SyncCollection(existingPerson.UserDefinedTags, person.UserDefinedTags);
-            SyncCollection(existingPerson.Notes, person.Notes);
-            SyncCollection(existingPerson.Interactions, person.Interactions);
-
-            await _db.SaveChangesAsync();
-            return existingPerson;
-        }
-
-        /// <summary>
-        /// Replaces the contents of a tracked navigation collection with the
-        /// incoming set, without swapping out the collection instance itself
-        /// (EF Core needs the tracked ICollection reference to stay stable).
-        /// </summary>
-        private static void SyncCollection<T>(ICollection<T> tracked, ICollection<T>? incoming)
+   
+      
+        private async Task  SyncCollection<TEntity, TKey>(
+     ICollection<TEntity> tracked,
+     ICollection<TEntity>? incoming,
+     Func<TEntity, TKey> keySelector) where TEntity : class
         {
             if (incoming == null)
                 return;
 
-            tracked.Clear();
-            foreach (var item in incoming)
+            var incomingKeys = incoming.Select(keySelector).ToHashSet();
+
+            var itemsToRemove = tracked.Where(t => !incomingKeys.Contains(keySelector(t))).ToList();
+            foreach (var item in itemsToRemove)
             {
-                tracked.Add(item);
+                tracked.Remove(item);
+            }
+
+            foreach (var incomingItem in incoming)
+            {
+                var key = keySelector(incomingItem);
+                var existingItem = tracked.FirstOrDefault(t => key.Equals(keySelector(t)));
+
+                if (existingItem == null)
+                {
+                    tracked.Add(incomingItem);
+                }
+                else
+                {
+                    _db.Entry(existingItem).CurrentValues.SetValues(incomingItem);
+                }
             }
         }
 
-      
+
     }
 }

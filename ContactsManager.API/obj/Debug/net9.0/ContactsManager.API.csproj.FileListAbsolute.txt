@@ -1,11 +1,3 @@
-C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.API\obj\Debug\net9.0\ContactsManager.API.csproj.AssemblyReference.cache
-C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.API\obj\Debug\net9.0\rpswa.dswa.cache.json
-C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.API\obj\Debug\net9.0\ContactsManager.API.GeneratedMSBuildEditorConfig.editorconfig
-C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.API\obj\Debug\net9.0\ContactsManager.API.AssemblyInfoInputs.cache
-C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.API\obj\Debug\net9.0\ContactsManager.API.AssemblyInfo.cs
-C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.API\obj\Debug\net9.0\ContactsManager.API.csproj.CoreCompileInputs.cache
-C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.API\obj\Debug\net9.0\ContactsManager.API.MvcApplicationPartsAssemblyInfo.cache
-C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.API\obj\Debug\net9.0\ContactsManager.API.sourcelink.json
 C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.API\bin\Debug\net9.0\appsettings.Development.json
 C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.API\bin\Debug\net9.0\appsettings.json
 C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.API\bin\Debug\net9.0\ContactsManager.API.staticwebassets.endpoints.json
@@ -191,6 +183,15 @@ C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.API\bin\Debug\net9
 C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.API\bin\Debug\net9.0\ContactsManger.Core.dll
 C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.API\bin\Debug\net9.0\ContactsManager.Inferastructure.pdb
 C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.API\bin\Debug\net9.0\ContactsManger.Core.pdb
+C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.API\obj\Debug\net9.0\ContactsManager.API.csproj.AssemblyReference.cache
+C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.API\obj\Debug\net9.0\rpswa.dswa.cache.json
+C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.API\obj\Debug\net9.0\ContactsManager.API.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.API\obj\Debug\net9.0\ContactsManager.API.AssemblyInfoInputs.cache
+C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.API\obj\Debug\net9.0\ContactsManager.API.AssemblyInfo.cs
+C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.API\obj\Debug\net9.0\ContactsManager.API.csproj.CoreCompileInputs.cache
+C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.API\obj\Debug\net9.0\ContactsManager.API.MvcApplicationPartsAssemblyInfo.cs
+C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.API\obj\Debug\net9.0\ContactsManager.API.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.API\obj\Debug\net9.0\ContactsManager.API.sourcelink.json
 C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.API\obj\Debug\net9.0\rjimswa.dswa.cache.json
 C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.API\obj\Debug\net9.0\rjsmrazor.dswa.cache.json
 C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.API\obj\Debug\net9.0\rjsmcshtml.dswa.cache.json

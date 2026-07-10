@@ -24,6 +24,7 @@ namespace Servicess
         private readonly UserDefinedTagsRepositryContract _userDefinedTagsRepository;
         private readonly SystemStatusTagRepositryContract _systemStatusTagRepository;
         private readonly ICurrentUserService _currentUserService;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<PersonAdderService> _logger;
 
         public PersonAdderService(
@@ -34,6 +35,7 @@ namespace Servicess
             UserDefinedTagsRepositryContract userDefinedTagsRepository,
             SystemStatusTagRepositryContract systemStatusTagRepository,
             ICurrentUserService currentUserService,
+            IUnitOfWork unitOfWork,
             ILogger<PersonAdderService> logger)
         {
             PersonRipository = personRipository;
@@ -43,9 +45,9 @@ namespace Servicess
             _userDefinedTagsRepository = userDefinedTagsRepository;
             _systemStatusTagRepository = systemStatusTagRepository;
             _currentUserService = currentUserService;
+            _unitOfWork = unitOfWork;
             _logger = logger;
         }
-
         public async Task<PersonRespones> AddPerson(PersonAddRequest? personAddRequest)
         {
             using (Operation.Time("Add person operation for: {PersonName}", personAddRequest?.Name ?? "null"))
@@ -68,15 +70,12 @@ namespace Servicess
                     var person = personAddRequest.ToPerson();
                     person.PersonId = Guid.NewGuid();
 
-                    // ApplicationUserId comes ONLY from the authenticated user's
-                    // ID, never from client-submitted request data -- a client
-                    // must never be able to claim ownership of a Person on
-                    // someone else's behalf.
                     if (_currentUserService.UserId == Guid.Empty)
                     {
                         _logger.LogWarning("AddPerson called with no authenticated user context");
                         throw new UnauthorizedAccessException("Cannot add a person without an authenticated user.");
                     }
+
                     if (!_currentUserService.UserId.HasValue)
                     {
                         throw new UnauthorizedAccessException("No authenticated user context is available.");
@@ -84,7 +83,6 @@ namespace Servicess
 
                     person.ApplicationUserId = _currentUserService.UserId.Value;
 
-                    
                     var circles = await ResolveCircles(personAddRequest.Organizations);
                     var channels = await ResolveConnectionChannels(personAddRequest.ConnectionChannels);
                     var tags = await ResolveUserDefinedTags(personAddRequest.UserDefinedTags);
@@ -102,13 +100,17 @@ namespace Servicess
                     foreach (var statusTag in statusTags)
                         person.SystemStatusTags.Add(statusTag);
 
-                await    ResolveContactItemRoles(person, personAddRequest.CurrentRoles);
-                   await  ResolveSocialMediaAccounts(person, personAddRequest.SocialMediaAccounts);
+                    await ResolveContactItemRoles(person, personAddRequest.CurrentRoles);
+                    await ResolveSocialMediaAccounts(person, personAddRequest.SocialMediaAccounts);
 
                     _logger.LogDebug("Adding new person with ID: {PersonId}, Name: {PersonName}",
                         person.PersonId, person.Name);
 
+                    // Stage changes only
                     await PersonRipository.AddPerson(person);
+
+                    // Single commit for the whole use case
+                    await _unitOfWork.SaveChangesAsync();
 
                     var result = person.ConvertToPersonRespons();
                     result.CountryName = person.Country?.CountryName;

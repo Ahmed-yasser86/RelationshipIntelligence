@@ -45,6 +45,8 @@ namespace ContactsManger.Core.DTOs.PersonDTOs
         {
             if (person == null) return null;
 
+
+            var latestInteraction = person.Interactions?.MaxBy(i => i.TimeOfInteraction);
             return new PersonViewDTO
             {
                 PersonId = person.PersonId,
@@ -57,7 +59,9 @@ namespace ContactsManger.Core.DTOs.PersonDTOs
                 ConnectionChannels = person.ConnectionChannels?.Select(c => c.ConvertToDto()).ToList() ?? new List<ConnectionChannelResponse>(),
                 SystemStatusTags = person.SystemStatusTags?.Select(s => s.ConvertToDto()).ToList() ?? new List<SystemStatusTagResponse>(),
                 UserDefinedTags = person.UserDefinedTags?.Select(t => t.ConvertToDto()).ToList() ?? new List<UserDefinedTagsResponse>(),
-                Interactions = person.Interactions?.Select(i => i.ConvertToDto()).ToList() ?? new List<InteractionResponse>()
+                Interactions = latestInteraction != null
+            ? new List<InteractionResponse> { latestInteraction.ConvertToDto() }
+            : new List<InteractionResponse>()
             };
         }
 

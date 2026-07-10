@@ -57,9 +57,10 @@ namespace Repositories
             }
         }
 
+
         public async Task<Circle> AddCircle(Circle circle)
         {
-            using (Operation.Time("AddCircle database operation for Circle: {CircleName}", circle?.Name))
+            using (Operation.Time("AddCircle staged for Circle: {CircleName}", circle?.Name))
             {
                 _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Circle: {@Circle}",
                     nameof(AddCircle), DateTime.UtcNow, circle);
@@ -72,19 +73,17 @@ namespace Repositories
                         throw new ArgumentNullException(nameof(circle));
                     }
 
+                    // CHANGED: no longer calls _db.SaveChangesAsync() here. The entity
+                    // is added to the change tracker; committing is now the caller's
+                    // (Service layer's) responsibility via IUnitOfWork, so multiple
+                    // repository operations within one request can be committed
+                    // together as a single unit.
                     _db.Circles.Add(circle);
-                    await _db.SaveChangesAsync();
 
-                    _logger.LogInformation("Successfully added circle with ID: {CircleId}, Name: {CircleName}",
+                    _logger.LogInformation("Successfully staged circle for insert. ID: {CircleId}, Name: {CircleName}",
                         circle.CircleId, circle.Name);
 
                     return circle;
-                }
-                catch (DbUpdateException ex)
-                {
-                    _logger.LogError(ex, "Database update error while adding circle. Circle: {@Circle}. Error: {ErrorMessage}",
-                        circle, ex.Message);
-                    throw;
                 }
                 catch (Exception ex)
                 {
@@ -94,6 +93,7 @@ namespace Repositories
                 }
             }
         }
+
 
         public async Task<Circle?> GetCircleById(Guid? id)
         {

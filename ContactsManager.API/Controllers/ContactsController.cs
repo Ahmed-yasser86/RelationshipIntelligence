@@ -23,11 +23,14 @@ namespace ContactsManager.API.Controllers
         private readonly IPersonQuickAdderService _personQuickAdderService;
         private readonly ICountryGetterService _countryGetterService;
         private readonly IPersonAdderService _personAdderService;
+        private readonly IPersonUpdaterService _personUpdaterService;
+        private readonly IPersonDeleterService _personDeleterService;
+
 
         public ContactsController(UserManager<ApplicationUser> userManager, IPersonGetterService personGetterService,
             IPersonSearcherService personSearcher , ISystemTagsGetter systemTagsGetter,
             IPersonQuickAdderService personQuickAdder, ICountryGetterService getCountries,
-            IPersonAdderService PersoneAdderService)
+            IPersonAdderService PersoneAdderService , IPersonUpdaterService PersonesUpdater , IPersonDeleterService personDeleter)
         {
             _userManager = userManager;
             _personGetterService = personGetterService;
@@ -36,6 +39,8 @@ namespace ContactsManager.API.Controllers
             _personQuickAdderService = personQuickAdder;
             _countryGetterService = getCountries;
             _personAdderService = PersoneAdderService;
+            _personUpdaterService = PersonesUpdater;
+            _personDeleterService = personDeleter;
         }
 
         /// <summary>
@@ -320,16 +325,12 @@ namespace ContactsManager.API.Controllers
         public async Task<IActionResult> GetContactByContactID(Guid? ID)
         {
             PersonRespones? ContactObj;
-            try
-            {
+           
+           
 
-                ContactObj = await _personGetterService.GetPersonByPersonId(ID);
-            }
-            catch (Exception ex)
-            {
-
-                throw;
-            }
+              ContactObj = await _personGetterService.GetPersonByPersonId(ID);
+          
+         
 
             return Ok(ContactObj);
 
@@ -381,7 +382,7 @@ namespace ContactsManager.API.Controllers
         }
 
         [HttpPost]
-        public async Task <IActionResult> AddPersoneRequest([FromBody] PersonAddRequest? PersoneAddRequest)
+        public async Task <IActionResult>PostAddPersoneRequest([FromBody] PersonAddRequest? PersoneAddRequest)
         {
             var PersonRespones = await _personAdderService.AddPerson(PersoneAddRequest);
 
@@ -390,7 +391,22 @@ namespace ContactsManager.API.Controllers
 
         }
 
+        [HttpPut]
+        public async Task <IActionResult> PutContactItemUpdateRequest([FromBody]   PersonUpdateRequest person)
+        {
 
+            var personResponesObject = await _personUpdaterService.UpdatePerson(person);
+            return Ok(personResponesObject);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeletePersoneObject(Guid PersoneID)
+        {
+
+            var p = await _personDeleterService.DeletePersonByPersonId(PersoneID);
+
+            return Ok(p);
+        }
         
      }
       

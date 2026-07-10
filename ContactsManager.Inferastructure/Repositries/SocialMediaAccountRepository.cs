@@ -18,9 +18,10 @@ namespace Repositories
             _logger = logger;
         }
 
+
         public async Task<SocialMediaAccount> AddSocialMediaAccount(SocialMediaAccount account)
         {
-            using (Operation.Time("AddSocialMediaAccount database operation for URL: {Url}", account?.Url))
+            using (Operation.Time("AddSocialMediaAccount staged for URL: {Url}", account?.Url))
             {
                 _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Account: {@SocialMediaAccount}",
                     nameof(AddSocialMediaAccount), DateTime.UtcNow, account);
@@ -34,23 +35,57 @@ namespace Repositories
                     }
 
                     _db.SocialMediaAccounts.Add(account);
-                    await _db.SaveChangesAsync();
 
-                    _logger.LogInformation("Successfully added SocialMediaAccount with ID: {SocialMediaAccountId}, Platform: {Platform}",
+                    _logger.LogInformation("Successfully staged SocialMediaAccount for insert. ID: {SocialMediaAccountId}, Platform: {Platform}",
                         account.SocialMediaAccountId, account.Platform);
 
                     return account;
-                }
-                catch (DbUpdateException ex)
-                {
-                    _logger.LogError(ex, "Database update error while adding SocialMediaAccount. Account: {@SocialMediaAccount}. Error: {ErrorMessage}",
-                        account, ex.Message);
-                    throw;
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Unexpected error occurred in {MethodName} for account: {@SocialMediaAccount}",
                         nameof(AddSocialMediaAccount), account);
+                    throw;
+                }
+            }
+        }
+
+        public async Task<bool> DeleteSocialMediaAccount(Guid socialMediaAccountId)
+        {
+            using (Operation.Time("DeleteSocialMediaAccount staged for ID: {SocialMediaAccountId}", socialMediaAccountId))
+            {
+                _logger.LogInformation(
+                    "Executing {MethodName} method at {Timestamp}. SocialMediaAccountId: {SocialMediaAccountId}",
+                    nameof(DeleteSocialMediaAccount), DateTime.UtcNow, socialMediaAccountId);
+
+                try
+                {
+                    if (socialMediaAccountId == Guid.Empty)
+                    {
+                        _logger.LogWarning("DeleteSocialMediaAccount called with an empty Guid.");
+                        return false;
+                    }
+
+                    var account = await _db.SocialMediaAccounts
+                        .FirstOrDefaultAsync(a => a.SocialMediaAccountId == socialMediaAccountId);
+
+                    if (account == null)
+                    {
+                        _logger.LogInformation("No SocialMediaAccount found with ID: {SocialMediaAccountId}", socialMediaAccountId);
+                        return false;
+                    }
+
+                    _db.SocialMediaAccounts.Remove(account);
+
+                    _logger.LogInformation("Successfully staged SocialMediaAccount for deletion. ID: {SocialMediaAccountId}", socialMediaAccountId);
+
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex,
+                        "Unexpected error occurred in {MethodName} for SocialMediaAccountId: {SocialMediaAccountId}",
+                        nameof(DeleteSocialMediaAccount), socialMediaAccountId);
                     throw;
                 }
             }
@@ -89,6 +124,8 @@ namespace Repositories
             }
         }
 
+
+
         public async Task<IEnumerable<SocialMediaAccount>> GetAllSocialMediaAccountsForPerson(Guid personId)
         {
             using (Operation.Time("GetAllSocialMediaAccountsForPerson database operation for PersonId: {PersonId}", personId))
@@ -115,5 +152,8 @@ namespace Repositories
                 }
             }
         }
+
+
+
     }
 }

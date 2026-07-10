@@ -17,9 +17,10 @@ namespace Repositories
             _logger = logger;
         }
 
+
         public async Task<Country> AddCountry(Country country)
         {
-            using (Operation.Time("AddCountry database operation for Country: {CountryName}", country?.CountryName))
+            using (Operation.Time("AddCountry staged for Country: {CountryName}", country?.CountryName))
             {
                 _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Country: {@Country}",
                     nameof(AddCountry), DateTime.UtcNow, country);
@@ -32,27 +33,63 @@ namespace Repositories
                         throw new ArgumentNullException(nameof(country));
                     }
 
-                    _logger.LogDebug("Adding country with ID: {CountryId}, Name: {CountryName} to database",
+                    _logger.LogDebug("Staging country with ID: {CountryId}, Name: {CountryName} for insert",
                         country.CountryId, country.CountryName);
 
                     _db.Countries.Add(country);
-                    await _db.SaveChangesAsync();
 
-                    _logger.LogInformation("Successfully added country with ID: {CountryId}, Name: {CountryName}",
+                    _logger.LogInformation("Successfully staged country for insert. ID: {CountryId}, Name: {CountryName}",
                         country.CountryId, country.CountryName);
 
                     return country;
-                }
-                catch (DbUpdateException ex)
-                {
-                    _logger.LogError(ex, "Database update error while adding country. Country: {@Country}. Error: {ErrorMessage}",
-                        country, ex.Message);
-                    throw;
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Unexpected error occurred in {MethodName} for country: {@Country}",
                         nameof(AddCountry), country);
+                    throw;
+                }
+            }
+        }
+
+        public async Task<Country> UpdateCountry(Country country)
+        {
+            using (Operation.Time("UpdateCountry staged for Country: {CountryName}", country?.CountryName))
+            {
+                _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Country: {@Country}",
+                    nameof(UpdateCountry), DateTime.UtcNow, country);
+
+                try
+                {
+                    if (country == null)
+                    {
+                        _logger.LogWarning("UpdateCountry called with null country parameter");
+                        throw new ArgumentNullException(nameof(country));
+                    }
+
+                    var existingCountry = await _db.Countries.FindAsync(country.CountryId);
+
+                    if (existingCountry == null)
+                    {
+                        _logger.LogWarning("UpdateCountry called for non-existent Country ID: {CountryId}", country.CountryId);
+                        throw new InvalidOperationException($"Country with ID {country.CountryId} does not exist.");
+                    }
+
+                    _db.Entry(existingCountry).CurrentValues.SetValues(country);
+
+                    _logger.LogInformation("Successfully staged country update. ID: {CountryId}, Name: {CountryName}",
+                        existingCountry.CountryId, existingCountry.CountryName);
+
+                    return existingCountry;
+                }
+                catch (InvalidOperationException)
+                {
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Unexpected error occurred in {MethodName} for country: {@Country}",
+                        nameof(UpdateCountry), country);
                     throw;
                 }
             }
@@ -158,54 +195,6 @@ namespace Repositories
             }
         }
 
-        public async Task<Country> UpdateCountry(Country country)
-        {
-            using (Operation.Time("UpdateCountry database operation for Country: {CountryName}", country?.CountryName))
-            {
-                _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Country: {@Country}",
-                    nameof(UpdateCountry), DateTime.UtcNow, country);
-
-                try
-                {
-                    if (country == null)
-                    {
-                        _logger.LogWarning("UpdateCountry called with null country parameter");
-                        throw new ArgumentNullException(nameof(country));
-                    }
-
-                    var existingCountry = await _db.Countries.FindAsync(country.CountryId);
-
-                    if (existingCountry == null)
-                    {
-                        _logger.LogWarning("UpdateCountry called for non-existent Country ID: {CountryId}", country.CountryId);
-                        throw new InvalidOperationException($"Country with ID {country.CountryId} does not exist.");
-                    }
-
-                    _db.Entry(existingCountry).CurrentValues.SetValues(country);
-                    await _db.SaveChangesAsync();
-
-                    _logger.LogInformation("Successfully updated country with ID: {CountryId}, Name: {CountryName}",
-                        existingCountry.CountryId, existingCountry.CountryName);
-
-                    return existingCountry;
-                }
-                catch (DbUpdateException ex)
-                {
-                    _logger.LogError(ex, "Database update error while updating country. Country: {@Country}. Error: {ErrorMessage}",
-                        country, ex.Message);
-                    throw;
-                }
-                catch (InvalidOperationException)
-                {
-                    throw;
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Unexpected error occurred in {MethodName} for country: {@Country}",
-                        nameof(UpdateCountry), country);
-                    throw;
-                }
-            }
-        }
+    
     }
 }

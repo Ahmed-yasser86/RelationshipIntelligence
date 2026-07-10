@@ -2294,6 +2294,7 @@
         "dependencies": {
           "AspNetSerilog": "1.6.0",
           "Microsoft.AspNetCore.Authentication.JwtBearer": "9.0.17",
+          "Microsoft.EntityFrameworkCore": "9.0.14",
           "Microsoft.Extensions.Logging": "10.0.9",
           "Serilog": "4.3.1",
           "Serilog.AspNetCore": "9.0.0",

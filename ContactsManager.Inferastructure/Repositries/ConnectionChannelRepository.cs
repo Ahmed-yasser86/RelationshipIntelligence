@@ -57,9 +57,10 @@ namespace Repositories
             }
         }
 
+
         public async Task<ConnectionChannel> AddConnectionChannel(ConnectionChannel channel)
         {
-            using (Operation.Time("AddConnectionChannel database operation for: {ChannelName}", channel?.ConnectionChannelName))
+            using (Operation.Time("AddConnectionChannel staged for: {ChannelName}", channel?.ConnectionChannelName))
             {
                 _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Channel: {@ConnectionChannel}",
                     nameof(AddConnectionChannel), DateTime.UtcNow, channel);
@@ -73,18 +74,11 @@ namespace Repositories
                     }
 
                     _db.ConnectionChannels.Add(channel);
-                    await _db.SaveChangesAsync();
 
-                    _logger.LogInformation("Successfully added ConnectionChannel with ID: {ConnectionChannelId}, Name: {ChannelName}",
+                    _logger.LogInformation("Successfully staged ConnectionChannel for insert. ID: {ConnectionChannelId}, Name: {ChannelName}",
                         channel.ConnectionChannelId, channel.ConnectionChannelName);
 
                     return channel;
-                }
-                catch (DbUpdateException ex)
-                {
-                    _logger.LogError(ex, "Database update error while adding ConnectionChannel. Channel: {@ConnectionChannel}. Error: {ErrorMessage}",
-                        channel, ex.Message);
-                    throw;
                 }
                 catch (Exception ex)
                 {
@@ -94,6 +88,7 @@ namespace Repositories
                 }
             }
         }
+
 
         public async Task<ConnectionChannel?> GetConnectionChannelById(Guid? id)
         {

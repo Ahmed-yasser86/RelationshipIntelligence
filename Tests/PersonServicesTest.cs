@@ -32,7 +32,7 @@ namespace CRUDTests
         private readonly IPersonSearcherService _personSearcherService;
         private readonly IPersonSorterService _personSorterService;
         private readonly IFixture _fixture;
-
+        private readonly IUnitOfWork _unitOfWork;
         private readonly Mock<PersonRepositryContract> _personRepositryContractMoq;
         private readonly PersonRepositryContract _personRepositryContract;
 
@@ -54,18 +54,15 @@ namespace CRUDTests
         private readonly Mock<ICurrentUserService> _currentUserServiceMoq;
         private readonly ICurrentUserService _currentUserService;
         private readonly Guid _testUserId;
+        private readonly Mock<IUnitOfWork> _unitOfWorkMoq;
+
+        private readonly Mock<SocialMediaAccountRepositryContract> _SocialMediaAccountRepositryContractMoq;
+        private readonly SocialMediaAccountRepositryContract _socialMediaAccountRepositryContract;
 
         public PersonServicesTest()
         {
             _fixture = new Fixture();
 
-            // Person carries several navigation collections (Notes, Interactions,
-            // Circles, ConnectionChannels, SystemStatusTags, UserDefinedTags,
-            // ContactItemRoles, OtherSocialMediaAccounts) plus back-references
-            // (e.g. ContactItemRole.Person, Country.Persons). Left on defaults,
-            // AutoFixture's ThrowingRecursionBehavior throws on the circular
-            // graph. Swap to OmitOnRecursionBehavior so it just stops recursing
-            // instead of crashing every test that builds a Person.
             _fixture.Behaviors.OfType<ThrowingRecursionBehavior>()
                 .ToList()
                 .ForEach(b => _fixture.Behaviors.Remove(b));
@@ -74,6 +71,11 @@ namespace CRUDTests
             List<Person> persons = new List<Person>();
             List<Country> countries = new List<Country>();
             DbContextMock<AppDBContext> dbContextMock = new DbContextMock<AppDBContext>(new DbContextOptionsBuilder<AppDBContext>().Options);
+
+            _SocialMediaAccountRepositryContractMoq = new Mock<SocialMediaAccountRepositryContract>();
+            _socialMediaAccountRepositryContract =  _SocialMediaAccountRepositryContractMoq.Object;
+            _unitOfWorkMoq = new Mock<IUnitOfWork>();
+            _unitOfWork = _unitOfWorkMoq.Object; 
 
             _personRepositryContractMoq = new Mock<PersonRepositryContract>();
             _personRepositryContract = _personRepositryContractMoq.Object;
@@ -128,7 +130,7 @@ namespace CRUDTests
                 _connectionChannelRepositryContract,
                 _userDefinedTagsRepositryContract,
                 _systemStatusTagRepositryContract,
-                _currentUserService,
+                _currentUserService, _unitOfWork,
                 loggerAdderMock.Object);
 
             // PersonQuickAdderService only depends on Person + Circle repos
@@ -138,8 +140,10 @@ namespace CRUDTests
             _personQuickAdderService = new PersonQuickAdderService(
                 _personRepositryContract,
                 _circleRepositryContract,
-                _currentUserService,
+                _currentUserService, _unitOfWork,
                 loggerQuickAdderMock.Object);
+
+
 
             // PersonUpdaterService has the same six-dependency shape as Adder.
             _personUpdaterService = new PersonUpdaterService(
@@ -149,9 +153,9 @@ namespace CRUDTests
                 _connectionChannelRepositryContract,
                 _userDefinedTagsRepositryContract,
                 _systemStatusTagRepositryContract,
-                loggerUpdaterMock.Object);
+                loggerUpdaterMock.Object, _socialMediaAccountRepositryContract, _unitOfWork);
 
-            _personDeleterService = new PersonDeleterService(_personRepositryContract, loggerDeleterMock.Object);
+            _personDeleterService = new PersonDeleterService(_unitOfWork, _personRepositryContract, loggerDeleterMock.Object);
             _personSearcherService = new PersonSearcherService(_personRepositryContract, loggerSearcherMock.Object);
             _personSorterService = new PersonSorterService(_personRepositryContract, loggerSorterMock.Object);
         }

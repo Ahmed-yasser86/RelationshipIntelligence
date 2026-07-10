@@ -11,6 +11,7 @@ using ServiceContracts.DTOs;
 using Servicess.Helpers;
 using RepositryContracts;
 using SerilogTimings;
+using Microsoft.EntityFrameworkCore;
 
 namespace Servicess
 {
@@ -23,6 +24,8 @@ namespace Servicess
         private readonly UserDefinedTagsRepositryContract _userDefinedTagsRepository;
         private readonly SystemStatusTagRepositryContract _systemStatusTagRepository;
         private readonly ILogger<PersonUpdaterService> _logger;
+        private readonly SocialMediaAccountRepositryContract _socialMediaAccountRepositryContract;
+        private readonly IUnitOfWork _unitOfWork;
 
         public PersonUpdaterService(
             PersonRepositryContract personRipository,
@@ -31,7 +34,9 @@ namespace Servicess
             ConnectionChannelRepositryContract connectionChannelRepository,
             UserDefinedTagsRepositryContract userDefinedTagsRepository,
             SystemStatusTagRepositryContract systemStatusTagRepository,
-            ILogger<PersonUpdaterService> logger)
+            ILogger<PersonUpdaterService> logger,
+            SocialMediaAccountRepositryContract socialMediaAccountRepositryContract,
+            IUnitOfWork unitOfWork)
         {
             PersonRipository = personRipository;
             _circleRepository = circleRepository;
@@ -40,6 +45,8 @@ namespace Servicess
             _userDefinedTagsRepository = userDefinedTagsRepository;
             _systemStatusTagRepository = systemStatusTagRepository;
             _logger = logger;
+            _socialMediaAccountRepositryContract = socialMediaAccountRepositryContract;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<PersonRespones?> UpdatePerson(PersonUpdateRequest? personUpdateRequest)
@@ -71,7 +78,6 @@ namespace Servicess
 
                     _logger.LogDebug("Updating person fields for ID: {PersonId}", personUpdateRequest.PersonId);
 
-                    // --- Scalar fields (unchanged behavior from the original service) ---
                     if (personUpdateRequest.Name != null && person.Name != personUpdateRequest.Name)
                         _logger.LogDebug("Updating Name from '{OldValue}' to '{NewValue}'", person.Name, personUpdateRequest.Name);
 
@@ -96,53 +102,45 @@ namespace Servicess
                     person.CountryId = personUpdateRequest.CountryId ?? person.CountryId;
                     person.Gender = personUpdateRequest.Gender.ToString() ?? person.Gender;
 
-                    // --- New full-profile scalar fields ---
                     person.ContextMemory = personUpdateRequest.ContextMemory ?? person.ContextMemory;
                     person.ProfileImagePath = personUpdateRequest.ProfileImagePath ?? person.ProfileImagePath;
                     person.Origin = personUpdateRequest.Origin ?? person.Origin;
                     person.LinkedInProfile = personUpdateRequest.LinkedInProfile ?? person.LinkedInProfile;
                     person.OtherInformation = personUpdateRequest.OtherInformation ?? person.OtherInformation;
 
-                    // --- Related collections: resolve get-or-create here (Service
-                    // layer), then hand the fully-formed Person to the Repository,
-                    // which only syncs what it's given (no lookups in Repository). ---
+
+
                     if (personUpdateRequest.Organizations != null)
                     {
-                        person.Circles.Clear();
-                        await ResolveCircles(person, personUpdateRequest.Organizations);
+                        await SyncCircles(person, personUpdateRequest.Organizations);
                     }
 
                     if (personUpdateRequest.CurrentRoles != null)
                     {
-                        person.ContactItemRoles.Clear();
-                        ResolveContactItemRoles(person, personUpdateRequest.CurrentRoles);
+                        await SyncContactItemRoles(person, personUpdateRequest.CurrentRoles);
                     }
 
                     if (personUpdateRequest.ConnectionChannels != null)
                     {
-                        person.ConnectionChannels.Clear();
-                        await ResolveConnectionChannels(person, personUpdateRequest.ConnectionChannels);
+                        await SyncConnectionChannels(person, personUpdateRequest.ConnectionChannels);
                     }
 
                     if (personUpdateRequest.UserDefinedTags != null)
                     {
-                        person.UserDefinedTags.Clear();
-                        await ResolveUserDefinedTags(person, personUpdateRequest.UserDefinedTags);
+                        await SyncUserDefinedTags(person, personUpdateRequest.UserDefinedTags);
                     }
 
                     if (personUpdateRequest.SystemStatusTags != null)
                     {
-                        person.SystemStatusTags.Clear();
-                        await ResolveSystemStatusTags(person, personUpdateRequest.SystemStatusTags);
+                        await SyncSystemStatusTags(person, personUpdateRequest.SystemStatusTags);
                     }
 
                     if (personUpdateRequest.SocialMediaAccounts != null)
                     {
-                        person.OtherSocialMediaAccounts.Clear();
-                        ResolveSocialMediaAccounts(person, personUpdateRequest.SocialMediaAccounts);
+                        await SyncSocialMediaAccounts(person, personUpdateRequest.SocialMediaAccounts);
                     }
 
-                    await PersonRipository.UpdatePerson(person);
+                    await _unitOfWork.SaveChangesAsync();
 
                     var result = person.ConvertToPersonRespons();
 
@@ -150,6 +148,23 @@ namespace Servicess
                         result.PersonId, result.Name);
 
                     return result;
+                }
+                catch (DbUpdateConcurrencyException ex)
+                {
+                    foreach (var entry in ex.Entries)
+                    {
+                        Console.WriteLine($"Entity: {entry.Entity.GetType().Name}");
+                        Console.WriteLine($"State : {entry.State}");
+
+                        foreach (var property in entry.Properties)
+                        {
+                            Console.WriteLine($"{property.Metadata.Name} = {property.CurrentValue}");
+                        }
+
+                        Console.WriteLine("------------------------");
+                    }
+
+                    throw;
                 }
                 catch (ArgumentException ex)
                 {
@@ -170,31 +185,123 @@ namespace Servicess
             }
         }
 
-        private async Task ResolveCircles(Person person, List<string> organizationNames)
+
+        private async Task SyncCircles(Person person, List<string> organizationNames)
         {
-            foreach (var name in organizationNames.Where(n => !string.IsNullOrWhiteSpace(n)))
+            var requestedNames = organizationNames
+                .Where(n => !string.IsNullOrWhiteSpace(n))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            var currentCircles = person.Circles.ToList();
+
+            var untouched = currentCircles
+                .Where(c => requestedNames.Any(n => string.Equals(n, c.Name, StringComparison.OrdinalIgnoreCase)))
+                .ToList();
+
+            var toRemove = currentCircles.Except(untouched).ToList();
+            foreach (var circle in toRemove)
+                person.Circles.Remove(circle);
+
+            var untouchedNames = untouched
+                .Select(c => c.Name)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            var namesStillNeeded = requestedNames
+                .Where(n => !untouchedNames.Contains(n))
+                .ToList();
+
+            if (namesStillNeeded.Count == 0) return;
+
+            var foundCircles = (await _circleRepository.GetCirclesByNames(namesStillNeeded)).ToList();
+            var foundNames = foundCircles
+                .Select(c => c.Name)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var circle in foundCircles)
+                person.Circles.Add(circle);
+
+            foreach (var name in namesStillNeeded.Where(n => !foundNames.Contains(n)))
             {
-                var existing = await _circleRepository.GetCircleByName(name);
-                person.Circles.Add(existing ?? new Circle { CircleId = Guid.NewGuid(), Name = name });
+                person.Circles.Add(new Circle { CircleId = Guid.NewGuid(), Name = name });
             }
         }
 
-        private void ResolveContactItemRoles(Person person, List<string> roleNames)
+        private async Task SyncContactItemRoles(Person person, List<string> roleNames)
         {
-            foreach (var role in roleNames.Where(r => !string.IsNullOrWhiteSpace(r)))
+            var requestedRoles = roleNames
+                .Where(r => !string.IsNullOrWhiteSpace(r))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            var currentRoles = person.ContactItemRoles.ToList();
+
+            var untouchedRoles = currentRoles
+                .Where(existing => requestedRoles.Any(r => string.Equals(r, existing.Role, StringComparison.OrdinalIgnoreCase)))
+                .ToList();
+
+            var rolesStillNeeded = requestedRoles
+                .Where(r => !untouchedRoles.Any(existing => string.Equals(existing.Role, r, StringComparison.OrdinalIgnoreCase)))
+                .ToList();
+
+            var rowsAvailableForReuse = currentRoles
+                .Except(untouchedRoles)
+                .ToList();
+
+            int pairCount = Math.Min(rowsAvailableForReuse.Count, rolesStillNeeded.Count);
+
+            for (int i = 0; i < pairCount; i++)
             {
-                person.ContactItemRoles.Add(new ContactItemRole
+                rowsAvailableForReuse[i].Role = rolesStillNeeded[i];
+            }
+
+            for (int i = pairCount; i < rowsAvailableForReuse.Count; i++)
+            {
+                person.ContactItemRoles.Remove(rowsAvailableForReuse[i]);
+            }
+
+            for (int i = pairCount; i < rolesStillNeeded.Count; i++)
+            {
+                var roleName = rolesStillNeeded[i];
+
+                var existingElsewhere = await _contactItemRoleRepository.GetContactItemRoleByPersonAndRole(person.PersonId, roleName);
+
+                person.ContactItemRoles.Add(existingElsewhere ?? new ContactItemRole
                 {
                     ContactsRoleId = Guid.NewGuid(),
-                    Role = role,
+                    Role = roleName,
                     PersonId = person.PersonId
                 });
             }
         }
 
-        private async Task ResolveConnectionChannels(Person person, List<string> channelNames)
+
+        private async Task SyncConnectionChannels(Person person, List<string> channelNames)
         {
-            foreach (var name in channelNames.Where(n => !string.IsNullOrWhiteSpace(n)))
+            var requestedNames = channelNames
+                .Where(n => !string.IsNullOrWhiteSpace(n))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            var currentChannels = person.ConnectionChannels.ToList();
+
+            var untouched = currentChannels
+                .Where(c => requestedNames.Any(n => string.Equals(n, c.ConnectionChannelName, StringComparison.OrdinalIgnoreCase)))
+                .ToList();
+
+            var toRemove = currentChannels.Except(untouched).ToList();
+            foreach (var channel in toRemove)
+                person.ConnectionChannels.Remove(channel);
+
+            var untouchedNames = untouched
+                .Select(c => c.ConnectionChannelName)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            var namesStillNeeded = requestedNames
+                .Where(n => !untouchedNames.Contains(n))
+                .ToList();
+
+            foreach (var name in namesStillNeeded)
             {
                 var existing = await _connectionChannelRepository.GetConnectionChannelByName(name);
                 person.ConnectionChannels.Add(existing ?? new ConnectionChannel
@@ -205,9 +312,33 @@ namespace Servicess
             }
         }
 
-        private async Task ResolveUserDefinedTags(Person person, List<string> tagNames)
+
+        private async Task SyncUserDefinedTags(Person person, List<string> tagNames)
         {
-            foreach (var name in tagNames.Where(n => !string.IsNullOrWhiteSpace(n)))
+            var requestedNames = tagNames
+                .Where(n => !string.IsNullOrWhiteSpace(n))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            var currentTags = person.UserDefinedTags.ToList();
+
+            var untouched = currentTags
+                .Where(t => requestedNames.Any(n => string.Equals(n, t.TagName, StringComparison.OrdinalIgnoreCase)))
+                .ToList();
+
+            var toRemove = currentTags.Except(untouched).ToList();
+            foreach (var tag in toRemove)
+                person.UserDefinedTags.Remove(tag);
+
+            var untouchedNames = untouched
+                .Select(t => t.TagName)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            var namesStillNeeded = requestedNames
+                .Where(n => !untouchedNames.Contains(n))
+                .ToList();
+
+            foreach (var name in namesStillNeeded)
             {
                 var existing = await _userDefinedTagsRepository.GetUserDefinedTagByName(name);
                 person.UserDefinedTags.Add(existing ?? new UserDefinedTags
@@ -218,9 +349,27 @@ namespace Servicess
             }
         }
 
-        private async Task ResolveSystemStatusTags(Person person, List<ContactsManger.Core.Domain.Entities.EEnums.EnSystemStatusTag> statusTags)
+
+        private async Task SyncSystemStatusTags(
+            Person person,
+            List<ContactsManger.Core.Domain.Entities.EEnums.EnSystemStatusTag> statusTags)
         {
-            foreach (var statusEnum in statusTags)
+            var requested = statusTags.Distinct().ToList();
+
+            var current = person.SystemStatusTags.ToList();
+
+            var untouched = current
+                .Where(t => requested.Contains(t.StatusTagId))
+                .ToList();
+
+            var toRemove = current.Except(untouched).ToList();
+            foreach (var tag in toRemove)
+                person.SystemStatusTags.Remove(tag);
+
+            var untouchedEnums = untouched.Select(t => t.StatusTagId).ToHashSet();
+            var stillNeeded = requested.Where(e => !untouchedEnums.Contains(e)).ToList();
+
+            foreach (var statusEnum in stillNeeded)
             {
                 var existing = await _systemStatusTagRepository.GetSystemStatusTagByEnum(statusEnum);
                 if (existing != null)
@@ -234,17 +383,35 @@ namespace Servicess
             }
         }
 
-        private void ResolveSocialMediaAccounts(Person person, List<SocialMediaAccountAddRequest> accounts)
+        private Task SyncSocialMediaAccounts(Person person, List<SocialMediaAccountAddRequest> accounts)
         {
-            foreach (var account in accounts.Where(a => !string.IsNullOrWhiteSpace(a.Url)))
+            var requested = accounts.Where(a => !string.IsNullOrWhiteSpace(a.Url)).ToList();
+            var current = person.OtherSocialMediaAccounts.ToList();
+
+            int pairCount = Math.Min(requested.Count, current.Count);
+
+            for (int i = 0; i < pairCount; i++)
+            {
+                current[i].Platform = requested[i].Platform;
+                current[i].Url = requested[i].Url;
+            }
+
+            for (int i = pairCount; i < current.Count; i++)
+            {
+                person.OtherSocialMediaAccounts.Remove(current[i]);
+            }
+
+            for (int i = pairCount; i < requested.Count; i++)
             {
                 person.OtherSocialMediaAccounts.Add(new SocialMediaAccount
                 {
                     SocialMediaAccountId = Guid.NewGuid(),
-                    Platform = account.Platform,
-                    Url = account.Url
+                    Platform = requested[i].Platform,
+                    Url = requested[i].Url
                 });
             }
+
+            return Task.CompletedTask;
         }
     }
 }

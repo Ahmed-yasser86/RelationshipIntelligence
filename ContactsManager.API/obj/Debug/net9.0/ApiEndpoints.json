@@ -43,15 +43,15 @@
   },
   {
     "ContainingType": "ContactsManager.API.Controllers.ContactsController",
-    "Method": "AddPersoneRequest",
-    "RelativePath": "api/Contacts/AddPersoneRequest",
+    "Method": "DeletePersoneObject",
+    "RelativePath": "api/Contacts/DeletePersoneObject",
     "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
-        "Name": "PersoneAddRequest",
-        "Type": "ServiceContracts.DTOs.PersonAddRequest",
+        "Name": "PersoneID",
+        "Type": "System.Guid",
         "IsRequired": false
       }
     ],
@@ -203,6 +203,22 @@
   },
   {
     "ContainingType": "ContactsManager.API.Controllers.ContactsController",
+    "Method": "PostAddPersoneRequest",
+    "RelativePath": "api/Contacts/PostAddPersoneRequest",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "PersoneAddRequest",
+        "Type": "ServiceContracts.DTOs.PersonAddRequest",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ContactsManager.API.Controllers.ContactsController",
     "Method": "PostQuickAddContact",
     "RelativePath": "api/Contacts/PostQuickAddContact",
     "HttpMethod": "POST",
@@ -212,6 +228,22 @@
       {
         "Name": "person",
         "Type": "ServiceContracts.DTOs.PersonQuickAddRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ContactsManager.API.Controllers.ContactsController",
+    "Method": "PutContactItemUpdateRequest",
+    "RelativePath": "api/Contacts/PutContactItemUpdateRequest",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "person",
+        "Type": "ServiceContracts.DTOs.PersonUpdateRequest",
         "IsRequired": true
       }
     ],

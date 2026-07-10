@@ -19,17 +19,20 @@ namespace Servicess
         private readonly PersonRepositryContract PersonRipository;
         private readonly CircleRepositryContract _circleRepository;
         private readonly ICurrentUserService _currentUserService;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<PersonQuickAdderService> _logger;
 
         public PersonQuickAdderService(
             PersonRepositryContract personRipository,
             CircleRepositryContract circleRepository,
             ICurrentUserService currentUserService,
+            IUnitOfWork unitOfWork,
             ILogger<PersonQuickAdderService> logger)
         {
             PersonRipository = personRipository;
             _circleRepository = circleRepository;
             _currentUserService = currentUserService;
+            _unitOfWork = unitOfWork;
             _logger = logger;
         }
 
@@ -70,7 +73,7 @@ namespace Servicess
                     _logger.LogDebug("Quick-adding new person with ID: {PersonId}, Name: {PersonName}",
                         person.PersonId, person.Name);
 
-                    await PersonRipository.AddPerson(person);
+                    await _unitOfWork.SaveChangesAsync();
 
                     var result = person.ConvertToPersonRespons();
                     result.CountryName = person.Country?.CountryName;
@@ -79,6 +82,8 @@ namespace Servicess
                         result.PersonId, result.Name);
 
                     return result;
+
+               
                 }
                 catch (ValidationException ex)
                 {

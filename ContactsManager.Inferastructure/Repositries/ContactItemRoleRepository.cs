@@ -18,9 +18,10 @@ namespace Repositories
             _logger = logger;
         }
 
+
         public async Task<ContactItemRole> AddContactItemRole(ContactItemRole role)
         {
-            using (Operation.Time("AddContactItemRole database operation for Role: {Role}", role?.Role))
+            using (Operation.Time("AddContactItemRole staged for Role: {Role}", role?.Role))
             {
                 _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Role: {@ContactItemRole}",
                     nameof(AddContactItemRole), DateTime.UtcNow, role);
@@ -34,18 +35,11 @@ namespace Repositories
                     }
 
                     _db.ContactItemRoles.Add(role);
-                    await _db.SaveChangesAsync();
 
-                    _logger.LogInformation("Successfully added ContactItemRole with ID: {ContactsRoleId}, Role: {Role}",
+                    _logger.LogInformation("Successfully staged ContactItemRole for insert. ID: {ContactsRoleId}, Role: {Role}",
                         role.ContactsRoleId, role.Role);
 
                     return role;
-                }
-                catch (DbUpdateException ex)
-                {
-                    _logger.LogError(ex, "Database update error while adding ContactItemRole. Role: {@ContactItemRole}. Error: {ErrorMessage}",
-                        role, ex.Message);
-                    throw;
                 }
                 catch (Exception ex)
                 {

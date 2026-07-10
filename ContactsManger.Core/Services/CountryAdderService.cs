@@ -11,12 +11,19 @@ namespace Servicess
     {
         private readonly CountryRepositryContract CountriesRipositry;
         private readonly ILogger<CountryAdderService> _logger;
+        private readonly IUnitOfWork _unitOfWork;        
 
-        public CountryAdderService(CountryRepositryContract countriesRipositry, ILogger<CountryAdderService> logger)
+        public CountryAdderService(
+            CountryRepositryContract countriesRipositry,
+            ILogger<CountryAdderService> logger,
+            IUnitOfWork unitOfWork)                          
         {
             CountriesRipositry = countriesRipositry;
             _logger = logger;
+            _unitOfWork = unitOfWork;                      
         }
+
+
 
         public async Task<CountryResponse> AddCountryRequest(CountryAddRequest? countryAddRequest)
         {
@@ -55,7 +62,7 @@ namespace Servicess
                     _logger.LogDebug("Adding new country with ID: {CountryId}, Name: {CountryName}",
                         country.CountryId, country.CountryName);
 
-                    await CountriesRipositry.AddCountry(country);
+                    await _unitOfWork.SaveChangesAsync();
 
                     var result = country.ConvertToDto();
 

@@ -13,11 +13,13 @@ namespace Servicess
     {
         private readonly PersonRepositryContract PersonRipository;
         private readonly ILogger<PersonDeleterService> _logger;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public PersonDeleterService(PersonRepositryContract personRipository, ILogger<PersonDeleterService> logger)
+        public PersonDeleterService(IUnitOfWork unitOfWork,PersonRepositryContract personRipository, ILogger<PersonDeleterService> logger)
         {
             PersonRipository = personRipository;
             _logger = logger;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<bool> DeletePersonByPersonId(Guid? personId)
@@ -38,7 +40,13 @@ namespace Servicess
                     _logger.LogDebug("Attempting to delete person with ID: {PersonId}", personId);
                     var result = await PersonRipository.DeletePerson(personId);
 
+
                     if (result)
+                       await _unitOfWork.SaveChangesAsync();
+
+
+
+                        if (result)
                     {
                         _logger.LogInformation("Successfully deleted person with ID: {PersonId}", personId);
                     }

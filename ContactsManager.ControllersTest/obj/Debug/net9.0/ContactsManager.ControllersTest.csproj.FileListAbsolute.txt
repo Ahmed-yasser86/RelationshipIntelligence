@@ -1,11 +1,5 @@
 C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.ControllersTest\bin\Debug\net9.0\.msCoverageSourceRootsMapping_ContactsManager.ControllersTest
 C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.ControllersTest\bin\Debug\net9.0\CoverletSourceRootsMapping_ContactsManager.ControllersTest
-C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.ControllersTest\obj\Debug\net9.0\ContactsManager.ControllersTest.csproj.AssemblyReference.cache
-C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.ControllersTest\obj\Debug\net9.0\ContactsManager.ControllersTest.GeneratedMSBuildEditorConfig.editorconfig
-C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.ControllersTest\obj\Debug\net9.0\ContactsManager.ControllersTest.AssemblyInfoInputs.cache
-C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.ControllersTest\obj\Debug\net9.0\ContactsManager.ControllersTest.AssemblyInfo.cs
-C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.ControllersTest\obj\Debug\net9.0\ContactsManager.ControllersTest.csproj.CoreCompileInputs.cache
-C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.ControllersTest\obj\Debug\net9.0\ContactsManager.ControllersTest.sourcelink.json
 C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.ControllersTest\bin\Debug\net9.0\testhost.dll
 C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.ControllersTest\bin\Debug\net9.0\testhost.exe
 C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.ControllersTest\bin\Debug\net9.0\xunit.runner.visualstudio.testadapter.dll
@@ -33,6 +27,8 @@ C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.ControllersTest\bi
 C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.ControllersTest\bin\Debug\net9.0\Microsoft.VisualStudio.CodeCoverage.Shim.dll
 C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.ControllersTest\bin\Debug\net9.0\Microsoft.EntityFrameworkCore.dll
 C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.ControllersTest\bin\Debug\net9.0\Microsoft.EntityFrameworkCore.Abstractions.dll
+C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.ControllersTest\bin\Debug\net9.0\Microsoft.Extensions.Caching.Abstractions.dll
+C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.ControllersTest\bin\Debug\net9.0\Microsoft.Extensions.Caching.Memory.dll
 C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.ControllersTest\bin\Debug\net9.0\Microsoft.Extensions.Configuration.dll
 C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.ControllersTest\bin\Debug\net9.0\Microsoft.Extensions.Configuration.Abstractions.dll
 C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.ControllersTest\bin\Debug\net9.0\Microsoft.Extensions.Configuration.Binder.dll
@@ -149,6 +145,12 @@ C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.ControllersTest\bi
 C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.ControllersTest\bin\Debug\net9.0\runtimes\win\lib\net9.0\System.Text.Encodings.Web.dll
 C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.ControllersTest\bin\Debug\net9.0\ContactsManger.Core.dll
 C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.ControllersTest\bin\Debug\net9.0\ContactsManger.Core.pdb
+C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.ControllersTest\obj\Debug\net9.0\ContactsManager.ControllersTest.csproj.AssemblyReference.cache
+C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.ControllersTest\obj\Debug\net9.0\ContactsManager.ControllersTest.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.ControllersTest\obj\Debug\net9.0\ContactsManager.ControllersTest.AssemblyInfoInputs.cache
+C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.ControllersTest\obj\Debug\net9.0\ContactsManager.ControllersTest.AssemblyInfo.cs
+C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.ControllersTest\obj\Debug\net9.0\ContactsManager.ControllersTest.csproj.CoreCompileInputs.cache
+C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.ControllersTest\obj\Debug\net9.0\ContactsManager.ControllersTest.sourcelink.json
 C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.ControllersTest\obj\Debug\net9.0\Contacts.8D5AE1F7.Up2Date
 C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.ControllersTest\obj\Debug\net9.0\ContactsManager.ControllersTest.dll
 C:\Users\DELL\Downloads\projectwebapi\Project\ContactsManager.ControllersTest\obj\Debug\net9.0\refint\ContactsManager.ControllersTest.dll

@@ -10,35 +10,47 @@ using Servicess;
 
 namespace CRUDTests
 {
-    public class CountryServiceTest
-    {
-        private readonly ICountryGetterService _countryGetterService;
-        private readonly ICountryAdderService _countryAdderService;
-        private readonly IFixture _fixture;
-        private readonly Mock<CountryRepositryContract> _countryRepositryContractMoq;
-        private readonly CountryRepositryContract _countryRepositryContract;
 
-        public CountryServiceTest()
+        public class CountryServiceTest
         {
-            _fixture = new Fixture();
+            private readonly Fixture _fixture;
 
-            // Fix the circular reference issue
-            _fixture.Behaviors.OfType<ThrowingRecursionBehavior>()
-                .ToList()
-                .ForEach(b => _fixture.Behaviors.Remove(b));
-            _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+            // Repositories
+            private readonly Mock<CountryRepositryContract> _countryRepositryContractMoq;
+            private readonly CountryRepositryContract _countryRepositryContract;
 
-            // Setup mock repository
-            _countryRepositryContractMoq = new Mock<CountryRepositryContract>();
-            _countryRepositryContract = _countryRepositryContractMoq.Object;
+            // Unit of Work
+            private readonly Mock<IUnitOfWork> _unitOfWorkMoq;
+            private readonly IUnitOfWork _unitOfWork;
 
-            // Create separate loggers for each service
-            ILogger<CountryGetterService> loggerGetter = new Mock<ILogger<CountryGetterService>>().Object;
-            ILogger<CountryAdderService> loggerAdder = new Mock<ILogger<CountryAdderService>>().Object;
+        // Services
+        private readonly CountryGetterService _countryGetterService;
+            private readonly CountryAdderService _countryAdderService;
 
-            _countryGetterService = new CountryGetterService(_countryRepositryContract, loggerGetter);
-            _countryAdderService = new CountryAdderService(_countryRepositryContract, loggerAdder);
-        }
+            public CountryServiceTest()
+            {
+                _fixture = new Fixture();
+
+                _fixture.Behaviors.OfType<ThrowingRecursionBehavior>()
+                    .ToList()
+                    .ForEach(b => _fixture.Behaviors.Remove(b));
+                _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+
+                _countryRepositryContractMoq = new Mock<CountryRepositryContract>();
+                _countryRepositryContract = _countryRepositryContractMoq.Object;
+
+
+                _unitOfWorkMoq = new Mock<IUnitOfWork>();
+                _unitOfWork = _unitOfWorkMoq.Object;
+
+                ILogger<CountryGetterService> loggerGetter = new Mock<ILogger<CountryGetterService>>().Object;
+                ILogger<CountryAdderService> loggerAdder = new Mock<ILogger<CountryAdderService>>().Object;
+
+            
+                _countryGetterService = new CountryGetterService(_countryRepositryContract, loggerGetter);
+                _countryAdderService = new CountryAdderService(_countryRepositryContract, loggerAdder,_unitOfWork);
+            }
+        
 
         #region AddCountryRequest Tests
 

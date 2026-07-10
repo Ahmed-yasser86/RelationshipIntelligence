@@ -59,7 +59,7 @@ namespace Repositories
 
         public async Task<UserDefinedTags> AddUserDefinedTag(UserDefinedTags tag)
         {
-            using (Operation.Time("AddUserDefinedTag database operation for: {TagName}", tag?.TagName))
+            using (Operation.Time("AddUserDefinedTag staged for: {TagName}", tag?.TagName))
             {
                 _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Tag: {@UserDefinedTags}",
                     nameof(AddUserDefinedTag), DateTime.UtcNow, tag);
@@ -73,18 +73,11 @@ namespace Repositories
                     }
 
                     _db.UserDefinedTags.Add(tag);
-                    await _db.SaveChangesAsync();
 
-                    _logger.LogInformation("Successfully added UserDefinedTag with ID: {TagId}, Name: {TagName}",
+                    _logger.LogInformation("Successfully staged UserDefinedTag for insert. ID: {TagId}, Name: {TagName}",
                         tag.TagId, tag.TagName);
 
                     return tag;
-                }
-                catch (DbUpdateException ex)
-                {
-                    _logger.LogError(ex, "Database update error while adding UserDefinedTag. Tag: {@UserDefinedTags}. Error: {ErrorMessage}",
-                        tag, ex.Message);
-                    throw;
                 }
                 catch (Exception ex)
                 {

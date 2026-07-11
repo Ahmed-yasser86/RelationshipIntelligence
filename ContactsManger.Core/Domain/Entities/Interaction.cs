@@ -27,6 +27,10 @@ namespace ContactsManger.Core.Domain.Entities
         [Required]
         public DateTime TimeOfInteraction { get; set; }
 
-        public ICollection<Person> People { get; set; } = new List<Person>();
+
+        public Guid PersonId { get; set; }
+
+        [ForeignKey("PersonId")]
+        public Person? Person { get; set; }
     }
 }

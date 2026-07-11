@@ -1,14 +1,10 @@
-﻿using ContactsManger.Core.CustomValidations;
+﻿
+using ContactsManger.Core.CustomValidations;
 using ContactsManger.Core.Domain.Entities.EEnums;
 using Entities;
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ContactsManger.Core.Domain.Entities
 {
@@ -16,18 +12,20 @@ namespace ContactsManger.Core.Domain.Entities
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-
         public Guid NoteId { get; set; }
 
         [Required]
         [EnumRange(typeof(EnNoteType))]
-        public EnNoteType NoteType { get; set; } 
+        public EnNoteType NoteType { get; set; }
 
         [Required]
         [StringLength(1000)]
         public string Content { get; set; }
 
+        public Guid PersonId { get; set; }
 
-        public ICollection<Person> People { get; set; } = new Collection<Person>();
+        [ForeignKey("PersonId")]
+        public Person? Person { get; set; }
     }
 }
+

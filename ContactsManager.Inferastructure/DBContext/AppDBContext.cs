@@ -18,8 +18,6 @@ namespace Entities
             : base(options)
         {
             _currentUserId = currentUserService.UserId;
-      //    Console.WriteLine($"[DEBUG] AppDBContext constructed with _currentUserId = {_currentUserId}");
-
         }
 
         public virtual DbSet<Person> Persons { get; set; }
@@ -37,7 +35,6 @@ namespace Entities
         {
             base.OnModelCreating(modelBuilder);
 
-
             modelBuilder.Entity<Country>().ToTable("Countries");
             modelBuilder.Entity<Person>().ToTable("Persons");
             modelBuilder.Entity<ContactItemRole>().ToTable("ContactItemRoles");
@@ -48,7 +45,6 @@ namespace Entities
             modelBuilder.Entity<Interaction>().ToTable("Interactions");
             modelBuilder.Entity<SocialMediaAccount>().ToTable("SocialMediaAccounts");
 
-
             modelBuilder.Entity<Person>()
                 .HasQueryFilter(p => p.ApplicationUserId == _currentUserId && !p.IsDeleted);
 
@@ -58,15 +54,13 @@ namespace Entities
                 .HasForeignKey(p => p.ApplicationUserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-
             // ==========================================
-            // 2. MANY-TO-MANY RELATIONSHIPS
+            // 2. RELATIONSHIPS
             // ==========================================
             modelBuilder.Entity<ConnectionChannel>()
                 .HasMany(c => c.People)
                 .WithMany(p => p.ConnectionChannels)
                 .UsingEntity(j => j.ToTable("PersonConnectionChannels"));
-
 
             modelBuilder.Entity<Person>()
                 .HasMany(p => p.UserDefinedTags)
@@ -81,19 +75,23 @@ namespace Entities
                 .WithMany(c => c.People)
                 .UsingEntity(j => j.ToTable("PersonCircles"));
 
+            // Notes and Interactions are one-to-many (a Note/Interaction
+            // belongs to exactly one Person) -- no join table.
             modelBuilder.Entity<Person>()
                 .HasMany(p => p.Notes)
-                .WithMany(n => n.People)
-                .UsingEntity(j => j.ToTable("PersonNotes"));
+                .WithOne(n => n.Person)
+                .HasForeignKey(n => n.PersonId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Person>()
                 .HasMany(p => p.Interactions)
-                .WithMany(i => i.People)
-                .UsingEntity(j => j.ToTable("PersonInteractions"));
+                .WithOne(i => i.Person)
+                .HasForeignKey(i => i.PersonId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<SocialMediaAccount>()
                 .HasMany(s => s.People)
-                .WithMany(p => p.OtherSocialMediaAccounts) // Updated to match new property name
+                .WithMany(p => p.OtherSocialMediaAccounts)
                 .UsingEntity(j => j.ToTable("PersonSocialMediaAccounts"));
 
             // ==========================================
@@ -140,30 +138,22 @@ namespace Entities
             };
 
             var smAccounts = new[]
-   {
-    Guid.Parse("90000001-0000-0000-0000-000000000000"),
-    Guid.Parse("90000002-0000-0000-0000-000000000000"),
-    Guid.Parse("90000003-0000-0000-0000-000000000000"),
-    Guid.Parse("90000004-0000-0000-0000-000000000000"),
-    Guid.Parse("90000005-0000-0000-0000-000000000000"),
-    Guid.Parse("90000006-0000-0000-0000-000000000000"),
-    Guid.Parse("90000007-0000-0000-0000-000000000000"),
-    Guid.Parse("90000008-0000-0000-0000-000000000000"),
-    Guid.Parse("90000009-0000-0000-0000-000000000000"),
-    Guid.Parse("9000000a-0000-0000-0000-000000000000")
-};
+            {
+                Guid.Parse("90000001-0000-0000-0000-000000000000"),
+                Guid.Parse("90000002-0000-0000-0000-000000000000"),
+                Guid.Parse("90000003-0000-0000-0000-000000000000"),
+                Guid.Parse("90000004-0000-0000-0000-000000000000"),
+                Guid.Parse("90000005-0000-0000-0000-000000000000"),
+                Guid.Parse("90000006-0000-0000-0000-000000000000"),
+                Guid.Parse("90000007-0000-0000-0000-000000000000"),
+                Guid.Parse("90000008-0000-0000-0000-000000000000"),
+                Guid.Parse("90000009-0000-0000-0000-000000000000"),
+                Guid.Parse("9000000a-0000-0000-0000-000000000000")
+            };
 
             // ==========================================
             // 3b. SEED TEST USER + ROLE
             // ==========================================
-            // A fixed-Guid ApplicationUser so the 10 seeded Persons below can
-            // be linked to a REAL, loggable-in account via ApplicationUserId
-            // (now a required FK). HasData() cannot use runtime-generated
-            // values (e.g. _userManager.CreateAsync's auto Guid), so this user
-            // has to be seeded directly with a Guid we control, and a
-            // pre-computed PasswordHash matching ASP.NET Core Identity's
-            // format -- see GenerateSeedPasswordHash.csx for how that hash
-            // was produced.
             var seedUserId = Guid.Parse("00000000-0000-0000-0000-000000000001");
             var seedRoleId = Guid.Parse("00000000-0000-0000-0000-000000000002");
 
@@ -187,7 +177,7 @@ namespace Entities
                     EmailConfirmed = true,
                     PersonName = "Test User",
                     SecurityStamp = "STATIC-SEED-SECURITY-STAMP-0001",
-                    ConcurrencyStamp = "STATIC-SEED-CONCURRENCY-STAMP-0001",          
+                    ConcurrencyStamp = "STATIC-SEED-CONCURRENCY-STAMP-0001",
                     PasswordHash = "AQAAAAIAAYagAAAAEP9N9FETj6XBlr2nCwBktgDVpDvbmOXLKGisPywjI8prNBnxoqoHbJ5eYAlzc98QUw=="
                 }
             );
@@ -270,32 +260,6 @@ namespace Entities
                 new Circle { CircleId = circles[9], Name = "C# Mentorship" }
             );
 
-            modelBuilder.Entity<Note>().HasData(
-                new Note { NoteId = notes[0], NoteType = EnNoteType.Important, Content = "Discussed the framework of Douglass North regarding institutional constraints." },
-                new Note { NoteId = notes[1], NoteType = EnNoteType.Moderate, Content = "Finalized the scope for the paper: 'Structural Waste within Absorptive Structures'." },
-                new Note { NoteId = notes[2], NoteType = EnNoteType.Moderate, Content = "Troubleshooting the CI/CD pipeline. SonarCloud and Trivy are failing on the new C# build." },
-                new Note { NoteId = notes[3], NoteType = EnNoteType.Low, Content = "Need to schedule a visit to Beit Yakan and tour the Abdeen architectural sites." },
-                new Note { NoteId = notes[4], NoteType = EnNoteType.Important, Content = "Configured StatefulSets for the SQL Server database in Kubernetes." },
-                new Note { NoteId = notes[5], NoteType = EnNoteType.Moderate, Content = "Drafted the thank you email to Professor Ann Swidler for her sociology lectures." },
-                new Note { NoteId = notes[6], NoteType = EnNoteType.Important, Content = "Reviewing C# Repository Pattern and Serilog implementation for the Stock Management App." },
-                new Note { NoteId = notes[7], NoteType = EnNoteType.Moderate, Content = "Comparing cultural differences and social phenomena over a call." },
-                new Note { NoteId = notes[8], NoteType = EnNoteType.Low, Content = "Need to catch up on the latest UC Berkeley lecture notes." },
-                new Note { NoteId = notes[9], NoteType = EnNoteType.Important, Content = "Exploring the intersection of technical programming and CSS." }
-            );
-
-            modelBuilder.Entity<Interaction>().HasData(
-                new Interaction { InteractionId = interactions[0], InteractionTitle = "Research sync on structural waste", TimeOfInteraction = new DateTime(2026, 6, 1) },
-                new Interaction { InteractionId = interactions[1], InteractionTitle = "Code Review: C# Web API", TimeOfInteraction = new DateTime(2026, 6, 2) },
-                new Interaction { InteractionId = interactions[2], InteractionTitle = "Sociology debate on Durkheim", TimeOfInteraction = new DateTime(2026, 6, 3) },
-                new Interaction { InteractionId = interactions[3], InteractionTitle = "Kubernetes cluster troubleshooting", TimeOfInteraction = new DateTime(2026, 6, 4) },
-                new Interaction { InteractionId = interactions[4], InteractionTitle = "Cairo urban history walk planning", TimeOfInteraction = new DateTime(2026, 6, 5) },
-                new Interaction { InteractionId = interactions[5], InteractionTitle = "GCI World Data Science kickoff", TimeOfInteraction = new DateTime(2026, 6, 6) },
-                new Interaction { InteractionId = interactions[6], InteractionTitle = "GitHub Actions pairing session", TimeOfInteraction = new DateTime(2026, 6, 7) },
-                new Interaction { InteractionId = interactions[7], InteractionTitle = "Catchup call across time zones", TimeOfInteraction = new DateTime(2026, 6, 8) },
-                new Interaction { InteractionId = interactions[8], InteractionTitle = "Acemoglu reading discussion", TimeOfInteraction = new DateTime(2026, 6, 9) },
-                new Interaction { InteractionId = interactions[9], InteractionTitle = "Institutional Economics framework mapping", TimeOfInteraction = new DateTime(2026, 6, 10) }
-            );
-
             modelBuilder.Entity<SocialMediaAccount>().HasData(
                 new SocialMediaAccount { SocialMediaAccountId = smAccounts[0], Platform = "LinkedIn", Url = "https://linkedin.com/in/ned-ibrahim" },
                 new SocialMediaAccount { SocialMediaAccountId = smAccounts[1], Platform = "Twitter", Url = "https://twitter.com/acemoglu" },
@@ -310,14 +274,8 @@ namespace Entities
             );
 
             // ==========================================
-            // 5. CORE BUSINESS SEED DATA (Updated Persons)
+            // 5. CORE BUSINESS SEED DATA (Persons)
             // ==========================================
-            // Every seeded Person is now linked to the seed test user via
-            // ApplicationUserId = seedUserId, so logging in as
-            // testuser@contactsmanager.dev and hitting any GET /Person
-            // endpoint returns exactly these 10 contacts (thanks to the
-            // HasQueryFilter above).
-
             modelBuilder.Entity<Person>().HasData(
                 new Person
                 {
@@ -481,6 +439,9 @@ namespace Entities
                 }
             );
 
+            // ==========================================
+            // 6. ONE-TO-MANY SEED DATA (ContactItemRole, Note, Interaction)
+            // ==========================================
             modelBuilder.Entity<ContactItemRole>().HasData(
                 new ContactItemRole { ContactsRoleId = roles[0], PersonId = persons[0] },
                 new ContactItemRole { ContactsRoleId = roles[1], PersonId = persons[1] },
@@ -494,11 +455,34 @@ namespace Entities
                 new ContactItemRole { ContactsRoleId = roles[9], PersonId = persons[9] }
             );
 
+            modelBuilder.Entity<Note>().HasData(
+                new Note { NoteId = notes[0], NoteType = EnNoteType.Important, Content = "Discussed the framework of Douglass North regarding institutional constraints.", PersonId = persons[5] },
+                new Note { NoteId = notes[1], NoteType = EnNoteType.Moderate, Content = "Finalized the scope for the paper: 'Structural Waste within Absorptive Structures'.", PersonId = persons[1] },
+                new Note { NoteId = notes[2], NoteType = EnNoteType.Moderate, Content = "Troubleshooting the CI/CD pipeline. SonarCloud and Trivy are failing on the new C# build.", PersonId = persons[6] },
+                new Note { NoteId = notes[3], NoteType = EnNoteType.Low, Content = "Need to schedule a visit to Beit Yakan and tour the Abdeen architectural sites.", PersonId = persons[8] },
+                new Note { NoteId = notes[4], NoteType = EnNoteType.Important, Content = "Configured StatefulSets for the SQL Server database in Kubernetes.", PersonId = persons[7] },
+                new Note { NoteId = notes[5], NoteType = EnNoteType.Moderate, Content = "Drafted the thank you email to Professor Ann Swidler for her sociology lectures.", PersonId = persons[3] },
+                new Note { NoteId = notes[6], NoteType = EnNoteType.Important, Content = "Reviewing C# Repository Pattern and Serilog implementation for the Stock Management App.", PersonId = persons[9] },
+                new Note { NoteId = notes[7], NoteType = EnNoteType.Moderate, Content = "Comparing cultural differences and social phenomena over a call.", PersonId = persons[0] },
+                new Note { NoteId = notes[8], NoteType = EnNoteType.Low, Content = "Need to catch up on the latest UC Berkeley lecture notes.", PersonId = persons[4] },
+                new Note { NoteId = notes[9], NoteType = EnNoteType.Important, Content = "Exploring the intersection of technical programming and CSS.", PersonId = persons[2] }
+            );
 
-
+            modelBuilder.Entity<Interaction>().HasData(
+                new Interaction { InteractionId = interactions[0], InteractionTitle = "Research sync on structural waste", TimeOfInteraction = new DateTime(2026, 6, 1), PersonId = persons[5] },
+                new Interaction { InteractionId = interactions[1], InteractionTitle = "Code Review: C# Web API", TimeOfInteraction = new DateTime(2026, 6, 2), PersonId = persons[9] },
+                new Interaction { InteractionId = interactions[2], InteractionTitle = "Sociology debate on Durkheim", TimeOfInteraction = new DateTime(2026, 6, 3), PersonId = persons[3] },
+                new Interaction { InteractionId = interactions[3], InteractionTitle = "Kubernetes cluster troubleshooting", TimeOfInteraction = new DateTime(2026, 6, 4), PersonId = persons[4] },
+                new Interaction { InteractionId = interactions[4], InteractionTitle = "Cairo urban history walk planning", TimeOfInteraction = new DateTime(2026, 6, 5), PersonId = persons[8] },
+                new Interaction { InteractionId = interactions[5], InteractionTitle = "GCI World Data Science kickoff", TimeOfInteraction = new DateTime(2026, 6, 6), PersonId = persons[7] },
+                new Interaction { InteractionId = interactions[6], InteractionTitle = "GitHub Actions pairing session", TimeOfInteraction = new DateTime(2026, 6, 7), PersonId = persons[6] },
+                new Interaction { InteractionId = interactions[7], InteractionTitle = "Catchup call across time zones", TimeOfInteraction = new DateTime(2026, 6, 8), PersonId = persons[0] },
+                new Interaction { InteractionId = interactions[8], InteractionTitle = "Acemoglu reading discussion", TimeOfInteraction = new DateTime(2026, 6, 9), PersonId = persons[1] },
+                new Interaction { InteractionId = interactions[9], InteractionTitle = "Institutional Economics framework mapping", TimeOfInteraction = new DateTime(2026, 6, 10), PersonId = persons[2] }
+            );
 
             // ==========================================
-            // 6. JUNCTION TABLE MAPPINGS
+            // 7. REMAINING JUNCTION TABLE MAPPINGS (still M:N)
             // ==========================================
 
             modelBuilder.Entity<Person>().HasMany(p => p.UserDefinedTags).WithMany(t => t.People).UsingEntity(j => j.HasData(
@@ -538,32 +522,6 @@ namespace Entities
                 new { PeoplePersonId = persons[7], CirclesCircleId = circles[4] },
                 new { PeoplePersonId = persons[8], CirclesCircleId = circles[2] },
                 new { PeoplePersonId = persons[9], CirclesCircleId = circles[3] }
-            ));
-
-            modelBuilder.Entity<Person>().HasMany(p => p.Notes).WithMany(n => n.People).UsingEntity(j => j.HasData(
-                new { PeoplePersonId = persons[0], NotesNoteId = notes[7] },
-                new { PeoplePersonId = persons[1], NotesNoteId = notes[1] },
-                new { PeoplePersonId = persons[2], NotesNoteId = notes[9] },
-                new { PeoplePersonId = persons[3], NotesNoteId = notes[5] },
-                new { PeoplePersonId = persons[4], NotesNoteId = notes[8] },
-                new { PeoplePersonId = persons[5], NotesNoteId = notes[0] },
-                new { PeoplePersonId = persons[6], NotesNoteId = notes[2] },
-                new { PeoplePersonId = persons[7], NotesNoteId = notes[4] },
-                new { PeoplePersonId = persons[8], NotesNoteId = notes[3] },
-                new { PeoplePersonId = persons[9], NotesNoteId = notes[6] }
-            ));
-
-            modelBuilder.Entity<Person>().HasMany(p => p.Interactions).WithMany(i => i.People).UsingEntity(j => j.HasData(
-                new { PeoplePersonId = persons[0], InteractionsInteractionId = interactions[7] },
-                new { PeoplePersonId = persons[1], InteractionsInteractionId = interactions[8] },
-                new { PeoplePersonId = persons[2], InteractionsInteractionId = interactions[9] },
-                new { PeoplePersonId = persons[3], InteractionsInteractionId = interactions[2] },
-                new { PeoplePersonId = persons[4], InteractionsInteractionId = interactions[2] },
-                new { PeoplePersonId = persons[5], InteractionsInteractionId = interactions[0] },
-                new { PeoplePersonId = persons[6], InteractionsInteractionId = interactions[6] },
-                new { PeoplePersonId = persons[7], InteractionsInteractionId = interactions[5] },
-                new { PeoplePersonId = persons[8], InteractionsInteractionId = interactions[4] },
-                new { PeoplePersonId = persons[9], InteractionsInteractionId = interactions[1] }
             ));
 
             modelBuilder.Entity<ConnectionChannel>().HasMany(c => c.People).WithMany(p => p.ConnectionChannels).UsingEntity(j => j.HasData(

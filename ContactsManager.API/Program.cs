@@ -180,7 +180,11 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseHttpsRedirection();
+var useHttpsRedirection = builder.Configuration.GetValue<bool>("UseHttpsRedirection");
+if (useHttpsRedirection)
+{
+    app.UseHttpsRedirection();
+}
 
 app.UseRouting();
 app.UseCors("CorsPolicy"); 

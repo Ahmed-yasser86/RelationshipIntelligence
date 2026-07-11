@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "wDuhVlfVeCM=",
+  "dgSpecHash": "YNT2JA73Sgk=",
   "success": true,
-  "projectFilePath": "C:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.Inferastructure\\ContactsManager.Inferastructure.csproj",
+  "projectFilePath": "c:\\Users\\DELL\\Downloads\\projectwebapi\\Project\\ContactsManager.Inferastructure\\ContactsManager.Inferastructure.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\DELL\\.nuget\\packages\\aspnetserilog\\1.6.0\\aspnetserilog.1.6.0.nupkg.sha512",
     "C:\\Users\\DELL\\.nuget\\packages\\azure.core\\1.38.0\\azure.core.1.38.0.nupkg.sha512",

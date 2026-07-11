@@ -14,6 +14,7 @@
           "ContactsManger.Core": "1.0.0",
           "Microsoft.AspNetCore.OpenApi": "9.0.11",
           "Microsoft.EntityFrameworkCore.Design": "9.0.14",
+          "Microsoft.EntityFrameworkCore.InMemory": "9.0.14",
           "Swashbuckle.AspNetCore": "9.0.6"
         },
         "runtime": {
@@ -893,6 +894,19 @@
         },
         "runtime": {
           "lib/net8.0/Microsoft.EntityFrameworkCore.Design.dll": {
+            "assemblyVersion": "9.0.14.0",
+            "fileVersion": "9.0.1426.11905"
+          }
+        }
+      },
+      "Microsoft.EntityFrameworkCore.InMemory/9.0.14": {
+        "dependencies": {
+          "Microsoft.EntityFrameworkCore": "9.0.14",
+          "Microsoft.Extensions.Caching.Memory": "9.0.14",
+          "Microsoft.Extensions.Logging": "10.0.9"
+        },
+        "runtime": {
+          "lib/net8.0/Microsoft.EntityFrameworkCore.InMemory.dll": {
             "assemblyVersion": "9.0.14.0",
             "fileVersion": "9.0.1426.11905"
           }
@@ -2927,6 +2941,13 @@
       "sha512": "sha512-+7ojPX5p3NYCRPJoLSiimdmHpDpLH8S93XXnDKeFwRnD6GirJS2E0UxYnRZ3ovqtsIzsDHiRAkPl7N5XjM2BAw==",
       "path": "microsoft.entityframeworkcore.design/9.0.14",
       "hashPath": "microsoft.entityframeworkcore.design.9.0.14.nupkg.sha512"
+    },
+    "Microsoft.EntityFrameworkCore.InMemory/9.0.14": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-nh2b12KZ9xm17PQGhc1Z6Wx8yTufaL0r1f3b4V4Jex+l04w4Ar4ldMGxkTuR46TmS0aJ618LsTaybEsv8jSWRw==",
+      "path": "microsoft.entityframeworkcore.inmemory/9.0.14",
+      "hashPath": "microsoft.entityframeworkcore.inmemory.9.0.14.nupkg.sha512"
     },
     "Microsoft.EntityFrameworkCore.Relational/9.0.14": {
       "type": "package",

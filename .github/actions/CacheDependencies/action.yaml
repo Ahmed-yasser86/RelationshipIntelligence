@@ -13,7 +13,7 @@ runs:
       with:
         global-json-file: global.json 
         cache: true
-        cache-dependency-path: '**/packages.lock.json'
+        cache-dependency-path: '**/*.csproj'
     - name: Restore dependencies
       if: ${{ inputs.restore == 'true' }}
       shell: bash

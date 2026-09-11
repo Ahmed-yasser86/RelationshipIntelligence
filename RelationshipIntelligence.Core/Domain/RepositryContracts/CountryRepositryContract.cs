@@ -5,7 +5,7 @@ using System;
 namespace RepositryContracts
 {
     public interface CountryRepositryContract
-    { 
+    {
 
         Task<Country> AddCountry(Country country);
 

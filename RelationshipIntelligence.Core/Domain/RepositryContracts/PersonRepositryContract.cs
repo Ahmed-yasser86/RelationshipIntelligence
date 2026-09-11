@@ -21,9 +21,9 @@ namespace RepositryContracts
 
         Task<List<Person?>> GetFilteredPersons(Expression<Func<Person, bool>> predicate);
 
-        Task<(List<Person> Items, int TotalCount)> GetFilteredPersonsPaged(int pageNumber, int pageSize , Expression<Func<Person, bool>> predicate);
+        Task<(List<Person> Items, int TotalCount)> GetFilteredPersonsPaged(int pageNumber, int pageSize, Expression<Func<Person, bool>> predicate);
 
-        public  Task<(List<Person> Items, int TotalCount)> GetSortedFilteredPersonsPaged(
+        public Task<(List<Person> Items, int TotalCount)> GetSortedFilteredPersonsPaged(
              int pageNumber,
              int pageSize,
              Expression<Func<Person, bool>> predicate,

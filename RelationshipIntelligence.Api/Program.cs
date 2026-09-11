@@ -62,7 +62,7 @@ builder.Services.AddScoped<IPersonSearcherService, PersonSearcherService>();
 builder.Services.AddScoped<IPersonSorterService, PersonSorterService>();
 builder.Services.AddScoped<IPersonQuickAdderService, PersonQuickAdderService>();
 builder.Services.AddScoped<IPersonDeleterService, PersonDeleterService>();
- builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<ICountryAdderService, CountryAdderService>();
 builder.Services.AddScoped<ICountryGetterService, CountryGetterService>();
 
@@ -187,7 +187,7 @@ if (useHttpsRedirection)
 }
 
 app.UseRouting();
-app.UseCors("CorsPolicy"); 
+app.UseCors("CorsPolicy");
 app.UseAuthentication();
 app.UseAuthorization();
 

@@ -37,7 +37,7 @@ namespace ContactsManger.Core.Services
 
         public AuthentocationRespones Authenticate(ApplicationUser user)
         {
-            var expiration = DateTime.UtcNow.AddMinutes( Convert.ToDouble(_configuration["Jwt:expiration_minutes"]));
+            var expiration = DateTime.UtcNow.AddMinutes(Convert.ToDouble(_configuration["Jwt:expiration_minutes"]));
 
             Claim[] claims = new Claim[]
             {
@@ -48,7 +48,7 @@ new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds()
                 new Claim(ClaimTypes.Name, user.PersonName ?? string.Empty),
 
             };
-           
+
 
             SymmetricSecurityKey key = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
 

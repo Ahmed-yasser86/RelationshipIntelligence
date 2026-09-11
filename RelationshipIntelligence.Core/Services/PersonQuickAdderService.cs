@@ -68,7 +68,7 @@ namespace Servicess
                     person.ApplicationUserId = _currentUserService.UserId.Value;
 
                     await ResolveCircles(person, personQuickAddRequest.Organizations);
-                    await  ResolveContactItemRoles(person, personQuickAddRequest.CurrentRoles);
+                    await ResolveContactItemRoles(person, personQuickAddRequest.CurrentRoles);
 
                     _logger.LogDebug("Quick-adding new person with ID: {PersonId}, Name: {PersonName}",
                         person.PersonId, person.Name);
@@ -84,7 +84,7 @@ namespace Servicess
 
                     return result;
 
-               
+
                 }
                 catch (ValidationException ex)
                 {

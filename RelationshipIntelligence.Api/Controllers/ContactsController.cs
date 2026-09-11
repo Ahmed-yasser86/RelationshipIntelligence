@@ -28,9 +28,9 @@ namespace ContactsManager.API.Controllers
 
 
         public ContactsController(UserManager<ApplicationUser> userManager, IPersonGetterService personGetterService,
-            IPersonSearcherService personSearcher , ISystemTagsGetter systemTagsGetter,
+            IPersonSearcherService personSearcher, ISystemTagsGetter systemTagsGetter,
             IPersonQuickAdderService personQuickAdder, ICountryGetterService getCountries,
-            IPersonAdderService PersoneAdderService , IPersonUpdaterService PersonesUpdater , IPersonDeleterService personDeleter)
+            IPersonAdderService PersoneAdderService, IPersonUpdaterService PersonesUpdater, IPersonDeleterService personDeleter)
         {
             _userManager = userManager;
             _personGetterService = personGetterService;
@@ -66,7 +66,7 @@ namespace ContactsManager.API.Controllers
             return Ok(result);
         }
 
-       
+
 
         /// <summary>
         /// Retrieves all predefined system status tags available in the application.
@@ -313,7 +313,7 @@ namespace ContactsManager.API.Controllers
         /// <returns>A sorted and sliced page result of contacts.</returns>
 
         [HttpGet]
-        public async Task<IActionResult> GetSearchSortedPeopleBy([FromQuery] int page = 1, [FromQuery] int size = 10, [FromQuery] string sortBy = nameof( Person.Name))
+        public async Task<IActionResult> GetSearchSortedPeopleBy([FromQuery] int page = 1, [FromQuery] int size = 10, [FromQuery] string sortBy = nameof(Person.Name))
         {
             var pagedResult = await _personSearcherService.SearchSortedPeopleBy(page, size, sortBy);
 
@@ -325,12 +325,12 @@ namespace ContactsManager.API.Controllers
         public async Task<IActionResult> GetContactByContactID(Guid? ID)
         {
             PersonRespones? ContactObj;
-           
-           
 
-              ContactObj = await _personGetterService.GetPersonByPersonId(ID);
-          
-         
+
+
+            ContactObj = await _personGetterService.GetPersonByPersonId(ID);
+
+
 
             return Ok(ContactObj);
 
@@ -346,7 +346,7 @@ namespace ContactsManager.API.Controllers
         /// </remarks>
         /// <returns></returns>
         [HttpPost]
-        public async Task<IActionResult> PostQuickAddContact([FromBody]PersonQuickAddRequest person)
+        public async Task<IActionResult> PostQuickAddContact([FromBody] PersonQuickAddRequest person)
         {
             if (_personQuickAdderService == null)
                 throw new Exception("_personQuickAdderService is NULL");
@@ -354,8 +354,8 @@ namespace ContactsManager.API.Controllers
 
             var PersonRespons = await _personQuickAdderService.QuickAddPerson(person);
 
-                return Ok(PersonRespons);
-         
+            return Ok(PersonRespons);
+
 
         }
 
@@ -377,12 +377,12 @@ namespace ContactsManager.API.Controllers
 
             var countries = await _countryGetterService.Countries();
 
-          return  Ok(countries);
+            return Ok(countries);
 
         }
 
         [HttpPost]
-        public async Task <IActionResult>PostAddPersoneRequest([FromBody] PersonAddRequest? PersoneAddRequest)
+        public async Task<IActionResult> PostAddPersoneRequest([FromBody] PersonAddRequest? PersoneAddRequest)
         {
             var PersonRespones = await _personAdderService.AddPerson(PersoneAddRequest);
 
@@ -392,7 +392,7 @@ namespace ContactsManager.API.Controllers
         }
 
         [HttpPut]
-        public async Task <IActionResult> PutContactItemUpdateRequest([FromBody]   PersonUpdateRequest person)
+        public async Task<IActionResult> PutContactItemUpdateRequest([FromBody] PersonUpdateRequest person)
         {
 
             var personResponesObject = await _personUpdaterService.UpdatePerson(person);
@@ -407,9 +407,9 @@ namespace ContactsManager.API.Controllers
 
             return Ok(p);
         }
-        
-     }
-      
 
-    
+    }
+
+
+
 }

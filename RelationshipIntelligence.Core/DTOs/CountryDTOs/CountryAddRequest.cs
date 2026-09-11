@@ -14,7 +14,7 @@ namespace ServiceContracts.DTOs
         public Country ConvertToCountry()
         {
 
-           return new Country
+            return new Country
             {
                 CountryName = this.CountryName
             };
@@ -24,6 +24,6 @@ namespace ServiceContracts.DTOs
     }
 
 
-   
+
 
 }

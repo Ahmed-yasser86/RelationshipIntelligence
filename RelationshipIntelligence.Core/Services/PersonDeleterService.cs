@@ -15,7 +15,7 @@ namespace Servicess
         private readonly ILogger<PersonDeleterService> _logger;
         private readonly IUnitOfWork _unitOfWork;
 
-        public PersonDeleterService(IUnitOfWork unitOfWork,PersonRepositryContract personRipository, ILogger<PersonDeleterService> logger)
+        public PersonDeleterService(IUnitOfWork unitOfWork, PersonRepositryContract personRipository, ILogger<PersonDeleterService> logger)
         {
             PersonRipository = personRipository;
             _logger = logger;
@@ -42,11 +42,11 @@ namespace Servicess
 
 
                     if (result)
-                       await _unitOfWork.SaveChangesAsync();
+                        await _unitOfWork.SaveChangesAsync();
 
 
 
-                        if (result)
+                    if (result)
                     {
                         _logger.LogInformation("Successfully deleted person with ID: {PersonId}", personId);
                     }

@@ -47,7 +47,7 @@ namespace Repositories
 
         public async Task<Person> AddPerson(Person person)
         {
-        
+
             _db.Persons.Add(person);
             return person;
         }
@@ -65,7 +65,7 @@ namespace Repositories
             return true;
         }
 
-   
+
         public async Task<Person> UpdatePerson(Person person)
         {
             var existingPerson = await PersonWithAllIncludes()
@@ -114,7 +114,7 @@ namespace Repositories
        int pageNumber,
        int pageSize,
        Expression<Func<Person, bool>> predicate,
-       string sortBy, 
+       string sortBy,
        SortDirection sortDirection = SortDirection.Ascending)
         {
             if (pageNumber < 1) pageNumber = 1;
@@ -134,7 +134,7 @@ namespace Repositories
                 {
                     nameof(Person.Interactions) => baseQuery.OrderBy(p => p.Interactions.Max(i => (DateTime?)i.TimeOfInteraction) ?? DateTime.MinValue),
                     nameof(Person.SystemStatusTags) => baseQuery.OrderBy(p => p.SystemStatusTags.Min(t => (int?)t.StatusTagId) ?? int.MaxValue),
-                    _ => baseQuery.OrderBy(p => p.Name) 
+                    _ => baseQuery.OrderBy(p => p.Name)
                 };
             }
             else
@@ -143,7 +143,7 @@ namespace Repositories
                 {
                     nameof(Person.Interactions) => baseQuery.OrderByDescending(p => p.Interactions.Max(i => (DateTime?)i.TimeOfInteraction) ?? DateTime.MinValue),
                     nameof(Person.SystemStatusTags) => baseQuery.OrderByDescending(p => p.SystemStatusTags.Min(t => (int?)t.StatusTagId) ?? int.MaxValue),
-                    _ => baseQuery.OrderByDescending(p => p.Name) 
+                    _ => baseQuery.OrderByDescending(p => p.Name)
                 };
             }
 
@@ -170,7 +170,7 @@ namespace Repositories
             if (pageNumber < 1) pageNumber = 1;
             if (pageSize < 1) pageSize = 1;
 
-          
+
             var baseQuery = PersonWithAllIncludes().AsNoTracking();
 
             int totalCount = await _db.Persons.CountAsync();
@@ -194,21 +194,21 @@ namespace Repositories
 
 
 
-   
+
 
         public async Task<Person?> GetPersonById(Guid? id)
         {
             if (id == null)
                 return null;
 
-         
+
             return await PersonWithAllIncludes()
                 .FirstOrDefaultAsync(p => p.PersonId == id);
         }
 
-   
-      
-        private async Task  SyncCollection<TEntity, TKey>(
+
+
+        private async Task SyncCollection<TEntity, TKey>(
      ICollection<TEntity> tracked,
      ICollection<TEntity>? incoming,
      Func<TEntity, TKey> keySelector) where TEntity : class

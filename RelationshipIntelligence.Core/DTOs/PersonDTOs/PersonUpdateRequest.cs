@@ -47,7 +47,7 @@ namespace ServiceContracts.DTOs
         [StringLength(500, ErrorMessage = "Source context is too long")]
         public string? Origin { get; set; }
 
-     //   [Url(ErrorMessage = "Invalid LinkedIn URL")]
+        //   [Url(ErrorMessage = "Invalid LinkedIn URL")]
         public string? LinkedInProfile { get; set; }
 
         public string? OtherInformation { get; set; }

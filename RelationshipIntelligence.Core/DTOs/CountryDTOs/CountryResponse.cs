@@ -9,7 +9,7 @@ namespace ServiceContracts.DTOs
 {
     public class CountryResponse
     {
-        public string CountryName { get; set; } 
+        public string CountryName { get; set; }
         public Guid CountryId { get; set; }
 
 
@@ -22,18 +22,21 @@ namespace ServiceContracts.DTOs
             CountryResponse other = obj as CountryResponse;
 
 
-            return  CountryName == other.CountryName &&
-                CountryId == other.CountryId;   
+            return CountryName == other.CountryName &&
+                CountryId == other.CountryId;
 
         }
 
-
+        public override int GetHashCode()
+        {
+            throw new NotImplementedException();
+        }
     }
 
 
     public static class ExtensionClass
     {
-        public static  CountryResponse ConvertToDto(this Country country)
+        public static CountryResponse ConvertToDto(this Country country)
         {
             return new CountryResponse
             {

@@ -97,6 +97,7 @@ jobs:
     name: SonarCloud Analysis
     runs-on: ubuntu-latest
     needs: [build, test]
+    if: ${{ secrets.SONAR_TOKEN != '' }}
     env:
       GITHUB_TOKEN: ${{ github.token }}
       Serilog__WriteTo__2__Args__connectionString: ${{ secrets.SERILOG_DB_CONNECTION }}
@@ -196,7 +197,7 @@ jobs:
         uses: docker/build-push-action@ff26911fd365b0233252dfbd8eede1c0e9ef9a51  
         with:
           context: . 
-          file: ./ContactsManager.API/Dockerfile 
+          file: ./RelationshipIntelligence.Api/Dockerfile 
           push: false
           load: true 
           tags: contacts-manager-api:${{ github.sha }}

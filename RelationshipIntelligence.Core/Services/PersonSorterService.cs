@@ -56,7 +56,7 @@ namespace Servicess
                 ? int.MaxValue
                 : person.SystemStatusTags.Min(t => (int)t.StatusTagId);
         }
-      
+
         /// <summary>
         /// This Function Is Used With MVC projects only 
         /// </summary>

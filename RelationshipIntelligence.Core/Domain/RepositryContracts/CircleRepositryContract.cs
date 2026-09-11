@@ -12,7 +12,7 @@ namespace RepositryContracts
         Task<Circle>? GetCircleByName(string name);
 
         Task<IEnumerable<Circle>> GetAllCircles();
-    
+
         Task<IEnumerable<Circle>> GetCirclesByNames(IEnumerable<string> names);
     }
 }

@@ -11,46 +11,46 @@ using Servicess;
 namespace CRUDTests
 {
 
-        public class CountryServiceTest
-        {
-            private readonly Fixture _fixture;
+    public class CountryServiceTest
+    {
+        private readonly Fixture _fixture;
 
-            // Repositories
-            private readonly Mock<CountryRepositryContract> _countryRepositryContractMoq;
-            private readonly CountryRepositryContract _countryRepositryContract;
+        // Repositories
+        private readonly Mock<CountryRepositryContract> _countryRepositryContractMoq;
+        private readonly CountryRepositryContract _countryRepositryContract;
 
-            // Unit of Work
-            private readonly Mock<IUnitOfWork> _unitOfWorkMoq;
-            private readonly IUnitOfWork _unitOfWork;
+        // Unit of Work
+        private readonly Mock<IUnitOfWork> _unitOfWorkMoq;
+        private readonly IUnitOfWork _unitOfWork;
 
         // Services
         private readonly CountryGetterService _countryGetterService;
-            private readonly CountryAdderService _countryAdderService;
+        private readonly CountryAdderService _countryAdderService;
 
-            public CountryServiceTest()
-            {
-                _fixture = new Fixture();
+        public CountryServiceTest()
+        {
+            _fixture = new Fixture();
 
-                _fixture.Behaviors.OfType<ThrowingRecursionBehavior>()
-                    .ToList()
-                    .ForEach(b => _fixture.Behaviors.Remove(b));
-                _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+            _fixture.Behaviors.OfType<ThrowingRecursionBehavior>()
+                .ToList()
+                .ForEach(b => _fixture.Behaviors.Remove(b));
+            _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
 
-                _countryRepositryContractMoq = new Mock<CountryRepositryContract>();
-                _countryRepositryContract = _countryRepositryContractMoq.Object;
+            _countryRepositryContractMoq = new Mock<CountryRepositryContract>();
+            _countryRepositryContract = _countryRepositryContractMoq.Object;
 
 
-                _unitOfWorkMoq = new Mock<IUnitOfWork>();
-                _unitOfWork = _unitOfWorkMoq.Object;
+            _unitOfWorkMoq = new Mock<IUnitOfWork>();
+            _unitOfWork = _unitOfWorkMoq.Object;
 
-                ILogger<CountryGetterService> loggerGetter = new Mock<ILogger<CountryGetterService>>().Object;
-                ILogger<CountryAdderService> loggerAdder = new Mock<ILogger<CountryAdderService>>().Object;
+            ILogger<CountryGetterService> loggerGetter = new Mock<ILogger<CountryGetterService>>().Object;
+            ILogger<CountryAdderService> loggerAdder = new Mock<ILogger<CountryAdderService>>().Object;
 
-            
-                _countryGetterService = new CountryGetterService(_countryRepositryContract, loggerGetter);
-                _countryAdderService = new CountryAdderService(_countryRepositryContract, loggerAdder,_unitOfWork);
-            }
-        
+
+            _countryGetterService = new CountryGetterService(_countryRepositryContract, loggerGetter);
+            _countryAdderService = new CountryAdderService(_countryRepositryContract, loggerAdder, _unitOfWork);
+        }
+
 
         #region AddCountryRequest Tests
 

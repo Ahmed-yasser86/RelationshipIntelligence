@@ -11,12 +11,12 @@ namespace ContactsManger.Core.DTOs
     {
         public string token { get; set; } = String.Empty;
         public string personeName { get; set; } = String.Empty;
-        public string personeEmail { get; set; }= String.Empty;
+        public string personeEmail { get; set; } = String.Empty;
 
         public string refreshToken { get; set; } = String.Empty;
-       
+
         public DateTime RefreshTokenExpirationTime { get; set; }
-        public DateTime ExpirationTime { get; set; } 
+        public DateTime ExpirationTime { get; set; }
 
     }
 }

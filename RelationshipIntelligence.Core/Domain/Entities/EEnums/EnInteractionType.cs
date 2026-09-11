@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 
 namespace ContactsManger.Core.Domain.Entities.EEnums
 {
-   public enum  EnInteractionType
+    public enum EnInteractionType
     {
-                Call,
-                Email,
-                Meeting,
-                Message,
+        Call,
+        Email,
+        Meeting,
+        Message,
 
     }
 }

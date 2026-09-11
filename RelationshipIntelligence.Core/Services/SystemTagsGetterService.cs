@@ -11,10 +11,11 @@ using System.Threading.Tasks;
 
 namespace ContactsManger.Core.Services
 {
-    public class SystemTagsGetterService :  ISystemTagsGetter
+    public class SystemTagsGetterService : ISystemTagsGetter
     {
         private readonly SystemStatusTagRepositryContract _systemTagRepositryContract;
-        public SystemTagsGetterService(SystemStatusTagRepositryContract systemTagRepositryContract) {
+        public SystemTagsGetterService(SystemStatusTagRepositryContract systemTagRepositryContract)
+        {
 
             _systemTagRepositryContract = systemTagRepositryContract;
         }
@@ -23,12 +24,13 @@ namespace ContactsManger.Core.Services
             IEnumerable<SystemStatusTag> systemStatusTags;
             try
             {
-              systemStatusTags = await _systemTagRepositryContract.GetAllSystemStatusTags();
+                systemStatusTags = await _systemTagRepositryContract.GetAllSystemStatusTags();
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 throw;
             }
-            var sytemtags =  systemStatusTags.Select(t => t.ConvertToDto()).ToList();
+            var sytemtags = systemStatusTags.Select(t => t.ConvertToDto()).ToList();
             return sytemtags;
         }
     }

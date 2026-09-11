@@ -12,7 +12,7 @@ namespace ContactsManger.Core.ServiceContracts
     {
 
         public Task<IEnumerable<SystemStatusTagResponse>> GetSystemTags();
-       
+
 
     }
 }

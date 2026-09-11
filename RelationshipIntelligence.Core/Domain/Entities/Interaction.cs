@@ -17,7 +17,7 @@ namespace ContactsManger.Core.Domain.Entities
 
         [Required]
         [EnumRange(typeof(EnInteractionType))]
-        public EnInteractionType InteractionType { get; set; } 
+        public EnInteractionType InteractionType { get; set; }
 
         [Required]
         [StringLength(100)]

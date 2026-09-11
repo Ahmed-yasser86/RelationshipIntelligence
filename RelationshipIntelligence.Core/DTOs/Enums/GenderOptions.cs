@@ -12,4 +12,4 @@ namespace ServiceContracts.DTOs.Enums
         Female,
         Other
     }
-    }
+}

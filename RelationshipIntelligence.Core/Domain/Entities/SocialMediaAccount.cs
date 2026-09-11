@@ -21,7 +21,7 @@ namespace ContactsManger.Core.Domain.Entities
         public string? Platform { get; set; } = string.Empty;
 
         [Required]
-        public string Url { get; set; } 
+        public string Url { get; set; }
 
         public ICollection<Person> People { get; set; } = new Collection<Person>();
 

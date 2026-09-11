@@ -27,7 +27,7 @@ namespace ContactsManager.API.Filters
             };
 
             problem.Extensions["traceId"] = context.HttpContext.TraceIdentifier;
-         
+
             context.Result = new ObjectResult(problem) { StatusCode = StatusCodes.Status500InternalServerError };
             context.ExceptionHandled = true;
             return Task.CompletedTask;

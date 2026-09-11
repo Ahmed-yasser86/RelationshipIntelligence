@@ -30,8 +30,6 @@ runs:
         out: 'dependency-check-reports'
         args: >
           --failOnCVSS 7
-          --scan "RelationshipIntelligence.*/**/*.csproj"
-          --scan "**/project.assets.json"
 
     - name: Upload Dependency Check results
       uses: actions/upload-artifact@v4

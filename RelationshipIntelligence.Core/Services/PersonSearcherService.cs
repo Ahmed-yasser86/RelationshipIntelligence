@@ -31,11 +31,11 @@ namespace Servicess
         {
             Expression<Func<Person, bool>> filter = p => !p.IsDeleted;
 
-            var (items, totalCount) =  await PersonRipository.GetSortedFilteredPersonsPaged(
+            var (items, totalCount) = await PersonRipository.GetSortedFilteredPersonsPaged(
                 pageNumber: page,
                 pageSize: size,
                 predicate: filter,
-                sortBy: sortBy, 
+                sortBy: sortBy,
                 sortDirection: SortDirection.Descending
             );
 
@@ -116,7 +116,7 @@ namespace Servicess
                         case nameof(Person.Circles):
                             {
                                 _logger.LogDebug("Searching persons by Circles containing: {Parameter}", PersonParamter);
-                              
+
                                 var (people, count) = await PersonRipository.GetFilteredPersonsPaged(pageNumber, pageSize, p => p.Circles.Any(c => c.Name.Contains(PersonParamter)));
                                 totalCount = count;
                                 MatchingResults = people
@@ -315,8 +315,8 @@ namespace Servicess
         }
 
 
-public async Task<PagedResult<PersonViewDTO>> SearchPersonsByCompositeFilter(
-    PersonCompositeFilter filter, int pageNumber, int pageSize)
+        public async Task<PagedResult<PersonViewDTO>> SearchPersonsByCompositeFilter(
+            PersonCompositeFilter filter, int pageNumber, int pageSize)
         {
             using (Operation.Time("Composite filter search. Page: {PageNumber}, Size: {PageSize}", pageNumber, pageSize))
             {

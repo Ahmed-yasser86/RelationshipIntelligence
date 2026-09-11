@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ServiceContracts.DTOs.Enums
 {
-     public enum sortedListOp
+    public enum sortedListOp
     {
         Ascending,
         Descending

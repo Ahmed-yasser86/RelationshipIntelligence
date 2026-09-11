@@ -21,7 +21,7 @@ namespace ContactsManger.Core.DTOs.PersonDTOs
         public string CountryName { get; set; }
 
         public List<CircleResponse> Circles { get; set; } = new List<CircleResponse>();
-   
+
         public List<ContactItemRoleResponse> ContactItemRoles { get; set; } = new List<ContactItemRoleResponse>();
 
         /// <summary>
@@ -32,7 +32,7 @@ namespace ContactsManger.Core.DTOs.PersonDTOs
         public List<SystemStatusTagResponse> SystemStatusTags { get; set; } = new List<SystemStatusTagResponse>();
 
         public List<UserDefinedTagsResponse> UserDefinedTags { get; set; } = new List<UserDefinedTagsResponse>();
-    
+
         public List<InteractionResponse> Interactions { get; set; } = new List<InteractionResponse>();
 
 
@@ -66,4 +66,4 @@ namespace ContactsManger.Core.DTOs.PersonDTOs
         }
 
     }
-  }
+}

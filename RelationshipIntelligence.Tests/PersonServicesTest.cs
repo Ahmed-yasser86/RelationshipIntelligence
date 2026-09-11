@@ -73,9 +73,9 @@ namespace CRUDTests
             DbContextMock<AppDBContext> dbContextMock = new DbContextMock<AppDBContext>(new DbContextOptionsBuilder<AppDBContext>().Options);
 
             _SocialMediaAccountRepositryContractMoq = new Mock<SocialMediaAccountRepositryContract>();
-            _socialMediaAccountRepositryContract =  _SocialMediaAccountRepositryContractMoq.Object;
+            _socialMediaAccountRepositryContract = _SocialMediaAccountRepositryContractMoq.Object;
             _unitOfWorkMoq = new Mock<IUnitOfWork>();
-            _unitOfWork = _unitOfWorkMoq.Object; 
+            _unitOfWork = _unitOfWorkMoq.Object;
 
             _personRepositryContractMoq = new Mock<PersonRepositryContract>();
             _personRepositryContract = _personRepositryContractMoq.Object;

@@ -14,7 +14,7 @@ namespace ContactsManger.Core.Domain.Entities
 
         [EnumRange(typeof(EnSystemStatusTag))]
 
-        public EnSystemStatusTag StatusTagId { get; set; }= EnSystemStatusTag.ModeratePriority;
+        public EnSystemStatusTag StatusTagId { get; set; } = EnSystemStatusTag.ModeratePriority;
 
         [Required]
         [StringLength(100)]

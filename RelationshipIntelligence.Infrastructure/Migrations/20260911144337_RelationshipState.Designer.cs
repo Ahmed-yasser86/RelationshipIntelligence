@@ -4,6 +4,7 @@ using Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ContactsManager.Inferastructure.Migrations
 {
     [DbContext(typeof(AppDBContext))]
-    partial class AppDBContextModelSnapshot : ModelSnapshot
+    [Migration("20260911144337_RelationshipState")]
+    partial class RelationshipState
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1010,82 +1013,6 @@ namespace ContactsManager.Inferastructure.Migrations
                             CountryId = new Guid("c000000a-0000-0000-0000-000000000000"),
                             CountryName = "Norway"
                         });
-                });
-
-            modelBuilder.Entity("Entities.DigestDelivery", b =>
-                {
-                    b.Property<Guid>("DigestDeliveryId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("ApplicationUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedAtUtc")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("PersonIdsJson")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("WeekStartUtc")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("DigestDeliveryId");
-
-                    b.HasIndex("ApplicationUserId", "WeekStartUtc")
-                        .IsUnique();
-
-                    b.ToTable("DigestDeliveries", (string)null);
-                });
-
-            modelBuilder.Entity("Entities.DigestMetric", b =>
-                {
-                    b.Property<Guid>("DigestMetricId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("ActionTaken")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("ActionType")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("ApplicationUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("DeliveryId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("Opened")
-                        .HasColumnType("bit");
-
-                    b.Property<Guid>("PersonId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("DigestMetricId");
-
-                    b.ToTable("DigestMetrics", (string)null);
-                });
-
-            modelBuilder.Entity("Entities.DigestPreference", b =>
-                {
-                    b.Property<Guid>("ApplicationUserId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("Count")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("Enabled")
-                        .HasColumnType("bit");
-
-                    b.Property<double>("Threshold")
-                        .HasColumnType("float");
-
-                    b.HasKey("ApplicationUserId");
-
-                    b.ToTable("DigestPreferences", (string)null);
                 });
 
             modelBuilder.Entity("Entities.Person", b =>

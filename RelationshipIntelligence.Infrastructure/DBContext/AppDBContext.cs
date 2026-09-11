@@ -30,6 +30,10 @@ namespace Entities
         public virtual DbSet<Note> Notes { get; set; }
         public virtual DbSet<Interaction> Interactions { get; set; }
         public virtual DbSet<SocialMediaAccount> SocialMediaAccounts { get; set; }
+        public virtual DbSet<RelationshipState> RelationshipStates { get; set; }
+        public virtual DbSet<DigestDelivery> DigestDeliveries { get; set; }
+        public virtual DbSet<DigestMetric> DigestMetrics { get; set; }
+        public virtual DbSet<DigestPreference> DigestPreferences { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -44,9 +48,27 @@ namespace Entities
             modelBuilder.Entity<Note>().ToTable("Notes");
             modelBuilder.Entity<Interaction>().ToTable("Interactions");
             modelBuilder.Entity<SocialMediaAccount>().ToTable("SocialMediaAccounts");
+            modelBuilder.Entity<RelationshipState>().ToTable("RelationshipStates");
+            modelBuilder.Entity<RelationshipState>()
+                .HasIndex(s => new { s.ApplicationUserId, s.PersonId })
+                .IsUnique();
 
             modelBuilder.Entity<Person>()
                 .HasQueryFilter(p => p.ApplicationUserId == _currentUserId && !p.IsDeleted);
+            modelBuilder.Entity<RelationshipState>()
+                .HasQueryFilter(s => s.ApplicationUserId == _currentUserId);
+            modelBuilder.Entity<DigestDelivery>().ToTable("DigestDeliveries");
+            modelBuilder.Entity<DigestDelivery>()
+                .HasIndex(d => new { d.ApplicationUserId, d.WeekStartUtc })
+                .IsUnique();
+            modelBuilder.Entity<DigestDelivery>()
+                .HasQueryFilter(d => d.ApplicationUserId == _currentUserId);
+            modelBuilder.Entity<DigestMetric>().ToTable("DigestMetrics");
+            modelBuilder.Entity<DigestMetric>()
+                .HasQueryFilter(m => m.ApplicationUserId == _currentUserId);
+            modelBuilder.Entity<DigestPreference>().ToTable("DigestPreferences");
+            modelBuilder.Entity<DigestPreference>()
+                .HasQueryFilter(p => p.ApplicationUserId == _currentUserId);
 
             modelBuilder.Entity<Person>()
                 .HasOne(p => p.ApplicationUser)

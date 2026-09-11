@@ -206,6 +206,16 @@ namespace Repositories
                 .FirstOrDefaultAsync(p => p.PersonId == id);
         }
 
+        public async Task<Person?> GetPersonByIdIgnoringFilters(Guid? id)
+        {
+            if (id == null)
+                return null;
+
+            return await PersonWithAllIncludes()
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(p => p.PersonId == id);
+        }
+
 
 
         private async Task SyncCollection<TEntity, TKey>(

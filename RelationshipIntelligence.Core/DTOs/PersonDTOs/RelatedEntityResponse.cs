@@ -52,6 +52,7 @@ namespace ServiceContracts.DTOs
     public class InteractionResponse
     {
         public Guid InteractionId { get; set; }
+        public Guid PersonId { get; set; }
         public EnInteractionType InteractionType { get; set; }
         public string InteractionTitle { get; set; }
         public string? InteractionDescription { get; set; }
@@ -127,11 +128,17 @@ namespace ServiceContracts.DTOs
             return new InteractionResponse
             {
                 InteractionId = interaction.InteractionId,
+                PersonId = interaction.PersonId,
                 InteractionType = interaction.InteractionType,
                 InteractionTitle = interaction.InteractionTitle,
                 InteractionDescription = interaction.InteractionDescription,
                 TimeOfInteraction = interaction.TimeOfInteraction
             };
+        }
+
+        public static List<InteractionResponse> ConvertToDtos(this IEnumerable<Interaction> interactions)
+        {
+            return interactions.Select(i => i.ConvertToDto()).ToList();
         }
     }
 }

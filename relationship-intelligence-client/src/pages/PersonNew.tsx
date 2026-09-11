@@ -69,14 +69,14 @@ export function PersonNew() {
     setError(null);
     setBusy(true);
     try {
-      const res = await api.post<{ PersonId: string }>("/api/Contacts/PostQuickAddContact", {
+      const res = await api.post<{ personId: string }>("/api/Contacts/PostQuickAddContact", {
         Name: quick.Name.trim(),
         email: quick.email.trim(),
         Organizations: splitList(quick.Organizations),
         CurrentRoles: splitList(quick.CurrentRoles),
         Origin: quick.Origin.trim() === "" ? null : quick.Origin.trim(),
       });
-      navigate(`/people/${res.PersonId}`);
+      navigate(`/people/${res.personId}`);
     } catch (err) {
       setError(err instanceof ApiError ? err.body || err.message : "Could not add person.");
     } finally {
@@ -89,7 +89,7 @@ export function PersonNew() {
     setError(null);
     setBusy(true);
     try {
-      const res = await api.post<{ PersonId: string }>("/api/Contacts/PostAddPersoneRequest", {
+      const res = await api.post<{ personId: string }>("/api/Contacts/PostAddPersoneRequest", {
         Name: full.Name.trim() === "" ? null : full.Name.trim(),
         email: full.email.trim() === "" ? null : full.email.trim(),
         phone: full.phone.trim() === "" ? null : full.phone.trim(),
@@ -106,7 +106,7 @@ export function PersonNew() {
         ConnectionChannels: splitList(full.ConnectionChannels),
         UserDefinedTags: splitList(full.UserDefinedTags),
       });
-      navigate(`/people/${res.PersonId}`);
+      navigate(`/people/${res.personId}`);
     } catch (err) {
       setError(err instanceof ApiError ? err.body || err.message : "Could not add person.");
     } finally {
@@ -196,8 +196,8 @@ export function PersonNew() {
                   </SelectTrigger>
                   <SelectContent>
                     {countries.map((c) => (
-                      <SelectItem key={c.CountryId} value={c.CountryId}>
-                        {c.CountryName}
+                      <SelectItem key={c.countryId} value={c.countryId}>
+                        {c.countryName}
                       </SelectItem>
                     ))}
                   </SelectContent>

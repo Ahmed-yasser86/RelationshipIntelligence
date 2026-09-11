@@ -106,7 +106,7 @@ export function UrgencyBar({ value }: { value: number }) {
   );
 }
 
-export function PersonAvatar({ name, className }: { name: string; className?: string }) {
+export function PersonAvatar({ name, className }: { name: string | null | undefined; className?: string }) {
   return (
     <div
       className={cn(

@@ -8,13 +8,13 @@ import { daysSince, timeAgo } from "@/lib/format";
 import type { RelationshipHealth } from "@/lib/types";
 
 function cadenceLine(item: RelationshipHealth): string {
-  const silent = daysSince(item.LastContactAtUtc);
+  const silent = daysSince(item.lastContactAtUtc);
   const rhythm =
-    item.CadenceReferenceDays != null
-      ? `roughly every ${Math.round(item.CadenceReferenceDays)} days`
+    item.cadenceReferenceDays != null
+      ? `roughly every ${Math.round(item.cadenceReferenceDays)} days`
       : "no rhythm established yet";
   const quiet = silent == null ? "no contact recorded" : `quiet for ${silent}d`;
-  return `Your rhythm: ${rhythm} — ${quiet}. Last contact ${timeAgo(item.LastContactAtUtc)}.`;
+  return `Your rhythm: ${rhythm} — ${quiet}. Last contact ${timeAgo(item.lastContactAtUtc)}.`;
 }
 
 export function Queue() {
@@ -63,29 +63,29 @@ export function Queue() {
       {items !== null && items.length > 0 && (
         <ol className="flex flex-col gap-3">
           {items.map((item, i) => (
-            <li key={item.PersonId} className="rounded-lg border px-4 py-3">
+            <li key={`${item.personId}-${i}`} className="rounded-lg border px-4 py-3">
               <div className="flex items-center gap-3">
                 <span className="w-5 shrink-0 text-sm tabular-nums text-muted-foreground">
                   {i + 1}
                 </span>
-                <PersonAvatar name={item.Name} />
+                <PersonAvatar name={item.name} />
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <Link
-                      to={`/people/${item.PersonId}`}
+                      to={`/people/${item.personId}`}
                       className="truncate text-sm font-semibold hover:underline"
                     >
-                      {item.Name}
+                      {item.name ?? "Unnamed contact"}
                     </Link>
-                    <BandBadge band={item.Band} />
-                    {item.IsBridge && <Badge variant="secondary">Bridge</Badge>}
-                    {item.IsImportant && <Badge variant="secondary">Key</Badge>}
+                    <BandBadge band={item.band} />
+                    {item.isBridge && <Badge variant="secondary">Bridge</Badge>}
+                    {item.isImportant && <Badge variant="secondary">Key</Badge>}
                   </div>
                   <p className="mt-0.5 truncate text-xs text-muted-foreground">
                     {cadenceLine(item)}
                   </p>
                 </div>
-                <UrgencyBar value={item.UrgencyScore} />
+                <UrgencyBar value={item.urgencyScore} />
               </div>
             </li>
           ))}

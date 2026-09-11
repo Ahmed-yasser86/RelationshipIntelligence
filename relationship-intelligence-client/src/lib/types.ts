@@ -1,4 +1,5 @@
-// Backend DTO mirrors. Property names match the API's JSON exactly (PascalCase).
+// Backend DTO mirrors. The API serializes JSON in camelCase - property names
+// below match the actual wire format exactly.
 
 export interface AuthResponse {
   token: string;
@@ -10,142 +11,142 @@ export interface AuthResponse {
 }
 
 export interface CircleResponse {
-  CircleId: string;
-  Name: string;
+  circleId: string;
+  name: string;
 }
 export interface ContactItemRoleResponse {
-  ContactsRoleId: string;
-  Role: string;
+  contactsRoleId: string;
+  role: string;
 }
 export interface ConnectionChannelResponse {
-  ConnectionChannelId: string;
-  ConnectionChannelName: string;
+  connectionChannelId: string;
+  connectionChannelName: string;
 }
 export interface SystemStatusTagResponse {
-  StatusTagId: number;
-  Name: string;
-  Description: string | null;
+  statusTagId: number;
+  name: string;
+  description: string | null;
 }
 export interface UserDefinedTagsResponse {
-  TagId: string;
-  TagName: string;
+  tagId: string;
+  tagName: string;
 }
 export interface SocialMediaAccountResponse {
-  SocialMediaAccountId: string;
-  Platform: string | null;
-  Url: string;
+  socialMediaAccountId: string;
+  platform: string | null;
+  url: string;
 }
 export interface NoteResponse {
-  NoteId: string;
-  NoteType: number;
-  Content: string;
+  noteId: string;
+  noteType: number;
+  content: string;
 }
 export interface InteractionResponse {
-  InteractionId: string;
-  PersonId: string;
-  InteractionType: number;
-  InteractionTitle: string;
-  InteractionDescription: string | null;
-  TimeOfInteraction: string;
+  interactionId: string;
+  personId: string;
+  interactionType: number;
+  interactionTitle: string;
+  interactionDescription: string | null;
+  timeOfInteraction: string;
 }
 
 export interface PersonView {
-  PersonId: string;
-  Name: string;
+  personId: string;
+  name: string | null;
   email: string | null;
   phone: string;
-  CountryName: string;
-  Circles: CircleResponse[];
-  ContactItemRoles: ContactItemRoleResponse[];
-  ConnectionChannels: ConnectionChannelResponse[];
-  SystemStatusTags: SystemStatusTagResponse[];
-  UserDefinedTags: UserDefinedTagsResponse[];
-  Interactions: InteractionResponse[];
+  countryName: string;
+  circles: CircleResponse[];
+  contactItemRoles: ContactItemRoleResponse[];
+  connectionChannels: ConnectionChannelResponse[];
+  systemStatusTags: SystemStatusTagResponse[];
+  userDefinedTags: UserDefinedTagsResponse[];
+  interactions: InteractionResponse[];
 }
 
 export interface PersonDetail extends PersonView {
-  Age: number;
-  DateOfBirth: string | null;
-  Gender: string;
-  Address: string | null;
-  CountryId: string | null;
-  NewsLetter: boolean | null;
-  ContextMemory: string | null;
-  ProfileImagePath: string | null;
-  Origin: string | null;
-  LinkedInProfile: string | null;
-  OtherInformation: string | null;
-  Organizations: CircleResponse[];
-  CurrentRoles: ContactItemRoleResponse[];
-  SocialMediaAccounts: SocialMediaAccountResponse[];
-  Notes: NoteResponse[];
+  age: number;
+  dateOfBirth: string | null;
+  gender: string;
+  address: string | null;
+  countryId: string | null;
+  newsLetter: boolean | null;
+  contextMemory: string | null;
+  profileImagePath: string | null;
+  origin: string | null;
+  linkedInProfile: string | null;
+  otherInformation: string | null;
+  organizations: CircleResponse[];
+  currentRoles: ContactItemRoleResponse[];
+  socialMediaAccounts: SocialMediaAccountResponse[];
+  notes: NoteResponse[];
 }
 
 export interface PagedResult<T> {
-  Items: T[];
-  TotalCount: number;
-  PageNumber: number;
-  PageSize: number;
-  HasMore: boolean;
+  items: T[];
+  totalCount: number;
+  pageNumber: number;
+  pageSize: number;
+  hasMore: boolean;
 }
 
 export interface RelationshipHealth {
-  PersonId: string;
-  Name: string;
-  TieStrength: number;
-  LastContactAtUtc: string | null;
-  CadenceReferenceDays: number | null;
-  UrgencyScore: number;
-  Band: string;
-  IsBridge: boolean;
-  IsImportant: boolean;
+  personId: string;
+  name: string | null;
+  tieStrength: number;
+  lastContactAtUtc: string | null;
+  cadenceReferenceDays: number | null;
+  urgencyScore: number;
+  band: string;
+  isBridge: boolean;
+  isImportant: boolean;
 }
 
 export interface DigestEntry {
-  Health: RelationshipHealth;
-  Suggestion: string;
-  ActionUrl: string;
-  RemindUrl: string;
+  health: RelationshipHealth;
+  suggestion: string;
+  actionUrl: string;
+  remindUrl: string;
 }
 
 export interface DigestPayload {
-  DeliveryId: string;
-  WeekStartUtc: string;
-  Entries: DigestEntry[];
-  NetworkHealth: number;
+  deliveryId: string;
+  weekStartUtc: string;
+  entries: DigestEntry[];
+  networkHealth: number;
 }
 
 export interface DigestPreference {
-  ApplicationUserId: string;
-  Enabled: boolean;
-  Threshold: number;
-  Count: number;
+  applicationUserId: string;
+  enabled: boolean;
+  threshold: number;
+  count: number;
 }
 
 export interface NetworkNode {
-  PersonId: string;
-  Name: string;
-  Degree: number;
-  IsBridge: boolean;
-  IsIsolated: boolean;
-  UrgencyScore: number;
+  personId: string;
+  name: string | null;
+  degree: number;
+  isBridge: boolean;
+  isIsolated: boolean;
+  urgencyScore: number;
 }
 
 export interface NetworkEdge {
-  From: string;
-  To: string;
-  Reason: string;
+  from: string;
+  to: string;
+  reason: string;
 }
 
 export interface NetworkGraph {
-  Nodes: NetworkNode[];
-  Edges: NetworkEdge[];
-  ClusterCount: number;
+  nodes: NetworkNode[];
+  edges: NetworkEdge[];
+  clusterCount: number;
 }
 
 export interface CountryResponse {
-  CountryId: string;
-  CountryName: string;
+  countryId: string;
+  countryName: string;
 }
 
 export const InteractionTypes = ["Call", "Email", "Meeting", "Message"] as const;

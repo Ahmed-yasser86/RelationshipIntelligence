@@ -19,8 +19,8 @@ import type { PagedResult, PersonView } from "@/lib/types";
 const PAGE_SIZE = 10;
 
 function lastContact(p: PersonView): string {
-  const times = (p.Interactions ?? [])
-    .map((i) => i.TimeOfInteraction)
+  const times = (p.interactions ?? [])
+    .map((i) => i.timeOfInteraction)
     .sort()
     .reverse();
   return times.length > 0 ? timeAgo(times[0]) : "no contact yet";
@@ -112,7 +112,7 @@ export function People() {
   }
 
   const totalPages =
-    data != null ? Math.max(1, Math.ceil(data.TotalCount / data.PageSize)) : 1;
+    data != null ? Math.max(1, Math.ceil(data.totalCount / data.pageSize)) : 1;
 
   return (
     <div>
@@ -120,7 +120,7 @@ export function People() {
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">People</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            {data ? `${data.TotalCount} people in your network` : "Your network"}
+            {data ? `${data.totalCount} people in your network` : "Your network"}
           </p>
         </div>
         <div className="flex gap-2">
@@ -229,7 +229,7 @@ export function People() {
 
       {error && <ErrorState message={error} onRetry={() => void load(page)} />}
       {data === null && !error && <LoadingList rows={6} />}
-      {data !== null && data.Items.length === 0 && (
+      {data !== null && data.items.length === 0 && (
         <EmptyState
           title="No people found"
           body="Nothing matches the current search. Clear the search or add the person to your network."
@@ -240,35 +240,35 @@ export function People() {
           }
         />
       )}
-      {data !== null && data.Items.length > 0 && (
+      {data !== null && data.items.length > 0 && (
         <>
           <ul className="flex flex-col gap-2">
-            {data.Items.map((p) => (
-              <li key={p.PersonId} className="rounded-lg border px-4 py-3">
+            {data.items.map((p) => (
+              <li key={p.personId} className="rounded-lg border px-4 py-3">
                 <div className="flex items-center gap-3">
-                  <PersonAvatar name={p.Name} />
+                  <PersonAvatar name={p.name} />
                   <div className="min-w-0 flex-1">
                     <Link
-                      to={`/people/${p.PersonId}`}
+                      to={`/people/${p.personId}`}
                       className="truncate text-sm font-semibold hover:underline"
                     >
-                      {p.Name}
+                      {p.name ?? "Unnamed contact"}
                     </Link>
                     <p className="truncate text-xs text-muted-foreground">
-                      {[p.Circles[0]?.Name, p.ContactItemRoles[0]?.Role]
+                      {[p.circles[0]?.name, p.contactItemRoles[0]?.role]
                         .filter(Boolean)
-                        .join(" · ") || p.CountryName || p.email || ""}
+                        .join(" · ") || p.countryName || p.email || ""}
                       {" · "}last contact {lastContact(p)}
                     </p>
                     <div className="mt-1 flex flex-wrap gap-1">
-                      {p.SystemStatusTags.slice(0, 3).map((t) => (
-                        <Badge key={t.StatusTagId} variant="secondary" className="text-[11px]">
-                          {t.Name}
+                      {p.systemStatusTags.slice(0, 3).map((t) => (
+                        <Badge key={t.statusTagId} variant="secondary" className="text-[11px]">
+                          {t.name}
                         </Badge>
                       ))}
-                      {p.UserDefinedTags.slice(0, 3).map((t) => (
-                        <Badge key={t.TagId} variant="outline" className="text-[11px]">
-                          {t.TagName}
+                      {p.userDefinedTags.slice(0, 3).map((t) => (
+                        <Badge key={t.tagId} variant="outline" className="text-[11px]">
+                          {t.tagName}
                         </Badge>
                       ))}
                     </div>
@@ -279,22 +279,22 @@ export function People() {
           </ul>
           <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">
             <span>
-              Page {data.PageNumber} of {totalPages} · {data.TotalCount} total
+              Page {data.pageNumber} of {totalPages} · {data.totalCount} total
             </span>
             <div className="flex gap-2">
               <Button
                 variant="outline"
                 size="sm"
-                disabled={data.PageNumber <= 1}
-                onClick={() => void load(data.PageNumber - 1)}
+                disabled={data.pageNumber <= 1}
+                onClick={() => void load(data.pageNumber - 1)}
               >
                 Previous
               </Button>
               <Button
                 variant="outline"
                 size="sm"
-                disabled={!data.HasMore}
-                onClick={() => void load(data.PageNumber + 1)}
+                disabled={!data.hasMore}
+                onClick={() => void load(data.pageNumber + 1)}
               >
                 Next
               </Button>

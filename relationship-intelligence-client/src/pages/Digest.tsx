@@ -16,9 +16,9 @@ function Preferences({
   pref: DigestPreference;
   onSaved: () => void;
 }) {
-  const [enabled, setEnabled] = useState(pref.Enabled);
-  const [threshold, setThreshold] = useState(pref.Threshold);
-  const [count, setCount] = useState(pref.Count);
+  const [enabled, setEnabled] = useState(pref.enabled);
+  const [threshold, setThreshold] = useState(pref.threshold);
+  const [count, setCount] = useState(pref.count);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
@@ -116,7 +116,7 @@ export function Digest() {
     setSendResult(null);
     try {
       const res = await api.post<DigestPayload | string>("/api/Digest/PostSendDigest");
-      setSendResult(typeof res === "string" ? res : `Sent — ${res.Entries.length} contacts.`);
+      setSendResult(typeof res === "string" ? res : `Sent — ${res.entries.length} contacts.`);
     } catch (err) {
       setSendResult(err instanceof ApiError ? err.body || err.message : "Send failed.");
     } finally {
@@ -131,7 +131,7 @@ export function Digest() {
           <h1 className="text-2xl font-semibold tracking-tight">Weekly digest</h1>
           <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
             {payload
-              ? `Week of ${formatDate(payload.WeekStartUtc)} · network health ${payload.NetworkHealth}/100. Same selection the email carries — act here or from your inbox.`
+              ? `Week of ${formatDate(payload.weekStartUtc)} · network health ${payload.networkHealth}/100. Same selection the email carries — act here or from your inbox.`
               : "The five relationships to protect this week."}
           </p>
         </div>
@@ -143,32 +143,32 @@ export function Digest() {
 
       {error && <ErrorState message={error} onRetry={() => void load()} />}
       {payload === null && !error && <LoadingList rows={5} />}
-      {payload !== null && payload.Entries.length === 0 && (
+      {payload !== null && payload.entries.length === 0 && (
         <EmptyState
           title="A quiet week"
           body="No relationship crosses your urgency threshold right now. The digest will reappear the moment something needs protection."
         />
       )}
-      {payload !== null && payload.Entries.length > 0 && (
+      {payload !== null && payload.entries.length > 0 && (
         <ol className="mb-6 flex flex-col gap-3">
-          {payload.Entries.map((entry) => (
-            <li key={entry.Health.PersonId} className="rounded-lg border px-4 py-3">
+          {payload.entries.map((entry) => (
+            <li key={entry.health.personId} className="rounded-lg border px-4 py-3">
               <div className="flex items-center gap-3">
-                <PersonAvatar name={entry.Health.Name} />
+                <PersonAvatar name={entry.health.name} />
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <Link
-                      to={`/people/${entry.Health.PersonId}`}
+                      to={`/people/${entry.health.personId}`}
                       className="text-sm font-semibold hover:underline"
                     >
-                      {entry.Health.Name}
+                      {entry.health.name ?? "Unnamed contact"}
                     </Link>
-                    <BandBadge band={entry.Health.Band} />
+                    <BandBadge band={entry.health.band} />
                   </div>
-                  <p className="mt-0.5 text-sm text-muted-foreground">{entry.Suggestion}</p>
+                  <p className="mt-0.5 text-sm text-muted-foreground">{entry.suggestion}</p>
                 </div>
                 <a
-                  href={entry.ActionUrl}
+                  href={entry.actionUrl}
                   target="_blank"
                   rel="noreferrer"
                   className={cn(buttonVariants({ size: "sm", variant: "outline" }))}

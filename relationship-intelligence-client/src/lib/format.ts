@@ -36,10 +36,12 @@ export function bandStyle(band: string): string {
   return BAND_STYLES[band] ?? "bg-muted text-muted-foreground border-border";
 }
 
-export function initials(name: string): string {
-  return name
+export function initials(name: string | null | undefined): string {
+  if (!name) return "?";
+  const parts = name
     .split(/\s+/)
     .slice(0, 2)
     .map((p) => p[0]?.toUpperCase() ?? "")
     .join("");
+  return parts === "" ? "?" : parts;
 }

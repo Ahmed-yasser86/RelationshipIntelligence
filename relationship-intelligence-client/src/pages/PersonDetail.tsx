@@ -232,7 +232,7 @@ function ImportDialog({ personId, onDone }: { personId: string; onDone: () => vo
 
 function Timeline({ interactions }: { interactions: InteractionResponse[] }) {
   const sorted = [...(interactions ?? [])].sort(
-    (a, b) => +new Date(b.TimeOfInteraction) - +new Date(a.TimeOfInteraction),
+    (a, b) => +new Date(b.timeOfInteraction) - +new Date(a.timeOfInteraction),
   );
   if (sorted.length === 0) {
     return (
@@ -245,19 +245,19 @@ function Timeline({ interactions }: { interactions: InteractionResponse[] }) {
   return (
     <ol className="relative ml-1.5 flex flex-col gap-0 border-l pl-5">
       {sorted.map((i) => (
-        <li key={i.InteractionId} className="relative pb-5 last:pb-0">
+        <li key={i.interactionId} className="relative pb-5 last:pb-0">
           <span className="absolute -left-5 top-1.5 h-2 w-2 -translate-x-1/2 rounded-full bg-primary" />
           <div className="flex flex-wrap items-baseline gap-x-2">
-            <span className="text-sm font-semibold">{i.InteractionTitle}</span>
+            <span className="text-sm font-semibold">{i.interactionTitle}</span>
             <Badge variant="outline" className="text-[11px]">
-              {InteractionTypes[i.InteractionType] ?? i.InteractionType}
+              {InteractionTypes[i.interactionType] ?? i.interactionType}
             </Badge>
             <span className="text-xs text-muted-foreground">
-              {formatDate(i.TimeOfInteraction)} · {timeAgo(i.TimeOfInteraction)}
+              {formatDate(i.timeOfInteraction)} · {timeAgo(i.timeOfInteraction)}
             </span>
           </div>
-          {i.InteractionDescription && (
-            <p className="mt-0.5 text-sm text-muted-foreground">{i.InteractionDescription}</p>
+          {i.interactionDescription && (
+            <p className="mt-0.5 text-sm text-muted-foreground">{i.interactionDescription}</p>
           )}
         </li>
       ))}
@@ -275,12 +275,12 @@ export function PersonDetail() {
   useEffect(() => {
     api
       .get<RelationshipHealth[]>("/api/Contacts/GetRelationshipQueue?top=50")
-      .then((q) => setState(q.find((x) => x.PersonId === id) ?? null))
+      .then((q) => setState(q.find((x) => x.personId === id) ?? null))
       .catch(() => undefined);
   }, [id, person]);
 
   async function onDelete() {
-    if (!id || !window.confirm(`Delete ${person?.Name}? This cannot be undone.`)) return;
+    if (!id || !window.confirm(`Delete ${person?.name}? This cannot be undone.`)) return;
     setDeleting(true);
     try {
       await api.post(`/api/Contacts/DeletePersoneObject?id=${id}`);
@@ -302,8 +302,8 @@ export function PersonDetail() {
   if (!person) return <LoadingList rows={6} />;
 
   const silent = daysSince(
-    [...(person.Interactions ?? [])]
-      .map((i) => i.TimeOfInteraction)
+    [...(person.interactions ?? [])]
+      .map((i) => i.timeOfInteraction)
       .sort()
       .reverse()[0],
   );
@@ -315,14 +315,14 @@ export function PersonDetail() {
       </NavButton>
 
       <div className="flex flex-wrap items-start gap-4">
-        <PersonAvatar name={person.Name} className="h-14 w-14 text-base" />
+        <PersonAvatar name={person.name} className="h-14 w-14 text-base" />
         <div className="min-w-0 flex-1">
-          <h1 className="text-2xl font-semibold tracking-tight">{person.Name}</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">{person.name}</h1>
           <p className="mt-0.5 text-sm text-muted-foreground">
             {[
-              person.ContactItemRoles?.[0]?.Role,
-              person.Organizations?.[0]?.Name ?? person.Circles?.[0]?.Name,
-              person.CountryName,
+              person.contactItemRoles?.[0]?.role,
+              person.organizations?.[0]?.name ?? person.circles?.[0]?.name,
+              person.countryName,
             ]
               .filter(Boolean)
               .join(" · ")}
@@ -330,27 +330,27 @@ export function PersonDetail() {
           <div className="mt-2 flex flex-wrap items-center gap-1.5">
             {state && (
               <>
-                <BandBadge band={state.Band} />
-                <UrgencyBar value={state.UrgencyScore} />
-                {state.IsBridge && <Badge variant="secondary">Bridge</Badge>}
+                <BandBadge band={state.band} />
+                <UrgencyBar value={state.urgencyScore} />
+                {state.isBridge && <Badge variant="secondary">Bridge</Badge>}
               </>
             )}
-            {(person.SystemStatusTags ?? []).map((t) => (
-              <Badge key={t.StatusTagId} variant="secondary">
-                {t.Name}
+            {(person.systemStatusTags ?? []).map((t) => (
+              <Badge key={t.statusTagId} variant="secondary">
+                {t.name}
               </Badge>
             ))}
-            {(person.UserDefinedTags ?? []).map((t) => (
-              <Badge key={t.TagId} variant="outline">
-                {t.TagName}
+            {(person.userDefinedTags ?? []).map((t) => (
+              <Badge key={t.tagId} variant="outline">
+                {t.tagName}
               </Badge>
             ))}
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
-          <LogInteractionDialog personId={person.PersonId} onDone={() => void reload()} />
-          <ImportDialog personId={person.PersonId} onDone={() => void reload()} />
-          <NavButton to={`/people/${person.PersonId}/edit`} size="sm" variant="outline">
+          <LogInteractionDialog personId={person.personId} onDone={() => void reload()} />
+          <ImportDialog personId={person.personId} onDone={() => void reload()} />
+          <NavButton to={`/people/${person.personId}/edit`} size="sm" variant="outline">
             Edit
           </NavButton>
           <Button size="sm" variant="destructive" disabled={deleting} onClick={() => void onDelete()}>
@@ -364,12 +364,12 @@ export function PersonDetail() {
           <span className="font-semibold">Relationship state. </span>
           <span className="text-muted-foreground">
             Rhythm roughly every{" "}
-            {state.CadenceReferenceDays != null
-              ? `${Math.round(state.CadenceReferenceDays)} days`
+            {state.cadenceReferenceDays != null
+              ? `${Math.round(state.cadenceReferenceDays)} days`
               : "— (not enough history)"}
             {silent != null ? `, quiet for ${silent}d` : ""}. Strength{" "}
-            {state.TieStrength.toFixed(2)} — urgency {Math.round(state.UrgencyScore)}/100.
-            {state.IsBridge && " This contact bridges otherwise separate parts of your network."}
+            {state.tieStrength.toFixed(2)} — urgency {Math.round(state.urgencyScore)}/100.
+            {state.isBridge && " This contact bridges otherwise separate parts of your network."}
           </span>
         </div>
       )}
@@ -377,7 +377,7 @@ export function PersonDetail() {
       <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_320px]">
         <section>
           <h2 className="mb-3 text-base font-semibold">History</h2>
-          <Timeline interactions={person.Interactions ?? []} />
+          <Timeline interactions={person.interactions ?? []} />
         </section>
         <aside className="flex min-w-0 flex-col gap-5">
           <section>
@@ -397,26 +397,26 @@ export function PersonDetail() {
                   <dd>{person.phone}</dd>
                 </div>
               )}
-              {person.Address && (
+              {person.address && (
                 <div className="flex justify-between gap-2">
                   <dt className="text-muted-foreground">Address</dt>
-                  <dd className="truncate">{person.Address}</dd>
+                  <dd className="truncate">{person.address}</dd>
                 </div>
               )}
-              {person.DateOfBirth && (
+              {person.dateOfBirth && (
                 <div className="flex justify-between gap-2">
                   <dt className="text-muted-foreground">Born</dt>
                   <dd>
-                    {formatDate(person.DateOfBirth)} ({person.Age})
+                    {formatDate(person.dateOfBirth)} ({person.age})
                   </dd>
                 </div>
               )}
-              {person.LinkedInProfile && (
+              {person.linkedInProfile && (
                 <div className="flex justify-between gap-2">
                   <dt className="text-muted-foreground">LinkedIn</dt>
                   <dd className="truncate">
                     <a
-                      href={person.LinkedInProfile}
+                      href={person.linkedInProfile}
                       target="_blank"
                       rel="noreferrer"
                       className="underline"
@@ -428,58 +428,58 @@ export function PersonDetail() {
               )}
             </dl>
           </section>
-          {(person.ContextMemory || person.Origin || person.OtherInformation) && (
+          {(person.contextMemory || person.origin || person.otherInformation) && (
             <section>
               <h3 className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 Memory
               </h3>
-              {person.ContextMemory && <p className="text-sm">{person.ContextMemory}</p>}
-              {person.Origin && (
-                <p className="mt-1 text-sm text-muted-foreground">Met: {person.Origin}</p>
+              {person.contextMemory && <p className="text-sm">{person.contextMemory}</p>}
+              {person.origin && (
+                <p className="mt-1 text-sm text-muted-foreground">Met: {person.origin}</p>
               )}
-              {person.OtherInformation && (
-                <p className="mt-1 text-sm text-muted-foreground">{person.OtherInformation}</p>
+              {person.otherInformation && (
+                <p className="mt-1 text-sm text-muted-foreground">{person.otherInformation}</p>
               )}
             </section>
           )}
-          {(person.Notes ?? []).length > 0 && (
+          {(person.notes ?? []).length > 0 && (
             <section>
               <h3 className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                Notes ({person.Notes.length})
+                Notes ({person.notes.length})
               </h3>
               <ul className="flex flex-col gap-2">
-                {person.Notes.map((n) => (
-                  <li key={n.NoteId} className="rounded-md border px-3 py-2 text-sm">
-                    {n.Content}
+                {person.notes.map((n) => (
+                  <li key={n.noteId} className="rounded-md border px-3 py-2 text-sm">
+                    {n.content}
                   </li>
                 ))}
               </ul>
             </section>
           )}
-          {(person.ConnectionChannels ?? []).length > 0 && (
+          {(person.connectionChannels ?? []).length > 0 && (
             <section>
               <h3 className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 Channels
               </h3>
               <div className="flex flex-wrap gap-1.5">
-                {person.ConnectionChannels.map((c) => (
-                  <Badge key={c.ConnectionChannelId} variant="outline">
-                    {c.ConnectionChannelName}
+                {person.connectionChannels.map((c) => (
+                  <Badge key={c.connectionChannelId} variant="outline">
+                    {c.connectionChannelName}
                   </Badge>
                 ))}
               </div>
             </section>
           )}
-          {(person.SocialMediaAccounts ?? []).length > 0 && (
+          {(person.socialMediaAccounts ?? []).length > 0 && (
             <section>
               <h3 className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 Elsewhere
               </h3>
               <ul className="space-y-1 text-sm">
-                {person.SocialMediaAccounts.map((s) => (
-                  <li key={s.SocialMediaAccountId} className="truncate">
-                    <a href={s.Url} target="_blank" rel="noreferrer" className="underline">
-                      {s.Platform || s.Url}
+                {person.socialMediaAccounts.map((s) => (
+                  <li key={s.socialMediaAccountId} className="truncate">
+                    <a href={s.url} target="_blank" rel="noreferrer" className="underline">
+                      {s.platform || s.url}
                     </a>
                   </li>
                 ))}

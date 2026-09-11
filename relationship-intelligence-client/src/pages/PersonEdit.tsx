@@ -43,17 +43,17 @@ export function PersonEdit() {
       .then((p) => {
         setPerson(p);
         setForm({
-          Name: p.Name ?? "",
+          Name: p.name ?? "",
           email: p.email ?? "",
           phone: p.phone ?? "",
-          Address: p.Address ?? "",
-          ContextMemory: p.ContextMemory ?? "",
-          Origin: p.Origin ?? "",
-          LinkedInProfile: p.LinkedInProfile ?? "",
-          OtherInformation: p.OtherInformation ?? "",
+          Address: p.address ?? "",
+          ContextMemory: p.contextMemory ?? "",
+          Origin: p.origin ?? "",
+          LinkedInProfile: p.linkedInProfile ?? "",
+          OtherInformation: p.otherInformation ?? "",
         });
-        setDob(p.DateOfBirth ? p.DateOfBirth.slice(0, 10) : "");
-        setCountryId(p.CountryId ?? "");
+        setDob(p.dateOfBirth ? p.dateOfBirth.slice(0, 10) : "");
+        setCountryId(p.countryId ?? "");
       })
       .catch((err) =>
         setError(err instanceof ApiError ? err.message : "Could not load person."),
@@ -107,7 +107,7 @@ export function PersonEdit() {
       <NavButton to={`/people/${id}`} variant="ghost" size="sm" className="mb-4">
         ← Back
       </NavButton>
-      <h1 className="text-2xl font-semibold tracking-tight">Edit {person.Name}</h1>
+      <h1 className="text-2xl font-semibold tracking-tight">Edit {person.name}</h1>
       <form onSubmit={submit} className="mt-6 flex flex-col gap-3">
         <div className="grid grid-cols-2 gap-3">
           <div className="flex flex-col gap-1.5">
@@ -126,7 +126,7 @@ export function PersonEdit() {
             <Label>Gender</Label>
             <Select value={gender} onValueChange={(v) => setGender(v ?? "")}>
               <SelectTrigger>
-                <SelectValue placeholder={person.Gender || "Select"} />
+                <SelectValue placeholder={person.gender || "Select"} />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="0">Male</SelectItem>
@@ -143,12 +143,12 @@ export function PersonEdit() {
             <Label>Country</Label>
             <Select value={countryId} onValueChange={(v) => setCountryId(v ?? "")}>
               <SelectTrigger>
-                <SelectValue placeholder={person.CountryName || "Select"} />
+                <SelectValue placeholder={person.countryName || "Select"} />
               </SelectTrigger>
               <SelectContent>
                 {countries.map((c) => (
-                  <SelectItem key={c.CountryId} value={c.CountryId}>
-                    {c.CountryName}
+                  <SelectItem key={c.countryId} value={c.countryId}>
+                    {c.countryName}
                   </SelectItem>
                 ))}
               </SelectContent>

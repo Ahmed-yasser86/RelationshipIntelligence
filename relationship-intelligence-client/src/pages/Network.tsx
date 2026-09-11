@@ -39,18 +39,18 @@ export function Network() {
     // Deterministic layout: nodes grouped by connected component, laid out in
     // columns; isolates in a final column. Edges drawn between node rows.
     const adj = new Map<string, Set<string>>();
-    for (const n of graph.Nodes) adj.set(n.PersonId, new Set());
-    for (const e of graph.Edges) {
-      adj.get(e.From)?.add(e.To);
-      adj.get(e.To)?.add(e.From);
+    for (const n of graph.nodes) adj.set(n.personId, new Set());
+    for (const e of graph.edges) {
+      adj.get(e.from)?.add(e.to);
+      adj.get(e.to)?.add(e.from);
     }
     const visited = new Set<string>();
     const clusters: string[][] = [];
-    for (const n of graph.Nodes) {
-      if (visited.has(n.PersonId)) continue;
+    for (const n of graph.nodes) {
+      if (visited.has(n.personId)) continue;
       const cluster: string[] = [];
-      const queue = [n.PersonId];
-      visited.add(n.PersonId);
+      const queue = [n.personId];
+      visited.add(n.personId);
       while (queue.length > 0) {
         const id = queue.shift()!;
         cluster.push(id);
@@ -76,11 +76,11 @@ export function Network() {
   }, [graph]);
 
   const selectedNode = selected
-    ? graph?.Nodes.find((n) => n.PersonId === selected) ?? null
+    ? graph?.nodes.find((n) => n.personId === selected) ?? null
     : null;
   const selectedEdges = useMemo(() => {
     if (!graph || !selected) return [];
-    return graph.Edges.filter((e) => e.From === selected || e.To === selected);
+    return graph.edges.filter((e) => e.from === selected || e.to === selected);
   }, [graph, selected]);
 
   return (
@@ -90,7 +90,7 @@ export function Network() {
           <h1 className="text-2xl font-semibold tracking-tight">Network</h1>
           <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
             {graph
-              ? `${graph.Nodes.length} people in ${graph.ClusterCount} separate groups. Ringed nodes are bridges — they connect parts of your network that would otherwise be disconnected, and research shows bridges are lost faster.`
+              ? `${graph.nodes.length} people in ${graph.clusterCount} separate groups. Ringed nodes are bridges — they connect parts of your network that would otherwise be disconnected, and research shows bridges are lost faster.`
               : "Your contacts as a map, grouped by shared organizations, tags, and channels."}
           </p>
         </div>
@@ -101,13 +101,13 @@ export function Network() {
 
       {error && <ErrorState message={error} onRetry={() => void load()} />}
       {graph === null && !error && <LoadingList rows={4} />}
-      {graph !== null && graph.Nodes.length === 0 && (
+      {graph !== null && graph.nodes.length === 0 && (
         <EmptyState
           title="No network yet"
           body="Add people with organizations, tags, or channels and connections will appear here."
         />
       )}
-      {graph !== null && graph.Nodes.length > 0 && layout && (
+      {graph !== null && graph.nodes.length > 0 && layout && (
         <div className="grid gap-4 xl:grid-cols-[1fr_300px]">
           <div className="overflow-x-auto rounded-lg border">
             <svg
@@ -129,11 +129,11 @@ export function Network() {
                   {cluster.length === 1 ? "Unconnected" : `Group ${ci + 1} · ${cluster.length}`}
                 </text>
               ))}
-              {graph.Edges.map((e, i) => {
-                const a = layout.pos.get(e.From);
-                const b = layout.pos.get(e.To);
+              {graph.edges.map((e, i) => {
+                const a = layout.pos.get(e.from);
+                const b = layout.pos.get(e.to);
                 if (!a || !b) return null;
-                const active = selected == null || e.From === selected || e.To === selected;
+                const active = selected == null || e.from === selected || e.to === selected;
                 return (
                   <line
                     key={i}
@@ -144,28 +144,28 @@ export function Network() {
                     stroke={active ? "#94a3b8" : "#e2e8f0"}
                     strokeWidth={active ? 1.5 : 1}
                   >
-                    <title>{e.Reason}</title>
+                    <title>{e.reason}</title>
                   </line>
                 );
               })}
-              {graph.Nodes.map((n) => {
-                const p = layout.pos.get(n.PersonId);
+              {graph.nodes.map((n) => {
+                const p = layout.pos.get(n.personId);
                 if (!p) return null;
-                const dim = selected != null && n.PersonId !== selected &&
-                  !selectedEdges.some((e) => e.From === n.PersonId || e.To === n.PersonId);
+                const dim = selected != null && n.personId !== selected &&
+                  !selectedEdges.some((e) => e.from === n.personId || e.to === n.personId);
                 return (
                   <g
-                    key={n.PersonId}
+                    key={n.personId}
                     transform={`translate(${p.x},${p.y})`}
-                    onClick={() => setSelected(selected === n.PersonId ? null : n.PersonId)}
+                    onClick={() => setSelected(selected === n.personId ? null : n.personId)}
                     style={{ cursor: "pointer", opacity: dim ? 0.35 : 1 }}
                   >
-                    {n.IsBridge && (
+                    {n.isBridge && (
                       <circle r={11} fill="none" stroke="#7c3aed" strokeWidth={2} strokeDasharray="3 2" />
                     )}
-                    <circle r={7} fill={urgencyColor(n.UrgencyScore)} />
+                    <circle r={7} fill={urgencyColor(n.urgencyScore)} />
                     <text x={14} y={4} fontSize={12} className="fill-foreground">
-                      {n.Name}
+                      {n.name ?? "?"}
                     </text>
                   </g>
                 );
@@ -181,18 +181,18 @@ export function Network() {
             ) : (
               <div className="flex flex-col gap-2">
                 <Link
-                  to={`/people/${selectedNode.PersonId}`}
+                  to={`/people/${selectedNode.personId}`}
                   className="text-sm font-semibold hover:underline"
                 >
-                  {selectedNode.Name}
+                  {selectedNode.name ?? "Unnamed contact"}
                 </Link>
                 <div className="flex gap-1.5">
-                  {selectedNode.IsBridge && <Badge variant="secondary">Bridge</Badge>}
-                  {selectedNode.IsIsolated && <Badge variant="outline">Unconnected</Badge>}
-                  <Badge variant="outline">{selectedNode.Degree} connections</Badge>
+                  {selectedNode.isBridge && <Badge variant="secondary">Bridge</Badge>}
+                  {selectedNode.isIsolated && <Badge variant="outline">Unconnected</Badge>}
+                  <Badge variant="outline">{selectedNode.degree} connections</Badge>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Urgency {Math.round(selectedNode.UrgencyScore)}/100
+                  Urgency {Math.round(selectedNode.urgencyScore)}/100
                 </p>
                 {selectedEdges.length > 0 && (
                   <>
@@ -202,7 +202,7 @@ export function Network() {
                     <ul className="flex flex-col gap-1">
                       {selectedEdges.slice(0, 8).map((e, i) => (
                         <li key={i} className="text-xs text-muted-foreground">
-                          {e.Reason}
+                          {e.reason}
                         </li>
                       ))}
                     </ul>

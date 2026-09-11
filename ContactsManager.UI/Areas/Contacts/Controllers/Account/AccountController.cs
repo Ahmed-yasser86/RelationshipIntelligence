@@ -33,7 +33,7 @@ namespace ContactsManager.UI.Areas.Contacts.Controllers.Account
         public async Task<IActionResult> IndexAsync(RegisterDTO registerDTO)
         {
 
-            if (ModelState.IsValid == false)
+            if (!ModelState.IsValid)
             {
                 ViewBag.Errors = ModelState.Values.SelectMany(x => x.Errors).
                     Select(x => x.ErrorMessage);

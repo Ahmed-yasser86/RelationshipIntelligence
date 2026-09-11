@@ -21,13 +21,13 @@ namespace Entities
         public virtual DbSet<Person> Persons { get; set; }
         public virtual DbSet<Country> Countries { get; set; }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        protected override void OnModelCreating(ModelBuilder builder)
         {
-            base.OnModelCreating(modelBuilder);
-            modelBuilder.Entity<Country>().ToTable("Countries");
-            modelBuilder.Entity<Person>().ToTable("Persons");
+            base.OnModelCreating(builder);
+            builder.Entity<Country>().ToTable("Countries");
+            builder.Entity<Person>().ToTable("Persons");
 
-            modelBuilder.Entity<Country>().HasData(
+            builder.Entity<Country>().HasData(
                 new Country { CountryId = Guid.Parse("7C9E6645-3677-448A-95B7-511B41F17491"), CountryName = "Japan" },
                 new Country { CountryId = Guid.Parse("A1B2C3D4-E5F6-47A8-B9C0-D1E2F3A4B5C6"), CountryName = "Canada" },
                 new Country { CountryId = new Guid("4A91B323-6902-4D3E-B147-3A2F6990C254"), CountryName = "Norway" },
@@ -35,7 +35,7 @@ namespace Entities
                 new Country { CountryId = new Guid("F2345B12-1111-4A55-89CC-5521AABBCCDD"), CountryName = "Brazil" }
             );
 
-            modelBuilder.Entity<Person>().HasData(
+            builder.Entity<Person>().HasData(
                 new Person
                 {
                     PersonId = Guid.Parse("12345678-90AB-CDEF-1234-567890ABCDEF"),

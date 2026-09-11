@@ -41,8 +41,7 @@ namespace ContactsManager.Startup
                 AddEntityFrameworkStores<AppDBContext>().
                 AddDefaultTokenProviders().
                 AddUserStore<UserStore<ApplicationUser,ApplicationRole, AppDBContext,Guid>>().
-                AddRoleStore<RoleStore<ApplicationRole,AppDBContext,Guid>>();
-                ;
+                 AddRoleStore<RoleStore<ApplicationRole,AppDBContext,Guid>>();
 
            Services.AddScoped<PerformanceLoggingFilter>();
             // For Stocks DbContext

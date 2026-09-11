@@ -4,8 +4,8 @@ using RepositryContracts;
 using Serilog;
 using ServiceContracts;
 using Servicess;
-using StocksApp2.Middleware;
-using StocksApp2.Startup;
+using ContactsManager.Middleware;
+using ContactsManager.Startup;
 var builder = WebApplication.CreateBuilder(args);
 
 

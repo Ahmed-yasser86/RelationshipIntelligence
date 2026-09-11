@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace StocksApp2.Areas.Contacts
+namespace ContactsManager.Areas.Contacts
 {
     public class HomeController : Controller
     {

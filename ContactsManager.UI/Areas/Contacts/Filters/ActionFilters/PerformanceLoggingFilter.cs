@@ -2,7 +2,7 @@
 using SerilogTimings;
 
 
-namespace StocksApp2.ContactComponent.Filters
+namespace ContactsManager.ContactComponent.Filters
 {
     public class PerformanceLoggingFilter : IAsyncActionFilter
     {

@@ -15,6 +15,10 @@ on:
 
 
 
+
+      
+
+
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
@@ -96,6 +100,9 @@ jobs:
     needs: [build, test]
     env:
       GITHUB_TOKEN: ${{ github.token }}
+      HAS_SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
       Serilog__WriteTo__2__Args__connectionString: ${{ secrets.SERILOG_DB_CONNECTION }}
       ConnectionStrings__ContactDb: ${{ secrets.DB_CONNECTION_STRING }}
     permissions:
@@ -112,6 +119,7 @@ jobs:
         uses: ./.github/actions/CacheDependencies
 
       - name: Run SonarCloud Scan
+        if: ${{ env.HAS_SONAR_TOKEN != '' }}
         uses: ./.github/actions/SonarCloud/SonarScane
         with:
           sonar_token: ${{ secrets.SONAR_TOKEN }}

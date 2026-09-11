@@ -2,6 +2,16 @@
   "version": 1,
   "dependencies": {
     "net9.0": {
+      "Microsoft.AspNetCore.Identity.EntityFrameworkCore": {
+        "type": "Direct",
+        "requested": "[9.0.14, )",
+        "resolved": "9.0.14",
+        "contentHash": "Yh57bLwfy6v/k9U3H3gU9WgxY0UO2J4gEQtKKikCY409c2WrJ+eeo4jTAywSuouB1vYeKQkCYjKj8QCjMikXXA==",
+        "dependencies": {
+          "Microsoft.EntityFrameworkCore.Relational": "9.0.14",
+          "Microsoft.Extensions.Identity.Stores": "9.0.14"
+        }
+      },
       "Microsoft.EntityFrameworkCore.SqlServer": {
         "type": "Direct",
         "requested": "[9.0.14, )",
@@ -207,8 +217,16 @@
       },
       "Microsoft.AspNetCore.Cryptography.Internal": {
         "type": "Transitive",
-        "resolved": "2.2.0",
-        "contentHash": "GXmMD8/vuTLPLvKzKEPz/4vapC5e0cwx1tUVd83ePRyWF9CCrn/pg4/1I+tGkQqFLPvi3nlI2QtPtC6MQN8Nww=="
+        "resolved": "9.0.14",
+        "contentHash": "bof0qT0STpIdoApYAqXHojQG70r3Is15tADEo47U+DUt5ffIQ0jfMGI1h7sxHisRd35uMVTmeVYOMrs0QMHcYA=="
+      },
+      "Microsoft.AspNetCore.Cryptography.KeyDerivation": {
+        "type": "Transitive",
+        "resolved": "9.0.14",
+        "contentHash": "puDppSpkkTU4ftiQaG9WVhSkAQM0zqgQaF8UvhJg+u6B4kXgAJzSvGG/bMd1eUfLnh94KeFAYedEwcAlTXgpoA==",
+        "dependencies": {
+          "Microsoft.AspNetCore.Cryptography.Internal": "9.0.14"
+        }
       },
       "Microsoft.AspNetCore.DataProtection": {
         "type": "Transitive",
@@ -839,6 +857,26 @@
           "Microsoft.Extensions.Diagnostics.Abstractions": "10.0.0",
           "Microsoft.Extensions.FileProviders.Abstractions": "10.0.0",
           "Microsoft.Extensions.Logging.Abstractions": "10.0.0"
+        }
+      },
+      "Microsoft.Extensions.Identity.Core": {
+        "type": "Transitive",
+        "resolved": "9.0.14",
+        "contentHash": "OTHDdyiC3v1w6G3BcDEmfBvRqtUlKkIGAe7dANhyZqPT9QhyvYVNP5MFd8ZAz26rJMrjuootC/Hm2tMPkiVT6g==",
+        "dependencies": {
+          "Microsoft.AspNetCore.Cryptography.KeyDerivation": "9.0.14",
+          "Microsoft.Extensions.Logging": "9.0.14",
+          "Microsoft.Extensions.Options": "9.0.14"
+        }
+      },
+      "Microsoft.Extensions.Identity.Stores": {
+        "type": "Transitive",
+        "resolved": "9.0.14",
+        "contentHash": "Y1d2mH3JcGkAMeWrGtLemSNaa43Q52KtpSTJ5USBu0sj1tylqkN9EOaisNx6fzgvDQQeMi5WlacStdJMaIN2YQ==",
+        "dependencies": {
+          "Microsoft.Extensions.Caching.Abstractions": "9.0.14",
+          "Microsoft.Extensions.Identity.Core": "9.0.14",
+          "Microsoft.Extensions.Logging": "9.0.14"
         }
       },
       "Microsoft.Extensions.Localization": {
@@ -2098,6 +2136,7 @@
         "dependencies": {
           "AspNetSerilog": "[1.6.0, )",
           "ContactsManger.Core": "[1.0.0, )",
+          "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "[9.0.14, )",
           "Microsoft.EntityFrameworkCore.SqlServer": "[9.0.14, )",
           "Serilog": "[4.3.1, )",
           "Serilog.AspNetCore": "[9.0.0, )",

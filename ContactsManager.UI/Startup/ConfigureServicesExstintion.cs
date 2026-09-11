@@ -1,14 +1,15 @@
 ﻿using Entities;
 using Microsoft.EntityFrameworkCore;
-
 using RepositryContracts;
 using Serilog;
 using ServiceContracts;
-
 using Servicess;
-using StocksApp2.ContactComponent.Filters;
+using ContactsManager.ContactComponent.Filters;
 using Repositories;
-namespace StocksApp2.Startup
+using ContactsManger.Core.Domain.IdentityEntities;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
+namespace ContactsManager.Startup
 {
     public static class ConfigureServicesExstintion 
     {
@@ -35,13 +36,12 @@ namespace StocksApp2.Startup
            Services.AddScoped<IPersonDeleterService, PersonDeleterService>();
            Services.AddScoped<IPersonSearcherService, PersonSearcherService>();
            Services.AddScoped<IPersonSorterService, PersonSorterService>();
-
-            // If you still need the old combined interface for backward compatibility
-            // you can create a facade or keep the old PersonServices class
-            // but it's better to let clients depend on the specific interfaces they need
-
-            // Register Stocks Service (USE SCOPED, NOT SINGLETON!)
-
+          
+            Services.AddIdentity<ApplicationUser,ApplicationRole>().
+                AddEntityFrameworkStores<AppDBContext>().
+                AddDefaultTokenProviders().
+                AddUserStore<UserStore<ApplicationUser,ApplicationRole, AppDBContext,Guid>>().
+                 AddRoleStore<RoleStore<ApplicationRole,AppDBContext,Guid>>();
 
            Services.AddScoped<PerformanceLoggingFilter>();
             // For Stocks DbContext

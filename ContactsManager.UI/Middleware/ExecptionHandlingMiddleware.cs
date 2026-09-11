@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Serilog;
 using System.Threading.Tasks;
 
-namespace StocksApp2.Middleware
+namespace ContactsManager.Middleware
 {
     public class ExecptionHandlingMiddleware
     {

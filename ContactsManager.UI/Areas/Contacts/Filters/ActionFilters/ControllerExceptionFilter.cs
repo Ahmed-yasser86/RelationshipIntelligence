@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
-namespace StocksApp2.ContactComponent.Controllers
+namespace ContactsManager.ContactComponent.Controllers
 {
     public class ExceptionFilter : IExceptionFilter
     {

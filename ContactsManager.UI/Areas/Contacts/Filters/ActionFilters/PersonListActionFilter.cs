@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using ServiceContracts.DTOs;
 using System.Linq;
 
-namespace StocksApp2.Areas.Contacts.Filters.ActionFilters
+namespace ContactsManager.Areas.Contacts.Filters.ActionFilters
 {
     public class PersonListActionFilter : IActionFilter
     {

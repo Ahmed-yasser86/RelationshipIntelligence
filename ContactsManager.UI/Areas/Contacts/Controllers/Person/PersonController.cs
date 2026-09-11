@@ -5,12 +5,13 @@ using SerilogTimings;
 using ServiceContracts;
 using ServiceContracts.DTOs;
 using ServiceContracts.DTOs.Enums;
-using StocksApp2.ContactComponent.Filters;
+using ContactsManager.ContactComponent.Filters;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System;
+using ContactsManager.ContactComponent.Controllers;
 
-namespace StocksApp2.ContactComponent.Controllers
+namespace ContactsManager.UI.Areas.Contacts.Controllers
 {
     [Area("Contacts")]
     [TypeFilter(typeof(PerformanceLoggingFilter))]

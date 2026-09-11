@@ -39,7 +39,7 @@ flowchart LR
 
     subgraph Pipeline["⚙️ CI/CD Pipeline"]
         Qual["🧹 Quality<br/>(Lint → Build)"]
-        Test["🧪 Test<br/>(3 Suites)"]
+        Test["Test<br/>(service + controller suites)"]
         Sec["🔒 Security<br/>(5 Layers)"]
         Cont["🐳 Container<br/>(Build → Scan)"]
         Pub["📦 Publish<br/>(GHCR)"]
@@ -80,7 +80,7 @@ The CI/CD pipeline is the automated gatekeeper for every commit, PR, and deploym
 ```mermaid
 flowchart TB
     subgraph Trigger["🚀 Trigger"]
-        Push["push: master, dev"]
+        Push["push: master, dev, relationship-intelligence-main"]
         PR["pull_request: master"]
         Manual["workflow_dispatch"]
     end
@@ -136,7 +136,7 @@ flowchart TB
 on:
   workflow_dispatch:          # Manual trigger
   push:
-    branches: [master, dev]   # Any push to master/dev
+        branches: [master, dev, relationship-intelligence-main]   # Any push to tracked branches
   pull_request:
     branches: [master]        # PR targeting master
     types:
@@ -305,13 +305,13 @@ flowchart LR
 ```mermaid
 flowchart LR
     Code["📝 Code"] --> Docker["🐳 Docker Buildx"]
-    Docker --> Image["📦 Image Tagged<br/>contacts-manager-ui:SHA"]
+    Docker --> Image["📦 Image Tagged<br/>contacts-manager-api:SHA"]
     Docker --> Cache["💾 GHA Cache<br/>(save for Trivy)"]
 ```
 
 **What it does:**
 - Builds Docker image using `RelationshipIntelligence.Api/Dockerfile`
-- Tags with commit SHA: `contacts-manager-ui:abc123`
+- Tags with commit SHA: `contacts-manager-api:abc123`
 - Saves layers to GHA cache (buildx `cache-to`)
 - **Does NOT push** to registry (validation only)
 
@@ -323,7 +323,7 @@ flowchart LR
 
 ```mermaid
 flowchart TB
-    Image["📦 contacts-manager-ui:SHA"] --> Trivy["🔍 Trivy Scanner"]
+    Image["📦 contacts-manager-api:SHA"] --> Trivy["🔍 Trivy Scanner"]
     
     Trivy --> OS["🖥️ OS Packages"]
     Trivy --> Libs["📚 Application Libs"]
@@ -429,8 +429,8 @@ WORKDIR /src
 
 # Copy project files and restore (layer caching)
 COPY ["RelationshipIntelligence.Api/RelationshipIntelligence.Api.csproj", "RelationshipIntelligence.Api/"]
-COPY ["ContactsManager.Inferastructure/ContactsManager.Inferastructure.csproj", "ContactsManager.Inferastructure/"]
-COPY ["ContactsManger.Core/ContactsManger.Core.csproj", "ContactsManger.Core/"]
+COPY ["RelationshipIntelligence.Infrastructure/RelationshipIntelligence.Infrastructure.csproj", "RelationshipIntelligence.Infrastructure/"]
+COPY ["RelationshipIntelligence.Core/RelationshipIntelligence.Core.csproj", "RelationshipIntelligence.Core/"]
 RUN dotnet restore "./RelationshipIntelligence.Api/RelationshipIntelligence.Api.csproj"
 
 # Copy everything and build
@@ -523,7 +523,7 @@ runs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        global-json-file: RelationshipIntelligence.Api/global.json
+        global-json-file: global.json
         cache: true
         cache-dependency-path: '**/packages.lock.json'
     - name: Restore dependencies
@@ -747,15 +747,14 @@ git push origin master
 
 ```bash
 # Lint
-dotnet format RelationshipIntelligence.Api
+dotnet format RelationshipIntelligence.sln
 
 # Build
-dotnet build RelationshipIntelligence.Api
+dotnet build RelationshipIntelligence.sln
 
 # Run tests
-dotnet test Tests/ContactsManger.ServiceTests.csproj
-dotnet test ContactsManager.ControllersTest/ContactsManager.ControllersTest.csproj
-dotnet test ContactsManager.IntegrationTests/ContactsManager.IntegrationTests.csproj
+dotnet test RelationshipIntelligence.Tests/RelationshipIntelligence.Tests.csproj
+dotnet test RelationshipIntelligence.ControllerTests/RelationshipIntelligence.ControllerTests.csproj
 
 # Build Docker locally
 docker build -f RelationshipIntelligence.Api/Dockerfile -t local:test .

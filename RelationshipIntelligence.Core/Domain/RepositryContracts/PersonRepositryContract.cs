@@ -13,9 +13,17 @@ namespace RepositryContracts
 
         Task<Person> AddPerson(Person person);
 
+        [Obsolete("Update flows mutate the tracked entity loaded via GetPersonById and commit once through IUnitOfWork. This merge API is retained only for compatibility and is no longer called by any service.")]
         Task<Person> UpdatePerson(Person person);
 
         Task<Person>? GetPersonById(Guid? id);
+
+        /// <summary>
+        /// Bypasses the global ownership query filter. Reserved exclusively for flows
+        /// where an HMAC-signed token has already established authorization
+        /// (digest one-click actions). The caller MUST verify ownership explicitly.
+        /// </summary>
+        Task<Person?> GetPersonByIdIgnoringFilters(Guid? id);
 
         Task<IEnumerable<Person>> GetAllPersons();
 

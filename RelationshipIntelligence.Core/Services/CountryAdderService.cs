@@ -62,6 +62,7 @@ namespace Servicess
                     _logger.LogDebug("Adding new country with ID: {CountryId}, Name: {CountryName}",
                         country.CountryId, country.CountryName);
 
+                    await CountriesRipositry.AddCountry(country);
                     await _unitOfWork.SaveChangesAsync();
 
                     var result = country.ConvertToDto();

@@ -62,6 +62,26 @@ builder.Services.AddScoped<IPersonSearcherService, PersonSearcherService>();
 builder.Services.AddScoped<IPersonSorterService, PersonSorterService>();
 builder.Services.AddScoped<IPersonQuickAdderService, PersonQuickAdderService>();
 builder.Services.AddScoped<IPersonDeleterService, PersonDeleterService>();
+builder.Services.AddScoped<IRelationshipScoringService, RelationshipScoringService>();
+builder.Services.AddScoped<INetworkAnalysisService, NetworkAnalysisService>();
+builder.Services.AddScoped<RelationshipStateRepositoryContract, RelationshipStateRepository>();
+builder.Services.AddScoped<DigestRepositoryContract, DigestRepository>();
+builder.Services.AddScoped<IEmailSender>(sp => new FileEmailSender(
+    sp.GetRequiredService<IConfiguration>()["Digest:OutputDirectory"] ?? string.Empty,
+    sp.GetRequiredService<ILogger<FileEmailSender>>()));
+builder.Services.AddScoped<IDigestService>(sp => new DigestService(
+    sp.GetRequiredService<IRelationshipScoringService>(),
+    sp.GetRequiredService<PersonRepositryContract>(),
+    sp.GetRequiredService<InteractionRepositoryContract>(),
+    sp.GetRequiredService<DigestRepositoryContract>(),
+    sp.GetRequiredService<ICurrentUserService>(),
+    sp.GetRequiredService<IEmailSender>(),
+    sp.GetRequiredService<IUnitOfWork>(),
+    sp.GetRequiredService<IConfiguration>()["Digest:Secret"] ?? "dev-secret-change-in-production",
+    sp.GetRequiredService<ILogger<DigestService>>()));
+builder.Services.AddHostedService<RelationshipIntelligence.Api.Workers.RelationshipMaintenanceJob>();
+builder.Services.AddScoped<IInteractionService, InteractionService>();
+builder.Services.AddScoped<InteractionRepositoryContract, InteractionRepository>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<ICountryAdderService, CountryAdderService>();
 builder.Services.AddScoped<ICountryGetterService, CountryGetterService>();
@@ -70,6 +90,7 @@ builder.Services.AddScoped<ISystemTagsGetter, SystemTagsGetterService>();
 
 builder.Services.AddScoped<IjwtAuthentication, JwtServices>();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+builder.Services.AddScoped<PersonOwnershipFilter>();
 
 builder.Services.AddDbContext<AppDBContext>(options =>
 {

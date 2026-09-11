@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using ServiceContracts;
 using ServiceContracts.DTOs;
+using System.ComponentModel.DataAnnotations;
 
 namespace ContactsManager.API.Controllers
 {
@@ -25,12 +26,15 @@ namespace ContactsManager.API.Controllers
         private readonly IPersonAdderService _personAdderService;
         private readonly IPersonUpdaterService _personUpdaterService;
         private readonly IPersonDeleterService _personDeleterService;
+        private readonly IInteractionService _interactionService;
+        private readonly IRelationshipScoringService _scoringService;
 
 
         public ContactsController(UserManager<ApplicationUser> userManager, IPersonGetterService personGetterService,
             IPersonSearcherService personSearcher, ISystemTagsGetter systemTagsGetter,
             IPersonQuickAdderService personQuickAdder, ICountryGetterService getCountries,
-            IPersonAdderService PersoneAdderService, IPersonUpdaterService PersonesUpdater, IPersonDeleterService personDeleter)
+            IPersonAdderService PersoneAdderService, IPersonUpdaterService PersonesUpdater, IPersonDeleterService personDeleter,
+            IInteractionService interactionService, IRelationshipScoringService scoringService)
         {
             _userManager = userManager;
             _personGetterService = personGetterService;
@@ -41,6 +45,8 @@ namespace ContactsManager.API.Controllers
             _personAdderService = PersoneAdderService;
             _personUpdaterService = PersonesUpdater;
             _personDeleterService = personDeleter;
+            _interactionService = interactionService;
+            _scoringService = scoringService;
         }
 
         /// <summary>
@@ -322,18 +328,15 @@ namespace ContactsManager.API.Controllers
 
 
         [HttpGet]
-        public async Task<IActionResult> GetContactByContactID(Guid? ID)
+        [ServiceFilter(typeof(PersonOwnershipFilter))]
+        public async Task<IActionResult> GetContactByContactID(Guid? id)
         {
-            PersonRespones? ContactObj;
+            PersonRespones? ContactObj = await _personGetterService.GetPersonByPersonId(id);
 
-
-
-            ContactObj = await _personGetterService.GetPersonByPersonId(ID);
-
-
+            if (ContactObj == null)
+                return NotFound();
 
             return Ok(ContactObj);
-
         }
 
         /// <summary>
@@ -394,18 +397,76 @@ namespace ContactsManager.API.Controllers
         [HttpPut]
         public async Task<IActionResult> PutContactItemUpdateRequest([FromBody] PersonUpdateRequest person)
         {
-
-            var personResponesObject = await _personUpdaterService.UpdatePerson(person);
-            return Ok(personResponesObject);
+            try
+            {
+                var personResponesObject = await _personUpdaterService.UpdatePerson(person);
+                return Ok(personResponesObject);
+            }
+            catch (ArgumentException)
+            {
+                return NotFound();
+            }
         }
 
         [HttpPost]
-        public async Task<IActionResult> DeletePersoneObject(Guid PersoneID)
+        [ServiceFilter(typeof(PersonOwnershipFilter))]
+        public async Task<IActionResult> DeletePersoneObject(Guid id)
         {
+            var p = await _personDeleterService.DeletePersonByPersonId(id);
 
-            var p = await _personDeleterService.DeletePersonByPersonId(PersoneID);
+            if (!p)
+                return NotFound();
 
             return Ok(p);
+        }
+
+        [HttpGet]
+        [ServiceFilter(typeof(PersonOwnershipFilter))]
+        public async Task<IActionResult> GetInteractionsForContact(Guid id)
+        {
+            var interactions = await _interactionService.ListForPersonAsync(id);
+
+            return Ok(interactions);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetRelationshipQueue([FromQuery] int top = 7)
+        {
+            var queue = await _scoringService.GetQueueAsync(top);
+
+            return Ok(queue);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> PostLogInteraction([FromBody] InteractionAddRequest request)
+        {
+            try
+            {
+                var response = await _interactionService.LogAsync(request);
+                return Ok(response);
+            }
+            catch (ArgumentException)
+            {
+                return NotFound();
+            }
+            catch (ValidationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> PostImportInteractions(Guid id, [FromBody] CsvImportRequest request)
+        {
+            try
+            {
+                var count = await _interactionService.ImportCsvAsync(id, request?.CsvText);
+                return Ok(count);
+            }
+            catch (ArgumentException)
+            {
+                return NotFound();
+            }
         }
 
     }

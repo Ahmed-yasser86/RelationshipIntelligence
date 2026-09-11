@@ -114,6 +114,10 @@ namespace CRUDTests
 
             // Assert
             actualResponse.Should().NotBeNull();
+            _countryRepositryContractMoq.Verify(
+                repo => repo.AddCountry(It.Is<Country>(c => c.CountryName == uniqueCountryName)),
+                Times.Once);
+            _unitOfWorkMoq.Verify(u => u.SaveChangesAsync(), Times.Once);
         }
 
         [Fact]

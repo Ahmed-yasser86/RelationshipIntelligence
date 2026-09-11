@@ -5,6 +5,8 @@
 [Ll]ogs/
 out/
 publish/
+dist/
+node_modules/
 
 # Visual Studio / VS Code / Rider
 .vs/

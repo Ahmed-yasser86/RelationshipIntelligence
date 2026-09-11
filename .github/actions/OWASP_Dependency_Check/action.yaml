@@ -30,7 +30,7 @@ runs:
         out: 'dependency-check-reports'
         args: >
           --failOnCVSS 7
-          --scan "ContactsManager.UI/**/*.csproj"
+          --scan "RelationshipIntelligence.*/**/*.csproj"
           --scan "**/project.assets.json"
 
     - name: Upload Dependency Check results

@@ -3,7 +3,7 @@ name: CI
 on:
   workflow_dispatch:  
   push:
-    branches: [master, dev]
+    branches: [master, dev, relationship-intelligence-main]
   pull_request:
     branches: [master]
     types:
@@ -43,7 +43,7 @@ jobs:
         with:
           github_token: ${{ github.token }}
           dotnet_format: true
-          dotnet_format_args: "ContactsManager.UI"
+          dotnet_format_args: "RelationshipIntelligence.sln"
           neutral_check_on_warning: true
 
   build:
@@ -60,8 +60,7 @@ jobs:
         uses: ./.github/actions/CacheDependencies
 
       - name: Build
-        run: dotnet build --no-restore
-        working-directory: ContactsManager.UI
+        run: dotnet build --no-restore RelationshipIntelligence.sln
 
   secret_scan:
     name: Gitleaks Secret Scan
@@ -141,9 +140,7 @@ jobs:
 
       - name: Run Specified Unit and Integration Tests
         run: |
-          dotnet test Tests/ContactsManger.ServiceTests.csproj --configuration Release --no-restore --logger "trx;LogFileName=ServiceTests.trx" --results-directory ./TestResults
-          dotnet test ContactsManager.ControllersTest/ContactsManager.ControllersTest.csproj --configuration Release --no-restore --logger "trx;LogFileName=ControllersTest.trx" --results-directory ./TestResults
-          dotnet test ContactsManager.IntegrationTests/ContactsManager.IntegrationTests.csproj --configuration Release --no-restore --logger "trx;LogFileName=IntegrationTests.trx" --results-directory ./TestResults
+          dotnet test RelationshipIntelligence.Tests/RelationshipIntelligence.Tests.csproj --configuration Release --no-restore --logger "trx;LogFileName=ServiceTests.trx" --results-directory ./TestResults
 
       - name: Upload all test results
         uses: actions/upload-artifact@v4
@@ -171,12 +168,12 @@ jobs:
         uses: docker/build-push-action@ff26911fd365b0233252dfbd8eede1c0e9ef9a51
         with:
           context: .
-          file: ./ContactsManager.UI/Dockerfile
+          file: ./RelationshipIntelligence.Api/Dockerfile
           push: false
           load: true
           cache-to: type=gha,mode=max
           cache-from: type=gha
-          tags: contacts-manager-ui:${{ github.sha }}
+          tags: contacts-manager-api:${{ github.sha }}
           build-args: |
             ConnectionStrings__ContactDb=${{ secrets.DB_CONNECTION_STRING }}
             Serilog__WriteTo__2__Args__connectionString=${{ secrets.SERILOG_DB_CONNECTION }}
@@ -199,16 +196,16 @@ jobs:
         uses: docker/build-push-action@ff26911fd365b0233252dfbd8eede1c0e9ef9a51  
         with:
           context: . 
-          file: ./ContactsManager.UI/Dockerfile 
+          file: ./ContactsManager.API/Dockerfile 
           push: false
           load: true 
-          tags: contacts-manager-ui:${{ github.sha }}
+          tags: contacts-manager-api:${{ github.sha }}
           cache-from: type=gha  
 
       - name: Execute Trivy Scan via Composite Action
         uses: ./.github/actions/Trivy_Container_Scan
         with:
-          image_tag: contacts-manager-ui:${{ github.sha }}
+          image_tag: contacts-manager-api:${{ github.sha }}
 
   publish-image:
     name: Publish Docker Image to GHCR
@@ -251,7 +248,7 @@ jobs:
         uses: docker/build-push-action@ff26911fd365b0233252dfbd8eede1c0e9ef9a51
         with:
           context: .
-          file: ./ContactsManager.UI/Dockerfile
+          file: ./RelationshipIntelligence.Api/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

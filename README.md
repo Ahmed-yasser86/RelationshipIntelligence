@@ -310,7 +310,7 @@ flowchart LR
 ```
 
 **What it does:**
-- Builds Docker image using `ContactsManager.UI/Dockerfile`
+- Builds Docker image using `RelationshipIntelligence.Api/Dockerfile`
 - Tags with commit SHA: `contacts-manager-ui:abc123`
 - Saves layers to GHA cache (buildx `cache-to`)
 - **Does NOT push** to registry (validation only)
@@ -428,26 +428,26 @@ ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
 # Copy project files and restore (layer caching)
-COPY ["ContactsManager.UI/ContactsManager.UI.csproj", "ContactsManager.UI/"]
+COPY ["RelationshipIntelligence.Api/RelationshipIntelligence.Api.csproj", "RelationshipIntelligence.Api/"]
 COPY ["ContactsManager.Inferastructure/ContactsManager.Inferastructure.csproj", "ContactsManager.Inferastructure/"]
 COPY ["ContactsManger.Core/ContactsManger.Core.csproj", "ContactsManger.Core/"]
-RUN dotnet restore "./ContactsManager.UI/ContactsManager.UI.csproj"
+RUN dotnet restore "./RelationshipIntelligence.Api/RelationshipIntelligence.Api.csproj"
 
 # Copy everything and build
 COPY . .
-WORKDIR "/src/ContactsManager.UI"
-RUN dotnet build "./ContactsManager.UI.csproj" -c $BUILD_CONFIGURATION -o /app/build
+WORKDIR "/src/RelationshipIntelligence.Api"
+RUN dotnet build "./RelationshipIntelligence.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 # ========== STAGE 3: Publish ==========
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./ContactsManager.UI.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./RelationshipIntelligence.Api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 # ========== STAGE 4: Final (Runtime) ==========
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "ContactsManager.UI.dll"]
+ENTRYPOINT ["dotnet", "RelationshipIntelligence.Api.dll"]
 ```
 
 ### 6.2 Build Stages Explained
@@ -523,12 +523,12 @@ runs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        global-json-file: ContactsManager.UI/global.json
+        global-json-file: RelationshipIntelligence.Api/global.json
         cache: true
         cache-dependency-path: '**/packages.lock.json'
     - name: Restore dependencies
       run: dotnet restore --locked-mode
-      working-directory: ContactsManager.UI
+      working-directory: RelationshipIntelligence.Api
 ```
 
 **What this achieves:**
@@ -569,10 +569,10 @@ runs:
         fi
     
     - name: Build Project
-      run: dotnet build ContactsManager.UI --no-restore
+      run: dotnet build RelationshipIntelligence.Api --no-restore
     
     - name: Run Tests with Coverage
-      run: dotnet-coverage collect 'dotnet test ContactsManager.UI --no-restore' -f xml -o 'coverage.xml'
+      run: dotnet-coverage collect 'dotnet test RelationshipIntelligence.Api --no-restore' -f xml -o 'coverage.xml'
     
     - name: Sonar End
       run: dotnet sonarscanner end /d:sonar.token="${{ inputs.sonar_token }}"
@@ -747,10 +747,10 @@ git push origin master
 
 ```bash
 # Lint
-dotnet format ContactsManager.UI
+dotnet format RelationshipIntelligence.Api
 
 # Build
-dotnet build ContactsManager.UI
+dotnet build RelationshipIntelligence.Api
 
 # Run tests
 dotnet test Tests/ContactsManger.ServiceTests.csproj
@@ -758,7 +758,7 @@ dotnet test ContactsManager.ControllersTest/ContactsManager.ControllersTest.cspr
 dotnet test ContactsManager.IntegrationTests/ContactsManager.IntegrationTests.csproj
 
 # Build Docker locally
-docker build -f ContactsManager.UI/Dockerfile -t local:test .
+docker build -f RelationshipIntelligence.Api/Dockerfile -t local:test .
 
 # Run container
 docker run -p 8080:8080 local:test

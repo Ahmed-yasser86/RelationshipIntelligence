@@ -29,7 +29,7 @@ runs:
       uses: actions/cache@v4
       with:
         path: ~/.nuget/packages
-        key: ${{ runner.os }}-nuget-${{ hashFiles('ContactsManager.UI/**/packages.lock.json') }}
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
         restore-keys: |
           ${{ runner.os }}-nuget-
     - name: Install SonarScanner and Coverage Tools (with Cache Check)
@@ -66,10 +66,10 @@ runs:
         fi
     - name: Build Project (Required for Sonar to analyze)
       shell: bash
-      run: dotnet build ContactsManager.UI --no-restore
+      run: dotnet build RelationshipIntelligence.sln --no-restore
     - name: Run Tests with Coverage
       shell: bash
-      run: dotnet-coverage collect 'dotnet test ContactsManager.UI --no-restore' -f xml -o 'coverage.xml'
+      run: dotnet-coverage collect 'dotnet test RelationshipIntelligence.Tests/RelationshipIntelligence.Tests.csproj --no-restore' -f xml -o 'coverage.xml'
     - name: Sonar Scanner End
       shell: bash
       run: dotnet sonarscanner end /d:sonar.token="${{ inputs.sonar_token }}"

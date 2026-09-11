@@ -11,11 +11,10 @@ runs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v4  
       with:
-        global-json-file: ContactsManager.UI/global.json 
+        global-json-file: global.json 
         cache: true
-        cache-dependency-path: 'ContactsManager.UI/**/packages.lock.json'
+        cache-dependency-path: '**/packages.lock.json'
     - name: Restore dependencies
       if: ${{ inputs.restore == 'true' }}
       shell: bash
-      run: dotnet restore --locked-mode --disable-build-servers -p:UseMultiToolProvider=false
-      working-directory: ContactsManager.UI
+      run: dotnet restore RelationshipIntelligence.sln --disable-build-servers -p:UseMultiToolProvider=false

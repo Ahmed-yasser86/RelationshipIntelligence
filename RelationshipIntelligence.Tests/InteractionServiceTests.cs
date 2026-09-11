@@ -21,12 +21,14 @@ namespace CRUDTests
         private readonly Guid _userA = Guid.NewGuid();
         private readonly Mock<InteractionRepositoryContract> _interactionsMock = new();
         private readonly Mock<PersonRepositryContract> _personsMock = new();
+        private readonly Mock<IRelationshipScoringService> _scoringMock = new();
         private readonly Mock<ICurrentUserService> _userMock = new();
         private readonly Mock<IUnitOfWork> _unitOfWorkMock = new();
 
         private InteractionService Service() => new(
             _interactionsMock.Object,
             _personsMock.Object,
+            _scoringMock.Object,
             _userMock.Object,
             _unitOfWorkMock.Object,
             Mock.Of<ILogger<InteractionService>>());
@@ -65,6 +67,7 @@ namespace CRUDTests
             saved!.PersonId.Should().Be(person.PersonId);
             saved.TimeOfInteraction.Kind.Should().Be(DateTimeKind.Utc);
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Once);
+            _scoringMock.Verify(s => s.RecomputeForPairAsync(person.PersonId), Times.Once);
         }
 
         [Fact]
@@ -146,7 +149,7 @@ namespace CRUDTests
             string csv = "date,type,title\n" + string.Concat(
                 System.Linq.Enumerable.Repeat("2026-01-01,Email,x\n", InteractionCsvParser.MaxRows + 1));
 
-            await Assert.ThrowsAsync<ArgumentException>(
+            await Assert.ThrowsAsync<ValidationException>(
                 () => Service().ImportCsvAsync(person.PersonId, csv));
         }
 
@@ -154,14 +157,14 @@ namespace CRUDTests
         public void CsvParser_InvalidType_ThrowsWithLineNumber()
         {
             Action act = () => InteractionCsvParser.Parse("date,type,title\n2026-01-01,Teleport,Hello");
-            act.Should().Throw<ArgumentException>().WithMessage("*Line 2*");
+            act.Should().Throw<ValidationException>().WithMessage("*Line 2*");
         }
 
         [Fact]
         public void CsvParser_MissingTitle_Throws()
         {
             Action act = () => InteractionCsvParser.Parse("date,type,title\n2026-01-01,Email,");
-            act.Should().Throw<ArgumentException>();
+            act.Should().Throw<ValidationException>();
         }
     }
 }

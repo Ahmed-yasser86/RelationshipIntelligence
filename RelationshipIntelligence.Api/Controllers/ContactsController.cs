@@ -463,6 +463,10 @@ namespace ContactsManager.API.Controllers
                 var count = await _interactionService.ImportCsvAsync(id, request?.CsvText);
                 return Ok(count);
             }
+            catch (ValidationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
             catch (ArgumentException)
             {
                 return NotFound();

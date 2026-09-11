@@ -22,6 +22,7 @@ namespace CRUDTests
         private readonly Mock<PersonRepositryContract> _personsMock = new();
         private readonly Mock<InteractionRepositoryContract> _interactionsMock = new();
         private readonly Mock<DigestRepositoryContract> _digestsMock = new();
+        private readonly Mock<RelationshipStateRepositoryContract> _statesMock = new();
         private readonly Mock<ICurrentUserService> _userMock = new();
         private readonly Mock<IEmailSender> _emailMock = new();
         private readonly Mock<IUnitOfWork> _unitOfWorkMock = new();
@@ -31,6 +32,7 @@ namespace CRUDTests
             _personsMock.Object,
             _interactionsMock.Object,
             _digestsMock.Object,
+            _statesMock.Object,
             _userMock.Object,
             _emailMock.Object,
             _unitOfWorkMock.Object,
@@ -68,6 +70,48 @@ namespace CRUDTests
             payload.Entries[0].Health.Name.Should().Be("Hot");
             payload.Entries[0].ActionUrl.Should().Contain("token=");
             payload.Entries[0].Suggestion.Should().NotBeNullOrEmpty();
+        }
+
+        [Fact]
+        public async Task BuildAsync_FreshStates_SkipsRecompute()
+        {
+            ArrangeOwner();
+            var personId = Guid.NewGuid();
+            _personsMock.Setup(r => r.GetAllPersons()).ReturnsAsync(new List<Person>
+            {
+                new() { PersonId = personId, ApplicationUserId = _userA, Name = "P" }
+            }.AsEnumerable());
+            _statesMock.Setup(r => r.ListForOwnerAsync(_userA)).ReturnsAsync(new List<RelationshipState>
+            {
+                new() { PersonId = personId, ApplicationUserId = _userA, UpdatedAtUtc = DateTime.UtcNow }
+            });
+            _scoringMock.Setup(s => s.GetQueueAsync(50))
+                .ReturnsAsync(new List<RelationshipHealthResponse>());
+
+            await Service().BuildAsync("https://app.test");
+
+            _scoringMock.Verify(s => s.RecomputeForCurrentUserAsync(), Times.Never);
+        }
+
+        [Fact]
+        public async Task BuildAsync_StaleStates_Recomputes()
+        {
+            ArrangeOwner();
+            var personId = Guid.NewGuid();
+            _personsMock.Setup(r => r.GetAllPersons()).ReturnsAsync(new List<Person>
+            {
+                new() { PersonId = personId, ApplicationUserId = _userA, Name = "P" }
+            }.AsEnumerable());
+            _statesMock.Setup(r => r.ListForOwnerAsync(_userA)).ReturnsAsync(new List<RelationshipState>
+            {
+                new() { PersonId = personId, ApplicationUserId = _userA, UpdatedAtUtc = DateTime.UtcNow.AddDays(-2) }
+            });
+            _scoringMock.Setup(s => s.GetQueueAsync(50))
+                .ReturnsAsync(new List<RelationshipHealthResponse>());
+
+            await Service().BuildAsync("https://app.test");
+
+            _scoringMock.Verify(s => s.RecomputeForCurrentUserAsync(), Times.Once);
         }
 
         [Fact]

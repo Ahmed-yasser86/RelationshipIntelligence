@@ -100,7 +100,7 @@ namespace Servicess
                     person.NewsLetter = personUpdateRequest.NewsLetter ?? person.NewsLetter;
                     person.Address = personUpdateRequest.Address ?? person.Address;
                     person.CountryId = personUpdateRequest.CountryId ?? person.CountryId;
-                    person.Gender = personUpdateRequest.Gender.ToString() ?? person.Gender;
+                    person.Gender = personUpdateRequest.Gender?.ToString() ?? person.Gender;
 
                     person.ContextMemory = personUpdateRequest.ContextMemory ?? person.ContextMemory;
                     person.ProfileImagePath = personUpdateRequest.ProfileImagePath ?? person.ProfileImagePath;

@@ -25,6 +25,10 @@ namespace RepositryContracts
         /// </summary>
         Task<Person?> GetPersonByIdIgnoringFilters(Guid? id);
 
+        Task<List<Person>> ListByIdsAsync(IEnumerable<Guid> personIds);
+
+        Task<List<PersonAffinity>> ListAffinitiesAsync();
+
         Task<IEnumerable<Person>> GetAllPersons();
 
         Task<List<Person?>> GetFilteredPersons(Expression<Func<Person, bool>> predicate);

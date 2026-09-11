@@ -12,6 +12,38 @@ export function setToken(token: string | null) {
   else localStorage.removeItem(TOKEN_KEY);
 }
 
+function readableBody(text: string): string {
+  const trimmed = text.trim();
+  if (trimmed.startsWith("{")) {
+    try {
+      const parsed = JSON.parse(trimmed) as {
+        message?: unknown;
+        title?: unknown;
+        errors?: unknown;
+      };
+      if (typeof parsed.message === "string" && parsed.message !== "") {
+        return parsed.message;
+      }
+      if (typeof parsed.title === "string" && parsed.title !== "") {
+        const details =
+          parsed.errors != null ? ` ${JSON.stringify(parsed.errors)}` : "";
+        return `${parsed.title}.${details}`;
+      }
+    } catch {
+      // fall through to raw text
+    }
+  }
+  if (trimmed.startsWith('"') && trimmed.endsWith('"')) {
+    try {
+      const parsed: unknown = JSON.parse(trimmed);
+      if (typeof parsed === "string") return parsed;
+    } catch {
+      // fall through to raw text
+    }
+  }
+  return text;
+}
+
 export class ApiError extends Error {
   status: number;
   body: string;
@@ -36,14 +68,14 @@ async function request<T>(
   }
 
   const res = await fetch(`${BASE_URL}${path}`, { ...init, headers });
+  const text = await res.text();
   if (res.status === 401) {
     setToken(null);
     window.dispatchEvent(new Event("ri:unauthorized"));
-    throw new ApiError(401, "Session expired. Please sign in again.");
+    throw new ApiError(401, text !== "" ? readableBody(text) : "Session expired. Please sign in again.");
   }
   if (res.status === 204) return undefined as T;
-  const text = await res.text();
-  if (!res.ok) throw new ApiError(res.status, text || res.statusText);
+  if (!res.ok) throw new ApiError(res.status, text !== "" ? readableBody(text) : res.statusText);
   if (!text) return undefined as T;
   const contentType = res.headers.get("content-type") ?? "";
   if (contentType.includes("json")) return JSON.parse(text) as T;

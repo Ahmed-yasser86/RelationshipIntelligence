@@ -74,6 +74,7 @@ builder.Services.AddScoped<IDigestService>(sp => new DigestService(
     sp.GetRequiredService<PersonRepositryContract>(),
     sp.GetRequiredService<InteractionRepositoryContract>(),
     sp.GetRequiredService<DigestRepositoryContract>(),
+    sp.GetRequiredService<RelationshipStateRepositoryContract>(),
     sp.GetRequiredService<ICurrentUserService>(),
     sp.GetRequiredService<IEmailSender>(),
     sp.GetRequiredService<IUnitOfWork>(),

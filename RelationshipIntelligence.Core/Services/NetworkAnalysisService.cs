@@ -14,6 +14,7 @@ namespace Servicess
 {
     public class NetworkAnalysisService : INetworkAnalysisService
     {
+        public const int MaxNodes = 400;
         private readonly PersonRepositryContract _persons;
         private readonly RelationshipStateRepositoryContract _states;
         private readonly ICurrentUserService _currentUser;
@@ -43,11 +44,33 @@ namespace Servicess
                 if (userId == null || userId == Guid.Empty)
                     return response;
 
-                var persons = (await _persons.GetAllPersons())
-                    .Where(p => p != null)
-                    .ToList();
                 var states = (await _states.ListForOwnerAsync(userId.Value))
                     .ToDictionary(s => s.PersonId);
+                var urgencyOf = new Func<Guid, double>(id =>
+                    states.TryGetValue(id, out var s) ? s.UrgencyScore : 0);
+
+                var affinities = await _persons.ListAffinitiesAsync();
+                var connected = ConnectedPersonIds(
+                    affinities, NetworkAnalyzer.DefaultMaxSharedAttributeMembers);
+
+                var candidateIds = connected
+                    .OrderByDescending(urgencyOf)
+                    .Take(MaxNodes)
+                    .ToList();
+                if (candidateIds.Count < 50)
+                {
+                    foreach (var id in states.Keys.OrderByDescending(urgencyOf))
+                    {
+                        if (candidateIds.Count >= MaxNodes)
+                            break;
+                        if (!candidateIds.Contains(id))
+                            candidateIds.Add(id);
+                    }
+                }
+
+                var persons = (await _persons.ListByIdsAsync(candidateIds))
+                    .Where(p => p != null)
+                    .ToList();
 
                 var analysis = NetworkAnalyzer.Analyze(
                     persons.Select(p => new GraphNodeInput(
@@ -91,6 +114,45 @@ namespace Servicess
 
                 return response;
             }
+        }
+
+        private static HashSet<Guid> ConnectedPersonIds(
+            List<PersonAffinity> affinities, int maxSharedAttributeMembers)
+        {
+            var connected = new HashSet<Guid>();
+            var byCircle = new Dictionary<string, List<Guid>>(StringComparer.OrdinalIgnoreCase);
+            var byTag = new Dictionary<string, List<Guid>>(StringComparer.OrdinalIgnoreCase);
+            var byChannel = new Dictionary<string, List<Guid>>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var affinity in affinities)
+            {
+                foreach (var circle in affinity.CircleNames.Where(c => !string.IsNullOrWhiteSpace(c)))
+                    AddToIndex(byCircle, circle.Trim(), affinity.PersonId);
+                foreach (var tag in affinity.TagNames.Where(t => !string.IsNullOrWhiteSpace(t)))
+                    AddToIndex(byTag, tag.Trim(), affinity.PersonId);
+                foreach (var channel in affinity.ChannelNames.Where(c => !string.IsNullOrWhiteSpace(c)))
+                    AddToIndex(byChannel, channel.Trim(), affinity.PersonId);
+            }
+
+            foreach (var index in new[] { byCircle, byTag, byChannel })
+                foreach (var members in index.Values)
+                    if (members.Count > 1 && members.Count <= maxSharedAttributeMembers)
+                        foreach (var id in members)
+                            connected.Add(id);
+
+            return connected;
+        }
+
+        private static void AddToIndex(
+            Dictionary<string, List<Guid>> index, string key, Guid personId)
+        {
+            if (!index.TryGetValue(key, out var members))
+            {
+                members = new List<Guid>();
+                index[key] = members;
+            }
+            if (!members.Contains(personId))
+                members.Add(personId);
         }
     }
 }

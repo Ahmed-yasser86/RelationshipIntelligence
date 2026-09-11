@@ -383,10 +383,15 @@ Sec.8 evidence.
 
 - Nodes: the user's contacts (`Person` rows visible through the query filter).
 - Edges (all same-user, undirected, `[OPERATIONALIZATION]`):
-  shared `Circle` (weight 1.0), shared `UserDefinedTags` entry (0.5 each, cap 1.0),
+  shared `Circle` (weight 1.0), shared tag (0.5 each, cap 1.0),
   shared `ConnectionChannel` (0.5), co-occurrence of two persons in interactions
   with equal timestamps where supported (1.0; reserved until multi-attendee
   events exist - v1 passes no co-occurrence groups).
+- Ubiquity discount: an attribute value shared by more than 50 persons in the
+  analyzed set draws no edges. Rationale: near-universal affiliations (a default
+  channel, a junk tag) carry no structural information and would otherwise
+  produce a meaningless near-complete graph; the cutoff is an engineering choice,
+  disclosed here and covered by a unit test.
 - Measures (standard): **degree centrality** and **articulation points** via
   Tarjan's algorithm; **components** shown as clusters (structural holes described,
   no constraint/effective-size statistics claimed until validated).
@@ -600,6 +605,16 @@ on: retention gate passed (macro), 100k+ users or real-time graph load
   (`RelatedEntityResponse.cs` and similar) are left untouched.
 - Sec.12.12 (history): commit messages never reference internal plan-step labels;
   history on this branch uses feature-based messages only.
+- Sec.12.13 (live-data hardening from end-to-end verification): digest builds skip
+  the full recompute when every scored pair is fresher than one hour (the nightly
+  job owns refresh; `LogAsync`/`ImportCsvAsync` trigger instant per-pair recompute
+  so writes are never stale); the network endpoint first selects at most 400
+  candidates - connected persons by urgency, backfilled with top-urgency others -
+  via a lightweight affinity projection instead of materializing the whole network;
+  attributes shared by more than 50 analyzed persons draw no edges (near-universal
+  affiliations carry no structural information); CSV and future-date validation
+  failures surface as 400 with the message, unknown ids as 404; `PersonUpdateRequest`
+  validation matches the service's patch semantics (only identity fields required).
   `InteractionResponse`/`ConvertToDto` (extended with `PersonId`) and maps
   `ArgumentException` to 404 / validation failures to 400 on new endpoints. R2's
   nightly worker composes repositories and the scoring service manually per owner

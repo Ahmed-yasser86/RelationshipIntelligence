@@ -52,8 +52,9 @@ export function People() {
   }, []);
 
   const load = useCallback(
-    async (pageNumber: number) => {
+    async (pageNumber: number, overrideQuery?: string) => {
       setError(null);
+      const activeQuery = overrideQuery ?? query;
       try {
         const hasComposite = Object.values(composite).some((v) => v.trim() !== "");
         let result: PagedResult<PersonView>;
@@ -68,9 +69,9 @@ export function People() {
               Object.entries(composite).map(([k, v]) => [k, v.trim() === "" ? null : v.trim()]),
             ),
           );
-        } else if (query.trim() !== "") {
+        } else if (activeQuery.trim() !== "") {
           const params = new URLSearchParams({
-            QueryParamter: query.trim(),
+            QueryParamter: activeQuery.trim(),
             SearchBy: field,
             pageNumber: String(pageNumber),
             pageSize: String(PAGE_SIZE),
@@ -106,9 +107,50 @@ export function People() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  function submit(e: React.FormEvent) {
+  function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    void load(1);
+    const data = new FormData(e.currentTarget);
+    const q = (data.get("q") ?? "").toString();
+    setQuery(q);
+    const freshComposite = { ...composite };
+    (Object.keys(composite) as (keyof typeof composite)[]).forEach((k) => {
+      const v = data.get(`cf-${k}`);
+      if (v != null) freshComposite[k] = v.toString();
+    });
+    setComposite(freshComposite);
+    void loadComposite(1, q, freshComposite);
+  }
+
+  type Composite = typeof composite;
+
+  async function loadComposite(
+    pageNumber: number,
+    activeQuery: string,
+    activeComposite: Composite,
+  ) {
+    setError(null);
+    try {
+      const hasComposite = Object.values(activeComposite).some((v) => v.trim() !== "");
+      let result: PagedResult<PersonView>;
+      if (hasComposite) {
+        const params = new URLSearchParams({
+          pageNumber: String(pageNumber),
+          pageSize: String(PAGE_SIZE),
+        });
+        result = await api.post<PagedResult<PersonView>>(
+          `/api/Contacts/QueryContactsByCompositeFilter?${params}`,
+          Object.fromEntries(
+            Object.entries(activeComposite).map(([k, v]) => [k, v.trim() === "" ? null : v.trim()]),
+          ),
+        );
+      } else {
+        return load(pageNumber, activeQuery);
+      }
+      setData(result);
+      setPage(pageNumber);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Could not load people.");
+    }
   }
 
   const totalPages =
@@ -138,15 +180,16 @@ export function People() {
           <Label htmlFor="q">Search</Label>
           <Input
             id="q"
+            name="q"
             placeholder="Name, email, phone, organization…"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
         </div>
         <div className="flex flex-col gap-1.5">
-          <Label>Field</Label>
+          <Label htmlFor="people-field">Field</Label>
           <Select value={field} onValueChange={(v) => setField(v ?? "Name")}>
-            <SelectTrigger className="w-44">
+            <SelectTrigger id="people-field" className="w-44">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -159,9 +202,9 @@ export function People() {
           </Select>
         </div>
         <div className="flex flex-col gap-1.5">
-          <Label>Sort</Label>
+          <Label htmlFor="people-sort">Sort</Label>
           <Select value={sortBy} onValueChange={(v) => setSortBy(v ?? "Name")}>
-            <SelectTrigger className="w-44">
+            <SelectTrigger id="people-sort" className="w-44">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -193,8 +236,10 @@ export function People() {
             ] as const
           ).map(([key, label]) => (
             <div key={key} className="flex flex-col gap-1.5">
-              <Label>{label}</Label>
+              <Label htmlFor={`cf-${key}`}>{label}</Label>
               <Input
+                id={`cf-${key}`}
+                name={`cf-${key}`}
                 value={composite[key]}
                 onChange={(e) => setComposite((c) => ({ ...c, [key]: e.target.value }))}
               />

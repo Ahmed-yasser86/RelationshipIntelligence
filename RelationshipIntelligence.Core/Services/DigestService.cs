@@ -22,6 +22,7 @@ namespace Servicess
         private readonly PersonRepositryContract _persons;
         private readonly InteractionRepositoryContract _interactions;
         private readonly DigestRepositoryContract _digests;
+        private readonly RelationshipStateRepositoryContract _states;
         private readonly ICurrentUserService _currentUser;
         private readonly IEmailSender _email;
         private readonly IUnitOfWork _unitOfWork;
@@ -33,6 +34,7 @@ namespace Servicess
             PersonRepositryContract persons,
             InteractionRepositoryContract interactions,
             DigestRepositoryContract digests,
+            RelationshipStateRepositoryContract states,
             ICurrentUserService currentUser,
             IEmailSender email,
             IUnitOfWork unitOfWork,
@@ -43,6 +45,7 @@ namespace Servicess
             _persons = persons;
             _interactions = interactions;
             _digests = digests;
+            _states = states;
             _currentUser = currentUser;
             _email = email;
             _unitOfWork = unitOfWork;
@@ -89,7 +92,7 @@ namespace Servicess
                 if (!preference.Enabled)
                     return payload;
 
-                await _scoring.RecomputeForCurrentUserAsync();
+                await RefreshStaleStatesAsync(ownerId.Value);
                 var queue = await _scoring.GetQueueAsync(50);
                 var now = DateTime.UtcNow;
 
@@ -218,6 +221,20 @@ namespace Servicess
             var date = utcNow.Date;
             int diff = ((int)date.DayOfWeek + 6) % 7;
             return date.AddDays(-diff);
+        }
+
+        private async Task RefreshStaleStatesAsync(Guid ownerId)
+        {
+            var persons = ((await _persons.GetAllPersons()) ?? Enumerable.Empty<Person>())
+                .Where(p => p != null)
+                .ToList();
+            var states = await _states.ListForOwnerAsync(ownerId) ?? new List<RelationshipState>();
+            var cutoff = DateTime.UtcNow.AddHours(-1);
+            bool fresh = persons.Count > 0
+                && states.Count >= persons.Count
+                && states.All(s => s.UpdatedAtUtc >= cutoff);
+            if (!fresh)
+                await _scoring.RecomputeForCurrentUserAsync();
         }
     }
 }

@@ -173,9 +173,9 @@ export function PersonNew() {
                 <Input id="f-phone" value={full.phone} onChange={setF("phone")} />
               </div>
               <div className="flex flex-col gap-1.5">
-                <Label>Gender</Label>
+                <Label htmlFor="f-gender">Gender</Label>
                 <Select value={full.Gender} onValueChange={(v) => setFull((f) => ({ ...f, Gender: v ?? "" }))}>
-                  <SelectTrigger>
+                  <SelectTrigger id="f-gender">
                     <SelectValue placeholder="Select" />
                   </SelectTrigger>
                   <SelectContent>
@@ -189,9 +189,9 @@ export function PersonNew() {
                 <Input id="f-dob" type="date" value={full.DateOfBirth} onChange={setF("DateOfBirth")} />
               </div>
               <div className="flex flex-col gap-1.5">
-                <Label>Country</Label>
+                <Label htmlFor="f-country">Country</Label>
                 <Select value={full.CountryId} onValueChange={(v) => setFull((f) => ({ ...f, CountryId: v ?? "" }))}>
-                  <SelectTrigger>
+                  <SelectTrigger id="f-country">
                     <SelectValue placeholder="Select" />
                   </SelectTrigger>
                   <SelectContent>
@@ -217,8 +217,8 @@ export function PersonNew() {
               ] as const
             ).map(([key, label]) => (
               <div key={key} className="flex flex-col gap-1.5">
-                <Label>{label}</Label>
-                <Input value={full[key]} onChange={setF(key)} />
+                <Label htmlFor={`f-${key}`}>{label}</Label>
+                <Input id={`f-${key}`} value={full[key]} onChange={setF(key)} />
               </div>
             ))}
             {error && <p className="text-sm text-destructive">{error}</p>}

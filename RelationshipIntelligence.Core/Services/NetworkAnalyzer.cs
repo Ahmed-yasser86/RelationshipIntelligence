@@ -7,12 +7,22 @@ namespace Servicess
 {
     public static class NetworkAnalyzer
     {
+        public const int DefaultMaxSharedAttributeMembers = 50;
+
         public static GraphAnalysis Analyze(
             IReadOnlyList<GraphNodeInput> nodes,
-            IReadOnlyList<IReadOnlyList<Guid>> coOccurrenceGroups)
+            IReadOnlyList<IReadOnlyList<Guid>> coOccurrenceGroups,
+            int maxSharedAttributeMembers = DefaultMaxSharedAttributeMembers)
         {
             var edges = new List<GraphEdge>();
             var ids = nodes.Select(n => n.PersonId).ToHashSet();
+
+            var circleCounts = CountValues(nodes.Select(n => n.CircleName));
+            var channelCounts = CountValues(nodes.Select(n => n.ChannelName));
+            var tagCounts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+            foreach (var node in nodes)
+                foreach (var tag in ParseTags(node.TagsJson))
+                    tagCounts[tag] = tagCounts.TryGetValue(tag, out int c) ? c + 1 : 1;
 
             for (int i = 0; i < nodes.Count; i++)
             {
@@ -24,13 +34,16 @@ namespace Servicess
                     var reasons = new List<string>();
 
                     if (!string.IsNullOrWhiteSpace(a.CircleName)
-                        && string.Equals(a.CircleName.Trim(), b.CircleName?.Trim(), StringComparison.OrdinalIgnoreCase))
+                        && string.Equals(a.CircleName.Trim(), b.CircleName?.Trim(), StringComparison.OrdinalIgnoreCase)
+                        && !IsUbiquitous(a.CircleName, circleCounts, maxSharedAttributeMembers))
                     {
                         weight += 1.0;
                         reasons.Add("Same organization");
                     }
 
-                    var sharedTags = SharedTags(a.TagsJson, b.TagsJson);
+                    var sharedTags = SharedTags(a.TagsJson, b.TagsJson)
+                        .Where(t => !IsUbiquitous(t, tagCounts, maxSharedAttributeMembers))
+                        .ToList();
                     if (sharedTags.Count > 0)
                     {
                         weight += Math.Min(1.0, 0.5 * sharedTags.Count);
@@ -38,7 +51,8 @@ namespace Servicess
                     }
 
                     if (!string.IsNullOrWhiteSpace(a.ChannelName)
-                        && string.Equals(a.ChannelName.Trim(), b.ChannelName?.Trim(), StringComparison.OrdinalIgnoreCase))
+                        && string.Equals(a.ChannelName.Trim(), b.ChannelName?.Trim(), StringComparison.OrdinalIgnoreCase)
+                        && !IsUbiquitous(a.ChannelName, channelCounts, maxSharedAttributeMembers))
                     {
                         weight += 0.5;
                         reasons.Add("Shared channel");
@@ -76,6 +90,27 @@ namespace Servicess
             var a = ParseTags(aJson);
             var b = ParseTags(bJson);
             return a.Intersect(b, StringComparer.OrdinalIgnoreCase).ToList();
+        }
+
+        private static Dictionary<string, int> CountValues(IEnumerable<string?> values)
+        {
+            var counts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+            foreach (var value in values)
+            {
+                if (string.IsNullOrWhiteSpace(value))
+                    continue;
+                string key = value.Trim();
+                counts[key] = counts.TryGetValue(key, out int c) ? c + 1 : 1;
+            }
+            return counts;
+        }
+
+        private static bool IsUbiquitous(
+            string? value, Dictionary<string, int> counts, int maxSharedAttributeMembers)
+        {
+            return !string.IsNullOrWhiteSpace(value)
+                && counts.TryGetValue(value.Trim(), out int c)
+                && c > maxSharedAttributeMembers;
         }
 
         private static HashSet<string> ParseTags(string? json)

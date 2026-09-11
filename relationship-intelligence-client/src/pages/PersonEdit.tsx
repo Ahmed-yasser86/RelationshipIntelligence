@@ -54,6 +54,8 @@ export function PersonEdit() {
         });
         setDob(p.dateOfBirth ? p.dateOfBirth.slice(0, 10) : "");
         setCountryId(p.countryId ?? "");
+        const genderMap: Record<string, string> = { Male: "0", Female: "1", Other: "2" };
+        setGender(p.gender != null ? (genderMap[p.gender] ?? "") : "");
       })
       .catch((err) =>
         setError(err instanceof ApiError ? err.message : "Could not load person."),
@@ -122,10 +124,10 @@ export function PersonEdit() {
             <Label htmlFor="e-phone">Phone</Label>
             <Input id="e-phone" value={form.phone} onChange={set("phone")} />
           </div>
-          <div className="flex flex-col gap-1.5">
-            <Label>Gender</Label>
-            <Select value={gender} onValueChange={(v) => setGender(v ?? "")}>
-              <SelectTrigger>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="e-gender">Gender</Label>
+              <Select value={gender} onValueChange={(v) => setGender(v ?? "")}>
+                <SelectTrigger id="e-gender">
                 <SelectValue placeholder={person.gender || "Select"} />
               </SelectTrigger>
               <SelectContent>
@@ -139,10 +141,10 @@ export function PersonEdit() {
             <Label htmlFor="e-dob">Date of birth</Label>
             <Input id="e-dob" type="date" value={dob} onChange={(e) => setDob(e.target.value)} />
           </div>
-          <div className="flex flex-col gap-1.5">
-            <Label>Country</Label>
-            <Select value={countryId} onValueChange={(v) => setCountryId(v ?? "")}>
-              <SelectTrigger>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="e-country">Country</Label>
+              <Select value={countryId} onValueChange={(v) => setCountryId(v ?? "")}>
+                <SelectTrigger id="e-country">
                 <SelectValue placeholder={person.countryName || "Select"} />
               </SelectTrigger>
               <SelectContent>
@@ -164,8 +166,8 @@ export function PersonEdit() {
           ] as const
         ).map(([key, label]) => (
           <div key={key} className="flex flex-col gap-1.5">
-            <Label>{label}</Label>
-            <Input value={form[key]} onChange={set(key)} />
+            <Label htmlFor={`e-${key}`}>{label}</Label>
+            <Input id={`e-${key}`} value={form[key]} onChange={set(key)} />
           </div>
         ))}
         <div className="flex flex-col gap-1.5">

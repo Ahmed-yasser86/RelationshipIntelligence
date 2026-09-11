@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -38,6 +38,7 @@ import { InteractionTypes } from "@/lib/types";
 function usePerson(id: string | undefined) {
   const [person, setPerson] = useState<Person | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const { key } = useLocation();
 
   const load = useCallback(async () => {
     if (!id) return;
@@ -53,7 +54,7 @@ function usePerson(id: string | undefined) {
 
   useEffect(() => {
     void load();
-  }, [load]);
+  }, [load, key]);
 
   return { person, error, reload: load };
 }
@@ -106,9 +107,9 @@ function LogInteractionDialog({
         <form onSubmit={submit} className="flex flex-col gap-3">
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1.5">
-              <Label>Type</Label>
+              <Label htmlFor="log-type">Type</Label>
               <Select value={type} onValueChange={(v) => setType(v ?? "1")}>
-                <SelectTrigger>
+                <SelectTrigger id="log-type">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>

@@ -16,6 +16,7 @@ namespace Servicess
     {
         private readonly InteractionRepositoryContract _interactions;
         private readonly PersonRepositryContract _persons;
+        private readonly IRelationshipScoringService _scoring;
         private readonly ICurrentUserService _currentUser;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<InteractionService> _logger;
@@ -23,12 +24,14 @@ namespace Servicess
         public InteractionService(
             InteractionRepositoryContract interactions,
             PersonRepositryContract persons,
+            IRelationshipScoringService scoring,
             ICurrentUserService currentUser,
             IUnitOfWork unitOfWork,
             ILogger<InteractionService> logger)
         {
             _interactions = interactions;
             _persons = persons;
+            _scoring = scoring;
             _currentUser = currentUser;
             _unitOfWork = unitOfWork;
             _logger = logger;
@@ -55,6 +58,7 @@ namespace Servicess
 
                 var saved = await _interactions.AddAsync(request.ToInteraction());
                 await _unitOfWork.SaveChangesAsync();
+                await _scoring.RecomputeForPairAsync(request.PersonId);
                 return saved.ConvertToDto();
             }
         }
@@ -92,6 +96,7 @@ namespace Servicess
                 });
             }
             await _unitOfWork.SaveChangesAsync();
+            await _scoring.RecomputeForPairAsync(person.PersonId);
 
             return rows.Count;
         }

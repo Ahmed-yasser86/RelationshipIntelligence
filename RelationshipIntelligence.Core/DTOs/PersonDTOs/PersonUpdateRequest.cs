@@ -18,7 +18,6 @@ namespace ServiceContracts.DTOs
         [StringLength(100, ErrorMessage = "Name cannot exceed 100 characters")]
         public string? Name { get; set; }
 
-        [Required(ErrorMessage = "Date of Birth is required")]
         [DataType(DataType.Date)]
         public DateTime? DateOfBirth { get; set; }
 
@@ -29,13 +28,11 @@ namespace ServiceContracts.DTOs
         [Phone(ErrorMessage = "Invalid phone number format")]
         public string? phone { get; set; }
 
-        [Required(ErrorMessage = "Gender is required")]
         public GenderOptions? Gender { get; set; }
 
         [StringLength(200, ErrorMessage = "Address is too long")]
         public string? Address { get; set; }
 
-        [Required(ErrorMessage = "Please select a country")]
         public Guid? CountryId { get; set; }
 
         public bool? NewsLetter { get; set; }

@@ -216,6 +216,28 @@ namespace Repositories
                 .FirstOrDefaultAsync(p => p.PersonId == id);
         }
 
+        public async Task<List<Person>> ListByIdsAsync(IEnumerable<Guid> personIds)
+        {
+            var ids = personIds?.ToHashSet() ?? new HashSet<Guid>();
+            if (ids.Count == 0)
+                return new List<Person>();
+
+            return await PersonWithAllIncludes()
+                .Where(p => ids.Contains(p.PersonId))
+                .ToListAsync();
+        }
+
+        public async Task<List<PersonAffinity>> ListAffinitiesAsync()
+        {
+            return await _db.Persons
+                .Select(p => new PersonAffinity(
+                    p.PersonId,
+                    p.Circles.Select(c => c.Name).ToList(),
+                    p.UserDefinedTags.Select(t => t.TagName).ToList(),
+                    p.ConnectionChannels.Select(c => c.ConnectionChannelName).ToList()))
+                .ToListAsync();
+        }
+
 
 
         private async Task SyncCollection<TEntity, TKey>(

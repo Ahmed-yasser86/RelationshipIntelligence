@@ -24,6 +24,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ExplainDrawer } from "@/components/explain-drawer";
 import { MemorySection } from "@/components/memory-section";
 import { EventsSection } from "@/components/events-section";
+import { StoryPanel } from "@/components/story-panel";
 import {
   BandBadge,
   EmptyState,
@@ -421,7 +422,14 @@ export function PersonDetail() {
               <>
                 <BandBadge band={state.band} />
                 <UrgencyBar value={state.urgencyScore} />
-                {state.isBridge && <Badge variant="secondary">Bridge</Badge>}
+                {state.isBridge && (
+                  <Badge
+                    variant="secondary"
+                    title="Articulation point — this contact connects otherwise separate parts of your network. Structural flag, not a risk score."
+                  >
+                    Bridge
+                  </Badge>
+                )}
               </>
             )}
             {(person.systemStatusTags ?? []).map((t) => (
@@ -466,7 +474,7 @@ export function PersonDetail() {
             {state.evidenceStatus === "Insufficient"
               ? ` — early estimate from ${state.interactionCount} logged interaction(s).`
               : "."}
-            {state.isBridge && " This contact bridges otherwise separate parts of your network."}
+            {state.isBridge && " This contact is an articulation point — it connects otherwise separate parts of your network."}
           </span>
         </div>
       )}
@@ -480,6 +488,8 @@ export function PersonDetail() {
           </span>
         </div>
       )}
+
+      <StoryPanel person={person} state={state} neighbors={neighbors} nodeInfo={nodeInfo ?? null} />
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_320px]">
         <section>
@@ -617,7 +627,7 @@ export function PersonDetail() {
                 {nodeInfo != null && (
                   <p className="text-sm text-muted-foreground">
                     {nodeInfo.degree} direct connection{nodeInfo.degree === 1 ? "" : "s"}
-                    {nodeInfo.isBridge ? " · a bridge between network regions" : ""} ·
+                    {nodeInfo.isBridge ? " · an articulation point between network regions" : ""} ·
                     urgency {Math.round(nodeInfo.urgencyScore)}.
                   </p>
                 )}

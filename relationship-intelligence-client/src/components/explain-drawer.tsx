@@ -349,7 +349,7 @@ export function ExplainDrawer({
             </dl>
             <p className="mt-1 text-xs text-muted-foreground">
               Urgency is the deficit against your strongest tie — a ranking aid, not a
-              probability. Flags (bridge, key) describe structure, not risk magnitude.
+              probability. Flags (articulation point, key) describe structure, not risk magnitude.
             </p>
           </section>
         </div>

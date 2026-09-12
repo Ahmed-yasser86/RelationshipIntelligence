@@ -275,7 +275,7 @@ export function Queue() {
                     {item.isBridge && (
                       <Badge
                         variant="secondary"
-                        title="Bridge — this contact connects otherwise separate parts of your network"
+                        title="Articulation point (bridge) — this contact connects otherwise separate parts of your network. Structural flag, not a risk score."
                       >
                         Bridge
                       </Badge>

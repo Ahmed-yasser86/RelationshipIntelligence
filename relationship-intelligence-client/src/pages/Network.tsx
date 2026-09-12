@@ -114,7 +114,7 @@ export function Network() {
         <h1 className="text-2xl font-semibold tracking-tight">Network</h1>
         <p className="mt-1 max-w-3xl text-sm text-muted-foreground">
           {graph
-            ? `${visible?.total ?? 0} people in view (${graph.nodes.length} received) · ${graph.edges.length} connections · ${graph.clusterCount} groups. Ringed nodes are bridges — they hold otherwise separate parts of your network together, and research shows they are lost faster.`
+            ? `${visible?.total ?? 0} people in view (${graph.nodes.length} received) · ${graph.edges.length} shared-context connections · ${graph.clusterCount} shared-context groups. Ringed nodes are articulation points (bridges) — removing one would split its region.`
             : "Your contacts as a map. Force layout: connected people pull together, everyone else pushes apart."}
         </p>
       </div>
@@ -173,13 +173,13 @@ export function Network() {
                 </SelectContent>
               </Select>
             </div>
-            <label className="flex items-center gap-1.5 text-sm">
+            <label className="flex items-center gap-1.5 text-sm" title="Show only articulation points — contacts whose removal would split their network region">
               <input
                 type="checkbox"
                 checked={bridgesOnly}
                 onChange={(e) => setBridgesOnly(e.target.checked)}
               />
-              Bridges only
+              Articulation points only
             </label>
             <label className="flex items-center gap-1.5 text-sm">
               <input
@@ -229,7 +229,7 @@ export function Network() {
                   <p className="text-sm text-muted-foreground">
                     Select a node to inspect it — its neighborhood highlights, everything
                     else fades. Color shows urgency (green → red); dashed rings mark
-                    bridges. Drag nodes to rearrange; scroll to zoom.
+                    articulation points (bridges). Drag nodes to rearrange; scroll to zoom.
                   </p>
                 ) : (
                   <div className="flex flex-col gap-2">
@@ -240,7 +240,11 @@ export function Network() {
                       {selectedNode.name ?? "Unnamed contact"}
                     </Link>
                     <div className="flex flex-wrap gap-1.5">
-                      {selectedNode.isBridge && <Badge variant="secondary">Bridge</Badge>}
+                      {selectedNode.isBridge && (
+                        <Badge variant="secondary" title="Articulation point — removing this contact would split its network region. Structural flag, not a risk score.">
+                          Bridge
+                        </Badge>
+                      )}
                       {selectedNode.isIsolated && <Badge variant="outline">Unconnected</Badge>}
                       <Badge variant="outline">{selectedNode.degree} connections</Badge>
                       {selectedNode.evidenceStatus === "NoHistory" ? (

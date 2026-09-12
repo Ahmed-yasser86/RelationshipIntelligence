@@ -100,7 +100,7 @@ export function Overview() {
           {[
             ["Observe", "Log interactions as they happen"],
             ["Understand", "See rhythm, drift, and state"],
-            ["Discover", "Find bridges, clusters, and risks"],
+            ["Discover", "Find articulation points, shared-context groups, and risks"],
             ["Act", "Work the weekly queue"],
           ].map(([step, desc]) => (
             <li key={step} className="rounded-lg border px-3 py-2.5">
@@ -127,8 +127,8 @@ export function Overview() {
               <span className="text-muted-foreground">{snapshot.drifting} drifting</span>
             </span>
             <span className="text-muted-foreground">
-              {snapshot.nodes} people · {snapshot.edges} connections ·{" "}
-              {snapshot.clusters} groups · {snapshot.bridges} bridges
+              {snapshot.nodes} people · {snapshot.edges} shared-context connections ·{" "}
+              {snapshot.clusters} shared-context groups · {snapshot.bridges} articulation points
             </span>
             <span className="text-muted-foreground">
               Digest holds {snapshot.digestCount} relationships to protect
@@ -173,7 +173,7 @@ export function Overview() {
           <Link to="/network" className="rounded-lg border px-4 py-3 hover:bg-secondary/50">
             <p className="text-sm font-semibold">Network structure</p>
             <p className="mt-0.5 text-xs text-muted-foreground">
-              Clusters, bridges, and isolates — who connects your worlds.
+              Shared-context groups, articulation points, and isolates — who connects your worlds.
             </p>
           </Link>
           <Link to="/people" className="rounded-lg border px-4 py-3 hover:bg-secondary/50">
@@ -198,7 +198,7 @@ export function Overview() {
             Tie strength decays exponentially between logged interactions (60-day
             half-life) and rises equally with each one — no per-channel weights, no
             hidden adjustments. Urgency is the deficit against your strongest tie.
-            Bands, bridges, and rhythms are display aids over this single dynamic.
+            Bands, articulation points, and rhythms are display aids over this single dynamic.
           </p>
         </div>
       </section>

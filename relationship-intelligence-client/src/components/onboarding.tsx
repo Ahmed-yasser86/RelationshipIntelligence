@@ -24,7 +24,7 @@ const STEPS = [
   },
   {
     title: "Your network has a shape",
-    body: "Shared organizations, tags, and channels reveal clusters and bridges — the people holding your worlds together. They are flagged because research shows bridges are lost first. Not sure where to start? Load the demo workspace below and watch the loop work on realistic data.",
+    body: "Shared organizations, tags, and channels reveal shared-context groups and articulation points — the people holding your worlds together. Not sure where to start? Load the demo workspace below and watch the loop work on realistic data.",
   },
 ];
 

@@ -26,7 +26,8 @@ test.describe("person workflows", () => {
     await page.locator("main").getByRole("button", { name: "Log interaction" }).click();
     await page.getByLabel("What was it about").fill("E2E verification call");
     await page.getByRole("button", { name: "Save interaction" }).click();
-    await expect(page.getByText("E2E verification call")).toBeVisible();
+    const historySection = page.locator("section", { has: page.getByRole("heading", { name: "History", exact: true }) });
+    await expect(historySection.getByText("E2E verification call")).toBeVisible();
 
     // csv import validation error surfaces
     await page.getByRole("button", { name: "Import CSV" }).click();
@@ -77,6 +78,9 @@ test.describe("person workflows", () => {
   test("person detail tells the relationship story", async ({ page }) => {
     await page.goto("/people");
     await page.locator("ul > li a").first().click();
+    await expect(page.getByRole("heading", { name: "The story so far" })).toBeVisible();
+    await expect(page.getByText("Relationship context")).toBeVisible();
+    await expect(page.getByText("Important events")).toBeVisible();
     await expect(page.getByRole("heading", { name: "History", exact: true })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Trajectory" })).toBeVisible();
     await expect(

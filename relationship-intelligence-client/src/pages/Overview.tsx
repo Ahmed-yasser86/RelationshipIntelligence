@@ -138,14 +138,6 @@ export function Overview() {
             hidden adjustments. Urgency is the deficit against your strongest tie.
             Bands, bridges, and rhythms are display aids over this single dynamic.
           </p>
-          <a
-            href="https://github.com/Ahmed-yasser86/RelationshipIntelligence/blob/relationship-intelligence-main/RELATIONSHIP_INTELLIGENCE_METHODOLOGY.md"
-            target="_blank"
-            rel="noreferrer"
-            className="mt-1 inline-block text-sm font-medium text-foreground underline"
-          >
-            Read the full methodology →
-          </a>
         </div>
       </section>
 

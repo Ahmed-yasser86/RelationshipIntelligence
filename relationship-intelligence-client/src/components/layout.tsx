@@ -1,9 +1,11 @@
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { CopilotDrawer } from "@/components/copilot-drawer";
 import { GlobalLog } from "@/components/global-log";
 import { Onboarding } from "@/components/onboarding";
 import { useAuth } from "@/lib/auth";
+import { useCopilot } from "@/lib/copilot";
 import { cn } from "cn";
 import {
   Building2,
@@ -12,6 +14,7 @@ import {
   LogOut,
   Network,
   Newspaper,
+  Sparkles,
   Users,
 } from "lucide-react";
 
@@ -27,6 +30,7 @@ const NAV = [
 export function Layout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const { openCopilot } = useCopilot();
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -63,6 +67,14 @@ export function Layout() {
           </nav>
           <div className="mt-auto">
             <Separator className="my-4" />
+            <Button
+              variant="outline"
+              size="sm"
+              className="mb-2 w-full justify-start"
+              onClick={() => openCopilot()}
+            >
+              <Sparkles className="h-4 w-4" /> Ask co-pilot
+            </Button>
             <p className="truncate px-2 text-xs text-muted-foreground">
               {user?.name || user?.email}
             </p>
@@ -83,6 +95,7 @@ export function Layout() {
           <Outlet />
         </main>
         <Onboarding />
+        <CopilotDrawer />
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { Layout } from "@/components/layout";
 import { AuthProvider, useAuth } from "@/lib/auth";
+import { CopilotProvider } from "@/lib/copilot";
 import { Digest } from "@/pages/Digest";
 import { Login } from "@/pages/Login";
 import { Network } from "@/pages/Network";
@@ -32,6 +33,7 @@ function PublicOnly({ children }: { children: JSX.Element }) {
 export function App() {
   return (
     <AuthProvider>
+      <CopilotProvider>
       <Routes>
         <Route
           path="/login"
@@ -68,6 +70,7 @@ export function App() {
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      </CopilotProvider>
     </AuthProvider>
   );
 }

@@ -4,12 +4,15 @@ using ContactsManger.Core.Services;
 using Entities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using RelationshipIntelligence.AI;
 using Repositories;
 using RepositryContracts;
 using ServiceContracts;
@@ -69,6 +72,16 @@ builder.Services.AddScoped<IRelationshipMemoryService, RelationshipMemoryService
 builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddScoped<RelationshipMemoryRepositoryContract, RelationshipMemoryRepository>();
 builder.Services.AddScoped<RelationshipEventRepositoryContract, RelationshipEventRepository>();
+builder.Services.AddScoped<IAiProviderSettingsService, AiProviderSettingsService>();
+builder.Services.AddScoped<AiProviderSettingsRepositoryContract, AiProviderSettingsRepository>();
+builder.Services.AddDataProtection();
+builder.Services.AddScoped<KernelFactory>();
+builder.Services.AddScoped<RelationshipPlugin>();
+var copilotMode = builder.Configuration["Copilot:Mode"];
+if (string.Equals(copilotMode, "Stub", StringComparison.OrdinalIgnoreCase))
+    builder.Services.AddScoped<ICopilotService, StubCopilotService>();
+else
+    builder.Services.AddScoped<ICopilotService, CopilotService>();
 builder.Services.AddScoped<INetworkAnalysisService, NetworkAnalysisService>();
 builder.Services.AddScoped<RelationshipStateRepositoryContract, RelationshipStateRepository>();
 builder.Services.AddScoped<DigestRepositoryContract, DigestRepository>();

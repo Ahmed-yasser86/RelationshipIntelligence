@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { EmptyState, ErrorState, NavButton } from "@/components/states";
+import { BriefingBlock } from "@/components/briefing-block";
 import { ApiError, api } from "@/lib/api";
 import { daysSince } from "@/lib/format";
 import { EventTypes } from "@/lib/types";
@@ -115,6 +116,7 @@ export function Overview() {
       {snapshot === null && !error && (
         <p className="text-sm text-muted-foreground">Loading your network snapshot…</p>
       )}
+      <BriefingBlock />
       {snapshot !== null && (
         <section aria-label="This week">
           <h2 className="mb-2 text-base font-semibold">This week in your network</h2>

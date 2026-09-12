@@ -25,6 +25,7 @@ import { ExplainDrawer } from "@/components/explain-drawer";
 import { MemorySection } from "@/components/memory-section";
 import { EventsSection } from "@/components/events-section";
 import { StoryPanel } from "@/components/story-panel";
+import { useCopilot } from "@/lib/copilot";
 import {
   BandBadge,
   EmptyState,
@@ -336,6 +337,7 @@ function Timeline({ interactions }: { interactions: InteractionResponse[] }) {
 export function PersonDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { openCopilot } = useCopilot();
   const { person, error, reload } = usePerson(id);
   const [state, setState] = useState<RelationshipHealth | null>(null);
   const [network, setNetwork] = useState<NetworkGraph | null>(null);
@@ -455,6 +457,9 @@ export function PersonDetail() {
           <NavButton to={`/people/${person.personId}/edit`} size="sm" variant="outline">
             Edit
           </NavButton>
+          <Button size="sm" variant="outline" onClick={() => openCopilot({ personId: person.personId, personName: person.name })}>
+            Ask co-pilot
+          </Button>
           <Button size="sm" variant="destructive" disabled={deleting} onClick={() => void onDelete()}>
             {deleting ? "Deleting…" : "Delete"}
           </Button>

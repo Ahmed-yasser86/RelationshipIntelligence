@@ -22,6 +22,7 @@ import {
 import { ExplainDrawer } from "@/components/explain-drawer";
 import { BandBadge, EmptyState, ErrorState, LoadingList, NavButton, PersonAvatar, UrgencyBar } from "@/components/states";
 import { ApiError, api } from "@/lib/api";
+import { useCopilot } from "@/lib/copilot";
 import { daysSince, timeAgo } from "@/lib/format";
 import type { InteractionResponse, RelationshipHealth } from "@/lib/types";
 import { InteractionTypes } from "@/lib/types";
@@ -151,6 +152,7 @@ function QuickLog({
 }
 
 export function Queue() {
+  const { openCopilot } = useCopilot();
   const [items, setItems] = useState<RelationshipHealth[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [top, setTop] = useState(PAGE_TOP);
@@ -319,6 +321,9 @@ export function Queue() {
                 <QuickLog person={item} onDone={() => void load()} />
                 <Button size="sm" variant="ghost" onClick={() => void explain(item)}>
                   Explain
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => openCopilot({ personId: item.personId, personName: item.name })}>
+                  Ask
                 </Button>
                 <Button size="sm" variant="ghost" onClick={() => snooze(item.personId)}>
                   Snooze

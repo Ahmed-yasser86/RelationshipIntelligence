@@ -37,6 +37,7 @@ namespace Entities
         public virtual DbSet<DigestPreference> DigestPreferences { get; set; }
         public virtual DbSet<RelationshipMemoryEntry> RelationshipMemoryEntries { get; set; }
         public virtual DbSet<RelationshipEvent> RelationshipEvents { get; set; }
+        public virtual DbSet<AiProviderSettings> AiProviderSettings { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -97,6 +98,9 @@ namespace Entities
                 .WithMany()
                 .HasForeignKey(e => e.PersonId)
                 .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<AiProviderSettings>().ToTable("AiProviderSettings");
+            modelBuilder.Entity<AiProviderSettings>()
+                .HasQueryFilter(s => s.ApplicationUserId == _currentUserId);
 
             modelBuilder.Entity<Person>()
                 .HasOne(p => p.ApplicationUser)

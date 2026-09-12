@@ -82,6 +82,49 @@ export interface EventOccurrence {
   inDays: number;
   importance: number;
 }
+export interface CopilotCitation {
+  kind: string;
+  id: string | null;
+  label: string;
+}
+export interface CopilotAnswer {
+  text: string;
+  citations: CopilotCitation[];
+  limitedContext: boolean;
+}
+export interface ChatTurn {
+  role: string;
+  text: string;
+}
+export interface BriefingAttentionItem {
+  personId: string;
+  name: string;
+  reason: string;
+  band: string;
+}
+export interface BriefingEventItem {
+  personId: string;
+  personName: string | null;
+  title: string;
+  inDays: number;
+  silenceLine: string;
+}
+export interface BriefingPayload {
+  generatedAtUtc: string;
+  summary: string;
+  attentionNow: BriefingAttentionItem[];
+  upcomingEvents: BriefingEventItem[];
+  followUpsDue: string[];
+  changes: unknown[];
+  suggestedActions: string[];
+}
+export interface AiProviderSettings {
+  provider: string;
+  model: string;
+  baseUrl: string | null;
+  hasKey: boolean;
+  updatedAtUtc: string | null;
+}
 export interface ContactChannelRequest {
   name: string;
   value: string | null;

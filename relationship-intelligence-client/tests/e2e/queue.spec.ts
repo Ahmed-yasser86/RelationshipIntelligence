@@ -5,6 +5,8 @@ test.describe("attention queue", () => {
   test.beforeEach(async ({ page }) => {
     await loginViaApi(page);
     await expectSignedIn(page);
+    await page.getByRole("link", { name: "Attention", exact: true }).click();
+    await expect(page.getByRole("heading", { name: "Needs attention" })).toBeVisible();
   });
 
   test("shows ranked queue with evidence", async ({ page }) => {

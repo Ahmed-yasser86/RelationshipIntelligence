@@ -71,27 +71,30 @@ export function PersonEdit() {
       setForm((f) => ({ ...f, [key]: e.target.value }));
   }
 
-  async function submit(e: React.FormEvent) {
+  async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!id) return;
     setError(null);
     setBusy(true);
     try {
+      const data = new FormData(e.currentTarget);
+      const str = (key: string): string | null => {
+        const v = (data.get(key) ?? "").toString().trim();
+        return v === "" ? null : v;
+      };
       await api.put("/api/Contacts/PutContactItemUpdateRequest", {
         PersonId: id,
-        Name: form.Name.trim() === "" ? null : form.Name.trim(),
-        email: form.email.trim() === "" ? null : form.email.trim(),
-        phone: form.phone.trim() === "" ? null : form.phone.trim(),
+        Name: str("Name"),
+        email: str("email"),
+        phone: str("phone"),
         Gender: gender === "" ? null : Number(gender),
         DateOfBirth: dob === "" ? null : dob,
-        Address: form.Address.trim() === "" ? null : form.Address.trim(),
+        Address: str("Address"),
         CountryId: countryId === "" ? null : countryId,
-        ContextMemory: form.ContextMemory.trim() === "" ? null : form.ContextMemory.trim(),
-        Origin: form.Origin.trim() === "" ? null : form.Origin.trim(),
-        LinkedInProfile:
-          form.LinkedInProfile.trim() === "" ? null : form.LinkedInProfile.trim(),
-        OtherInformation:
-          form.OtherInformation.trim() === "" ? null : form.OtherInformation.trim(),
+        ContextMemory: str("ContextMemory"),
+        Origin: str("Origin"),
+        LinkedInProfile: str("LinkedInProfile"),
+        OtherInformation: str("OtherInformation"),
       });
       navigate(`/people/${id}`);
     } catch (err) {
@@ -114,15 +117,15 @@ export function PersonEdit() {
         <div className="grid grid-cols-2 gap-3">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="e-name">Name</Label>
-            <Input id="e-name" value={form.Name} onChange={set("Name")} />
+            <Input id="e-name" name="Name" value={form.Name} onChange={set("Name")} />
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="e-email">Email</Label>
-            <Input id="e-email" type="email" value={form.email} onChange={set("email")} />
+            <Input id="e-email" name="email" type="email" value={form.email} onChange={set("email")} />
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="e-phone">Phone</Label>
-            <Input id="e-phone" value={form.phone} onChange={set("phone")} />
+            <Input id="e-phone" name="phone" value={form.phone} onChange={set("phone")} />
           </div>
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="e-gender">Gender</Label>
@@ -167,12 +170,12 @@ export function PersonEdit() {
         ).map(([key, label]) => (
           <div key={key} className="flex flex-col gap-1.5">
             <Label htmlFor={`e-${key}`}>{label}</Label>
-            <Input id={`e-${key}`} value={form[key]} onChange={set(key)} />
+            <Input id={`e-${key}`} name={key} value={form[key]} onChange={set(key)} />
           </div>
         ))}
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="e-mem">Memory aid</Label>
-          <Textarea id="e-mem" rows={3} value={form.ContextMemory} onChange={set("ContextMemory")} />
+          <Textarea id="e-mem" name="ContextMemory" rows={3} value={form.ContextMemory} onChange={set("ContextMemory")} />
         </div>
         {error && <p className="text-sm text-destructive">{error}</p>}
         <Button type="submit" disabled={busy}>

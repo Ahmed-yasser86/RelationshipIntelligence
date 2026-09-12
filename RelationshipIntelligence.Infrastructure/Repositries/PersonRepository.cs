@@ -232,9 +232,11 @@ namespace Repositories
             return await _db.Persons
                 .Select(p => new PersonAffinity(
                     p.PersonId,
+                    p.Name,
                     p.Circles.Select(c => c.Name).ToList(),
                     p.UserDefinedTags.Select(t => t.TagName).ToList(),
-                    p.ConnectionChannels.Select(c => c.ConnectionChannelName).ToList()))
+                    p.ConnectionChannels.Select(c => c.ConnectionChannelName).ToList(),
+                    p.SystemStatusTags.Select(t => t.Name).ToList()))
                 .ToListAsync();
         }
 

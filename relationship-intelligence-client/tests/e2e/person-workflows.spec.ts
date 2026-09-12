@@ -14,7 +14,7 @@ test.describe("person workflows", () => {
     request,
   }) => {
     // quick add
-    await page.getByRole("link", { name: "People" }).click();
+    await page.getByRole("link", { name: "People", exact: true }).click();
     await page.getByRole("link", { name: "Add person" }).click();
     await page.getByLabel("Name").first().fill(PROBE);
     await page.getByLabel("Email").fill(`probe-${Date.now()}@example.com`);

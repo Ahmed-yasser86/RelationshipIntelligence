@@ -225,16 +225,21 @@ namespace Servicess
 
         private async Task RefreshStaleStatesAsync(Guid ownerId)
         {
-            var persons = ((await _persons.GetAllPersons()) ?? Enumerable.Empty<Person>())
-                .Where(p => p != null)
-                .ToList();
-            var states = await _states.ListForOwnerAsync(ownerId) ?? new List<RelationshipState>();
+            var affinities = (await _persons.ListAffinitiesAsync()) ?? new List<PersonAffinity>();
+            var states = (await _states.ListForOwnerAsync(ownerId) ?? new List<RelationshipState>())
+                .ToDictionary(s => s.PersonId);
             var cutoff = DateTime.UtcNow.AddHours(-1);
-            bool fresh = persons.Count > 0
-                && states.Count >= persons.Count
-                && states.All(s => s.UpdatedAtUtc >= cutoff);
-            if (!fresh)
-                await _scoring.RecomputeForCurrentUserAsync();
+
+            foreach (var affinity in affinities)
+            {
+                if (affinity == null)
+                    continue;
+                if (!states.TryGetValue(affinity.PersonId, out var state)
+                    || state.UpdatedAtUtc < cutoff)
+                {
+                    await _scoring.RecomputeForPairAsync(affinity.PersonId);
+                }
+            }
         }
     }
 }

@@ -4,7 +4,7 @@ import { expectSignedIn, loginViaApi } from "./helpers";
 test.describe("people", () => {
   test.beforeEach(async ({ page }) => {
     await loginViaApi(page);
-    await page.getByRole("link", { name: "People" }).click();
+    await page.getByRole("link", { name: "People", exact: true }).click();
     await expect(page.getByRole("heading", { name: "People" })).toBeVisible();
   });
 

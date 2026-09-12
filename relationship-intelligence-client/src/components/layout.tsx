@@ -2,17 +2,19 @@ import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/lib/auth";
+import { cn } from "cn";
 import {
   HeartPulse,
+  LayoutDashboard,
   LogOut,
   Network,
   Newspaper,
   Users,
 } from "lucide-react";
-import { cn } from "cn";
 
 const NAV = [
-  { to: "/", label: "Attention", icon: HeartPulse, end: true },
+  { to: "/", label: "Overview", icon: LayoutDashboard, end: true },
+  { to: "/attention", label: "Attention", icon: HeartPulse, end: true },
   { to: "/people", label: "People", icon: Users, end: false },
   { to: "/network", label: "Network", icon: Network, end: false },
   { to: "/digest", label: "Digest", icon: Newspaper, end: false },

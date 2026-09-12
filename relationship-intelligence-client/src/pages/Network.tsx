@@ -1,25 +1,39 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { EmptyState, ErrorState, LoadingList } from "@/components/states";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { GraphCanvas } from "@/components/graph-canvas";
+import { EmptyState, ErrorState, LoadingList, NavButton } from "@/components/states";
 import { ApiError, api } from "@/lib/api";
 import type { NetworkGraph } from "@/lib/types";
 
-const WIDTH = 900;
-const ROW_H = 34;
-
-function urgencyColor(u: number): string {
-  if (u > 85) return "#dc2626";
-  if (u > 65) return "#d97706";
-  if (u >= 40) return "#0284c7";
-  return "#059669";
-}
+const BANDS = ["All", "Healthy", "Drifting", "AtRisk", "Critical"];
 
 export function Network() {
   const [graph, setGraph] = useState<NetworkGraph | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [selected, setSelected] = useState<string | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [query, setQuery] = useState("");
+  const [band, setBand] = useState("All");
+  const [bridgesOnly, setBridgesOnly] = useState(false);
+  const [showIsolates, setShowIsolates] = useState(false);
+
+  const selectedId = searchParams.get("person");
+  const setSelectedId = useCallback(
+    (id: string | null) => {
+      setSearchParams(id ? { person: id } : {}, { replace: true });
+    },
+    [setSearchParams],
+  );
 
   const load = useCallback(async () => {
     setError(null);
@@ -34,69 +48,75 @@ export function Network() {
     void load();
   }, [load]);
 
-  const layout = useMemo(() => {
-    if (!graph) return null;
-    // Deterministic layout: nodes grouped by connected component, laid out in
-    // columns; isolates in a final column. Edges drawn between node rows.
-    const adj = new Map<string, Set<string>>();
-    for (const n of graph.nodes) adj.set(n.personId, new Set());
-    for (const e of graph.edges) {
-      adj.get(e.from)?.add(e.to);
-      adj.get(e.to)?.add(e.from);
-    }
-    const visited = new Set<string>();
-    const clusters: string[][] = [];
-    for (const n of graph.nodes) {
-      if (visited.has(n.personId)) continue;
-      const cluster: string[] = [];
-      const queue = [n.personId];
-      visited.add(n.personId);
-      while (queue.length > 0) {
-        const id = queue.shift()!;
-        cluster.push(id);
-        for (const next of adj.get(id) ?? []) {
-          if (!visited.has(next)) {
-            visited.add(next);
-            queue.push(next);
-          }
-        }
-      }
-      clusters.push(cluster);
-    }
-    clusters.sort((a, b) => b.length - a.length);
-    const pos = new Map<string, { x: number; y: number }>();
-    const colW = Math.max(220, WIDTH / Math.max(1, clusters.length));
-    clusters.forEach((cluster, ci) => {
-      cluster.forEach((id, ri) => {
-        pos.set(id, { x: 110 + ci * colW, y: 30 + ri * ROW_H });
-      });
-    });
-    const height = Math.max(120, Math.max(...clusters.map((c) => c.length)) * ROW_H + 40);
-    return { pos, clusters, height };
+  const urgencyById = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const n of graph?.nodes ?? []) map.set(n.personId, n.urgencyScore);
+    return map;
   }, [graph]);
 
-  const selectedNode = selected
-    ? graph?.nodes.find((n) => n.personId === selected) ?? null
+  const bandOf = useCallback(
+    (id: string): string => {
+      const u = urgencyById.get(id) ?? 0;
+      if (u > 85) return "Critical";
+      if (u > 65) return "AtRisk";
+      if (u >= 40) return "Drifting";
+      return "Healthy";
+    },
+    [urgencyById],
+  );
+
+  const visible = useMemo(() => {
+    if (!graph) return null;
+    let nodes = graph.nodes;
+    if (band !== "All") nodes = nodes.filter((n) => bandOf(n.personId) === band);
+    if (bridgesOnly) nodes = nodes.filter((n) => n.isBridge);
+    const ids = new Set(nodes.map((n) => n.personId));
+    const edges = graph.edges.filter((e) => ids.has(e.from) && ids.has(e.to));
+    const connected = new Set<string>();
+    for (const e of edges) {
+      connected.add(e.from);
+      connected.add(e.to);
+    }
+    const isolated = nodes.filter((n) => !connected.has(n.personId));
+    const shown = showIsolates ? nodes : nodes.filter((n) => connected.has(n.personId));
+    const shownIds = new Set(shown.map((n) => n.personId));
+    return {
+      nodes: shown,
+      edges: edges.filter((e) => shownIds.has(e.from) && shownIds.has(e.to)),
+      isolated,
+      total: nodes.length,
+    };
+  }, [graph, band, bridgesOnly, showIsolates, bandOf]);
+
+  const searchMatches = useMemo(() => {
+    if (!graph || query.trim() === "") return [];
+    const q = query.trim().toLowerCase();
+    return graph.nodes.filter((n) => (n.name ?? "").toLowerCase().includes(q)).slice(0, 8);
+  }, [graph, query]);
+
+  const selectedNode = selectedId
+    ? (graph?.nodes.find((n) => n.personId === selectedId) ?? null)
     : null;
   const selectedEdges = useMemo(() => {
-    if (!graph || !selected) return [];
-    return graph.edges.filter((e) => e.from === selected || e.to === selected);
-  }, [graph, selected]);
+    if (!graph || !selectedId) return [];
+    return graph.edges.filter((e) => e.from === selectedId || e.to === selectedId);
+  }, [graph, selectedId]);
+  const neighborNames = useMemo(() => {
+    if (!graph) return new Map<string, string>();
+    const map = new Map<string, string>();
+    for (const n of graph.nodes) map.set(n.personId, n.name ?? "Unnamed contact");
+    return map;
+  }, [graph]);
 
   return (
     <div>
-      <div className="mb-4 flex items-end justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Network</h1>
-          <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-            {graph
-              ? `${graph.nodes.length} people in ${graph.clusterCount} separate groups. Ringed nodes are bridges — they connect parts of your network that would otherwise be disconnected, and research shows bridges are lost faster.`
-              : "Your contacts as a map, grouped by shared organizations, tags, and channels."}
-          </p>
-        </div>
-        <Button variant="outline" size="sm" onClick={() => void load()}>
-          Refresh
-        </Button>
+      <div className="mb-4">
+        <h1 className="text-2xl font-semibold tracking-tight">Network</h1>
+        <p className="mt-1 max-w-3xl text-sm text-muted-foreground">
+          {graph
+            ? `${visible?.total ?? 0} people in view (${graph.nodes.length} received) · ${graph.edges.length} connections · ${graph.clusterCount} groups. Ringed nodes are bridges — they hold otherwise separate parts of your network together, and research shows they are lost faster.`
+            : "Your contacts as a map. Force layout: connected people pull together, everyone else pushes apart."}
+        </p>
       </div>
 
       {error && <ErrorState message={error} onRetry={() => void load()} />}
@@ -107,111 +127,158 @@ export function Network() {
           body="Add people with organizations, tags, or channels and connections will appear here."
         />
       )}
-      {graph !== null && graph.nodes.length > 0 && layout && (
-        <div className="grid gap-4 xl:grid-cols-[1fr_300px]">
-          <div className="overflow-x-auto rounded-lg border">
-            <svg
-              width={WIDTH}
-              height={layout.height}
-              className="block min-w-full bg-card"
-              role="img"
-              aria-label="Contact network graph"
-            >
-              {layout.clusters.map((cluster, ci) => (
-                <text
-                  key={ci}
-                  x={110 + ci * Math.max(220, WIDTH / Math.max(1, layout.clusters.length))}
-                  y={14}
-                  textAnchor="middle"
-                  className="fill-muted-foreground"
-                  fontSize={11}
-                >
-                  {cluster.length === 1 ? "Unconnected" : `Group ${ci + 1} · ${cluster.length}`}
-                </text>
-              ))}
-              {graph.edges.map((e, i) => {
-                const a = layout.pos.get(e.from);
-                const b = layout.pos.get(e.to);
-                if (!a || !b) return null;
-                const active = selected == null || e.from === selected || e.to === selected;
-                return (
-                  <line
-                    key={i}
-                    x1={a.x}
-                    y1={a.y}
-                    x2={b.x}
-                    y2={b.y}
-                    stroke={active ? "#94a3b8" : "#e2e8f0"}
-                    strokeWidth={active ? 1.5 : 1}
-                  >
-                    <title>{e.reason}</title>
-                  </line>
-                );
-              })}
-              {graph.nodes.map((n) => {
-                const p = layout.pos.get(n.personId);
-                if (!p) return null;
-                const dim = selected != null && n.personId !== selected &&
-                  !selectedEdges.some((e) => e.from === n.personId || e.to === n.personId);
-                return (
-                  <g
-                    key={n.personId}
-                    transform={`translate(${p.x},${p.y})`}
-                    onClick={() => setSelected(selected === n.personId ? null : n.personId)}
-                    style={{ cursor: "pointer", opacity: dim ? 0.35 : 1 }}
-                  >
-                    {n.isBridge && (
-                      <circle r={11} fill="none" stroke="#7c3aed" strokeWidth={2} strokeDasharray="3 2" />
-                    )}
-                    <circle r={7} fill={urgencyColor(n.urgencyScore)} />
-                    <text x={14} y={4} fontSize={12} className="fill-foreground">
-                      {n.name ?? "?"}
-                    </text>
-                  </g>
-                );
-              })}
-            </svg>
+
+      {graph !== null && graph.nodes.length > 0 && visible && (
+        <>
+          <div className="mb-3 flex flex-wrap items-end gap-2">
+            <div className="relative flex min-w-52 flex-1 flex-col gap-1.5">
+              <Label htmlFor="net-search">Find person</Label>
+              <Input
+                id="net-search"
+                placeholder="Type a name, then pick a match"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+              />
+              {searchMatches.length > 0 && (
+                <ul className="absolute top-full z-10 mt-1 max-h-48 w-full overflow-auto rounded-md border bg-popover shadow-md">
+                  {searchMatches.map((m) => (
+                    <li key={m.personId}>
+                      <button
+                        type="button"
+                        className="w-full px-3 py-1.5 text-left text-sm hover:bg-secondary"
+                        onClick={() => {
+                          setSelectedId(m.personId);
+                          setQuery("");
+                        }}
+                      >
+                        {m.name ?? "Unnamed contact"}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="net-band">Health band</Label>
+              <Select value={band} onValueChange={(v) => setBand(v ?? "All")}>
+                <SelectTrigger id="net-band" className="w-36">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {BANDS.map((b) => (
+                    <SelectItem key={b} value={b}>
+                      {b}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <label className="flex items-center gap-1.5 text-sm">
+              <input
+                type="checkbox"
+                checked={bridgesOnly}
+                onChange={(e) => setBridgesOnly(e.target.checked)}
+              />
+              Bridges only
+            </label>
+            <label className="flex items-center gap-1.5 text-sm">
+              <input
+                type="checkbox"
+                checked={showIsolates}
+                onChange={(e) => setShowIsolates(e.target.checked)}
+              />
+              Show unconnected ({visible.isolated.length})
+            </label>
+            <Button variant="outline" size="sm" onClick={() => void load()}>
+              Refresh
+            </Button>
           </div>
-          <aside className="rounded-lg border p-4">
-            {selectedNode == null ? (
-              <p className="text-sm text-muted-foreground">
-                Select a node to inspect it. Color shows urgency (green → red).
-                Dashed rings mark bridges.
-              </p>
-            ) : (
-              <div className="flex flex-col gap-2">
-                <Link
-                  to={`/people/${selectedNode.personId}`}
-                  className="text-sm font-semibold hover:underline"
-                >
-                  {selectedNode.name ?? "Unnamed contact"}
-                </Link>
-                <div className="flex gap-1.5">
-                  {selectedNode.isBridge && <Badge variant="secondary">Bridge</Badge>}
-                  {selectedNode.isIsolated && <Badge variant="outline">Unconnected</Badge>}
-                  <Badge variant="outline">{selectedNode.degree} connections</Badge>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Urgency {Math.round(selectedNode.urgencyScore)}/100
-                </p>
-                {selectedEdges.length > 0 && (
-                  <>
-                    <p className="mt-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                      Connected through
-                    </p>
-                    <ul className="flex flex-col gap-1">
-                      {selectedEdges.slice(0, 8).map((e, i) => (
-                        <li key={i} className="text-xs text-muted-foreground">
-                          {e.reason}
-                        </li>
-                      ))}
-                    </ul>
-                  </>
+
+          <div className="grid gap-4 xl:grid-cols-[1fr_320px]">
+            <GraphCanvas
+              nodes={visible.nodes}
+              edges={visible.edges}
+              selectedId={selectedId}
+              onSelect={setSelectedId}
+            />
+            <aside className="flex min-w-0 flex-col gap-4">
+              <div className="rounded-lg border p-4">
+                {selectedNode == null ? (
+                  <p className="text-sm text-muted-foreground">
+                    Select a node to inspect it — its neighborhood highlights, everything
+                    else fades. Color shows urgency (green → red); dashed rings mark
+                    bridges. Drag nodes to rearrange; scroll to zoom.
+                  </p>
+                ) : (
+                  <div className="flex flex-col gap-2">
+                    <Link
+                      to={`/people/${selectedNode.personId}`}
+                      className="text-sm font-semibold hover:underline"
+                    >
+                      {selectedNode.name ?? "Unnamed contact"}
+                    </Link>
+                    <div className="flex flex-wrap gap-1.5">
+                      {selectedNode.isBridge && <Badge variant="secondary">Bridge</Badge>}
+                      {selectedNode.isIsolated && <Badge variant="outline">Unconnected</Badge>}
+                      <Badge variant="outline">{selectedNode.degree} connections</Badge>
+                      <Badge variant="outline">
+                        urgency {Math.round(selectedNode.urgencyScore)}
+                      </Badge>
+                    </div>
+                    {selectedEdges.length > 0 && (
+                      <>
+                        <p className="mt-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                          Connected through ({selectedEdges.length})
+                        </p>
+                        <ul className="flex max-h-56 flex-col gap-1 overflow-auto">
+                          {selectedEdges.slice(0, 20).map((e, i) => {
+                            const other =
+                              e.from === selectedNode.personId ? e.to : e.from;
+                            return (
+                              <li key={i} className="text-xs">
+                                <Link
+                                  to={`/people/${other}`}
+                                  className="font-medium hover:underline"
+                                >
+                                  {neighborNames.get(other) ?? "?"}
+                                </Link>
+                                <span className="text-muted-foreground"> — {e.reason}</span>
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      </>
+                    )}
+                    <NavButton to={`/people/${selectedNode.personId}`} size="sm" variant="outline">
+                      Open full profile →
+                    </NavButton>
+                  </div>
                 )}
               </div>
-            )}
-          </aside>
-        </div>
+
+              {!showIsolates && visible.isolated.length > 0 && (
+                <div className="rounded-lg border p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    Unconnected ({visible.isolated.length})
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Hidden from the canvas to keep the structure readable — nothing is
+                    discarded. Enable “Show unconnected” to lay them out, or open one:
+                  </p>
+                  <ul className="mt-2 flex max-h-48 flex-col gap-1 overflow-auto">
+                    {visible.isolated.slice(0, 30).map((n) => (
+                      <li key={n.personId} className="text-xs">
+                        <Link to={`/people/${n.personId}`} className="hover:underline">
+                          {n.name ?? "Unnamed contact"}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </aside>
+          </div>
+        </>
       )}
     </div>
   );

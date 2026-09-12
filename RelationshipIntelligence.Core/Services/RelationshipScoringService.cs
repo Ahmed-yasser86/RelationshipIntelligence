@@ -87,25 +87,19 @@ namespace Servicess
             if (person == null || IsExcluded(person))
                 return;
 
-            var persons = (await _persons.GetAllPersons()).Where(p => p != null).ToList();
             var now = DateTime.UtcNow;
-            double max = persons
-                .Select(p => TieDecayModel.StrengthAt(
-                    p!.Interactions
-                        .OrderBy(i => i.TimeOfInteraction)
-                        .Select(i => i.TimeOfInteraction)
-                        .ToList(),
-                    now))
-                .DefaultIfEmpty(1.0).Max();
-            if (max <= 0) max = 1.0;
-
             double strength = TieDecayModel.StrengthAt(
                 person.Interactions
                     .OrderBy(i => i.TimeOfInteraction)
                     .Select(i => i.TimeOfInteraction)
                     .ToList(),
                 now);
-            max = Math.Max(max, strength);
+
+            var states = await _states.ListForOwnerAsync(userId.Value);
+            double max = states.Count == 0
+                ? 1.0
+                : Math.Max(states.Max(s => s.TieStrength), strength);
+            if (max <= 0) max = 1.0;
 
             await _states.UpsertAsync(BuildState(userId.Value, person, strength, max, now));
             await _unitOfWork.SaveChangesAsync();
@@ -117,36 +111,37 @@ namespace Servicess
             if (userId == null || userId == Guid.Empty)
                 return new List<RelationshipHealthResponse>();
 
-            var persons = (await _persons.GetAllPersons())
+            var people = (await _persons.ListAffinitiesAsync())
                 .Where(p => p != null && !IsExcluded(p!))
                 .ToDictionary(p => p!.PersonId);
             var states = await _states.ListForOwnerAsync(userId.Value);
 
             return states
-                .Where(s => persons.ContainsKey(s.PersonId))
+                .Where(s => people.ContainsKey(s.PersonId))
                 .OrderByDescending(s => s.UrgencyScore)
-                .ThenByDescending(s => persons[s.PersonId].SystemStatusTags != null
-                    && persons[s.PersonId].SystemStatusTags.Any(t =>
-                        t.StatusTagId == EnSystemStatusTag.HighPriority
-                        || t.StatusTagId == EnSystemStatusTag.Urgent))
+                .ThenByDescending(s => IsImportant(people[s.PersonId]))
                 .ThenBy(s => s.LastContactAtUtc ?? DateTime.MinValue)
                 .Take(top <= 0 ? 7 : top)
                 .Select(s => new RelationshipHealthResponse
                 {
                     PersonId = s.PersonId,
-                    Name = persons[s.PersonId].Name,
+                    Name = people[s.PersonId].Name ?? string.Empty,
                     TieStrength = s.TieStrength,
                     LastContactAtUtc = s.LastContactAtUtc,
                     CadenceReferenceDays = s.CadenceReferenceDays,
                     UrgencyScore = s.UrgencyScore,
                     Band = TieDecayModel.BandFor(s.UrgencyScore).ToString(),
                     IsBridge = s.IsBridge,
-                    IsImportant = persons[s.PersonId].SystemStatusTags != null
-                        && persons[s.PersonId].SystemStatusTags.Any(t =>
-                            t.StatusTagId == EnSystemStatusTag.HighPriority
-                            || t.StatusTagId == EnSystemStatusTag.Urgent)
+                    IsImportant = IsImportant(people[s.PersonId])
                 })
                 .ToList();
+        }
+
+        private static bool IsImportant(PersonAffinity person)
+        {
+            return person.SystemTagNames.Any(t =>
+                string.Equals(t, nameof(EnSystemStatusTag.HighPriority), StringComparison.OrdinalIgnoreCase)
+                || string.Equals(t, nameof(EnSystemStatusTag.Urgent), StringComparison.OrdinalIgnoreCase));
         }
 
         private static bool IsExcluded(Person person)
@@ -154,6 +149,12 @@ namespace Servicess
             return person.UserDefinedTags != null
                 && person.UserDefinedTags.Any(t =>
                     string.Equals(t.TagName, "NoScore", StringComparison.OrdinalIgnoreCase));
+        }
+
+        private static bool IsExcluded(PersonAffinity person)
+        {
+            return person.TagNames.Any(t =>
+                string.Equals(t, "NoScore", StringComparison.OrdinalIgnoreCase));
         }
 
         private static RelationshipState BuildState(

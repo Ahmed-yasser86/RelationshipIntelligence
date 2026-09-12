@@ -174,6 +174,8 @@ namespace CRUDTests
             personsMock.Setup(r => r.ListAffinitiesAsync()).ReturnsAsync(
                 persons.Select(p => new PersonAffinity(
                     p.PersonId,
+                    p.Name,
+                    new List<string>(),
                     new List<string>(),
                     new List<string>(),
                     new List<string>())).ToList());

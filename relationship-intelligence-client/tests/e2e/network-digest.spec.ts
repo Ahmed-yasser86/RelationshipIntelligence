@@ -4,7 +4,7 @@ import { API_URL, expectSignedIn, loginViaApi } from "./helpers";
 test.describe("network", () => {
   test.beforeEach(async ({ page }) => {
     await loginViaApi(page);
-    await page.getByRole("link", { name: "Network" }).click();
+    await page.getByRole("link", { name: "Network", exact: true }).click();
     await expect(page.getByRole("heading", { name: "Network" })).toBeVisible();
   });
 
@@ -29,11 +29,10 @@ test.describe("network", () => {
       await page.reload();
       const svg = page.locator('svg[aria-label="Contact network graph"]');
       await expect(svg).toBeVisible();
-      const node = svg.getByText(/E2E Graph A/);
-      await expect(node).toBeVisible();
-      await node.click();
+      await page.getByLabel("Find person").fill("E2E Graph A");
+      await page.getByRole("button", { name: /E2E Graph A/ }).click();
       const panel = page.locator("aside");
-      await expect(panel.getByText(/E2E Graph A/)).toBeVisible();
+      await expect(panel.getByText(/E2E Graph A/).first()).toBeVisible();
       await expect(panel.getByText(/connections/)).toBeVisible();
     } finally {
       for (const id of created) {
@@ -48,7 +47,7 @@ test.describe("network", () => {
 test.describe("digest", () => {
   test.beforeEach(async ({ page }) => {
     await loginViaApi(page);
-    await page.getByRole("link", { name: "Digest" }).click();
+    await page.getByRole("link", { name: "Digest", exact: true }).click();
     await expect(page.getByRole("heading", { name: "Weekly digest" })).toBeVisible();
   });
 

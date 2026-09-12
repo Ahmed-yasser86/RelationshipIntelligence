@@ -77,10 +77,10 @@ namespace CRUDTests
         {
             ArrangeOwner();
             var personId = Guid.NewGuid();
-            _personsMock.Setup(r => r.GetAllPersons()).ReturnsAsync(new List<Person>
+            _personsMock.Setup(r => r.ListAffinitiesAsync()).ReturnsAsync(new List<PersonAffinity>
             {
-                new() { PersonId = personId, ApplicationUserId = _userA, Name = "P" }
-            }.AsEnumerable());
+                new(personId, "P", new List<string>(), new List<string>(), new List<string>(), new List<string>())
+            });
             _statesMock.Setup(r => r.ListForOwnerAsync(_userA)).ReturnsAsync(new List<RelationshipState>
             {
                 new() { PersonId = personId, ApplicationUserId = _userA, UpdatedAtUtc = DateTime.UtcNow }
@@ -90,28 +90,33 @@ namespace CRUDTests
 
             await Service().BuildAsync("https://app.test");
 
+            _scoringMock.Verify(s => s.RecomputeForPairAsync(It.IsAny<Guid?>()), Times.Never);
             _scoringMock.Verify(s => s.RecomputeForCurrentUserAsync(), Times.Never);
         }
 
         [Fact]
-        public async Task BuildAsync_StaleStates_Recomputes()
+        public async Task BuildAsync_StaleStates_RecomputesOnlyStalePairs()
         {
             ArrangeOwner();
-            var personId = Guid.NewGuid();
-            _personsMock.Setup(r => r.GetAllPersons()).ReturnsAsync(new List<Person>
+            var freshId = Guid.NewGuid();
+            var staleId = Guid.NewGuid();
+            _personsMock.Setup(r => r.ListAffinitiesAsync()).ReturnsAsync(new List<PersonAffinity>
             {
-                new() { PersonId = personId, ApplicationUserId = _userA, Name = "P" }
-            }.AsEnumerable());
+                new(freshId, "Fresh", new List<string>(), new List<string>(), new List<string>(), new List<string>()),
+                new(staleId, "Stale", new List<string>(), new List<string>(), new List<string>(), new List<string>())
+            });
             _statesMock.Setup(r => r.ListForOwnerAsync(_userA)).ReturnsAsync(new List<RelationshipState>
             {
-                new() { PersonId = personId, ApplicationUserId = _userA, UpdatedAtUtc = DateTime.UtcNow.AddDays(-2) }
+                new() { PersonId = freshId, ApplicationUserId = _userA, UpdatedAtUtc = DateTime.UtcNow },
+                new() { PersonId = staleId, ApplicationUserId = _userA, UpdatedAtUtc = DateTime.UtcNow.AddDays(-2) }
             });
             _scoringMock.Setup(s => s.GetQueueAsync(50))
                 .ReturnsAsync(new List<RelationshipHealthResponse>());
 
             await Service().BuildAsync("https://app.test");
 
-            _scoringMock.Verify(s => s.RecomputeForCurrentUserAsync(), Times.Once);
+            _scoringMock.Verify(s => s.RecomputeForPairAsync(staleId), Times.Once);
+            _scoringMock.Verify(s => s.RecomputeForPairAsync(freshId), Times.Never);
         }
 
         [Fact]

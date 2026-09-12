@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -32,7 +32,7 @@ import {
 } from "@/components/states";
 import { ApiError, api } from "@/lib/api";
 import { formatDate, timeAgo, daysSince } from "@/lib/format";
-import type { InteractionResponse, PersonDetail as Person, RelationshipHealth } from "@/lib/types";
+import type { InteractionResponse, NetworkGraph, PersonDetail as Person, RelationshipHealth } from "@/lib/types";
 import { InteractionTypes } from "@/lib/types";
 
 function usePerson(id: string | undefined) {
@@ -74,17 +74,20 @@ function LogInteractionDialog({
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  async function submit(e: React.FormEvent) {
+  async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
     setBusy(true);
     try {
+      const data = new FormData(e.currentTarget);
+      const title = (data.get("title") ?? "").toString().trim();
+      const description = (data.get("description") ?? "").toString().trim();
       await api.post("/api/Contacts/PostLogInteraction", {
         PersonId: personId,
         TimeOfInteraction: new Date(date).toISOString(),
         InteractionType: Number(type),
-        InteractionTitle: title.trim(),
-        InteractionDescription: description.trim() === "" ? null : description.trim(),
+        InteractionTitle: title,
+        InteractionDescription: description === "" ? null : description,
       });
       setOpen(false);
       setTitle("");
@@ -137,6 +140,7 @@ function LogInteractionDialog({
             <Label htmlFor="log-title">What was it about</Label>
             <Input
               id="log-title"
+              name="title"
               required
               maxLength={100}
               placeholder="e.g. Q3 hiring plans"
@@ -148,6 +152,7 @@ function LogInteractionDialog({
             <Label htmlFor="log-desc">Notes (optional)</Label>
             <Textarea
               id="log-desc"
+              name="description"
               rows={3}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -271,12 +276,17 @@ export function PersonDetail() {
   const navigate = useNavigate();
   const { person, error, reload } = usePerson(id);
   const [state, setState] = useState<RelationshipHealth | null>(null);
+  const [network, setNetwork] = useState<NetworkGraph | null>(null);
   const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     api
       .get<RelationshipHealth[]>("/api/Contacts/GetRelationshipQueue?top=50")
       .then((q) => setState(q.find((x) => x.personId === id) ?? null))
+      .catch(() => undefined);
+    api
+      .get<NetworkGraph>("/api/Network/GetNetworkGraph")
+      .then(setNetwork)
       .catch(() => undefined);
   }, [id, person]);
 
@@ -301,6 +311,13 @@ export function PersonDetail() {
       </div>
     );
   if (!person) return <LoadingList rows={6} />;
+
+  const neighbors = (network?.edges ?? [])
+    .filter((e) => e.from === person.personId || e.to === person.personId)
+    .slice(0, 8);
+  const neighborName = (pid: string) =>
+    network?.nodes.find((n) => n.personId === pid)?.name ?? "Unnamed contact";
+  const nodeInfo = network?.nodes.find((n) => n.personId === person.personId);
 
   const silent = daysSince(
     [...(person.interactions ?? [])]
@@ -471,6 +488,48 @@ export function PersonDetail() {
               </div>
             </section>
           )}
+          <section>
+            <h3 className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Network position
+            </h3>
+            {nodeInfo == null && neighbors.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                No shared organizations, tags, or channels — this contact stands
+                apart from the rest of your network.
+              </p>
+            ) : (
+              <div className="flex flex-col gap-1.5">
+                {nodeInfo != null && (
+                  <p className="text-sm text-muted-foreground">
+                    {nodeInfo.degree} direct connection{nodeInfo.degree === 1 ? "" : "s"}
+                    {nodeInfo.isBridge ? " · a bridge between network regions" : ""} ·
+                    urgency {Math.round(nodeInfo.urgencyScore)}.
+                  </p>
+                )}
+                {neighbors.length > 0 && (
+                  <ul className="flex flex-col gap-1">
+                    {neighbors.map((e, i) => {
+                      const other = e.from === person.personId ? e.to : e.from;
+                      return (
+                        <li key={i} className="text-sm">
+                          <Link
+                            to={`/people/${other}`}
+                            className="font-medium hover:underline"
+                          >
+                            {neighborName(other)}
+                          </Link>
+                          <span className="text-muted-foreground"> — {e.reason}</span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+                <Link to={`/network?person=${person.personId}`} className="text-sm underline">
+                  Open in network map →
+                </Link>
+              </div>
+            )}
+          </section>
           {(person.socialMediaAccounts ?? []).length > 0 && (
             <section>
               <h3 className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">

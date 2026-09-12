@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from "@/lib/auth";
 import { Digest } from "@/pages/Digest";
 import { Login } from "@/pages/Login";
 import { Network } from "@/pages/Network";
+import { Overview } from "@/pages/Overview";
 import { People } from "@/pages/People";
 import { PersonDetail } from "@/pages/PersonDetail";
 import { PersonEdit } from "@/pages/PersonEdit";
@@ -54,7 +55,8 @@ export function App() {
             </RequireAuth>
           }
         >
-          <Route index element={<Queue />} />
+          <Route index element={<Overview />} />
+          <Route path="attention" element={<Queue />} />
           <Route path="people" element={<People />} />
           <Route path="people/new" element={<PersonNew />} />
           <Route path="people/:id" element={<PersonDetail />} />

@@ -105,5 +105,7 @@ auth in `lib/auth.tsx`; routing guards in `App.tsx`; shared states/indicators in
 
 ## 7. Validation
 
-`tsc --noEmit` clean, `vite build` succeeds. Manual API-integration check against
-local backend recommended (login → queue → person → log → digest → network).
+`tsc --noEmit` clean, `vite build` succeeds. Playwright E2E: 22/22 green
+(`tests/e2e`, live backend + seeded data). Notable fixes from the suite: forms
+submit from `FormData` (never stale render state), camelCase wire types, null
+name hardening, exact accessible-name matching in tests.

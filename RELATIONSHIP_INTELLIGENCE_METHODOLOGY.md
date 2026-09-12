@@ -615,13 +615,11 @@ on: retention gate passed (macro), 100k+ users or real-time graph load
   affiliations carry no structural information); CSV and future-date validation
   failures surface as 400 with the message, unknown ids as 404; `PersonUpdateRequest`
   validation matches the service's patch semantics (only identity fields required).
-  `InteractionResponse`/`ConvertToDto` (extended with `PersonId`) and maps
-  `ArgumentException` to 404 / validation failures to 400 on new endpoints. R2's
-  nightly worker composes repositories and the scoring service manually per owner
-  (a `FixedUserService` carrying the enumerated owner id) because there is no
-  HTTP request principal in background scope; `RecomputeForOwnerAsync` is the
-  internal privileged path and is never called from controllers. `Note` stays
-  out of v1 scoring (content record, no timestamp).
+- Sec.12.14 (hot-path projection): the queue no longer materializes full person
+  graphs; it joins `RelationshipState` rows against a lightweight
+  `PersonAffinity` projection (ids, names, affiliation names), which keeps the
+  attention, digest, and overview screens fast at thousands of contacts. Full
+  entities are loaded only for the capped network candidate set.
 
 ---
 

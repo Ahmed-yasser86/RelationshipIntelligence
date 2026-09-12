@@ -133,20 +133,11 @@ namespace CRUDTests
             _userMock.Setup(u => u.UserId).Returns(_userA);
             var plainId = Guid.NewGuid();
             var importantId = Guid.NewGuid();
-            _personsMock.Setup(r => r.GetAllPersons()).ReturnsAsync(new List<Person>
+            _personsMock.Setup(r => r.ListAffinitiesAsync()).ReturnsAsync(new List<PersonAffinity>
             {
-                new() { PersonId = plainId, ApplicationUserId = _userA, Name = "Plain" },
-                new()
-                {
-                    PersonId = importantId,
-                    ApplicationUserId = _userA,
-                    Name = "Important",
-                    SystemStatusTags = new List<SystemStatusTag>
-                    {
-                        new() { StatusTagId = EnSystemStatusTag.HighPriority, Name = "High" }
-                    }
-                }
-            }.AsEnumerable());
+                new(plainId, "Plain", new List<string>(), new List<string>(), new List<string>(), new List<string>()),
+                new(importantId, "Important", new List<string>(), new List<string>(), new List<string>(), new List<string> { "HighPriority" })
+            });
             _statesMock.Setup(r => r.ListForOwnerAsync(_userA)).ReturnsAsync(new List<RelationshipState>
             {
                 new() { PersonId = plainId, ApplicationUserId = _userA, UrgencyScore = 70, TieStrength = 0.5 },

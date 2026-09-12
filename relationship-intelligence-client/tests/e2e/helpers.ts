@@ -24,5 +24,5 @@ export async function loginViaApi(page: Page): Promise<void> {
 }
 
 export async function expectSignedIn(page: Page): Promise<void> {
-  await expect(page.getByRole("heading", { name: "Needs attention" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Overview" })).toBeVisible();
 }

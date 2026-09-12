@@ -10,5 +10,6 @@ namespace ServiceContracts.DTOs
         public bool IsBridge { get; set; }
         public bool IsIsolated { get; set; }
         public double UrgencyScore { get; set; }
+        public string EvidenceStatus { get; set; } = string.Empty;
     }
 }

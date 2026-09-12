@@ -42,6 +42,8 @@ namespace Repositories
                 {
                     existing.TieStrength = state.TieStrength;
                     existing.LastContactAtUtc = state.LastContactAtUtc;
+                    existing.InteractionCount = state.InteractionCount;
+                    existing.EvidenceStatus = state.EvidenceStatus;
                     existing.CadenceReferenceDays = state.CadenceReferenceDays;
                     existing.SilenceQuantile = state.SilenceQuantile;
                     existing.IsBridge = state.IsBridge;

@@ -115,8 +115,33 @@ namespace CRUDTests
 
             await Service().BuildAsync("https://app.test");
 
-            _scoringMock.Verify(s => s.RecomputeForPairAsync(staleId), Times.Once);
-            _scoringMock.Verify(s => s.RecomputeForPairAsync(freshId), Times.Never);
+            _scoringMock.Verify(
+                s => s.RecomputePairsAsync(It.Is<IEnumerable<Guid>>(ids => ids.Contains(staleId) && !ids.Contains(freshId))),
+                Times.Once);
+            _scoringMock.Verify(s => s.RecomputeForPairAsync(It.IsAny<Guid?>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task BuildAsync_MisclassifiedLegacyRow_IsRecomputed()
+        {
+            ArrangeOwner();
+            var personId = Guid.NewGuid();
+            _personsMock.Setup(r => r.ListAffinitiesAsync()).ReturnsAsync(new List<PersonAffinity>
+            {
+                new(personId, "Legacy", new List<string>(), new List<string>(), new List<string>(), new List<string>(), DateTime.UtcNow.AddDays(-10))
+            });
+            _statesMock.Setup(r => r.ListForOwnerAsync(_userA)).ReturnsAsync(new List<RelationshipState>
+            {
+                new() { PersonId = personId, ApplicationUserId = _userA, UpdatedAtUtc = DateTime.UtcNow, EvidenceStatus = EvidenceStatus.NoHistory }
+            });
+            _scoringMock.Setup(s => s.GetQueueAsync(50))
+                .ReturnsAsync(new List<RelationshipHealthResponse>());
+
+            await Service().BuildAsync("https://app.test");
+
+            _scoringMock.Verify(
+                s => s.RecomputePairsAsync(It.Is<IEnumerable<Guid>>(ids => ids.Contains(personId))),
+                Times.Once);
         }
 
         [Fact]

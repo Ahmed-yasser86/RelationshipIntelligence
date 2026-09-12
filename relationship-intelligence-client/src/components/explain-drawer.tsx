@@ -38,6 +38,9 @@ export function ExplainDrawer({
     health.silenceQuantile == null
       ? "not enough history"
       : `${Math.round(health.silenceQuantile * 100)}% of past gaps were shorter`;
+  const estimated =
+    health.evidenceStatus === "Insufficient" ||
+    (health.cadenceReferenceDays != null && n < 3);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -56,6 +59,14 @@ export function ExplainDrawer({
             </h3>
             <dl>
               <Row k="Logged interactions" v={String(n)} />
+              <Row
+                k="Evidence grade"
+                v={
+                  health.evidenceStatus === "Established"
+                    ? "Established — measured rhythm"
+                    : "Early estimate — scored mostly on defaults"
+                }
+              />
               <Row
                 k="First / last contact"
                 v={
@@ -83,8 +94,8 @@ export function ExplainDrawer({
                 k="Typical rhythm"
                 v={
                   health.cadenceReferenceDays != null
-                    ? `~${Math.round(health.cadenceReferenceDays)} days between contacts`
-                    : "not enough history — 30-day default"
+                    ? `~${Math.round(health.cadenceReferenceDays)} days between contacts${estimated ? " (estimated default, not measured)" : ""}`
+                    : "cannot be inferred yet — no repeated contact to measure a rhythm from"
                 }
               />
               <Row k="Silence vs own history" v={quantile} />

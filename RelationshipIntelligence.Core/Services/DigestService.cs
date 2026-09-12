@@ -270,7 +270,8 @@ namespace Servicess
                     continue;
                 if (!states.TryGetValue(affinity.PersonId, out var state)
                     || (affinity.LastInteractionAtUtc.HasValue
-                        && (!state.LastContactAtUtc.HasValue
+                        && (state.EvidenceStatus == EvidenceStatus.NoHistory
+                            || !state.LastContactAtUtc.HasValue
                             || affinity.LastInteractionAtUtc.Value > state.LastContactAtUtc.Value)))
                 {
                     needsRecompute.Add(affinity.PersonId);

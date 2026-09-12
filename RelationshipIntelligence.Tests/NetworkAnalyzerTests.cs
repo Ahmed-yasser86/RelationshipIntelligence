@@ -189,5 +189,39 @@ namespace CRUDTests
 
             graph.Nodes.Should().HaveCount(NetworkAnalysisService.MaxNodes);
         }
+
+        [Fact]
+        public async Task Service_UnscoredPerson_MapsNoHistoryStatus()
+        {
+            var userA = Guid.NewGuid();
+            var userMock = new Mock<ICurrentUserService>();
+            userMock.Setup(u => u.UserId).Returns(userA);
+
+            var personId = Guid.NewGuid();
+            var personsMock = new Mock<PersonRepositryContract>();
+            personsMock.Setup(r => r.ListByIdsAsync(It.IsAny<IEnumerable<Guid>>()))
+                .ReturnsAsync(new List<Person>
+                {
+                    new() { PersonId = personId, ApplicationUserId = userA, Name = "New" }
+                });
+            personsMock.Setup(r => r.ListAffinitiesAsync()).ReturnsAsync(new List<PersonAffinity>
+            {
+                new(personId, "New", new List<string>(), new List<string>(), new List<string>(), new List<string>(), null)
+            });
+            var statesMock = new Mock<RelationshipStateRepositoryContract>();
+            statesMock.Setup(r => r.ListForOwnerAsync(userA)).ReturnsAsync(new List<RelationshipState>
+            {
+                new() { PersonId = personId, ApplicationUserId = userA, UrgencyScore = 0, EvidenceStatus = EvidenceStatus.NoHistory }
+            });
+
+            var service = new NetworkAnalysisService(
+                personsMock.Object, statesMock.Object, userMock.Object,
+                Mock.Of<IUnitOfWork>(), Mock.Of<ILogger<NetworkAnalysisService>>());
+
+            var graph = await service.GetGraphAsync();
+
+            graph.Nodes.Should().ContainSingle()
+                .Which.EvidenceStatus.Should().Be(nameof(EvidenceStatus.NoHistory));
+        }
     }
 }

@@ -166,6 +166,10 @@ namespace CRUDTests
             _statesMock.Setup(r => r.UpsertAsync(It.IsAny<RelationshipState>()))
                 .Callback<RelationshipState>(saved.Add)
                 .Returns(Task.CompletedTask);
+            _statesMock.Setup(r => r.AddSnapshotAsync(It.IsAny<RelationshipStateSnapshot>()))
+                .Returns(Task.CompletedTask);
+            _statesMock.Setup(r => r.ListSnapshotsAsync(It.IsAny<Guid>(), It.IsAny<Guid>()))
+                .ReturnsAsync(new List<RelationshipStateSnapshot>());
 
             var count = await Service().RecomputePairsAsync(new[] { wanted.PersonId });
 
@@ -227,13 +231,13 @@ namespace CRUDTests
             var importantId = Guid.NewGuid();
             _personsMock.Setup(r => r.ListAffinitiesAsync()).ReturnsAsync(new List<PersonAffinity>
             {
-                new(plainId, "Plain", new List<string>(), new List<string>(), new List<string>(), new List<string>()),
-                new(importantId, "Important", new List<string>(), new List<string>(), new List<string>(), new List<string> { "HighPriority" })
+                new(plainId, "Plain", new List<string>(), new List<string>(), new List<string>(), new List<string>(), null),
+                new(importantId, "Important", new List<string>(), new List<string>(), new List<string>(), new List<string> { "HighPriority" }, null)
             });
             _statesMock.Setup(r => r.ListForOwnerAsync(_userA)).ReturnsAsync(new List<RelationshipState>
             {
-                new() { PersonId = plainId, ApplicationUserId = _userA, UrgencyScore = 70, TieStrength = 0.5 },
-                new() { PersonId = importantId, ApplicationUserId = _userA, UrgencyScore = 70, TieStrength = 0.5 }
+                new() { PersonId = plainId, ApplicationUserId = _userA, UrgencyScore = 70, TieStrength = 0.5, EvidenceStatus = EvidenceStatus.Established },
+                new() { PersonId = importantId, ApplicationUserId = _userA, UrgencyScore = 70, TieStrength = 0.5, EvidenceStatus = EvidenceStatus.Established }
             });
 
             var queue = await Service().GetQueueAsync(7);
@@ -242,6 +246,137 @@ namespace CRUDTests
             queue[0].PersonId.Should().Be(importantId);
             queue[0].IsImportant.Should().BeTrue();
             queue[0].Band.Should().Be("AtRisk");
+        }
+
+        [Fact]
+        public async Task RecomputeForOwnerAsync_NoHistoryPerson_IsNeutralAndUnexposed()
+        {
+            var ghost = new Person
+            {
+                PersonId = Guid.NewGuid(),
+                ApplicationUserId = _userA,
+                Name = "Ghost"
+            };
+            ArrangeUser(ghost);
+
+            RelationshipState? saved = null;
+            _statesMock.Setup(r => r.UpsertAsync(It.IsAny<RelationshipState>()))
+                .Callback<RelationshipState>(s => saved = s)
+                .Returns(Task.CompletedTask);
+            int snapshots = 0;
+            _statesMock.Setup(r => r.AddSnapshotAsync(It.IsAny<RelationshipStateSnapshot>()))
+                .Callback(() => snapshots++)
+                .Returns(Task.CompletedTask);
+
+            await Service().RecomputeForOwnerAsync(_userA);
+
+            saved.Should().NotBeNull();
+            saved!.EvidenceStatus.Should().Be(EvidenceStatus.NoHistory);
+            saved.UrgencyScore.Should().Be(0);
+            saved.CadenceReferenceDays.Should().BeNull();
+            saved.SilenceQuantile.Should().BeNull();
+            saved.InteractionCount.Should().Be(0);
+            snapshots.Should().Be(0);
+
+            _statesMock.Setup(r => r.ListForOwnerAsync(_userA))
+                .ReturnsAsync(new List<RelationshipState> { saved });
+            _personsMock.Setup(r => r.ListAffinitiesAsync()).ReturnsAsync(new List<PersonAffinity>
+            {
+                new(ghost.PersonId, ghost.Name, new List<string>(), new List<string>(), new List<string>(), new List<string>(), null)
+            });
+
+            (await Service().GetQueueAsync(7)).Should().BeEmpty();
+        }
+
+        [Fact]
+        public async Task RecomputeForOwnerAsync_SingleEvent_IsInsufficientWithNullCadence()
+        {
+            var fresh = PersonWithEvents("Fresh", 2);
+            ArrangeUser(fresh);
+
+            RelationshipState? saved = null;
+            _statesMock.Setup(r => r.UpsertAsync(It.IsAny<RelationshipState>()))
+                .Callback<RelationshipState>(s => saved = s)
+                .Returns(Task.CompletedTask);
+
+            await Service().RecomputeForOwnerAsync(_userA);
+
+            saved.Should().NotBeNull();
+            saved!.EvidenceStatus.Should().Be(EvidenceStatus.Insufficient);
+            saved.InteractionCount.Should().Be(1);
+            saved.CadenceReferenceDays.Should().BeNull();
+            saved.SilenceQuantile.Should().BeNull();
+            saved.LastContactAtUtc.Should().NotBeNull();
+        }
+
+        [Fact]
+        public async Task RecomputeForOwnerAsync_TwoEvents_IsInsufficientWithPriorCadence()
+        {
+            var pair = PersonWithEvents("Pair", 30, 10);
+            ArrangeUser(pair);
+
+            RelationshipState? saved = null;
+            _statesMock.Setup(r => r.UpsertAsync(It.IsAny<RelationshipState>()))
+                .Callback<RelationshipState>(s => saved = s)
+                .Returns(Task.CompletedTask);
+
+            await Service().RecomputeForOwnerAsync(_userA);
+
+            saved!.EvidenceStatus.Should().Be(EvidenceStatus.Insufficient);
+            saved.CadenceReferenceDays.Should().Be(PersonaPriors.DefaultDays);
+            saved.SilenceQuantile.Should().NotBeNull();
+        }
+
+        [Fact]
+        public async Task RecomputeForOwnerAsync_FourEvents_IsEstablished()
+        {
+            var steady = PersonWithEvents("Steady", 40, 30, 20, 10);
+            ArrangeUser(steady);
+
+            RelationshipState? saved = null;
+            _statesMock.Setup(r => r.UpsertAsync(It.IsAny<RelationshipState>()))
+                .Callback<RelationshipState>(s => saved = s)
+                .Returns(Task.CompletedTask);
+
+            await Service().RecomputeForOwnerAsync(_userA);
+
+            saved!.EvidenceStatus.Should().Be(EvidenceStatus.Established);
+            saved.InteractionCount.Should().Be(4);
+        }
+
+        [Fact]
+        public async Task Urgency_WeakTieAgainstStrongTie_IsHighButFlaggedInsufficient()
+        {
+            var strong = PersonWithEvents("Strong", 1, 2, 3, 4, 5);
+            var weak = PersonWithEvents("Weak", 200);
+            ArrangeUser(strong, weak);
+
+            var saved = new List<RelationshipState>();
+            _statesMock.Setup(r => r.UpsertAsync(It.IsAny<RelationshipState>()))
+                .Callback<RelationshipState>(saved.Add)
+                .Returns(Task.CompletedTask);
+
+            await Service().RecomputeForOwnerAsync(_userA);
+
+            var weakState = saved.First(s => s.PersonId == weak.PersonId);
+            weakState.UrgencyScore.Should().BeGreaterThan(90);
+            weakState.EvidenceStatus.Should().Be(EvidenceStatus.Insufficient);
+            saved.First(s => s.PersonId == strong.PersonId).EvidenceStatus
+                .Should().Be(EvidenceStatus.Established);
+        }
+
+        [Fact]
+        public async Task RecomputeForOwnerAsync_EmptyDataset_ReturnsZeroAndQueueEmpty()
+        {
+            ArrangeUser();
+
+            (await Service().RecomputeForOwnerAsync(_userA)).Should().Be(0);
+            _statesMock.Setup(r => r.ListForOwnerAsync(_userA))
+                .ReturnsAsync(new List<RelationshipState>());
+            _personsMock.Setup(r => r.ListAffinitiesAsync())
+                .ReturnsAsync(new List<PersonAffinity>());
+
+            (await Service().GetQueueAsync(7)).Should().BeEmpty();
         }
     }
 }

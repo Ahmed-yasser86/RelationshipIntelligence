@@ -95,6 +95,8 @@ export interface RelationshipHealth {
   name: string | null;
   tieStrength: number;
   lastContactAtUtc: string | null;
+  interactionCount: number;
+  evidenceStatus: string;
   cadenceReferenceDays: number | null;
   silenceQuantile: number | null;
   urgencyScore: number;
@@ -131,6 +133,7 @@ export interface NetworkNode {
   isBridge: boolean;
   isIsolated: boolean;
   urgencyScore: number;
+  evidenceStatus: string;
 }
 
 export interface NetworkEdge {

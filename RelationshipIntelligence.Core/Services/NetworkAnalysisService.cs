@@ -91,7 +91,10 @@ namespace Servicess
                         Degree = analysis.Degrees.TryGetValue(person.PersonId, out int d) ? d : 0,
                         IsBridge = isBridge,
                         IsIsolated = !analysis.Degrees.TryGetValue(person.PersonId, out int deg) || deg == 0,
-                        UrgencyScore = states.TryGetValue(person.PersonId, out var s) ? s.UrgencyScore : 0
+                        UrgencyScore = states.TryGetValue(person.PersonId, out var s) ? s.UrgencyScore : 0,
+                        EvidenceStatus = states.TryGetValue(person.PersonId, out var st)
+                            ? st.EvidenceStatus.ToString()
+                            : Entities.EvidenceStatus.NoHistory.ToString()
                     });
 
                     if (states.TryGetValue(person.PersonId, out var state) && state.IsBridge != isBridge)

@@ -17,7 +17,8 @@ interface SimLink extends d3.SimulationLinkDatum<SimNode> {
   weight: number;
 }
 
-function urgencyColor(u: number): string {
+function urgencyColor(u: number, scored: boolean): string {
+  if (!scored) return "#94a3b8";
   if (u > 85) return "#dc2626";
   if (u > 65) return "#d97706";
   if (u >= 40) return "#0284c7";
@@ -119,7 +120,7 @@ export function GraphCanvas({
     node
       .append("circle")
       .attr("r", (d) => 5 + Math.min(8, d.node.degree * 1.5))
-      .attr("fill", (d) => urgencyColor(d.node.urgencyScore))
+      .attr("fill", (d) => urgencyColor(d.node.urgencyScore, d.node.evidenceStatus !== "NoHistory"))
       .attr("stroke", (d) =>
         d.id === selectedId ? "#0f172a" : d.node.isBridge ? "#7c3aed" : "#ffffff",
       )

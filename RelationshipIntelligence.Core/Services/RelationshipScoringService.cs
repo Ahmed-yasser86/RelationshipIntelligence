@@ -172,6 +172,10 @@ namespace Servicess
         private async Task AppendSnapshotIfNewDayAsync(
             Guid ownerId, Guid personId, RelationshipState state, DateTime now)
         {
+            // History without evidence is noise: never snapshot unscored rows.
+            if (state.EvidenceStatus == EvidenceStatus.NoHistory)
+                return;
+
             var existing = await _states.ListSnapshotsAsync(ownerId, personId);
             if (existing.Any(s => s.TakenAtUtc.Date == now.Date))
                 return;
@@ -200,6 +204,7 @@ namespace Servicess
 
             return states
                 .Where(s => people.ContainsKey(s.PersonId))
+                .Where(s => s.EvidenceStatus != EvidenceStatus.NoHistory)
                 .OrderByDescending(s => s.UrgencyScore)
                 .ThenByDescending(s => IsImportant(people[s.PersonId]))
                 .ThenBy(s => s.LastContactAtUtc ?? DateTime.MinValue)
@@ -210,6 +215,8 @@ namespace Servicess
                     Name = people[s.PersonId].Name ?? string.Empty,
                     TieStrength = s.TieStrength,
                     LastContactAtUtc = s.LastContactAtUtc,
+                    InteractionCount = s.InteractionCount,
+                    EvidenceStatus = s.EvidenceStatus.ToString(),
                     CadenceReferenceDays = s.CadenceReferenceDays,
                     SilenceQuantile = s.SilenceQuantile,
                     UrgencyScore = s.UrgencyScore,
@@ -253,13 +260,40 @@ namespace Servicess
 
             DateTime? last = times.Count == 0 ? null : (DateTime?)times[^1];
 
+            // No observed events means no evidence of any kind: no cadence can be
+            // inferred (not even from priors - a prior describes an expected rhythm,
+            // and there is no relationship rhythm to describe yet), no quantile can
+            // be computed, and urgency must stay neutral. Such rows are excluded
+            // from every ranked surface; see GetQueueAsync.
+            if (times.Count == 0)
+            {
+                return new RelationshipState
+                {
+                    ApplicationUserId = ownerId,
+                    PersonId = person.PersonId,
+                    TieStrength = 0,
+                    LastContactAtUtc = null,
+                    InteractionCount = 0,
+                    EvidenceStatus = EvidenceStatus.NoHistory,
+                    CadenceReferenceDays = null,
+                    SilenceQuantile = null,
+                    IsBridge = false,
+                    UrgencyScore = 0,
+                    UpdatedAtUtc = now
+                };
+            }
+
             return new RelationshipState
             {
                 ApplicationUserId = ownerId,
                 PersonId = person.PersonId,
                 TieStrength = strength,
                 LastContactAtUtc = last,
-                CadenceReferenceDays = gaps.Count == 0 ? prior : TieDecayModel.CadenceReference(gaps, prior),
+                InteractionCount = times.Count,
+                EvidenceStatus = gaps.Count >= 3
+                    ? EvidenceStatus.Established
+                    : EvidenceStatus.Insufficient,
+                CadenceReferenceDays = gaps.Count == 0 ? null : TieDecayModel.CadenceReference(gaps, prior),
                 SilenceQuantile = last == null
                     ? null
                     : TieDecayModel.SilenceQuantile(gaps, (now - last.Value).TotalDays),

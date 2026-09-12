@@ -228,6 +228,11 @@ export function Queue() {
                     <BandBadge band={item.band} />
                     {item.isBridge && <Badge variant="secondary">Bridge</Badge>}
                     {item.isImportant && <Badge variant="secondary">Key</Badge>}
+                    {item.evidenceStatus === "Insufficient" && (
+                      <Badge variant="outline" title={`Scored from ${item.interactionCount} logged interaction(s) — an early estimate, not a measured rhythm`}>
+                        Early estimate
+                      </Badge>
+                    )}
                   </div>
                   <p className="mt-0.5 truncate text-xs text-muted-foreground">
                     {cadenceLine(item)}

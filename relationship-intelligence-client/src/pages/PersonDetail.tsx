@@ -460,8 +460,21 @@ export function PersonDetail() {
               ? `${Math.round(state.cadenceReferenceDays)} days`
               : "— (not enough history)"}
             {silent != null ? `, quiet for ${silent}d` : ""}. Strength{" "}
-            {state.tieStrength.toFixed(2)} — urgency {Math.round(state.urgencyScore)}/100.
+            {state.tieStrength.toFixed(2)} — urgency {Math.round(state.urgencyScore)}/100
+            {state.evidenceStatus === "Insufficient"
+              ? ` — early estimate from ${state.interactionCount} logged interaction(s).`
+              : "."}
             {state.isBridge && " This contact bridges otherwise separate parts of your network."}
+          </span>
+        </div>
+      )}
+      {!state && (person.interactions ?? []).length === 0 && (
+        <div className="mt-4 rounded-lg border border-dashed px-4 py-3 text-sm">
+          <span className="font-semibold">Not yet observed. </span>
+          <span className="text-muted-foreground">
+            No interactions are logged for this contact, so the system claims
+            nothing about the relationship — no rhythm, no score, no urgency.
+            Log the first interaction to begin.
           </span>
         </div>
       )}

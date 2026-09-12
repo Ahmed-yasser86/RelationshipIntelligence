@@ -243,9 +243,13 @@ export function Network() {
                       {selectedNode.isBridge && <Badge variant="secondary">Bridge</Badge>}
                       {selectedNode.isIsolated && <Badge variant="outline">Unconnected</Badge>}
                       <Badge variant="outline">{selectedNode.degree} connections</Badge>
-                      <Badge variant="outline">
-                        urgency {Math.round(selectedNode.urgencyScore)}
-                      </Badge>
+                      {selectedNode.evidenceStatus === "NoHistory" ? (
+                        <Badge variant="outline">Unscored — no logged interactions</Badge>
+                      ) : (
+                        <Badge variant="outline">
+                          urgency {Math.round(selectedNode.urgencyScore)}
+                        </Badge>
+                      )}
                     </div>
                     {selectedEdges.length > 0 && (
                       <>

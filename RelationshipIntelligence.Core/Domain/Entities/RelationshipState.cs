@@ -18,6 +18,10 @@ namespace Entities
 
         public DateTime? LastContactAtUtc { get; set; }
 
+        public int InteractionCount { get; set; }
+
+        public EvidenceStatus EvidenceStatus { get; set; }
+
         public double? CadenceReferenceDays { get; set; }
 
         public double? SilenceQuantile { get; set; }

@@ -8,7 +8,9 @@ namespace ServiceContracts
     {
         Task<DigestPayload> BuildAsync(string baseUrl);
 
-        Task<DigestPayload?> DeliverAsync(string baseUrl, string recipientEmail);
+        Task<DigestEmailPreview> PreviewAsync(string baseUrl, string recipientEmail, string? customNote);
+
+        Task<DigestPayload?> DeliverAsync(string baseUrl, string recipientEmail, string? customNote);
 
         Task<bool> HandleActionAsync(string? token, string action);
 

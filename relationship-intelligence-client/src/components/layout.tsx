@@ -1,6 +1,8 @@
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { GlobalLog } from "@/components/global-log";
+import { Onboarding } from "@/components/onboarding";
 import { useAuth } from "@/lib/auth";
 import { cn } from "cn";
 import {
@@ -34,6 +36,9 @@ export function Layout() {
           <p className="mb-6 px-2 text-xs text-muted-foreground">
             Who is cooling, and what to do this week.
           </p>
+          <div className="mb-4 px-2">
+            <GlobalLog />
+          </div>
           <nav className="flex flex-col gap-1">
             {NAV.map(({ to, label, icon: Icon, end }) => (
               <NavLink
@@ -75,6 +80,7 @@ export function Layout() {
         <main className="min-w-0 flex-1 px-8 py-6">
           <Outlet />
         </main>
+        <Onboarding />
       </div>
     </div>
   );

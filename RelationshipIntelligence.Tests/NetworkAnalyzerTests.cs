@@ -178,7 +178,8 @@ namespace CRUDTests
                     new List<string>(),
                     new List<string>(),
                     new List<string>(),
-                    new List<string>())).ToList());
+                    new List<string>(),
+                    null)).ToList());
 
             var service = new NetworkAnalysisService(
                 personsMock.Object, statesMock.Object, userMock.Object,

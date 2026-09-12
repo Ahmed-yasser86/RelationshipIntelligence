@@ -17,6 +17,7 @@ export async function loginViaApi(page: Page): Promise<void> {
     ([token, email]) => {
       localStorage.setItem("ri.token", token);
       localStorage.setItem("ri.email", email);
+      localStorage.setItem("ri.onboarded", "1");
     },
     [body.token as string, (body.personeEmail as string) || TEST_EMAIL],
   );
@@ -24,5 +25,12 @@ export async function loginViaApi(page: Page): Promise<void> {
 }
 
 export async function expectSignedIn(page: Page): Promise<void> {
+  const tour = page.getByText("How this works (1 of 4)");
+  if (await tour.isVisible().catch(() => false)) {
+    for (let i = 0; i < 3; i++) {
+      await page.getByRole("button", { name: "Next" }).click();
+    }
+    await page.getByRole("button", { name: "Start exploring" }).click();
+  }
   await expect(page.getByRole("heading", { name: "Overview" })).toBeVisible();
 }

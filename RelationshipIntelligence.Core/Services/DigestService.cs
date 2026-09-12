@@ -143,30 +143,33 @@ namespace Servicess
             }
         }
 
-        public async Task<DigestPayload?> DeliverAsync(string baseUrl, string recipientEmail)
+        public const string DefaultSubject = "Relationships to protect this week";
+
+        public async Task<DigestEmailPreview> PreviewAsync(
+            string baseUrl, string recipientEmail, string? customNote)
+        {
+            var payload = await BuildAsync(baseUrl);
+            var (subject, html, text) = RenderEmail(payload, customNote);
+            return new DigestEmailPreview
+            {
+                To = recipientEmail,
+                Subject = subject,
+                HtmlBody = html,
+                TextBody = text,
+                EntryCount = payload.Entries.Count
+            };
+        }
+
+        public async Task<DigestPayload?> DeliverAsync(
+            string baseUrl, string recipientEmail, string? customNote = null)
         {
             var payload = await BuildAsync(baseUrl);
             if (payload.Entries.Count == 0)
                 return null;
 
             var ownerId = _currentUser.UserId!.Value;
-            var html = new StringBuilder();
-            html.Append("<html><body><h2>Relationships to protect this week</h2><ul>");
-            var text = new StringBuilder();
-            text.AppendLine("Relationships to protect this week:");
-
-            foreach (var entry in payload.Entries)
-            {
-                html.Append("<li><strong>").Append(entry.Health.Name).Append("</strong> - ")
-                    .Append(entry.Health.Band).Append(" (").Append(entry.Health.UrgencyScore.ToString("F0"))
-                    .Append(")<br>").Append(entry.Suggestion).Append("<br><a href=\"")
-                    .Append(entry.ActionUrl).Append("\">I reached out</a></li>");
-                text.AppendLine($"- {entry.Health.Name} ({entry.Health.Band}): {entry.Suggestion}");
-            }
-            html.Append("</ul></body></html>");
-
-            await _email.SendAsync(recipientEmail, "Relationships to protect this week",
-                html.ToString(), text.ToString());
+            var (subject, html, text) = RenderEmail(payload, customNote);
+            await _email.SendAsync(recipientEmail, subject, html, text);
 
             foreach (var entry in payload.Entries)
             {
@@ -180,6 +183,37 @@ namespace Servicess
             await _unitOfWork.SaveChangesAsync();
 
             return payload;
+        }
+
+        private static (string subject, string html, string text) RenderEmail(
+            DigestPayload payload, string? customNote)
+        {
+            var html = new StringBuilder();
+            html.Append("<html><body><h2>Relationships to protect this week</h2>");
+            var text = new StringBuilder();
+            text.AppendLine("Relationships to protect this week:");
+            text.AppendLine();
+
+            if (!string.IsNullOrWhiteSpace(customNote))
+            {
+                string note = customNote.Trim();
+                html.Append("<p><em>").Append(System.Net.WebUtility.HtmlEncode(note)).Append("</em></p>");
+                text.AppendLine(note);
+                text.AppendLine();
+            }
+
+            html.Append("<ul>");
+            foreach (var entry in payload.Entries)
+            {
+                html.Append("<li><strong>").Append(entry.Health.Name).Append("</strong> - ")
+                    .Append(entry.Health.Band).Append(" (").Append(entry.Health.UrgencyScore.ToString("F0"))
+                    .Append(")<br>").Append(entry.Suggestion).Append("<br><a href=\"")
+                    .Append(entry.ActionUrl).Append("\">I reached out</a></li>");
+                text.AppendLine($"- {entry.Health.Name} ({entry.Health.Band}): {entry.Suggestion}");
+            }
+            html.Append("</ul></body></html>");
+
+            return (DefaultSubject, html.ToString(), text.ToString());
         }
 
         public async Task<bool> HandleActionAsync(string? token, string action)
@@ -228,18 +262,23 @@ namespace Servicess
             var affinities = (await _persons.ListAffinitiesAsync()) ?? new List<PersonAffinity>();
             var states = (await _states.ListForOwnerAsync(ownerId) ?? new List<RelationshipState>())
                 .ToDictionary(s => s.PersonId);
-            var cutoff = DateTime.UtcNow.AddHours(-1);
 
+            var needsRecompute = new List<Guid>();
             foreach (var affinity in affinities)
             {
                 if (affinity == null)
                     continue;
                 if (!states.TryGetValue(affinity.PersonId, out var state)
-                    || state.UpdatedAtUtc < cutoff)
+                    || (affinity.LastInteractionAtUtc.HasValue
+                        && (!state.LastContactAtUtc.HasValue
+                            || affinity.LastInteractionAtUtc.Value > state.LastContactAtUtc.Value)))
                 {
-                    await _scoring.RecomputeForPairAsync(affinity.PersonId);
+                    needsRecompute.Add(affinity.PersonId);
                 }
             }
+
+            if (needsRecompute.Count > 0)
+                await _scoring.RecomputePairsAsync(needsRecompute);
         }
     }
 }

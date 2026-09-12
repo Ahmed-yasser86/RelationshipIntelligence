@@ -37,14 +37,25 @@ namespace RelationshipIntelligence.Api.Controllers
             return Ok();
         }
 
-        [HttpPost]
-        public async Task<IActionResult> PostSendDigest()
+        [HttpGet]
+        public async Task<IActionResult> GetDigestPreview([FromQuery] string? customNote = null)
         {
             var email = User.FindFirstValue(ClaimTypes.Email);
             if (string.IsNullOrEmpty(email))
                 return BadRequest("No email address on file.");
 
-            var payload = await _digest.DeliverAsync($"{Request.Scheme}://{Request.Host}", email);
+            return Ok(await _digest.PreviewAsync($"{Request.Scheme}://{Request.Host}", email, customNote));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> PostSendDigest([FromBody] DigestSendRequest? request)
+        {
+            var email = User.FindFirstValue(ClaimTypes.Email);
+            if (string.IsNullOrEmpty(email))
+                return BadRequest("No email address on file.");
+
+            var payload = await _digest.DeliverAsync(
+                $"{Request.Scheme}://{Request.Host}", email, request?.CustomNote);
             if (payload == null)
                 return Ok("Nothing needs attention right now.");
 

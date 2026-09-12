@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
+import { ExplainDrawer } from "@/components/explain-drawer";
 import {
   BandBadge,
   EmptyState,
@@ -33,6 +34,64 @@ import {
 import { ApiError, api } from "@/lib/api";
 import { formatDate, timeAgo, daysSince } from "@/lib/format";
 import type { InteractionResponse, NetworkGraph, PersonDetail as Person, RelationshipHealth } from "@/lib/types";
+
+interface HistoryPoint {
+  takenAtUtc: string;
+  tieStrength: number;
+  urgencyScore: number;
+  band: string;
+}
+
+function Trajectory({ points }: { points: HistoryPoint[] }) {
+  if (points.length < 2) {
+    return (
+      <p className="text-sm text-muted-foreground">
+        Trajectory appears after a few days of scored history — snapshots accumulate
+        nightly and on every logged interaction.
+      </p>
+    );
+  }
+  const w = 280;
+  const h = 64;
+  const pad = 6;
+  const max = Math.max(...points.map((p) => p.urgencyScore), 100);
+  const step = points.length > 1 ? (w - pad * 2) / (points.length - 1) : 0;
+  const path = points
+    .map(
+      (p, i) =>
+        `${i === 0 ? "M" : "L"}${(pad + i * step).toFixed(1)},${(h - pad - (p.urgencyScore / max) * (h - pad * 2)).toFixed(1)}`,
+    )
+    .join(" ");
+  const first = points[0].urgencyScore;
+  const last = points[points.length - 1].urgencyScore;
+  const delta = Math.round(last - first);
+  const trend =
+    delta > 5 ? "cooling" : delta < -5 ? "warming" : "steady";
+  return (
+    <div>
+      <svg viewBox={`0 0 ${w} ${h}`} className="w-full" role="img" aria-label="Urgency trajectory">
+        <path d={path} fill="none" stroke="currentColor" strokeWidth={2} />
+        {points.map((p, i) => (
+          <circle
+            key={i}
+            cx={pad + i * step}
+            cy={h - pad - (p.urgencyScore / max) * (h - pad * 2)}
+            r={2.5}
+            className="fill-primary"
+          >
+            <title>{`${formatDate(p.takenAtUtc)} — urgency ${Math.round(p.urgencyScore)} (${p.band})`}</title>
+          </circle>
+        ))}
+      </svg>
+      <p className="mt-1 text-xs text-muted-foreground">
+        {trend === "steady"
+          ? `Steady around ${Math.round(last)} over ${points.length} snapshots.`
+          : `${trend === "cooling" ? "Cooling" : "Warming"}: urgency ${delta > 0 ? "+" : ""}${delta} points across ${points.length} snapshots.`}{" "}
+        Each point is a scored daily snapshot, not a prediction.
+      </p>
+    </div>
+  );
+}
 import { InteractionTypes } from "@/lib/types";
 
 function usePerson(id: string | undefined) {
@@ -277,6 +336,8 @@ export function PersonDetail() {
   const { person, error, reload } = usePerson(id);
   const [state, setState] = useState<RelationshipHealth | null>(null);
   const [network, setNetwork] = useState<NetworkGraph | null>(null);
+  const [history, setHistory] = useState<HistoryPoint[]>([]);
+  const [explaining, setExplaining] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
@@ -288,6 +349,14 @@ export function PersonDetail() {
       .get<NetworkGraph>("/api/Network/GetNetworkGraph")
       .then(setNetwork)
       .catch(() => undefined);
+    if (id) {
+      api
+        .get<{ personId: string; points: HistoryPoint[] }>(
+          `/api/Contacts/GetStateHistory?id=${id}`,
+        )
+        .then((h) => setHistory(h.points ?? []))
+        .catch(() => undefined);
+    }
   }, [id, person]);
 
   async function onDelete() {
@@ -368,6 +437,11 @@ export function PersonDetail() {
         <div className="flex flex-wrap gap-2">
           <LogInteractionDialog personId={person.personId} onDone={() => void reload()} />
           <ImportDialog personId={person.personId} onDone={() => void reload()} />
+          {state && (
+            <Button size="sm" variant="outline" onClick={() => setExplaining(true)}>
+              Explain score
+            </Button>
+          )}
           <NavButton to={`/people/${person.personId}/edit`} size="sm" variant="outline">
             Edit
           </NavButton>
@@ -392,6 +466,12 @@ export function PersonDetail() {
         </div>
       )}
 
+      <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_320px]">
+        <section>
+          <h2 className="mb-3 text-base font-semibold">Trajectory</h2>
+          <Trajectory points={history} />
+        </section>
+      </div>
       <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_320px]">
         <section>
           <h2 className="mb-3 text-base font-semibold">History</h2>
@@ -549,6 +629,14 @@ export function PersonDetail() {
         </aside>
       </div>
       <Separator className="my-6" />
+      {state && (
+        <ExplainDrawer
+          health={state}
+          interactions={person.interactions ?? []}
+          open={explaining}
+          onOpenChange={setExplaining}
+        />
+      )}
       <p className="text-xs text-muted-foreground">
         Strength and urgency are computed from dated interactions by an exponential
         tie-decay model — equal weight per event, 60-day half-life. Flags and bands

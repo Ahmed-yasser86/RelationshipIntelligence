@@ -203,6 +203,28 @@ export function Network() {
             />
             <aside className="flex min-w-0 flex-col gap-4">
               <div className="rounded-lg border p-4">
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  Reading this map
+                </p>
+                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                  {graph != null && (
+                    <>
+                      Density{" "}
+                      {(
+                        (2 * graph.edges.length) /
+                        Math.max(1, graph.nodes.length * (graph.nodes.length - 1))
+                      ).toFixed(3)}
+                      {" — "}a sparse, affiliation-based map.{" "}
+                    </>
+                  )}
+                  Lines mean <em>shared context</em> (same organization, tag, or
+                  channel) — not observed contact. Groups are disconnected components,
+                  not detected communities. Ringed nodes are articulation points:
+                  removing one would split its region. Node size is degree; color is
+                  urgency.
+                </p>
+              </div>
+              <div className="rounded-lg border p-4">
                 {selectedNode == null ? (
                   <p className="text-sm text-muted-foreground">
                     Select a node to inspect it — its neighborhood highlights, everything

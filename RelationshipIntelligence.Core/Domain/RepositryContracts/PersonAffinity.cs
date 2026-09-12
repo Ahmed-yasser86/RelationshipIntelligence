@@ -9,5 +9,6 @@ namespace RepositryContracts
         IReadOnlyList<string> CircleNames,
         IReadOnlyList<string> TagNames,
         IReadOnlyList<string> ChannelNames,
-        IReadOnlyList<string> SystemTagNames);
+        IReadOnlyList<string> SystemTagNames,
+        DateTime? LastInteractionAtUtc);
 }

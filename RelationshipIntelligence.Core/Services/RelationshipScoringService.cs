@@ -68,8 +68,10 @@ namespace Servicess
 
                 foreach (var person in persons)
                 {
-                    await _states.UpsertAsync(BuildState(
-                        ownerId, person!, strengths[person!.PersonId], max, now));
+                    var state = BuildState(
+                        ownerId, person!, strengths[person!.PersonId], max, now);
+                    await _states.UpsertAsync(state);
+                    await AppendSnapshotIfNewDayAsync(ownerId, person!.PersonId, state, now);
                 }
                 await _unitOfWork.SaveChangesAsync();
 
@@ -101,8 +103,88 @@ namespace Servicess
                 : Math.Max(states.Max(s => s.TieStrength), strength);
             if (max <= 0) max = 1.0;
 
-            await _states.UpsertAsync(BuildState(userId.Value, person, strength, max, now));
+            var state = BuildState(userId.Value, person, strength, max, now);
+            await _states.UpsertAsync(state);
+            await AppendSnapshotIfNewDayAsync(userId.Value, person.PersonId, state, now);
             await _unitOfWork.SaveChangesAsync();
+        }
+
+        public async Task<int> RecomputePairsAsync(IEnumerable<Guid> personIds)
+        {
+            var userId = _currentUser.UserId;
+            if (userId == null || userId == Guid.Empty)
+                throw new UnauthorizedAccessException("Cannot score relationships without an authenticated user.");
+
+            var ids = personIds?.ToHashSet() ?? new HashSet<Guid>();
+            if (ids.Count == 0)
+                return 0;
+
+            var persons = await _persons.ListByIdsAsync(ids);
+            var states = await _states.ListForOwnerAsync(userId.Value);
+            var now = DateTime.UtcNow;
+            double max = states.Count == 0 ? 1.0 : states.Max(s => s.TieStrength);
+            if (max <= 0) max = 1.0;
+
+            int count = 0;
+            foreach (var person in persons.Where(p => p != null && !IsExcluded(p!)))
+            {
+                double strength = TieDecayModel.StrengthAt(
+                    person!.Interactions
+                        .OrderBy(i => i.TimeOfInteraction)
+                        .Select(i => i.TimeOfInteraction)
+                        .ToList(),
+                    now);
+                max = Math.Max(max, strength);
+                var state = BuildState(userId.Value, person, strength, max, now);
+                await _states.UpsertAsync(state);
+                await AppendSnapshotIfNewDayAsync(userId.Value, person.PersonId, state, now);
+                count++;
+            }
+            await _unitOfWork.SaveChangesAsync();
+            return count;
+        }
+
+        public async Task<RelationshipStateHistoryResponse> GetHistoryAsync(Guid? personId)
+        {
+            var userId = _currentUser.UserId;
+            var response = new RelationshipStateHistoryResponse();
+            if (userId == null || userId == Guid.Empty || personId == null)
+                return response;
+
+            var person = await _persons.GetPersonById(personId);
+            if (person == null)
+                return response;
+
+            response.PersonId = person.PersonId;
+            var snapshots = await _states.ListSnapshotsAsync(userId.Value, person.PersonId);
+            response.Points = snapshots
+                .Select(s => new RelationshipStateHistoryPoint
+                {
+                    TakenAtUtc = s.TakenAtUtc,
+                    TieStrength = s.TieStrength,
+                    UrgencyScore = s.UrgencyScore,
+                    Band = s.Band
+                })
+                .ToList();
+            return response;
+        }
+
+        private async Task AppendSnapshotIfNewDayAsync(
+            Guid ownerId, Guid personId, RelationshipState state, DateTime now)
+        {
+            var existing = await _states.ListSnapshotsAsync(ownerId, personId);
+            if (existing.Any(s => s.TakenAtUtc.Date == now.Date))
+                return;
+
+            await _states.AddSnapshotAsync(new RelationshipStateSnapshot
+            {
+                ApplicationUserId = ownerId,
+                PersonId = personId,
+                TakenAtUtc = now,
+                TieStrength = state.TieStrength,
+                UrgencyScore = state.UrgencyScore,
+                Band = TieDecayModel.BandFor(state.UrgencyScore).ToString()
+            });
         }
 
         public async Task<List<RelationshipHealthResponse>> GetQueueAsync(int top = 7)
@@ -129,6 +211,7 @@ namespace Servicess
                     TieStrength = s.TieStrength,
                     LastContactAtUtc = s.LastContactAtUtc,
                     CadenceReferenceDays = s.CadenceReferenceDays,
+                    SilenceQuantile = s.SilenceQuantile,
                     UrgencyScore = s.UrgencyScore,
                     Band = TieDecayModel.BandFor(s.UrgencyScore).ToString(),
                     IsBridge = s.IsBridge,

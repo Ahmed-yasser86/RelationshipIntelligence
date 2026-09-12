@@ -69,5 +69,26 @@ namespace Repositories
             return await _db.RelationshipStates
                 .FirstOrDefaultAsync(s => s.ApplicationUserId == ownerId && s.PersonId == personId);
         }
+
+        public async Task AddSnapshotAsync(RelationshipStateSnapshot snapshot)
+        {
+            if (snapshot == null)
+                throw new ArgumentNullException(nameof(snapshot));
+
+            if (snapshot.RelationshipStateSnapshotId == Guid.Empty)
+                snapshot.RelationshipStateSnapshotId = Guid.NewGuid();
+            await _db.RelationshipStateSnapshots.AddAsync(snapshot);
+        }
+
+        public async Task<List<RelationshipStateSnapshot>> ListSnapshotsAsync(Guid ownerId, Guid personId)
+        {
+            if (ownerId == Guid.Empty)
+                return new List<RelationshipStateSnapshot>();
+
+            return await _db.RelationshipStateSnapshots
+                .Where(s => s.ApplicationUserId == ownerId && s.PersonId == personId)
+                .OrderBy(s => s.TakenAtUtc)
+                .ToListAsync();
+        }
     }
 }

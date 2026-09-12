@@ -59,6 +59,15 @@ test.describe("digest", () => {
     await expect(page.getByLabel("Contacts per digest")).toBeVisible();
   });
 
+  test("reviews the exact email before sending", async ({ page }) => {
+    await page.getByRole("button", { name: "Review email" }).click();
+    await expect(page.getByText("Email preview")).toBeVisible();
+    await expect(page.getByText(/^To$/)).toBeVisible();
+    await expect(page.getByText(/^Subject$/)).toBeVisible();
+    await page.getByRole("button", { name: "Cancel" }).click();
+    await expect(page.getByRole("button", { name: "Review email" })).toBeVisible();
+  });
+
   test("saves preferences", async ({ page }) => {
     await page.getByLabel("Contacts per digest").fill("3");
     await page.getByRole("button", { name: "Save" }).click();

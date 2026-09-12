@@ -23,7 +23,7 @@ test.describe("person workflows", () => {
     await expect(page.getByRole("heading", { level: 1 })).toContainText(PROBE);
 
     // log interaction
-    await page.getByRole("button", { name: "Log interaction" }).click();
+    await page.locator("main").getByRole("button", { name: "Log interaction" }).click();
     await page.getByLabel("What was it about").fill("E2E verification call");
     await page.getByRole("button", { name: "Save interaction" }).click();
     await expect(page.getByText("E2E verification call")).toBeVisible();
@@ -61,5 +61,15 @@ test.describe("person workflows", () => {
     await page.getByLabel("Email", { exact: true }).fill(`full-${Date.now()}@example.com`);
     await page.getByRole("button", { name: "Add person", exact: true }).last().click();
     await expect(page).toHaveURL(/\/people\/.+/);
+  });
+
+  test("person detail tells the relationship story", async ({ page }) => {
+    await page.goto("/people");
+    await page.locator("ul > li a").first().click();
+    await expect(page.getByRole("heading", { name: "History", exact: true })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Trajectory" })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Network position" }),
+    ).toBeVisible();
   });
 });

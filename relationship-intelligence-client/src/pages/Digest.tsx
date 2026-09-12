@@ -1,13 +1,22 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { cn } from "cn";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { BandBadge, EmptyState, ErrorState, LoadingList, PersonAvatar } from "@/components/states";
-import { cn } from "cn";
 import { ApiError, api } from "@/lib/api";
 import { formatDate } from "@/lib/format";
 import type { DigestPayload, DigestPreference } from "@/lib/types";
+
+interface EmailPreview {
+  to: string;
+  subject: string;
+  htmlBody: string;
+  textBody: string;
+  entryCount: number;
+}
 
 function Preferences({
   pref,
@@ -90,6 +99,10 @@ export function Digest() {
   const [payload, setPayload] = useState<DigestPayload | null>(null);
   const [pref, setPref] = useState<DigestPreference | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [reviewing, setReviewing] = useState(false);
+  const [preview, setPreview] = useState<EmailPreview | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [note, setNote] = useState("");
   const [sending, setSending] = useState(false);
   const [sendResult, setSendResult] = useState<string | null>(null);
 
@@ -111,12 +124,49 @@ export function Digest() {
     void load();
   }, [load]);
 
+  async function openReview() {
+    setReviewing(true);
+    setPreview(null);
+    setPreviewLoading(true);
+    setSendResult(null);
+    try {
+      const params = new URLSearchParams();
+      setPreview(
+        await api.get<EmailPreview>(`/api/Digest/GetDigestPreview?${params}`),
+      );
+    } catch (err) {
+      setSendResult(err instanceof ApiError ? err.body || err.message : "Preview failed.");
+    } finally {
+      setPreviewLoading(false);
+    }
+  }
+
+  async function refreshPreview() {
+    setPreviewLoading(true);
+    try {
+      const params = new URLSearchParams();
+      if (note.trim() !== "") params.set("customNote", note.trim());
+      setPreview(
+        await api.get<EmailPreview>(`/api/Digest/GetDigestPreview?${params}`),
+      );
+    } catch (err) {
+      setSendResult(err instanceof ApiError ? err.body || err.message : "Preview failed.");
+    } finally {
+      setPreviewLoading(false);
+    }
+  }
+
   async function send() {
     setSending(true);
     setSendResult(null);
     try {
-      const res = await api.post<DigestPayload | string>("/api/Digest/PostSendDigest");
-      setSendResult(typeof res === "string" ? res : `Sent — ${res.entries.length} contacts.`);
+      const res = await api.post<DigestPayload | string>("/api/Digest/PostSendDigest", {
+        CustomNote: note.trim() === "" ? null : note.trim(),
+      });
+      setSendResult(
+        typeof res === "string" ? res : `Sent — ${res.entries.length} contacts.`,
+      );
+      setReviewing(false);
     } catch (err) {
       setSendResult(err instanceof ApiError ? err.body || err.message : "Send failed.");
     } finally {
@@ -131,15 +181,66 @@ export function Digest() {
           <h1 className="text-2xl font-semibold tracking-tight">Weekly digest</h1>
           <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
             {payload
-              ? `Week of ${formatDate(payload.weekStartUtc)} · network health ${payload.networkHealth}/100. Same selection the email carries — act here or from your inbox.`
-              : "The five relationships to protect this week."}
+              ? `Week of ${formatDate(payload.weekStartUtc)} · network health ${payload.networkHealth}/100. Review the exact email before anything sends — nothing goes out without your confirmation.`
+              : "The relationships to protect this week."}
           </p>
         </div>
-        <Button size="sm" disabled={sending} onClick={() => void send()}>
-          {sending ? "Sending…" : "Send email now"}
+        <Button size="sm" disabled={reviewing} onClick={() => void openReview()}>
+          Review email
         </Button>
       </div>
       {sendResult && <p className="mb-3 text-sm text-muted-foreground">{sendResult}</p>}
+
+      {reviewing && (
+        <div className="mb-6 rounded-lg border p-4">
+          <h2 className="mb-2 text-base font-semibold">Email preview</h2>
+          {previewLoading && <p className="text-sm text-muted-foreground">Rendering…</p>}
+          {preview && (
+            <>
+              <dl className="mb-2 space-y-1 text-sm">
+                <div className="flex gap-2">
+                  <dt className="w-16 shrink-0 text-muted-foreground">To</dt>
+                  <dd>{preview.to}</dd>
+                </div>
+                <div className="flex gap-2">
+                  <dt className="w-16 shrink-0 text-muted-foreground">Subject</dt>
+                  <dd>{preview.subject}</dd>
+                </div>
+              </dl>
+              <div
+                className="max-h-64 overflow-auto rounded-md border bg-card p-3 text-sm"
+                dangerouslySetInnerHTML={{ __html: preview.htmlBody }}
+              />
+              <div className="mt-3 flex flex-col gap-1.5">
+                <Label htmlFor="digest-note">Personal note (optional, appears at the top)</Label>
+                <Textarea
+                  id="digest-note"
+                  rows={2}
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                  onBlur={() => void refreshPreview()}
+                  placeholder="e.g. A quick note before you read on…"
+                />
+              </div>
+              <div className="mt-3 flex gap-2">
+                <Button size="sm" disabled={sending} onClick={() => void send()}>
+                  {sending ? "Sending…" : `Confirm send to ${preview.to}`}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    setReviewing(false);
+                    setNote("");
+                  }}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </>
+          )}
+        </div>
+      )}
 
       {error && <ErrorState message={error} onRetry={() => void load()} />}
       {payload === null && !error && <LoadingList rows={5} />}

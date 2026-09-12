@@ -31,6 +31,7 @@ namespace Entities
         public virtual DbSet<Interaction> Interactions { get; set; }
         public virtual DbSet<SocialMediaAccount> SocialMediaAccounts { get; set; }
         public virtual DbSet<RelationshipState> RelationshipStates { get; set; }
+        public virtual DbSet<RelationshipStateSnapshot> RelationshipStateSnapshots { get; set; }
         public virtual DbSet<DigestDelivery> DigestDeliveries { get; set; }
         public virtual DbSet<DigestMetric> DigestMetrics { get; set; }
         public virtual DbSet<DigestPreference> DigestPreferences { get; set; }
@@ -52,10 +53,15 @@ namespace Entities
             modelBuilder.Entity<RelationshipState>()
                 .HasIndex(s => new { s.ApplicationUserId, s.PersonId })
                 .IsUnique();
+            modelBuilder.Entity<RelationshipStateSnapshot>().ToTable("RelationshipStateSnapshots");
+            modelBuilder.Entity<RelationshipStateSnapshot>()
+                .HasIndex(s => new { s.ApplicationUserId, s.PersonId, s.TakenAtUtc });
 
             modelBuilder.Entity<Person>()
                 .HasQueryFilter(p => p.ApplicationUserId == _currentUserId && !p.IsDeleted);
             modelBuilder.Entity<RelationshipState>()
+                .HasQueryFilter(s => s.ApplicationUserId == _currentUserId);
+            modelBuilder.Entity<RelationshipStateSnapshot>()
                 .HasQueryFilter(s => s.ApplicationUserId == _currentUserId);
             modelBuilder.Entity<DigestDelivery>().ToTable("DigestDeliveries");
             modelBuilder.Entity<DigestDelivery>()

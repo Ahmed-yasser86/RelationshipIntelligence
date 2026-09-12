@@ -28,13 +28,15 @@ namespace ContactsManager.API.Controllers
         private readonly IPersonDeleterService _personDeleterService;
         private readonly IInteractionService _interactionService;
         private readonly IRelationshipScoringService _scoringService;
+        private readonly IDemoWorkspaceService _demoWorkspaceService;
 
 
         public ContactsController(UserManager<ApplicationUser> userManager, IPersonGetterService personGetterService,
             IPersonSearcherService personSearcher, ISystemTagsGetter systemTagsGetter,
             IPersonQuickAdderService personQuickAdder, ICountryGetterService getCountries,
             IPersonAdderService PersoneAdderService, IPersonUpdaterService PersonesUpdater, IPersonDeleterService personDeleter,
-            IInteractionService interactionService, IRelationshipScoringService scoringService)
+            IInteractionService interactionService, IRelationshipScoringService scoringService,
+            IDemoWorkspaceService demoWorkspaceService)
         {
             _userManager = userManager;
             _personGetterService = personGetterService;
@@ -47,6 +49,7 @@ namespace ContactsManager.API.Controllers
             _personDeleterService = personDeleter;
             _interactionService = interactionService;
             _scoringService = scoringService;
+            _demoWorkspaceService = demoWorkspaceService;
         }
 
         /// <summary>
@@ -435,6 +438,32 @@ namespace ContactsManager.API.Controllers
             var queue = await _scoringService.GetQueueAsync(top);
 
             return Ok(queue);
+        }
+
+        [HttpGet]
+        [ServiceFilter(typeof(PersonOwnershipFilter))]
+        public async Task<IActionResult> GetStateHistory(Guid id)
+        {
+            return Ok(await _scoringService.GetHistoryAsync(id));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> PostSeedDemoWorkspace()
+        {
+            try
+            {
+                return Ok(await _demoWorkspaceService.SeedAsync());
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> PostClearDemoWorkspace()
+        {
+            return Ok(await _demoWorkspaceService.ClearAsync());
         }
 
         [HttpPost]

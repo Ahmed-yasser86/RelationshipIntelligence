@@ -57,6 +57,10 @@ namespace CRUDTests
             _userMock.Setup(u => u.UserId).Returns(_userA);
             _personsMock.Setup(r => r.GetAllPersons())
                 .ReturnsAsync(persons.AsEnumerable());
+            _statesMock.Setup(r => r.AddSnapshotAsync(It.IsAny<RelationshipStateSnapshot>()))
+                .Returns(Task.CompletedTask);
+            _statesMock.Setup(r => r.ListSnapshotsAsync(It.IsAny<Guid>(), It.IsAny<Guid>()))
+                .ReturnsAsync(new List<RelationshipStateSnapshot>());
         }
 
         [Fact]
@@ -79,6 +83,94 @@ namespace CRUDTests
             saved.First(s => s.PersonId == stale.PersonId).UrgencyScore
                 .Should().BeGreaterThan(saved.First(s => s.PersonId == recent.PersonId).UrgencyScore);
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Once);
+        }
+
+        [Fact]
+        public async Task RecomputeForOwnerAsync_AppendsOneSnapshotPerDay()
+        {
+            var person = PersonWithEvents("Snap", 3);
+            ArrangeUser(person);
+
+            var snapshots = new List<RelationshipState>();
+            _statesMock.Setup(r => r.UpsertAsync(It.IsAny<RelationshipState>()))
+                .Callback<RelationshipState>(snapshots.Add)
+                .Returns(Task.CompletedTask);
+
+            int addedSnapshots = 0;
+            _statesMock.Setup(r => r.AddSnapshotAsync(It.IsAny<RelationshipStateSnapshot>()))
+                .Callback(() => addedSnapshots++)
+                .Returns(Task.CompletedTask);
+            _statesMock.Setup(r => r.ListSnapshotsAsync(It.IsAny<Guid>(), It.IsAny<Guid>()))
+                .ReturnsAsync(new List<RelationshipStateSnapshot>());
+
+            await Service().RecomputeForOwnerAsync(_userA);
+
+            addedSnapshots.Should().Be(1);
+        }
+
+        [Fact]
+        public async Task GetHistoryAsync_ReturnsOrderedPoints()
+        {
+            _userMock.Setup(u => u.UserId).Returns(_userA);
+            var personId = Guid.NewGuid();
+            _personsMock.Setup(r => r.GetPersonById(personId)).ReturnsAsync(
+                new Person { PersonId = personId, ApplicationUserId = _userA, Name = "H" });
+            _statesMock.Setup(r => r.ListSnapshotsAsync(_userA, personId)).ReturnsAsync(
+                new List<RelationshipStateSnapshot>
+                {
+                    new() { PersonId = personId, ApplicationUserId = _userA, TakenAtUtc = DateTime.UtcNow.AddDays(-2), TieStrength = 2, UrgencyScore = 10, Band = "Healthy" },
+                    new() { PersonId = personId, ApplicationUserId = _userA, TakenAtUtc = DateTime.UtcNow.AddDays(-1), TieStrength = 1, UrgencyScore = 55, Band = "Drifting" }
+                });
+
+            var history = await Service().GetHistoryAsync(personId);
+
+            history.PersonId.Should().Be(personId);
+            history.Points.Should().HaveCount(2);
+            history.Points[0].TakenAtUtc.Should().BeBefore(history.Points[1].TakenAtUtc);
+        }
+
+        [Fact]
+        public async Task GetHistoryAsync_ForeignPerson_ReturnsEmpty()
+        {
+            _userMock.Setup(u => u.UserId).Returns(_userA);
+            var foreignId = Guid.NewGuid();
+            _personsMock.Setup(r => r.GetPersonById(foreignId)).ReturnsAsync((Person?)null);
+
+            var history = await Service().GetHistoryAsync(foreignId);
+
+            history.Points.Should().BeEmpty();
+        }
+
+        [Fact]
+        public async Task RecomputePairsAsync_EmptySet_DoesNothing()
+        {
+            _userMock.Setup(u => u.UserId).Returns(_userA);
+
+            (await Service().RecomputePairsAsync(new List<Guid>())).Should().Be(0);
+            _statesMock.Verify(r => r.UpsertAsync(It.IsAny<RelationshipState>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task RecomputePairsAsync_ScoresOnlyRequestedPairs()
+        {
+            _userMock.Setup(u => u.UserId).Returns(_userA);
+            var wanted = PersonWithEvents("Wanted", 10);
+            var other = PersonWithEvents("Other", 10);
+            _personsMock.Setup(r => r.ListByIdsAsync(It.IsAny<IEnumerable<Guid>>()))
+                .ReturnsAsync((IEnumerable<Guid> ids) => new[] { wanted, other }
+                    .Where(p => ids.Contains(p.PersonId)).ToList());
+            _statesMock.Setup(r => r.ListForOwnerAsync(_userA))
+                .ReturnsAsync(new List<RelationshipState>());
+
+            var saved = new List<RelationshipState>();
+            _statesMock.Setup(r => r.UpsertAsync(It.IsAny<RelationshipState>()))
+                .Callback<RelationshipState>(saved.Add)
+                .Returns(Task.CompletedTask);
+
+            var count = await Service().RecomputePairsAsync(new[] { wanted.PersonId });
+
+            count.Should().Be(1);
+            saved.Should().ContainSingle(s => s.PersonId == wanted.PersonId);
         }
 
         [Fact]

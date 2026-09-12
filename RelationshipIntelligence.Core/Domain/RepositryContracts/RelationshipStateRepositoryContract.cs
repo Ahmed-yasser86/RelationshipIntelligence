@@ -12,5 +12,9 @@ namespace RepositryContracts
         Task<List<RelationshipState>> ListForOwnerAsync(Guid ownerId);
 
         Task<RelationshipState?> GetAsync(Guid ownerId, Guid personId);
+
+        Task AddSnapshotAsync(RelationshipStateSnapshot snapshot);
+
+        Task<List<RelationshipStateSnapshot>> ListSnapshotsAsync(Guid ownerId, Guid personId);
     }
 }

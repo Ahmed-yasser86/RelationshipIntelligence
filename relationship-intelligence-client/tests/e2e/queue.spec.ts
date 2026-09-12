@@ -30,4 +30,22 @@ test.describe("attention queue", () => {
     await page.getByRole("button", { name: "Refresh" }).click();
     await expect(page.locator("ol > li").first()).toBeVisible();
   });
+
+  test("explains a score with observed-derived-result evidence", async ({
+    page,
+  }) => {
+    await page.locator("ol > li").first().getByRole("button", { name: "Explain" }).click();
+    await expect(page.getByText("1 · Observed")).toBeVisible();
+    await expect(page.getByText("2 · Derived")).toBeVisible();
+    await expect(page.getByText("3 · Result")).toBeVisible();
+    await expect(page.getByText(/Typical rhythm/)).toBeVisible();
+  });
+
+  test("snoozes an item out of the queue", async ({ page }) => {
+    const rows = page.locator("ol > li");
+    await expect(rows.first()).toBeVisible();
+    const before = await rows.count();
+    await rows.first().getByRole("button", { name: "Snooze" }).click();
+    await expect(page.locator("ol > li")).toHaveCount(before - 1);
+  });
 });

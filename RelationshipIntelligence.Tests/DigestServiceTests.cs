@@ -79,11 +79,11 @@ namespace CRUDTests
             var personId = Guid.NewGuid();
             _personsMock.Setup(r => r.ListAffinitiesAsync()).ReturnsAsync(new List<PersonAffinity>
             {
-                new(personId, "P", new List<string>(), new List<string>(), new List<string>(), new List<string>())
+                new(personId, "P", new List<string>(), new List<string>(), new List<string>(), new List<string>(), DateTime.UtcNow.AddDays(-5))
             });
             _statesMock.Setup(r => r.ListForOwnerAsync(_userA)).ReturnsAsync(new List<RelationshipState>
             {
-                new() { PersonId = personId, ApplicationUserId = _userA, UpdatedAtUtc = DateTime.UtcNow }
+                new() { PersonId = personId, ApplicationUserId = _userA, UpdatedAtUtc = DateTime.UtcNow, LastContactAtUtc = DateTime.UtcNow.AddDays(-5) }
             });
             _scoringMock.Setup(s => s.GetQueueAsync(50))
                 .ReturnsAsync(new List<RelationshipHealthResponse>());
@@ -102,8 +102,8 @@ namespace CRUDTests
             var staleId = Guid.NewGuid();
             _personsMock.Setup(r => r.ListAffinitiesAsync()).ReturnsAsync(new List<PersonAffinity>
             {
-                new(freshId, "Fresh", new List<string>(), new List<string>(), new List<string>(), new List<string>()),
-                new(staleId, "Stale", new List<string>(), new List<string>(), new List<string>(), new List<string>())
+                new(freshId, "Fresh", new List<string>(), new List<string>(), new List<string>(), new List<string>(), null),
+                new(staleId, "Stale", new List<string>(), new List<string>(), new List<string>(), new List<string>(), DateTime.UtcNow)
             });
             _statesMock.Setup(r => r.ListForOwnerAsync(_userA)).ReturnsAsync(new List<RelationshipState>
             {
@@ -214,6 +214,29 @@ namespace CRUDTests
             var ok = await Service().HandleActionAsync(token, "reached-out");
 
             ok.Should().BeFalse();
+        }
+
+        [Fact]
+        public async Task PreviewAsync_ReturnsFullEmailWithoutSending()
+        {
+            ArrangeOwner();
+            _scoringMock.Setup(s => s.GetQueueAsync(50))
+                .ReturnsAsync(new List<RelationshipHealthResponse>
+                {
+                    Entry(Guid.NewGuid(), "Hot", 90, DateTime.UtcNow.AddDays(-30))
+                });
+            _interactionsMock.Setup(r => r.ListForPersonAsync(It.IsAny<Guid>()))
+                .ReturnsAsync(new List<Interaction>());
+
+            var preview = await Service().PreviewAsync("https://app.test", "user@test.com", "My note");
+
+            preview.To.Should().Be("user@test.com");
+            preview.Subject.Should().NotBeNullOrEmpty();
+            preview.HtmlBody.Should().Contain("My note");
+            preview.TextBody.Should().Contain("My note");
+            preview.EntryCount.Should().Be(1);
+            _emailMock.Verify(e => e.SendAsync(
+                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
         }
 
         [Fact]

@@ -96,6 +96,7 @@ export interface RelationshipHealth {
   tieStrength: number;
   lastContactAtUtc: string | null;
   cadenceReferenceDays: number | null;
+  silenceQuantile: number | null;
   urgencyScore: number;
   band: string;
   isBridge: boolean;

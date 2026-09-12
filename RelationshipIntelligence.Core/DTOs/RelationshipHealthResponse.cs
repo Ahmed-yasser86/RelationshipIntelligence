@@ -9,6 +9,7 @@ namespace ServiceContracts.DTOs
         public double TieStrength { get; set; }
         public DateTime? LastContactAtUtc { get; set; }
         public double? CadenceReferenceDays { get; set; }
+        public double? SilenceQuantile { get; set; }
         public double UrgencyScore { get; set; }
         public string Band { get; set; } = string.Empty;
         public bool IsBridge { get; set; }

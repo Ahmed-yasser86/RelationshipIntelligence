@@ -21,6 +21,7 @@ test.describe("auth", () => {
     await page.goto("/login");
     await page.getByLabel("Email").fill(TEST_EMAIL);
     await page.getByLabel("Password").fill(TEST_PASSWORD);
+    await page.evaluate(() => localStorage.setItem("ri.onboarded", "1"));
     await page.getByRole("button", { name: "Sign in" }).click();
     await expectSignedIn(page);
   });

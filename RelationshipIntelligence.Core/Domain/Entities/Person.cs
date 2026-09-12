@@ -81,7 +81,7 @@ namespace Entities
         public ICollection<Note> Notes { get; set; } = new List<Note>();
         public ICollection<Interaction> Interactions { get; set; } = new List<Interaction>();
         public ICollection<Circle> Circles { get; set; } = new List<Circle>();
-        public ICollection<ConnectionChannel> ConnectionChannels { get; set; } = new List<ConnectionChannel>();
+        public ICollection<ContactChannel> ContactChannels { get; set; } = new List<ContactChannel>();
         public ICollection<SystemStatusTag> SystemStatusTags { get; set; } = new List<SystemStatusTag>();
         public ICollection<UserDefinedTags> UserDefinedTags { get; set; } = new List<UserDefinedTags>();
         public ICollection<ContactItemRole> ContactItemRoles { get; set; } = new List<ContactItemRole>();

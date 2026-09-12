@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using ServiceContracts;
 using ServiceContracts.DTOs;
+using ServiceContracts.DTOs.OrganizationDTOs;
 using System.ComponentModel.DataAnnotations;
 
 namespace ContactsManager.API.Controllers
@@ -29,6 +30,7 @@ namespace ContactsManager.API.Controllers
         private readonly IInteractionService _interactionService;
         private readonly IRelationshipScoringService _scoringService;
         private readonly IDemoWorkspaceService _demoWorkspaceService;
+        private readonly IOrganizationService _organizationService;
 
 
         public ContactsController(UserManager<ApplicationUser> userManager, IPersonGetterService personGetterService,
@@ -36,7 +38,7 @@ namespace ContactsManager.API.Controllers
             IPersonQuickAdderService personQuickAdder, ICountryGetterService getCountries,
             IPersonAdderService PersoneAdderService, IPersonUpdaterService PersonesUpdater, IPersonDeleterService personDeleter,
             IInteractionService interactionService, IRelationshipScoringService scoringService,
-            IDemoWorkspaceService demoWorkspaceService)
+            IDemoWorkspaceService demoWorkspaceService, IOrganizationService organizationService)
         {
             _userManager = userManager;
             _personGetterService = personGetterService;
@@ -50,6 +52,7 @@ namespace ContactsManager.API.Controllers
             _interactionService = interactionService;
             _scoringService = scoringService;
             _demoWorkspaceService = demoWorkspaceService;
+            _organizationService = organizationService;
         }
 
         /// <summary>
@@ -98,6 +101,72 @@ namespace ContactsManager.API.Controllers
 
             return Ok(systemtages);
 
+        }
+
+        /// <summary>
+        /// Lists every organization (circle) with its current member count.
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> GetOrganizations()
+        {
+            return Ok(await _organizationService.GetAllAsync());
+        }
+
+        /// <summary>
+        /// Creates a new organization. Names must be unique (case-insensitive).
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> PostOrganization([FromBody] OrganizationCreateRequest request)
+        {
+            try
+            {
+                return Ok(await _organizationService.CreateAsync(request?.Name));
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Renames an organization. Contacts keep their membership.
+        /// </summary>
+        [HttpPut]
+        public async Task<IActionResult> PutOrganization([FromBody] OrganizationRenameRequest request)
+        {
+            try
+            {
+                return Ok(await _organizationService.RenameAsync(request.CircleId, request?.Name));
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Deletes an organization. Refused while contacts still belong to it.
+        /// </summary>
+        [HttpDelete]
+        public async Task<IActionResult> DeleteOrganization(Guid id)
+        {
+            try
+            {
+                await _organizationService.DeleteAsync(id);
+                return Ok(true);
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(ex.Message);
+            }
         }
 
         /// <summary>

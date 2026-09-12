@@ -93,7 +93,7 @@ namespace ServiceContracts.DTOs
                 OtherInformation = this.OtherInformation,
                 Organizations = this.Organizations?.Select(o => o.Name).ToList(),
                 CurrentRoles = this.CurrentRoles?.Select(r => r.Role).ToList(),
-                ConnectionChannels = this.ConnectionChannels?.Select(c => c.ConnectionChannelName).ToList(),
+                ConnectionChannels = this.ConnectionChannels?.Select(c => new ContactChannelRequest { Name = c.ConnectionChannelName, Value = c.Value }).ToList(),
                 SystemStatusTags = this.SystemStatusTags?.Select(s => s.StatusTagId).ToList(),
                 UserDefinedTags = this.UserDefinedTags?.Select(t => t.TagName).ToList()
             };
@@ -132,7 +132,7 @@ namespace ServiceContracts.DTOs
                 Organizations = person.Circles?.Select(c => c.ConvertToDto()).ToList() ?? new List<CircleResponse>(),
                 CurrentRoles = person.ContactItemRoles?.Select(r => r.ConvertToDto()).ToList() ?? new List<ContactItemRoleResponse>(),
                 SocialMediaAccounts = person.OtherSocialMediaAccounts?.Select(s => s.ConvertToDto()).ToList() ?? new List<SocialMediaAccountResponse>(),
-                ConnectionChannels = person.ConnectionChannels?.Select(c => c.ConvertToDto()).ToList() ?? new List<ConnectionChannelResponse>(),
+                ConnectionChannels = person.ContactChannels?.Select(c => c.ConvertToDto()).ToList() ?? new List<ConnectionChannelResponse>(),
                 SystemStatusTags = person.SystemStatusTags?.Select(s => s.ConvertToDto()).ToList() ?? new List<SystemStatusTagResponse>(),
                 UserDefinedTags = person.UserDefinedTags?.Select(t => t.ConvertToDto()).ToList() ?? new List<UserDefinedTagsResponse>(),
                 Notes = person.Notes?.Select(n => n.ConvertToDto()).ToList() ?? new List<NoteResponse>(),

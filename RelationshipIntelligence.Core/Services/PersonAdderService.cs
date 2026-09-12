@@ -91,8 +91,14 @@ namespace Servicess
                     foreach (var circle in circles)
                         person.Circles.Add(circle);
 
-                    foreach (var channel in channels)
-                        person.ConnectionChannels.Add(channel);
+                    foreach (var (channel, value) in channels)
+                        person.ContactChannels.Add(new ContactChannel
+                        {
+                            PersonId = person.PersonId,
+                            ConnectionChannelId = channel.ConnectionChannelId,
+                            Channel = channel,
+                            Value = value
+                        });
 
                     foreach (var tag in tags)
                         person.UserDefinedTags.Add(tag);
@@ -158,25 +164,41 @@ namespace Servicess
             return result;
         }
 
-        private async Task<List<ConnectionChannel>> ResolveConnectionChannels(List<string>? channelNames)
+        private async Task<List<(ConnectionChannel Channel, string? Value)>> ResolveConnectionChannels(List<ContactChannelRequest>? channelRequests)
         {
-            var names = (channelNames ?? new List<string>())
-                .Where(n => !string.IsNullOrWhiteSpace(n))
-                .Distinct()
+            var requests = (channelRequests ?? new List<ContactChannelRequest>())
+                .Where(r => !string.IsNullOrWhiteSpace(r?.Name))
+                .GroupBy(r => r!.Name!.Trim(), StringComparer.OrdinalIgnoreCase)
+                .Select(g => g.First())
                 .ToList();
 
-            if (names.Count == 0) return new List<ConnectionChannel>();
+            if (requests.Count == 0) return new List<(ConnectionChannel, string?)>();
 
+            var names = requests.Select(r => r.Name!.Trim()).ToList();
             var existing = (await _connectionChannelRepository.GetConnectionChannelsByNames(names)).ToList();
-            var existingNames = existing.Select(c => c.ConnectionChannelName).ToHashSet();
+            var existingNames = existing.Select(c => c.ConnectionChannelName).ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-            var result = new List<ConnectionChannel>(existing);
-            foreach (var name in names.Where(n => !existingNames.Contains(n)))
+            var result = new List<(ConnectionChannel Channel, string? Value)>();
+            foreach (var channel in existing)
+                result.Add((channel, CleanChannelValue(requests.First(r => string.Equals(r.Name!.Trim(), channel.ConnectionChannelName, StringComparison.OrdinalIgnoreCase)).Value)));
+
+            foreach (var req in requests.Where(r => !existingNames.Contains(r.Name!.Trim())))
             {
-                result.Add(new ConnectionChannel { ConnectionChannelId = Guid.NewGuid(), ConnectionChannelName = name });
+                result.Add((new ConnectionChannel
+                {
+                    ConnectionChannelId = Guid.NewGuid(),
+                    ConnectionChannelName = req.Name!.Trim()
+                }, CleanChannelValue(req.Value)));
             }
 
             return result;
+        }
+
+        private static string? CleanChannelValue(string? value)
+        {
+            var clean = (value ?? string.Empty).Trim();
+            if (clean.Length == 0) return null;
+            return clean.Length > 200 ? clean[..200] : clean;
         }
 
         private async Task<List<UserDefinedTags>> ResolveUserDefinedTags(List<string>? tagNames)

@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from "@/lib/auth";
 import { Digest } from "@/pages/Digest";
 import { Login } from "@/pages/Login";
 import { Network } from "@/pages/Network";
+import { Organizations } from "@/pages/Organizations";
 import { Overview } from "@/pages/Overview";
 import { People } from "@/pages/People";
 import { PersonDetail } from "@/pages/PersonDetail";
@@ -61,6 +62,7 @@ export function App() {
           <Route path="people/new" element={<PersonNew />} />
           <Route path="people/:id" element={<PersonDetail />} />
           <Route path="people/:id/edit" element={<PersonEdit />} />
+          <Route path="organizations" element={<Organizations />} />
           <Route path="network" element={<Network />} />
           <Route path="digest" element={<Digest />} />
         </Route>

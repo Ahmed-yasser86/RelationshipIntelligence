@@ -197,7 +197,7 @@ namespace CRUDTests
                 .With(p => p.Gender, GenderOptions.Male)
                 .With(p => p.Organizations, (List<string>?)null)
                 .With(p => p.CurrentRoles, (List<string>?)null)
-                .With(p => p.ConnectionChannels, (List<string>?)null)
+                .With(p => p.ConnectionChannels, (List<ContactChannelRequest>?)null)
                 .With(p => p.UserDefinedTags, (List<string>?)null)
                 .With(p => p.SystemStatusTags, (List<ContactsManger.Core.Domain.Entities.EEnums.EnSystemStatusTag>?)null)
                 .With(p => p.SocialMediaAccounts, (List<SocialMediaAccountAddRequest>?)null)
@@ -237,7 +237,7 @@ namespace CRUDTests
                 .With(p => p.OtherInformation, "Prefers async communication")
                 .With(p => p.Organizations, (List<string>?)null)
                 .With(p => p.CurrentRoles, (List<string>?)null)
-                .With(p => p.ConnectionChannels, (List<string>?)null)
+                .With(p => p.ConnectionChannels, (List<ContactChannelRequest>?)null)
                 .With(p => p.UserDefinedTags, (List<string>?)null)
                 .With(p => p.SystemStatusTags, (List<ContactsManger.Core.Domain.Entities.EEnums.EnSystemStatusTag>?)null)
                 .With(p => p.SocialMediaAccounts, (List<SocialMediaAccountAddRequest>?)null)
@@ -273,7 +273,7 @@ namespace CRUDTests
                 .With(p => p.Gender, GenderOptions.Male)
                 .With(p => p.Organizations, new List<string> { "Acme Inc" })
                 .With(p => p.CurrentRoles, (List<string>?)null)
-                .With(p => p.ConnectionChannels, (List<string>?)null)
+                .With(p => p.ConnectionChannels, (List<ContactChannelRequest>?)null)
                 .With(p => p.UserDefinedTags, (List<string>?)null)
                 .With(p => p.SystemStatusTags, (List<ContactsManger.Core.Domain.Entities.EEnums.EnSystemStatusTag>?)null)
                 .With(p => p.SocialMediaAccounts, (List<SocialMediaAccountAddRequest>?)null)
@@ -316,7 +316,7 @@ namespace CRUDTests
                 .With(p => p.Gender, GenderOptions.Male)
                 .With(p => p.Organizations, (List<string>?)null)
                 .With(p => p.CurrentRoles, (List<string>?)null)
-                .With(p => p.ConnectionChannels, new List<string> { "WhatsApp" })
+                .With(p => p.ConnectionChannels, new List<ContactChannelRequest> { new() { Name = "WhatsApp", Value = "+20 100 000 0000" } })
                 .With(p => p.UserDefinedTags, (List<string>?)null)
                 .With(p => p.SystemStatusTags, (List<ContactsManger.Core.Domain.Entities.EEnums.EnSystemStatusTag>?)null)
                 .With(p => p.SocialMediaAccounts, (List<SocialMediaAccountAddRequest>?)null)
@@ -339,7 +339,8 @@ namespace CRUDTests
 
             // Assert
             captured.Should().NotBeNull();
-            captured!.ConnectionChannels.Should().ContainSingle(c => c.ConnectionChannelName == "WhatsApp");
+            captured!.ContactChannels.Should().ContainSingle(c =>
+                c.Channel.ConnectionChannelName == "WhatsApp" && c.Value == "+20 100 000 0000");
         }
 
         /// <summary>
@@ -359,7 +360,7 @@ namespace CRUDTests
                 .With(p => p.Gender, GenderOptions.Male)
                 .With(p => p.Organizations, (List<string>?)null)
                 .With(p => p.CurrentRoles, (List<string>?)null)
-                .With(p => p.ConnectionChannels, (List<string>?)null)
+                .With(p => p.ConnectionChannels, (List<ContactChannelRequest>?)null)
                 .With(p => p.UserDefinedTags, (List<string>?)null)
                 .With(p => p.SystemStatusTags, new List<ContactsManger.Core.Domain.Entities.EEnums.EnSystemStatusTag> { requestedEnum })
                 .With(p => p.SocialMediaAccounts, (List<SocialMediaAccountAddRequest>?)null)
@@ -403,7 +404,7 @@ namespace CRUDTests
                 .With(p => p.Gender, GenderOptions.Male)
                 .With(p => p.Organizations, new List<string> { "Existing Org", "New Org" })
                 .With(p => p.CurrentRoles, (List<string>?)null)
-                .With(p => p.ConnectionChannels, (List<string>?)null)
+                .With(p => p.ConnectionChannels, (List<ContactChannelRequest>?)null)
                 .With(p => p.UserDefinedTags, (List<string>?)null)
                 .With(p => p.SystemStatusTags, (List<ContactsManger.Core.Domain.Entities.EEnums.EnSystemStatusTag>?)null)
                 .With(p => p.SocialMediaAccounts, (List<SocialMediaAccountAddRequest>?)null)
@@ -452,7 +453,7 @@ namespace CRUDTests
                 .With(p => p.Gender, GenderOptions.Male)
                 .With(p => p.Organizations, (List<string>?)null)
                 .With(p => p.CurrentRoles, (List<string>?)null)
-                .With(p => p.ConnectionChannels, (List<string>?)null)
+                .With(p => p.ConnectionChannels, (List<ContactChannelRequest>?)null)
                 .With(p => p.UserDefinedTags, (List<string>?)null)
                 .With(p => p.SystemStatusTags, (List<ContactsManger.Core.Domain.Entities.EEnums.EnSystemStatusTag>?)null)
                 .With(p => p.SocialMediaAccounts, (List<SocialMediaAccountAddRequest>?)null)
@@ -489,7 +490,7 @@ namespace CRUDTests
                 .With(p => p.Gender, GenderOptions.Male)
                 .With(p => p.Organizations, (List<string>?)null)
                 .With(p => p.CurrentRoles, (List<string>?)null)
-                .With(p => p.ConnectionChannels, (List<string>?)null)
+                .With(p => p.ConnectionChannels, (List<ContactChannelRequest>?)null)
                 .With(p => p.UserDefinedTags, (List<string>?)null)
                 .With(p => p.SystemStatusTags, (List<ContactsManger.Core.Domain.Entities.EEnums.EnSystemStatusTag>?)null)
                 .With(p => p.SocialMediaAccounts, (List<SocialMediaAccountAddRequest>?)null)
@@ -982,7 +983,7 @@ namespace CRUDTests
                 .With(p => p.Gender, GenderOptions.Male)
                 .With(p => p.Organizations, (List<string>?)null)
                 .With(p => p.CurrentRoles, (List<string>?)null)
-                .With(p => p.ConnectionChannels, (List<string>?)null)
+                .With(p => p.ConnectionChannels, (List<ContactChannelRequest>?)null)
                 .With(p => p.UserDefinedTags, (List<string>?)null)
                 .With(p => p.SystemStatusTags, (List<ContactsManger.Core.Domain.Entities.EEnums.EnSystemStatusTag>?)null)
                 .With(p => p.SocialMediaAccounts, (List<SocialMediaAccountAddRequest>?)null)
@@ -1032,6 +1033,70 @@ namespace CRUDTests
             result.Should().NotBeNull();
             result!.Name.Should().Be("karim");
             result.DateOfBirth.Should().Be(new DateTime(1990, 1, 1));
+        }
+
+        [Fact]
+        public async Task UpdatePerson_ChannelValue_UpdatesInPlaceAndAddsNew()
+        {
+            // Arrange
+            Person person = _fixture.Build<Person>()
+                .With(p => p.email, "test@example.com")
+                .With(p => p.phone, "123456789")
+                .Without(p => p.Country)
+                .With(p => p.Gender, "Male")
+                .Create();
+
+            var phoneChannel = new ConnectionChannel
+            {
+                ConnectionChannelId = Guid.NewGuid(),
+                ConnectionChannelName = "Phone"
+            };
+            person.ContactChannels = new List<ContactChannel>
+            {
+                new()
+                {
+                    PersonId = person.PersonId,
+                    ConnectionChannelId = phoneChannel.ConnectionChannelId,
+                    Channel = phoneChannel,
+                    Value = "old-number"
+                }
+            };
+
+            _personRepositryContractMoq
+                .Setup(repo => repo.GetPersonById(It.IsAny<Guid>()))
+                .ReturnsAsync(person);
+
+            _personRepositryContractMoq
+                .Setup(repo => repo.UpdatePerson(It.IsAny<Person>()))
+                .ReturnsAsync((Person p) => p);
+
+            _connectionChannelRepositryContractMoq
+                .Setup(repo => repo.GetConnectionChannelByName("Telegram"))
+                .ReturnsAsync((ConnectionChannel?)null);
+
+            PersonUpdateRequest toUpdate = person.ConvertToPersonRespons().ToPersonUpdateRequest();
+            toUpdate.Organizations = null;
+            toUpdate.CurrentRoles = null;
+            toUpdate.UserDefinedTags = null;
+            toUpdate.SystemStatusTags = null;
+            toUpdate.SocialMediaAccounts = null;
+            toUpdate.ConnectionChannels = new List<ContactChannelRequest>
+            {
+                new() { Name = "Phone", Value = "new-number" },
+                new() { Name = "Telegram", Value = "@handle" }
+            };
+
+            // Act
+            PersonRespones? result = await _personUpdaterService.UpdatePerson(toUpdate);
+
+            // Assert
+            result.Should().NotBeNull();
+            person.ContactChannels.Should().HaveCount(2);
+            person.ContactChannels
+                .Single(c => c.Channel.ConnectionChannelName == "Phone")
+                .Value.Should().Be("new-number");
+            person.ContactChannels.Should().Contain(c =>
+                c.Channel.ConnectionChannelName == "Telegram" && c.Value == "@handle");
         }
 
         /// <summary>

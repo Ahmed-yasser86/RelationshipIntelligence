@@ -11,9 +11,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { ChannelEditor } from "@/components/channel-editor";
+import { OrganizationPicker } from "@/components/organization-picker";
 import { LoadingList, ErrorState, NavButton } from "@/components/states";
 import { ApiError, api } from "@/lib/api";
-import type { CountryResponse, PersonDetail } from "@/lib/types";
+import type { ContactChannelRequest, CountryResponse, PersonDetail, SystemStatusTagResponse } from "@/lib/types";
 
 export function PersonEdit() {
   const { id } = useParams();
@@ -22,6 +24,7 @@ export function PersonEdit() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [countries, setCountries] = useState<CountryResponse[]>([]);
+  const [statusTags, setStatusTags] = useState<SystemStatusTagResponse[]>([]);
   const [form, setForm] = useState({
     Name: "",
     email: "",
@@ -35,6 +38,9 @@ export function PersonEdit() {
   const [gender, setGender] = useState("");
   const [dob, setDob] = useState("");
   const [countryId, setCountryId] = useState("");
+  const [statusTagId, setStatusTagId] = useState("");
+  const [orgs, setOrgs] = useState<string[]>([]);
+  const [channels, setChannels] = useState<ContactChannelRequest[]>([]);
 
   useEffect(() => {
     if (!id) return;
@@ -54,6 +60,18 @@ export function PersonEdit() {
         });
         setDob(p.dateOfBirth ? p.dateOfBirth.slice(0, 10) : "");
         setCountryId(p.countryId ?? "");
+        setStatusTagId(
+          p.systemStatusTags && p.systemStatusTags.length > 0
+            ? String(p.systemStatusTags[0].statusTagId)
+            : "",
+        );
+        setOrgs((p.organizations ?? []).map((o) => o.name));
+        setChannels(
+          (p.connectionChannels ?? []).map((c) => ({
+            name: c.connectionChannelName,
+            value: c.value,
+          })),
+        );
         const genderMap: Record<string, string> = { Male: "0", Female: "1", Other: "2" };
         setGender(p.gender != null ? (genderMap[p.gender] ?? "") : "");
       })
@@ -63,6 +81,10 @@ export function PersonEdit() {
     api
       .get<CountryResponse[]>("/api/Contacts/GetAllCountries")
       .then(setCountries)
+      .catch(() => undefined);
+    api
+      .get<SystemStatusTagResponse[]>("/api/Contacts/GetSystemStatusTags")
+      .then(setStatusTags)
       .catch(() => undefined);
   }, [id]);
 
@@ -95,6 +117,14 @@ export function PersonEdit() {
         Origin: str("Origin"),
         LinkedInProfile: str("LinkedInProfile"),
         OtherInformation: str("OtherInformation"),
+        Organizations: orgs,
+        ConnectionChannels: channels
+          .filter((c) => c.name.trim() !== "")
+          .map((c) => ({
+            Name: c.name.trim(),
+            Value: c.value?.trim() === "" || c.value == null ? null : c.value.trim(),
+          })),
+        SystemStatusTags: statusTagId === "" ? null : [Number(statusTagId)],
       });
       navigate(`/people/${id}`);
     } catch (err) {
@@ -159,6 +189,21 @@ export function PersonEdit() {
               </SelectContent>
             </Select>
           </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="e-status">Status</Label>
+            <Select value={statusTagId} onValueChange={(v) => setStatusTagId(v ?? "")}>
+              <SelectTrigger id="e-status">
+                <SelectValue placeholder="None" />
+              </SelectTrigger>
+              <SelectContent>
+                {statusTags.map((t) => (
+                  <SelectItem key={t.statusTagId} value={String(t.statusTagId)}>
+                    {t.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
         {(
           [
@@ -174,9 +219,11 @@ export function PersonEdit() {
           </div>
         ))}
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="e-mem">Memory aid</Label>
-          <Textarea id="e-mem" name="ContextMemory" rows={3} value={form.ContextMemory} onChange={set("ContextMemory")} />
+          <Label htmlFor="e-mem">Memory note</Label>
+          <Textarea id="e-mem" name="ContextMemory" rows={3} value={form.ContextMemory} onChange={set("ContextMemory")} placeholder="What should you remember about this person?" />
         </div>
+        <OrganizationPicker idPrefix="e-org" selected={orgs} onChange={setOrgs} />
+        <ChannelEditor idPrefix="e-ch" channels={channels} onChange={setChannels} />
         {error && <p className="text-sm text-destructive">{error}</p>}
         <Button type="submit" disabled={busy}>
           {busy ? "Saving…" : "Save changes"}

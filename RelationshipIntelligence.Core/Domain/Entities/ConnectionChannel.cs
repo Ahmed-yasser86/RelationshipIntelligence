@@ -18,7 +18,7 @@ namespace ContactsManger.Core.Domain.Entities
         [StringLength(100)]
         public string ConnectionChannelName { get; set; } = string.Empty;
 
-        public ICollection<Person> People { get; set; } = new List<Person>();
+        public ICollection<ContactChannel> ContactChannels { get; set; } = new List<ContactChannel>();
 
     }
 }

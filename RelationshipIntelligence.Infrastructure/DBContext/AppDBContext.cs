@@ -85,10 +85,20 @@ namespace Entities
             // ==========================================
             // 2. RELATIONSHIPS
             // ==========================================
-            modelBuilder.Entity<ConnectionChannel>()
-                .HasMany(c => c.People)
-                .WithMany(p => p.ConnectionChannels)
-                .UsingEntity(j => j.ToTable("PersonConnectionChannels"));
+            modelBuilder.Entity<ContactChannel>(e =>
+            {
+                e.ToTable("PersonConnectionChannels");
+                e.HasKey(x => new { x.PersonId, x.ConnectionChannelId });
+                e.Property(x => x.PersonId).HasColumnName("PeoplePersonId");
+                e.Property(x => x.ConnectionChannelId).HasColumnName("ConnectionChannelsConnectionChannelId");
+                e.Property(x => x.Value).HasMaxLength(200);
+                e.HasOne(x => x.Person)
+                    .WithMany(p => p.ContactChannels)
+                    .HasForeignKey(x => x.PersonId);
+                e.HasOne(x => x.Channel)
+                    .WithMany(c => c.ContactChannels)
+                    .HasForeignKey(x => x.ConnectionChannelId);
+            });
 
             modelBuilder.Entity<Person>()
                 .HasMany(p => p.UserDefinedTags)
@@ -552,18 +562,8 @@ namespace Entities
                 new { PeoplePersonId = persons[9], CirclesCircleId = circles[3] }
             ));
 
-            modelBuilder.Entity<ConnectionChannel>().HasMany(c => c.People).WithMany(p => p.ConnectionChannels).UsingEntity(j => j.HasData(
-                new { PeoplePersonId = persons[0], ConnectionChannelsConnectionChannelId = channels[4] },
-                new { PeoplePersonId = persons[1], ConnectionChannelsConnectionChannelId = channels[1] },
-                new { PeoplePersonId = persons[2], ConnectionChannelsConnectionChannelId = channels[3] },
-                new { PeoplePersonId = persons[3], ConnectionChannelsConnectionChannelId = channels[7] },
-                new { PeoplePersonId = persons[4], ConnectionChannelsConnectionChannelId = channels[0] },
-                new { PeoplePersonId = persons[5], ConnectionChannelsConnectionChannelId = channels[3] },
-                new { PeoplePersonId = persons[6], ConnectionChannelsConnectionChannelId = channels[2] },
-                new { PeoplePersonId = persons[7], ConnectionChannelsConnectionChannelId = channels[5] },
-                new { PeoplePersonId = persons[8], ConnectionChannelsConnectionChannelId = channels[0] },
-                new { PeoplePersonId = persons[9], ConnectionChannelsConnectionChannelId = channels[6] }
-            ));
+            // Channel memberships are user data — no seed rows. (An older
+            // implicit-join seed was dropped with the join payload migration.)
 
             modelBuilder.Entity<SocialMediaAccount>().HasMany(s => s.People).WithMany(p => p.OtherSocialMediaAccounts).UsingEntity(j => j.HasData(
                 new { PeoplePersonId = persons[0], OtherSocialMediaAccountsSocialMediaAccountId = smAccounts[0] },

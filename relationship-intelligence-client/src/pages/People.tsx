@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,7 +15,7 @@ import {
 import { EmptyState, ErrorState, LoadingList, NavButton, PersonAvatar } from "@/components/states";
 import { ApiError, api } from "@/lib/api";
 import { timeAgo } from "@/lib/format";
-import type { PagedResult, PersonView } from "@/lib/types";
+import type { PagedResult, PersonView, SystemStatusTagResponse } from "@/lib/types";
 
 const PAGE_SIZE = 10;
 
@@ -45,11 +46,13 @@ export function People() {
     UserDefinedTagName: "",
   });
   const [showFilters, setShowFilters] = useState(false);
+  const [statusTags, setStatusTags] = useState<SystemStatusTagResponse[]>([]);
   const requestId = useRef(0);
 
   useEffect(() => {
     api.get<string[]>("/api/Contacts/GetValidSearchFields").then(setSearchFields).catch(() => undefined);
     api.get<string[]>("/api/Contacts/GetValidSortFields").then(setSortFields).catch(() => undefined);
+    api.get<SystemStatusTagResponse[]>("/api/Contacts/GetSystemStatusTags").then(setStatusTags).catch(() => undefined);
   }, []);
 
   const load = useCallback(
@@ -131,6 +134,7 @@ export function People() {
     setQuery(q);
     const freshComposite = { ...composite };
     (Object.keys(composite) as (keyof typeof composite)[]).forEach((k) => {
+      if (k === "SystemStatusTagName") return;
       const v = data.get(`cf-${k}`);
       if (v != null) freshComposite[k] = v.toString();
     });
@@ -175,6 +179,26 @@ export function People() {
 
   const totalPages =
     data != null ? Math.max(1, Math.ceil(data.totalCount / data.pageSize)) : 1;
+
+  const [searchParams, setSearchParams] = useSearchParams();
+  useEffect(() => {
+    const org = (searchParams.get("org") ?? "").trim();
+    if (org === "") return;
+    setSearchParams({}, { replace: true });
+    setShowFilters(true);
+    const next = {
+      Name: "",
+      Email: "",
+      Phone: "",
+      CircleName: org,
+      ContactItemRole: "",
+      SystemStatusTagName: "",
+      UserDefinedTagName: "",
+    };
+    setComposite(next);
+    void loadComposite(1, "", next);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div>
@@ -251,7 +275,6 @@ export function People() {
               ["Phone", "Phone"],
               ["CircleName", "Organization"],
               ["ContactItemRole", "Role"],
-              ["SystemStatusTagName", "Status tag"],
               ["UserDefinedTagName", "Tag"],
             ] as const
           ).map(([key, label]) => (
@@ -265,6 +288,27 @@ export function People() {
               />
             </div>
           ))}
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="cf-SystemStatusTagName">Status tag</Label>
+            <Select
+              value={composite.SystemStatusTagName}
+              onValueChange={(v) =>
+                setComposite((c) => ({ ...c, SystemStatusTagName: v === "__any" ? "" : (v ?? "") }))
+              }
+            >
+              <SelectTrigger id="cf-SystemStatusTagName" name="cf-SystemStatusTagName">
+                <SelectValue placeholder="Any status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__any">Any status</SelectItem>
+                {statusTags.map((t) => (
+                  <SelectItem key={t.statusTagId} value={t.name}>
+                    {t.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           <div className="flex items-end gap-2">
             <Button type="submit" size="sm">
               Filter

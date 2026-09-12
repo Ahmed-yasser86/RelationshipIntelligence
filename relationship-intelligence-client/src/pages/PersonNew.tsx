@@ -12,9 +12,11 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import { ChannelEditor } from "@/components/channel-editor";
+import { OrganizationPicker } from "@/components/organization-picker";
 import { NavButton } from "@/components/states";
 import { ApiError, api } from "@/lib/api";
-import type { CountryResponse } from "@/lib/types";
+import type { ContactChannelRequest, CountryResponse, SystemStatusTagResponse } from "@/lib/types";
 
 function splitList(v: string): string[] | null {
   const items = v
@@ -27,10 +29,14 @@ function splitList(v: string): string[] | null {
 export function PersonNew() {
   const navigate = useNavigate();
   const [countries, setCountries] = useState<CountryResponse[]>([]);
+  const [statusTags, setStatusTags] = useState<SystemStatusTagResponse[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  const [quick, setQuick] = useState({ Name: "", email: "", Organizations: "", CurrentRoles: "", Origin: "" });
+  const [quick, setQuick] = useState({ Name: "", email: "", CurrentRoles: "", Origin: "" });
+  const [quickOrgs, setQuickOrgs] = useState<string[]>([]);
+  const [fullOrgs, setFullOrgs] = useState<string[]>([]);
+  const [fullChannels, setFullChannels] = useState<ContactChannelRequest[]>([]);
   const [full, setFull] = useState({
     Name: "",
     email: "",
@@ -39,12 +45,11 @@ export function PersonNew() {
     DateOfBirth: "",
     Address: "",
     CountryId: "",
+    StatusTagId: "",
     ContextMemory: "",
     Origin: "",
     LinkedInProfile: "",
-    Organizations: "",
     CurrentRoles: "",
-    ConnectionChannels: "",
     UserDefinedTags: "",
   });
 
@@ -52,6 +57,10 @@ export function PersonNew() {
     api
       .get<CountryResponse[]>("/api/Contacts/GetAllCountries")
       .then(setCountries)
+      .catch(() => undefined);
+    api
+      .get<SystemStatusTagResponse[]>("/api/Contacts/GetSystemStatusTags")
+      .then(setStatusTags)
       .catch(() => undefined);
   }, []);
 
@@ -72,7 +81,7 @@ export function PersonNew() {
       const res = await api.post<{ personId: string }>("/api/Contacts/PostQuickAddContact", {
         Name: quick.Name.trim(),
         email: quick.email.trim(),
-        Organizations: splitList(quick.Organizations),
+        Organizations: quickOrgs.length > 0 ? quickOrgs : null,
         CurrentRoles: splitList(quick.CurrentRoles),
         Origin: quick.Origin.trim() === "" ? null : quick.Origin.trim(),
       });
@@ -101,10 +110,19 @@ export function PersonNew() {
         ContextMemory: full.ContextMemory.trim() === "" ? null : full.ContextMemory.trim(),
         Origin: full.Origin.trim() === "" ? null : full.Origin.trim(),
         LinkedInProfile: full.LinkedInProfile.trim() === "" ? null : full.LinkedInProfile.trim(),
-        Organizations: splitList(full.Organizations),
+        Organizations: fullOrgs.length > 0 ? fullOrgs : null,
         CurrentRoles: splitList(full.CurrentRoles),
-        ConnectionChannels: splitList(full.ConnectionChannels),
+        ConnectionChannels:
+          fullChannels.filter((c) => c.name.trim() !== "").length > 0
+            ? fullChannels
+                .filter((c) => c.name.trim() !== "")
+                .map((c) => ({
+                  Name: c.name.trim(),
+                  Value: c.value?.trim() === "" || c.value == null ? null : c.value.trim(),
+                }))
+            : null,
         UserDefinedTags: splitList(full.UserDefinedTags),
+        SystemStatusTags: full.StatusTagId === "" ? null : [Number(full.StatusTagId)],
       });
       navigate(`/people/${res.personId}`);
     } catch (err) {
@@ -139,10 +157,7 @@ export function PersonNew() {
               <Label htmlFor="q-email">Email</Label>
               <Input id="q-email" type="email" required value={quick.email} onChange={setQ("email")} />
             </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="q-org">Organizations (comma-separated)</Label>
-              <Input id="q-org" value={quick.Organizations} onChange={setQ("Organizations")} />
-            </div>
+            <OrganizationPicker idPrefix="q-org" selected={quickOrgs} onChange={setQuickOrgs} />
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="q-roles">Current roles (comma-separated)</Label>
               <Input id="q-roles" value={quick.CurrentRoles} onChange={setQ("CurrentRoles")} />
@@ -181,6 +196,7 @@ export function PersonNew() {
                   <SelectContent>
                     <SelectItem value="0">Male</SelectItem>
                     <SelectItem value="1">Female</SelectItem>
+                    <SelectItem value="2">Other</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -203,16 +219,29 @@ export function PersonNew() {
                   </SelectContent>
                 </Select>
               </div>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="f-status">Status</Label>
+                <Select value={full.StatusTagId} onValueChange={(v) => setFull((f) => ({ ...f, StatusTagId: v ?? "" }))}>
+                  <SelectTrigger id="f-status">
+                    <SelectValue placeholder="None" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {statusTags.map((t) => (
+                      <SelectItem key={t.statusTagId} value={String(t.statusTagId)}>
+                        {t.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
             {(
               [
                 ["Address", "Address"],
                 ["LinkedInProfile", "LinkedIn URL"],
                 ["Origin", "How you met"],
-                ["ContextMemory", "Memory aid"],
-                ["Organizations", "Organizations (comma-separated)"],
+                ["ContextMemory", "Memory note — what should you remember about this person?"],
                 ["CurrentRoles", "Roles (comma-separated)"],
-                ["ConnectionChannels", "Channels (comma-separated)"],
                 ["UserDefinedTags", "Tags (comma-separated)"],
               ] as const
             ).map(([key, label]) => (
@@ -221,6 +250,8 @@ export function PersonNew() {
                 <Input id={`f-${key}`} value={full[key]} onChange={setF(key)} />
               </div>
             ))}
+            <ChannelEditor idPrefix="f-ch" channels={fullChannels} onChange={setFullChannels} />
+            <OrganizationPicker idPrefix="f-org" selected={fullOrgs} onChange={setFullOrgs} />
             {error && <p className="text-sm text-destructive">{error}</p>}
             <Button type="submit" disabled={busy}>
               {busy ? "Adding…" : "Add person"}

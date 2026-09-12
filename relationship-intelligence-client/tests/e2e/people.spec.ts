@@ -21,9 +21,9 @@ test.describe("people", () => {
   });
 
   test("searches by name", async ({ page }) => {
-    await page.getByLabel("Search").fill("Ned");
+    await page.getByLabel("Search").fill("Salma");
     await page.getByRole("button", { name: "Apply" }).click();
-    await expect(page.locator("ul > li").first()).toContainText("Ned");
+    await expect(page.locator("ul > li").first()).toContainText("Salma");
   });
 
   test("shows empty state for impossible search", async ({ page }) => {
@@ -35,6 +35,14 @@ test.describe("people", () => {
   test("composite filter by organization", async ({ page }) => {
     await page.getByRole("button", { name: "Filters" }).click();
     await page.getByLabel("Organization").fill("Proceedit");
+    await page.getByRole("button", { name: "Filter", exact: true }).click();
+    await expect(page.locator("ul > li").first()).toBeVisible();
+  });
+
+  test("composite filter by status tag dropdown", async ({ page }) => {
+    await page.getByRole("button", { name: "Filters" }).click();
+    await page.getByLabel("Status tag").click();
+    await page.getByRole("option", { name: "High Priority" }).click();
     await page.getByRole("button", { name: "Filter", exact: true }).click();
     await expect(page.locator("ul > li").first()).toBeVisible();
   });

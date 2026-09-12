@@ -54,7 +54,7 @@ namespace ServiceContracts.DTOs
 
         public List<SocialMediaAccountAddRequest>? SocialMediaAccounts { get; set; }
 
-        public List<string>? ConnectionChannels { get; set; }
+        public List<ContactChannelRequest>? ConnectionChannels { get; set; }
 
         public List<ContactsManger.Core.Domain.Entities.EEnums.EnSystemStatusTag>? SystemStatusTags { get; set; }
 

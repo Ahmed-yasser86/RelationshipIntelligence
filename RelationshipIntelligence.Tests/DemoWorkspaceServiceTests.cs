@@ -17,17 +17,19 @@ namespace CRUDTests
     public class DemoWorkspaceServiceTests
     {
         private readonly Guid _userA = Guid.NewGuid();
-        private readonly Mock<IPersonQuickAdderService> _quickAddMock = new();
+        private readonly Mock<IPersonAdderService> _adderMock = new();
         private readonly Mock<IInteractionService> _interactionsMock = new();
         private readonly Mock<PersonRepositryContract> _personsMock = new();
         private readonly Mock<IPersonDeleterService> _deleterMock = new();
+        private readonly Mock<ICountryGetterService> _countriesMock = new();
         private readonly Mock<ICurrentUserService> _userMock = new();
 
         private DemoWorkspaceService Service() => new(
-            _quickAddMock.Object,
+            _adderMock.Object,
             _interactionsMock.Object,
             _personsMock.Object,
             _deleterMock.Object,
+            _countriesMock.Object,
             _userMock.Object,
             Mock.Of<ILogger<DemoWorkspaceService>>());
 
@@ -39,7 +41,7 @@ namespace CRUDTests
                 Enumerable.Range(0, 5).Select(_ => new Person()).AsEnumerable());
 
             await Assert.ThrowsAsync<InvalidOperationException>(() => Service().SeedAsync());
-            _quickAddMock.Verify(q => q.QuickAddPerson(It.IsAny<PersonQuickAddRequest>()), Times.Never);
+            _adderMock.Verify(q => q.AddPerson(It.IsAny<PersonAddRequest>()), Times.Never);
         }
 
         [Fact]
@@ -51,12 +53,17 @@ namespace CRUDTests
         }
 
         [Fact]
-        public async Task SeedAsync_EmptyWorkspace_CreatesEightContacts()
+        public async Task SeedAsync_EmptyWorkspace_CreatesElevenContacts()
         {
             _userMock.Setup(u => u.UserId).Returns(_userA);
             _personsMock.Setup(r => r.GetAllPersons()).ReturnsAsync(new List<Person>().AsEnumerable());
-            _quickAddMock.Setup(q => q.QuickAddPerson(It.IsAny<PersonQuickAddRequest>()))
-                .ReturnsAsync((PersonQuickAddRequest req) => new PersonRespones
+            _countriesMock.Setup(c => c.Countries()).ReturnsAsync(new List<CountryResponse>
+            {
+                new() { CountryId = Guid.NewGuid(), CountryName = "Egypt" },
+                new() { CountryId = Guid.NewGuid(), CountryName = "Germany" }
+            });
+            _adderMock.Setup(q => q.AddPerson(It.IsAny<PersonAddRequest>()))
+                .ReturnsAsync((PersonAddRequest req) => new PersonRespones
                 {
                     PersonId = Guid.NewGuid(),
                     Name = req.Name ?? string.Empty
@@ -66,8 +73,8 @@ namespace CRUDTests
 
             var count = await Service().SeedAsync();
 
-            count.Should().Be(8);
-            _quickAddMock.Verify(q => q.QuickAddPerson(It.IsAny<PersonQuickAddRequest>()), Times.Exactly(8));
+            count.Should().Be(11);
+            _adderMock.Verify(q => q.AddPerson(It.IsAny<PersonAddRequest>()), Times.Exactly(11));
         }
 
         [Fact]
@@ -78,7 +85,7 @@ namespace CRUDTests
             var realId = Guid.NewGuid();
             _personsMock.Setup(r => r.GetAllPersons()).ReturnsAsync(new List<Person>
             {
-                new() { PersonId = demoId, ApplicationUserId = _userA, Name = "Maya Chen", email = "maya.chen@example.com" },
+                new() { PersonId = demoId, ApplicationUserId = _userA, Name = "Salma El-Sayed", email = "salma.elsayed@proceedit.com" },
                 new() { PersonId = realId, ApplicationUserId = _userA, Name = "Real Client", email = "real@client.com" }
             }.AsEnumerable());
             _deleterMock.Setup(d => d.DeletePersonByPersonId(demoId)).ReturnsAsync(true);

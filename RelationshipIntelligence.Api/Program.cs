@@ -64,6 +64,7 @@ builder.Services.AddScoped<IPersonQuickAdderService, PersonQuickAdderService>();
 builder.Services.AddScoped<IPersonDeleterService, PersonDeleterService>();
 builder.Services.AddScoped<IRelationshipScoringService, RelationshipScoringService>();
 builder.Services.AddScoped<IDemoWorkspaceService, DemoWorkspaceService>();
+builder.Services.AddScoped<IOrganizationService, OrganizationService>();
 builder.Services.AddScoped<INetworkAnalysisService, NetworkAnalysisService>();
 builder.Services.AddScoped<RelationshipStateRepositoryContract, RelationshipStateRepository>();
 builder.Services.AddScoped<DigestRepositoryContract, DigestRepository>();

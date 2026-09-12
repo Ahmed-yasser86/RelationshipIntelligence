@@ -537,12 +537,29 @@ export function PersonDetail() {
                   </dd>
                 </div>
               )}
+              {(person.organizations ?? []).length > 0 && (
+                <div className="flex justify-between gap-2">
+                  <dt className="shrink-0 text-muted-foreground">Organizations</dt>
+                  <dd className="flex flex-wrap justify-end gap-1">
+                    {(person.organizations ?? []).map((o) => (
+                      <Link
+                        key={o.circleId}
+                        to={`/people?org=${encodeURIComponent(o.name)}`}
+                        className="rounded-full border px-2 py-0.5 text-xs hover:border-primary hover:underline"
+                        title={`View members of ${o.name}`}
+                      >
+                        {o.name}
+                      </Link>
+                    ))}
+                  </dd>
+                </div>
+              )}
             </dl>
           </section>
           {(person.contextMemory || person.origin || person.otherInformation) && (
             <section>
               <h3 className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                Memory
+                Memory note
               </h3>
               {person.contextMemory && <p className="text-sm">{person.contextMemory}</p>}
               {person.origin && (
@@ -572,13 +589,14 @@ export function PersonDetail() {
               <h3 className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 Channels
               </h3>
-              <div className="flex flex-wrap gap-1.5">
+              <dl className="space-y-1 text-sm">
                 {person.connectionChannels.map((c) => (
-                  <Badge key={c.connectionChannelId} variant="outline">
-                    {c.connectionChannelName}
-                  </Badge>
+                  <div key={c.connectionChannelId} className="flex justify-between gap-2">
+                    <dt className="text-muted-foreground">{c.connectionChannelName}</dt>
+                    <dd className="truncate tabular-nums">{c.value ?? "—"}</dd>
+                  </div>
                 ))}
-              </div>
+              </dl>
             </section>
           )}
           <section>

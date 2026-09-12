@@ -77,7 +77,7 @@ namespace Servicess
                         p!.PersonId,
                         p.Circles.FirstOrDefault()?.Name,
                         JsonSerializer.Serialize(p.UserDefinedTags.Select(t => t.TagName).ToList()),
-                        p.ConnectionChannels.FirstOrDefault()?.ConnectionChannelName)).ToList(),
+                        p.ContactChannels.FirstOrDefault()?.Channel?.ConnectionChannelName)).ToList(),
                     new List<IReadOnlyList<Guid>>());
 
                 bool changed = false;

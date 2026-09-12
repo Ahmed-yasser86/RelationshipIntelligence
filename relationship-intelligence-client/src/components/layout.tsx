@@ -6,6 +6,7 @@ import { Onboarding } from "@/components/onboarding";
 import { useAuth } from "@/lib/auth";
 import { cn } from "cn";
 import {
+  Building2,
   HeartPulse,
   LayoutDashboard,
   LogOut,
@@ -18,6 +19,7 @@ const NAV = [
   { to: "/", label: "Overview", icon: LayoutDashboard, end: true },
   { to: "/attention", label: "Attention", icon: HeartPulse, end: true },
   { to: "/people", label: "People", icon: Users, end: false },
+  { to: "/organizations", label: "Organizations", icon: Building2, end: true },
   { to: "/network", label: "Network", icon: Network, end: false },
   { to: "/digest", label: "Digest", icon: Newspaper, end: false },
 ];

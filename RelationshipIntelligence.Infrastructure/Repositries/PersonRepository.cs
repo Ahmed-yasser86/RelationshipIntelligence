@@ -34,7 +34,8 @@ namespace Repositories
                 .Include(p => p.Circles)
                 .Include(p => p.ContactItemRoles)
                 .Include(p => p.OtherSocialMediaAccounts)
-                .Include(p => p.ConnectionChannels)
+                .Include(p => p.ContactChannels)
+                    .ThenInclude(cc => cc.Channel)
                 .Include(p => p.SystemStatusTags)
                 .Include(p => p.UserDefinedTags)
                 .Include(p => p.Notes)
@@ -79,7 +80,7 @@ namespace Repositories
             await SyncCollection(existingPerson.Circles, person.Circles, n => n.CircleId);
             await SyncCollection(existingPerson.ContactItemRoles, person.ContactItemRoles, n => n.ContactsRoleId);
             await SyncCollection(existingPerson.OtherSocialMediaAccounts, person.OtherSocialMediaAccounts, n => n.SocialMediaAccountId);
-            await SyncCollection(existingPerson.ConnectionChannels, person.ConnectionChannels, n => n.ConnectionChannelId);
+            await SyncCollection(existingPerson.ContactChannels, person.ContactChannels, n => n.ConnectionChannelId);
             await SyncCollection(existingPerson.SystemStatusTags, person.SystemStatusTags, n => n.StatusTagId);
             await SyncCollection(existingPerson.UserDefinedTags, person.UserDefinedTags, n => n.TagId);
             await SyncCollection(existingPerson.Notes, person.Notes, n => n.NoteId);
@@ -235,7 +236,7 @@ namespace Repositories
                     p.Name,
                     p.Circles.Select(c => c.Name).ToList(),
                     p.UserDefinedTags.Select(t => t.TagName).ToList(),
-                    p.ConnectionChannels.Select(c => c.ConnectionChannelName).ToList(),
+                    p.ContactChannels.Select(c => c.Channel.ConnectionChannelName).ToList(),
                     p.SystemStatusTags.Select(t => t.Name).ToList(),
                     p.Interactions.Max(i => (DateTime?)i.TimeOfInteraction)))
                 .ToListAsync();

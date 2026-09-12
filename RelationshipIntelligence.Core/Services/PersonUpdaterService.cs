@@ -276,38 +276,52 @@ namespace Servicess
         }
 
 
-        private async Task SyncConnectionChannels(Person person, List<string> channelNames)
+        private async Task SyncConnectionChannels(Person person, List<ContactChannelRequest> channelRequests)
         {
-            var requestedNames = channelNames
-                .Where(n => !string.IsNullOrWhiteSpace(n))
-                .Distinct(StringComparer.OrdinalIgnoreCase)
+            var requested = channelRequests
+                .Where(r => !string.IsNullOrWhiteSpace(r?.Name))
+                .GroupBy(r => r!.Name!.Trim(), StringComparer.OrdinalIgnoreCase)
+                .Select(g => g.First())
                 .ToList();
 
-            var currentChannels = person.ConnectionChannels.ToList();
+            var current = person.ContactChannels.ToList();
 
-            var untouched = currentChannels
-                .Where(c => requestedNames.Any(n => string.Equals(n, c.ConnectionChannelName, StringComparison.OrdinalIgnoreCase)))
-                .ToList();
-
-            var toRemove = currentChannels.Except(untouched).ToList();
-            foreach (var channel in toRemove)
-                person.ConnectionChannels.Remove(channel);
-
-            var untouchedNames = untouched
-                .Select(c => c.ConnectionChannelName)
-                .ToHashSet(StringComparer.OrdinalIgnoreCase);
-
-            var namesStillNeeded = requestedNames
-                .Where(n => !untouchedNames.Contains(n))
-                .ToList();
-
-            foreach (var name in namesStillNeeded)
+            string? CleanValue(string? value)
             {
+                var clean = (value ?? string.Empty).Trim();
+                if (clean.Length == 0) return null;
+                return clean.Length > 200 ? clean[..200] : clean;
+            }
+
+            var toRemove = current
+                .Where(c => !requested.Any(r => string.Equals(r.Name!.Trim(), c.Channel?.ConnectionChannelName, StringComparison.OrdinalIgnoreCase)))
+                .ToList();
+            foreach (var contactChannel in toRemove)
+                person.ContactChannels.Remove(contactChannel);
+
+            foreach (var req in requested)
+            {
+                var name = req.Name!.Trim();
+                var match = person.ContactChannels.FirstOrDefault(c =>
+                    string.Equals(c.Channel?.ConnectionChannelName, name, StringComparison.OrdinalIgnoreCase));
+                if (match != null)
+                {
+                    match.Value = CleanValue(req.Value);
+                    continue;
+                }
+
                 var existing = await _connectionChannelRepository.GetConnectionChannelByName(name);
-                person.ConnectionChannels.Add(existing ?? new ConnectionChannel
+                var channel = existing ?? new ConnectionChannel
                 {
                     ConnectionChannelId = Guid.NewGuid(),
                     ConnectionChannelName = name
+                };
+                person.ContactChannels.Add(new ContactChannel
+                {
+                    PersonId = person.PersonId,
+                    ConnectionChannelId = channel.ConnectionChannelId,
+                    Channel = channel,
+                    Value = CleanValue(req.Value)
                 });
             }
         }

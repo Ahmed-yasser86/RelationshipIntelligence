@@ -14,5 +14,9 @@ namespace RepositryContracts
         Task<IEnumerable<Circle>> GetAllCircles();
 
         Task<IEnumerable<Circle>> GetCirclesByNames(IEnumerable<string> names);
+
+        Task<IEnumerable<Circle>> GetCirclesWithMembers();
+
+        Task RemoveCircle(Circle circle);
     }
 }

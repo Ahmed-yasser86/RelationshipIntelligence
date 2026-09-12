@@ -185,5 +185,30 @@ namespace Repositories
                 }
             }
         }
+
+        public async Task<IEnumerable<Circle>> GetCirclesWithMembers()
+        {
+            using (Operation.Time("GetCirclesWithMembers database operation"))
+            {
+                try
+                {
+                    return await _db.Circles
+                        .Include(c => c.People)
+                        .OrderBy(c => c.Name)
+                        .ToListAsync();
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error occurred in {MethodName} method", nameof(GetCirclesWithMembers));
+                    throw;
+                }
+            }
+        }
+
+        public Task RemoveCircle(Circle circle)
+        {
+            _db.Circles.Remove(circle);
+            return Task.CompletedTask;
+        }
     }
 }

@@ -21,11 +21,21 @@ export interface ContactItemRoleResponse {
 export interface ConnectionChannelResponse {
   connectionChannelId: string;
   connectionChannelName: string;
+  value: string | null;
+}
+export interface ContactChannelRequest {
+  name: string;
+  value: string | null;
 }
 export interface SystemStatusTagResponse {
   statusTagId: number;
   name: string;
   description: string | null;
+}
+export interface OrganizationResponse {
+  circleId: string;
+  name: string;
+  memberCount: number;
 }
 export interface UserDefinedTagsResponse {
   tagId: string;

@@ -56,7 +56,7 @@ namespace ContactsManger.Core.DTOs.PersonDTOs
                 CountryName = person.Country?.CountryName,
                 Circles = person.Circles?.Select(c => c.ConvertToDto()).ToList() ?? new List<CircleResponse>(),
                 ContactItemRoles = person.ContactItemRoles?.Select(r => r.ConvertToDto()).ToList() ?? new List<ContactItemRoleResponse>(),
-                ConnectionChannels = person.ConnectionChannels?.Select(c => c.ConvertToDto()).ToList() ?? new List<ConnectionChannelResponse>(),
+                ConnectionChannels = person.ContactChannels?.Select(c => c.ConvertToDto()).ToList() ?? new List<ConnectionChannelResponse>(),
                 SystemStatusTags = person.SystemStatusTags?.Select(s => s.ConvertToDto()).ToList() ?? new List<SystemStatusTagResponse>(),
                 UserDefinedTags = person.UserDefinedTags?.Select(t => t.ConvertToDto()).ToList() ?? new List<UserDefinedTagsResponse>(),
                 Interactions = latestInteraction != null

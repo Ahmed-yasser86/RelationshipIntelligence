@@ -1,5 +1,6 @@
 ﻿using ContactsManger.Core.Domain.Entities;
 using ContactsManger.Core.Domain.Entities.EEnums;
+using Entities;
 using System;
 
 namespace ServiceContracts.DTOs
@@ -20,6 +21,7 @@ namespace ServiceContracts.DTOs
     {
         public Guid ConnectionChannelId { get; set; }
         public string ConnectionChannelName { get; set; }
+        public string? Value { get; set; }
     }
 
     public class SystemStatusTagResponse
@@ -71,6 +73,17 @@ namespace ServiceContracts.DTOs
         {
             if (role == null) return null;
             return new ContactItemRoleResponse { ContactsRoleId = role.ContactsRoleId, Role = role.Role };
+        }
+
+        public static ConnectionChannelResponse ConvertToDto(this ContactChannel contactChannel)
+        {
+            if (contactChannel == null) return null;
+            return new ConnectionChannelResponse
+            {
+                ConnectionChannelId = contactChannel.ConnectionChannelId,
+                ConnectionChannelName = contactChannel.Channel?.ConnectionChannelName ?? string.Empty,
+                Value = contactChannel.Value
+            };
         }
 
         public static ConnectionChannelResponse ConvertToDto(this ConnectionChannel channel)

@@ -19,7 +19,7 @@ test.describe("person workflows", () => {
     await page.getByLabel("Name").first().fill(PROBE);
     await page.getByLabel("Email").fill(`probe-${Date.now()}@example.com`);
     await page.getByRole("button", { name: "Add person" }).click();
-    await expect(page).toHaveURL(/\/people\/.+/);
+    await expect(page).toHaveURL(/\/people\/[0-9a-f-]{36}/);
     await expect(page.getByRole("heading", { level: 1 })).toContainText(PROBE);
 
     // log interaction
@@ -36,10 +36,13 @@ test.describe("person workflows", () => {
     await page.keyboard.press("Escape");
 
     // edit
-    await page.getByRole("link", { name: "Edit" }).click();
+    await page.getByRole("link", { name: "Edit", exact: true }).click();
     await page.getByLabel("Address").fill("Cairo, EG");
+    await page.locator("#e-status").click();
+    await page.getByRole("option", { name: "High Priority" }).click();
     await page.getByRole("button", { name: "Save changes" }).click();
     await expect(page.getByText("Cairo, EG")).toBeVisible();
+    await expect(page.getByText("High Priority", { exact: true }).first()).toBeVisible();
 
     // delete with cleanup verification via API
     const personId = page.url().split("/").pop()!;
@@ -59,8 +62,16 @@ test.describe("person workflows", () => {
     await page.getByRole("tab", { name: "Full profile" }).click();
     await page.getByLabel("Name", { exact: true }).fill(`E2E Full ${Date.now()}`);
     await page.getByLabel("Email", { exact: true }).fill(`full-${Date.now()}@example.com`);
+    await page.locator("#f-gender").click();
+    await page.getByRole("option", { name: "Male", exact: true }).click();
+    await page.getByLabel("Date of birth").fill("1990-05-01");
+    await page.locator("#f-country").click();
+    await page.getByRole("option").first().click();
+    await page.locator("#f-status").click();
+    await page.getByRole("option", { name: "Follow Up" }).click();
     await page.getByRole("button", { name: "Add person", exact: true }).last().click();
-    await expect(page).toHaveURL(/\/people\/.+/);
+    await expect(page).toHaveURL(/\/people\/[0-9a-f-]{36}/);
+    await expect(page.getByText("Follow Up", { exact: true }).first()).toBeVisible();
   });
 
   test("person detail tells the relationship story", async ({ page }) => {

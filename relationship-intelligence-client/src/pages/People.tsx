@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -45,6 +45,7 @@ export function People() {
     UserDefinedTagName: "",
   });
   const [showFilters, setShowFilters] = useState(false);
+  const requestId = useRef(0);
 
   useEffect(() => {
     api.get<string[]>("/api/Contacts/GetValidSearchFields").then(setSearchFields).catch(() => undefined);
@@ -53,6 +54,7 @@ export function People() {
 
   const load = useCallback(
     async (pageNumber: number, overrideQuery?: string) => {
+      const mine = ++requestId.current;
       setError(null);
       const activeQuery = overrideQuery ?? query;
       try {
@@ -93,9 +95,11 @@ export function People() {
             `/api/Contacts/GetContactsGrid?pageNumber=${pageNumber}&pageSize=${PAGE_SIZE}`,
           );
         }
+        if (requestId.current !== mine) return;
         setData(result);
         setPage(pageNumber);
       } catch (err) {
+        if (requestId.current !== mine) return;
         setError(err instanceof ApiError ? err.message : "Could not load people.");
       }
     },
@@ -103,7 +107,20 @@ export function People() {
   );
 
   useEffect(() => {
-    void load(1);
+    const mine = ++requestId.current;
+    void (async () => {
+      try {
+        const result = await api.get<PagedResult<PersonView>>(
+          `/api/Contacts/GetContactsGrid?pageNumber=1&pageSize=${PAGE_SIZE}`,
+        );
+        if (requestId.current !== mine) return;
+        setData(result);
+        setPage(1);
+      } catch (err) {
+        if (requestId.current !== mine) return;
+        setError(err instanceof ApiError ? err.message : "Could not load people.");
+      }
+    })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -128,6 +145,7 @@ export function People() {
     activeQuery: string,
     activeComposite: Composite,
   ) {
+    const mine = ++requestId.current;
     setError(null);
     try {
       const hasComposite = Object.values(activeComposite).some((v) => v.trim() !== "");
@@ -146,9 +164,11 @@ export function People() {
       } else {
         return load(pageNumber, activeQuery);
       }
+      if (requestId.current !== mine) return;
       setData(result);
       setPage(pageNumber);
     } catch (err) {
+      if (requestId.current !== mine) return;
       setError(err instanceof ApiError ? err.message : "Could not load people.");
     }
   }

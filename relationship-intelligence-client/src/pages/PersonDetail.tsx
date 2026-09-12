@@ -22,6 +22,8 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { ExplainDrawer } from "@/components/explain-drawer";
+import { MemorySection } from "@/components/memory-section";
+import { EventsSection } from "@/components/events-section";
 import {
   BandBadge,
   EmptyState,
@@ -584,6 +586,8 @@ export function PersonDetail() {
               </ul>
             </section>
           )}
+          <MemorySection personId={person.personId} />
+          <EventsSection personId={person.personId} />
           {(person.connectionChannels ?? []).length > 0 && (
             <section>
               <h3 className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">

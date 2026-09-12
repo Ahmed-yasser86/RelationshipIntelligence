@@ -22,6 +22,8 @@ namespace CRUDTests
         private readonly Mock<PersonRepositryContract> _personsMock = new();
         private readonly Mock<IPersonDeleterService> _deleterMock = new();
         private readonly Mock<ICountryGetterService> _countriesMock = new();
+        private readonly Mock<IRelationshipMemoryService> _memoryMock = new();
+        private readonly Mock<IEventService> _eventsMock = new();
         private readonly Mock<ICurrentUserService> _userMock = new();
 
         private DemoWorkspaceService Service() => new(
@@ -30,6 +32,8 @@ namespace CRUDTests
             _personsMock.Object,
             _deleterMock.Object,
             _countriesMock.Object,
+            _memoryMock.Object,
+            _eventsMock.Object,
             _userMock.Object,
             Mock.Of<ILogger<DemoWorkspaceService>>());
 

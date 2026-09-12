@@ -23,6 +23,65 @@ export interface ConnectionChannelResponse {
   connectionChannelName: string;
   value: string | null;
 }
+export interface MemoryEntryResponse {
+  memoryEntryId: string;
+  personId: string;
+  kind: number;
+  title: string;
+  detail: string | null;
+  status: number;
+  provenance: number;
+  sourceMeetingId: string | null;
+  sourceFindingId: string | null;
+  sourceExcerpt: string | null;
+  sourceMeetingDeleted: boolean;
+  createdAtUtc: string;
+  updatedAtUtc: string;
+}
+export const MemoryKinds = [
+  "Fact",
+  "Relationship type",
+  "Origin",
+  "Shared project",
+  "Topic",
+  "Commitment",
+  "Goal",
+  "Intent",
+  "Preference",
+  "Milestone",
+] as const;
+export const MemoryProvenanceLabels = ["Your note", "Suggested", "Confirmed", "From meeting"] as const;
+export interface PersonEvent {
+  eventId: string;
+  personId: string;
+  personName: string | null;
+  type: number;
+  title: string;
+  occursOn: string;
+  repeatsYearly: boolean;
+  importance: number;
+  notes: string | null;
+}
+export const EventTypes = [
+  "Birthday",
+  "Anniversary",
+  "Holiday",
+  "Job change",
+  "Professional milestone",
+  "Project milestone",
+  "Personal milestone",
+  "Custom",
+] as const;
+export interface EventOccurrence {
+  eventId: string;
+  personId: string;
+  personName: string | null;
+  type: number;
+  title: string;
+  occurrenceDate: string;
+  inDays: number;
+  importance: number;
+}
 export interface ContactChannelRequest {
   name: string;
   value: string | null;
@@ -113,6 +172,8 @@ export interface RelationshipHealth {
   band: string;
   isBridge: boolean;
   isImportant: boolean;
+  upcomingEvents: EventOccurrence[];
+  hasEventSignal: boolean;
 }
 
 export interface DigestEntry {

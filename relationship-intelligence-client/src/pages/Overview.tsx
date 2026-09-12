@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { EmptyState, ErrorState, NavButton } from "@/components/states";
 import { ApiError, api } from "@/lib/api";
+import { daysSince } from "@/lib/format";
+import { EventTypes } from "@/lib/types";
 import type { NetworkGraph, RelationshipHealth } from "@/lib/types";
 
 interface Snapshot {
@@ -15,8 +17,19 @@ interface Snapshot {
   digestCount: number;
 }
 
+interface ComingUp {
+  personId: string;
+  personName: string | null;
+  title: string;
+  type: number;
+  inDays: number;
+  silence: string;
+  hasSignal: boolean;
+}
+
 export function Overview() {
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
+  const [comingUp, setComingUp] = useState<ComingUp[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -29,6 +42,28 @@ export function Overview() {
           api.get<{ entries: unknown[] }>("/api/Digest/GetWeeklyDigest"),
         ]);
         if (cancelled) return;
+        const upcoming: ComingUp[] = [];
+        for (const q of queue) {
+          for (const ev of q.upcomingEvents ?? []) {
+            const silent = daysSince(q.lastContactAtUtc);
+            upcoming.push({
+              personId: q.personId,
+              personName: q.name,
+              title: ev.title,
+              type: ev.type,
+              inDays: ev.inDays,
+              silence:
+                silent == null
+                  ? "no contact recorded"
+                  : silent === 0
+                    ? "in touch today"
+                    : `quiet for ${silent}d`,
+              hasSignal: q.hasEventSignal,
+            });
+          }
+        }
+        upcoming.sort((a, b) => a.inDays - b.inDays);
+        if (!cancelled) setComingUp(upcoming.slice(0, 8));
         setSnapshot({
           critical: queue.filter((q) => q.band === "Critical").length,
           atRisk: queue.filter((q) => q.band === "AtRisk").length,
@@ -102,6 +137,33 @@ export function Overview() {
               Open the attention queue
             </NavButton>
           </div>
+        </section>
+      )}
+
+      {comingUp !== null && comingUp.length > 0 && (
+        <section aria-label="Coming up">
+          <h2 className="mb-2 text-base font-semibold">Coming up</h2>
+          <ul className="flex flex-col gap-2">
+            {comingUp.map((c) => (
+              <li key={`${c.personId}-${c.title}`} className="rounded-lg border px-4 py-2.5 text-sm">
+                <div className="flex flex-wrap items-center gap-x-2">
+                  <Link to={`/people/${c.personId}`} className="font-semibold hover:underline">
+                    {c.personName ?? "Unnamed contact"}
+                  </Link>
+                  <span className="text-muted-foreground">
+                    {c.title} ({EventTypes[c.type] ?? c.type}){" "}
+                    {c.inDays === 0 ? "today" : `in ${c.inDays}d`}
+                  </span>
+                  {c.hasSignal && (
+                    <span className="rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-xs text-amber-800">
+                      needs attention too
+                    </span>
+                  )}
+                </div>
+                <p className="mt-0.5 text-xs text-muted-foreground">{c.silence}</p>
+              </li>
+            ))}
+          </ul>
         </section>
       )}
 

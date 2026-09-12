@@ -293,6 +293,21 @@ export function Queue() {
                         Early estimate
                       </Badge>
                     )}
+                    {(item.upcomingEvents ?? []).length > 0 && (
+                      <Badge
+                        variant="outline"
+                        className="border-amber-300 bg-amber-50 text-amber-800"
+                        title={(item.upcomingEvents ?? [])
+                          .map((e) => `${e.title} in ${e.inDays}d`)
+                          .join(" · ")}
+                      >
+                        {item.upcomingEvents[0].title}{" "}
+                        {item.upcomingEvents[0].inDays === 0
+                          ? "today"
+                          : `in ${item.upcomingEvents[0].inDays}d`}
+                        {item.upcomingEvents.length > 1 ? ` +${item.upcomingEvents.length - 1}` : ""}
+                      </Badge>
+                    )}
                   </div>
                   <p className="mt-0.5 truncate text-xs text-muted-foreground">
                     {cadenceLine(item)}

@@ -9,6 +9,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using ServiceContracts;
 using ServiceContracts.DTOs;
+using ServiceContracts.DTOs.EventDTOs;
+using ServiceContracts.DTOs.MemoryDTOs;
 using ServiceContracts.DTOs.OrganizationDTOs;
 using System.ComponentModel.DataAnnotations;
 
@@ -31,6 +33,8 @@ namespace ContactsManager.API.Controllers
         private readonly IRelationshipScoringService _scoringService;
         private readonly IDemoWorkspaceService _demoWorkspaceService;
         private readonly IOrganizationService _organizationService;
+        private readonly IRelationshipMemoryService _memoryService;
+        private readonly IEventService _eventService;
 
 
         public ContactsController(UserManager<ApplicationUser> userManager, IPersonGetterService personGetterService,
@@ -38,7 +42,8 @@ namespace ContactsManager.API.Controllers
             IPersonQuickAdderService personQuickAdder, ICountryGetterService getCountries,
             IPersonAdderService PersoneAdderService, IPersonUpdaterService PersonesUpdater, IPersonDeleterService personDeleter,
             IInteractionService interactionService, IRelationshipScoringService scoringService,
-            IDemoWorkspaceService demoWorkspaceService, IOrganizationService organizationService)
+            IDemoWorkspaceService demoWorkspaceService, IOrganizationService organizationService,
+            IRelationshipMemoryService memoryService, IEventService eventService)
         {
             _userManager = userManager;
             _personGetterService = personGetterService;
@@ -53,6 +58,8 @@ namespace ContactsManager.API.Controllers
             _scoringService = scoringService;
             _demoWorkspaceService = demoWorkspaceService;
             _organizationService = organizationService;
+            _memoryService = memoryService;
+            _eventService = eventService;
         }
 
         /// <summary>
@@ -166,6 +173,206 @@ namespace ContactsManager.API.Controllers
             catch (InvalidOperationException ex)
             {
                 return Conflict(ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Lists relationship memory entries for a person, grouped by the client.
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> GetRelationshipMemory(Guid personId)
+        {
+            try
+            {
+                return Ok(await _memoryService.ListForPersonAsync(personId));
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Creates a user-authored relationship memory entry.
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> PostMemoryEntry([FromBody] MemoryEntryCreateRequest request)
+        {
+            try
+            {
+                return Ok(await _memoryService.CreateAsync(request));
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Edits a memory entry. A user edit is authoritative and flips provenance to User.
+        /// </summary>
+        [HttpPut]
+        public async Task<IActionResult> PutMemoryEntry([FromBody] MemoryEntryUpdateRequest request)
+        {
+            try
+            {
+                return Ok(await _memoryService.UpdateAsync(request));
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Permanently deletes a memory entry.
+        /// </summary>
+        [HttpDelete]
+        public async Task<IActionResult> DeleteMemoryEntry(Guid id)
+        {
+            try
+            {
+                await _memoryService.DeleteAsync(id);
+                return Ok(true);
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+        }
+
+        /// <summary>
+        /// Accepts an AI-suggested memory entry, making it user-confirmed.
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> PostAcceptMemorySuggestion(Guid id)
+        {
+            try
+            {
+                return Ok(await _memoryService.AcceptSuggestionAsync(id));
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Rejects (deletes) an AI-suggested memory entry.
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> PostRejectMemorySuggestion(Guid id)
+        {
+            try
+            {
+                await _memoryService.RejectSuggestionAsync(id);
+                return Ok(true);
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Lists events for a person.
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> GetPersonEvents(Guid personId)
+        {
+            try
+            {
+                return Ok(await _eventService.ListForPersonAsync(personId));
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+        }
+
+        /// <summary>
+        /// Lists upcoming event occurrences across the whole network.
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> GetUpcomingEvents([FromQuery] int days = 21)
+        {
+            return Ok(await _eventService.GetUpcomingAsync(days));
+        }
+
+        /// <summary>
+        /// Records an event for a person.
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> PostEvent([FromBody] EventCreateRequest request)
+        {
+            try
+            {
+                return Ok(await _eventService.CreateAsync(request));
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Updates an event.
+        /// </summary>
+        [HttpPut]
+        public async Task<IActionResult> PutEvent([FromBody] EventUpdateRequest request)
+        {
+            try
+            {
+                return Ok(await _eventService.UpdateAsync(request));
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Deletes an event.
+        /// </summary>
+        [HttpDelete]
+        public async Task<IActionResult> DeleteEvent(Guid id)
+        {
+            try
+            {
+                await _eventService.DeleteAsync(id);
+                return Ok(true);
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
             }
         }
 

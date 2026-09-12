@@ -249,6 +249,49 @@ namespace CRUDTests
         }
 
         [Fact]
+        public async Task GetQueueAsync_EventNearAndDrifting_SetsEventSignalWithoutChangingScore()
+        {
+            _userMock.Setup(u => u.UserId).Returns(_userA);
+            var driftedId = Guid.NewGuid();
+            var calmId = Guid.NewGuid();
+            _personsMock.Setup(r => r.ListAffinitiesAsync()).ReturnsAsync(new List<PersonAffinity>
+            {
+                new(driftedId, "Drifted", new List<string>(), new List<string>(), new List<string>(), new List<string>(), null),
+                new(calmId, "Calm", new List<string>(), new List<string>(), new List<string>(), new List<string>(), null)
+            });
+            _statesMock.Setup(r => r.ListForOwnerAsync(_userA)).ReturnsAsync(new List<RelationshipState>
+            {
+                new() { PersonId = driftedId, ApplicationUserId = _userA, UrgencyScore = 80, TieStrength = 0.4, EvidenceStatus = EvidenceStatus.Established, LastContactAtUtc = DateTime.UtcNow.AddDays(-81), CadenceReferenceDays = 30 },
+                new() { PersonId = calmId, ApplicationUserId = _userA, UrgencyScore = 18, TieStrength = 2.5, EvidenceStatus = EvidenceStatus.Established, LastContactAtUtc = DateTime.UtcNow.AddDays(-1), CadenceReferenceDays = 7 }
+            });
+            var eventsMock = new Mock<IEventService>();
+            eventsMock.Setup(e => e.GetUpcomingAsync(21)).ReturnsAsync(new List<ServiceContracts.DTOs.EventDTOs.EventOccurrenceDto>
+            {
+                new() { EventId = Guid.NewGuid(), PersonId = driftedId, Title = "Birthday", OccurrenceDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(4)), InDays = 4, Importance = 3 },
+                new() { EventId = Guid.NewGuid(), PersonId = calmId, Title = "Anniversary", OccurrenceDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(3)), InDays = 3, Importance = 2 }
+            });
+            var service = new RelationshipScoringService(
+                _personsMock.Object,
+                _statesMock.Object,
+                _userMock.Object,
+                _unitOfWorkMock.Object,
+                Mock.Of<ILogger<RelationshipScoringService>>(),
+                eventsMock.Object);
+
+            var queue = await service.GetQueueAsync(7);
+
+            var drifted = queue.Single(q => q.PersonId == driftedId);
+            drifted.UrgencyScore.Should().Be(80);
+            drifted.UpcomingEvents.Should().ContainSingle(o => o.Title == "Birthday");
+            drifted.HasEventSignal.Should().BeTrue();
+
+            var calm = queue.Single(q => q.PersonId == calmId);
+            calm.UrgencyScore.Should().Be(18);
+            calm.UpcomingEvents.Should().ContainSingle(o => o.Title == "Anniversary");
+            calm.HasEventSignal.Should().BeFalse();
+        }
+
+        [Fact]
         public async Task RecomputeForOwnerAsync_NoHistoryPerson_IsNeutralAndUnexposed()
         {
             var ghost = new Person

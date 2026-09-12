@@ -19,19 +19,22 @@ namespace Servicess
         private readonly ICurrentUserService _currentUser;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<RelationshipScoringService> _logger;
+        private readonly IEventService? _events;
 
         public RelationshipScoringService(
             PersonRepositryContract persons,
             RelationshipStateRepositoryContract states,
             ICurrentUserService currentUser,
             IUnitOfWork unitOfWork,
-            ILogger<RelationshipScoringService> logger)
+            ILogger<RelationshipScoringService> logger,
+            IEventService? eventService = null)
         {
             _persons = persons;
             _states = states;
             _currentUser = currentUser;
             _unitOfWork = unitOfWork;
             _logger = logger;
+            _events = eventService;
         }
 
         public async Task<int> RecomputeForCurrentUserAsync()
@@ -202,7 +205,7 @@ namespace Servicess
                 .ToDictionary(p => p!.PersonId);
             var states = await _states.ListForOwnerAsync(userId.Value);
 
-            return states
+            var queue = states
                 .Where(s => people.ContainsKey(s.PersonId))
                 .Where(s => s.EvidenceStatus != EvidenceStatus.NoHistory)
                 .OrderByDescending(s => s.UrgencyScore)
@@ -225,6 +228,37 @@ namespace Servicess
                     IsImportant = IsImportant(people[s.PersonId])
                 })
                 .ToList();
+
+            await EnrichWithUpcomingEventsAsync(queue);
+            return queue;
+        }
+
+        /// <summary>
+        /// Attaches upcoming event occurrences to queue rows. Enrichment only:
+        /// scores, bands, and ordering are never changed here.
+        /// </summary>
+        private async Task EnrichWithUpcomingEventsAsync(List<RelationshipHealthResponse> queue)
+        {
+            if (_events == null || queue.Count == 0)
+                return;
+
+            var now = DateTime.UtcNow;
+            var occurrences = await _events.GetUpcomingAsync(21);
+            var byPerson = occurrences.GroupBy(o => o.PersonId).ToDictionary(g => g.Key, g => g.ToList());
+
+            foreach (var row in queue)
+            {
+                if (!byPerson.TryGetValue(row.PersonId, out var personEvents))
+                    continue;
+
+                row.UpcomingEvents = personEvents;
+                var silenceDays = row.LastContactAtUtc == null
+                    ? (double?)null
+                    : (now - row.LastContactAtUtc.Value).TotalDays;
+                row.HasEventSignal = personEvents.Any(e => e.InDays <= 7)
+                    && (row.UrgencyScore > 65
+                        || (silenceDays != null && row.CadenceReferenceDays != null && silenceDays > row.CadenceReferenceDays));
+            }
         }
 
         private static bool IsImportant(PersonAffinity person)

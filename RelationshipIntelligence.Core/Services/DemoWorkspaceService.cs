@@ -1,10 +1,13 @@
 using ContactsManger.Core.Domain.Entities.EEnums;
+using Entities;
 using Microsoft.Extensions.Logging;
 using RepositryContracts;
 using SerilogTimings;
 using ServiceContracts;
 using ServiceContracts.DTOs;
 using ServiceContracts.DTOs.Enums;
+using ServiceContracts.DTOs.EventDTOs;
+using ServiceContracts.DTOs.MemoryDTOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,6 +22,8 @@ namespace Servicess
         private readonly PersonRepositryContract _persons;
         private readonly IPersonDeleterService _deleter;
         private readonly ICountryGetterService _countries;
+        private readonly IRelationshipMemoryService _memory;
+        private readonly IEventService _events;
         private readonly ICurrentUserService _currentUser;
         private readonly ILogger<DemoWorkspaceService> _logger;
 
@@ -28,6 +33,8 @@ namespace Servicess
             PersonRepositryContract persons,
             IPersonDeleterService deleter,
             ICountryGetterService countries,
+            IRelationshipMemoryService memory,
+            IEventService events,
             ICurrentUserService currentUser,
             ILogger<DemoWorkspaceService> logger)
         {
@@ -36,6 +43,8 @@ namespace Servicess
             _persons = persons;
             _deleter = deleter;
             _countries = countries;
+            _memory = memory;
+            _events = events;
             _currentUser = currentUser;
             _logger = logger;
         }
@@ -45,6 +54,19 @@ namespace Servicess
             EnInteractionType Type,
             string Title,
             string? Description);
+
+        private sealed record SeedMemory(
+            RelationshipMemoryKind Kind,
+            string Title,
+            string? Detail);
+
+        private sealed record SeedEvent(
+            RelationshipEventType Type,
+            string Title,
+            DateOnly OccursOn,
+            bool RepeatsYearly,
+            int Importance,
+            string? Notes);
 
         private sealed record SeedPerson(
             string Name,
@@ -62,7 +84,9 @@ namespace Servicess
             EnSystemStatusTag[] StatusTags,
             string[] UserTags,
             (string Name, string? Value)[] Channels,
-            SeedInteraction[] Interactions);
+            SeedInteraction[] Interactions,
+            SeedMemory[]? Memories = null,
+            SeedEvent[]? Events = null);
 
         public async Task<int> SeedAsync()
         {
@@ -98,6 +122,15 @@ namespace Servicess
                             new SeedInteraction(31, EnInteractionType.Call, "Portfolio review prep", "Mock review before her ADPList session — gave notes on case-study framing."),
                             new SeedInteraction(44, EnInteractionType.Email, "Intro: Salma <> Dina (research)", "Connected her with Dina for user interviews on the merchant app."),
                             new SeedInteraction(58, EnInteractionType.Meeting, "Q3 planning workshop", "Mapped the design roadmap; she owns onboarding metrics."),
+                        },
+                        new[]
+                        {
+                            new SeedMemory(RelationshipMemoryKind.Goal, "Ship the onboarding revamp together", "Target: end of quarter. Salma owns design, I own the API."),
+                            new SeedMemory(RelationshipMemoryKind.Commitment, "Send crit notes on checkout flow", "Promised after the last crit; due this week."),
+                        },
+                        new[]
+                        {
+                            new SeedEvent(RelationshipEventType.ProfessionalMilestone, "Portfolio review session", DateOnly.FromDateTime(now.AddDays(9)), false, 2, "Mock ADPList review at the Maadi office."),
                         }),
                     new("Karim Naguib", "karim.naguib@proceedit.com", "+201098765432", GenderOptions.Male,
                         new DateTime(1987, 7, 2), "Egypt", "Maadi, Cairo",
@@ -113,7 +146,12 @@ namespace Servicess
                             new SeedInteraction(26, EnInteractionType.Meeting, "Backend hiring: final round debrief", "Aligned on the offer for the senior Go engineer."),
                             new SeedInteraction(41, EnInteractionType.Message, "Staging access for QA", "Sorted the VPN issue for the new QA engineer."),
                             new SeedInteraction(57, EnInteractionType.Email, "Proposal: on-call rotation", "Sent the draft schedule and compensation notes."),
-                        }),
+                        },
+                        new[]
+                        {
+                            new SeedMemory(RelationshipMemoryKind.Intent, "Stay close to the backend hiring loop", "Karim flags strong candidates before they hit the market."),
+                        },
+                        null),
                     new("Nourhan Aziz", "nourhan.aziz@gmail.com", "+201112223334", GenderOptions.Female,
                         new DateTime(1990, 11, 25), "Egypt", "Heliopolis, Cairo",
                         new[] { "Sahl Fintech" }, new[] { "Senior Marketing Manager" },
@@ -142,7 +180,12 @@ namespace Servicess
                             new SeedInteraction(118, EnInteractionType.Call, "Career advice: staff vs manager track", "He pushed me toward staff for now; sent two books afterwards."),
                             new SeedInteraction(150, EnInteractionType.Email, "Recommendation letter request", "Asked for a reference for the conference talk application."),
                             new SeedInteraction(190, EnInteractionType.Meeting, "Breakfast in Heliopolis", "Farewell breakfast before his Riyadh move."),
-                        }),
+                        },
+                        new[]
+                        {
+                            new SeedMemory(RelationshipMemoryKind.Intent, "Ask for an intro to the Riyadh fintech scene", "He offered once — follow up before asking twice."),
+                        },
+                        null),
                     new("Layla Hassan", "layla.hassan@gmail.com", "+201044455566", GenderOptions.Female,
                         new DateTime(1994, 9, 8), "Egypt", "Nasr City, Cairo",
                         Array.Empty<string>(), new[] { "Pharmacist" },
@@ -156,6 +199,11 @@ namespace Servicess
                             new SeedInteraction(3, EnInteractionType.Call, "Weekend plans at Sokhna", "Coordinating the chalet booking with the cousins."),
                             new SeedInteraction(10, EnInteractionType.Message, "Jana's birthday photos", "Sent the album; she wants prints for aunt Mona."),
                             new SeedInteraction(21, EnInteractionType.Meeting, "Family lunch in Nasr City", "Monthly family lunch, discussed Eid plans."),
+                        },
+                        null,
+                        new[]
+                        {
+                            new SeedEvent(RelationshipEventType.Birthday, "Layla's birthday", new DateOnly(1994, 9, 8), true, 3, "She loves diving gear — check the October trip list first."),
                         }),
                     new("Omar Khalil", "omar.khalil@gmail.com", "+201077788899", GenderOptions.Male,
                         new DateTime(1989, 1, 19), "Egypt", "Downtown, Cairo",
@@ -172,6 +220,14 @@ namespace Servicess
                             new SeedInteraction(35, EnInteractionType.Call, "Sponsor intro: Proceedit <> community", "Pitched the sponsorship package to our marketing lead."),
                             new SeedInteraction(49, EnInteractionType.Email, "Speaker lineup for June", "Confirmed three speakers, one slot still open."),
                             new SeedInteraction(66, EnInteractionType.Message, "Venue hunt in Downtown", "Scouting a bigger venue for the anniversary edition."),
+                        },
+                        new[]
+                        {
+                            new SeedMemory(RelationshipMemoryKind.SharedProject, "June community panel moderation", "I moderate the AI-in-product panel; Omar owns speakers and venue."),
+                        },
+                        new[]
+                        {
+                            new SeedEvent(RelationshipEventType.Custom, "Community meetup #43", DateOnly.FromDateTime(now.AddDays(6)), false, 2, "Anniversary edition — biggest crowd yet."),
                         }),
                     new("Jonas Weber", "jonas.weber@gmail.com", "+491512345678", GenderOptions.Male,
                         new DateTime(1988, 12, 3), "Germany", "Kreuzberg, Berlin",
@@ -200,6 +256,14 @@ namespace Servicess
                             new SeedInteraction(15, EnInteractionType.Meeting, "UAT sign-off session", "Signed off with two minor fixes; go-live confirmed."),
                             new SeedInteraction(33, EnInteractionType.Call, "Invoice + next phase scoping", "Agreed the phase-2 scope; proposal due end of month."),
                             new SeedInteraction(52, EnInteractionType.Email, "Contract renewal draft", "Sent the renewal with the maintenance clause updated."),
+                        },
+                        new[]
+                        {
+                            new SeedMemory(RelationshipMemoryKind.Commitment, "Phase-2 proposal by month end", "Scoping call agreed; proposal decides renewal."),
+                        },
+                        new[]
+                        {
+                            new SeedEvent(RelationshipEventType.ProjectMilestone, "Phase-2 proposal due", DateOnly.FromDateTime(now.AddDays(4)), false, 3, "Gating the renewal — do not slip."),
                         }),
                     new("Tarek Mansour", "tarek.mansour@gmail.com", "+201066677788", GenderOptions.Male,
                         new DateTime(1978, 2, 22), "Egypt", "Sheikh Zayed, Giza",
@@ -228,6 +292,11 @@ namespace Servicess
                             new SeedInteraction(12, EnInteractionType.Meeting, "Dinner in Zamalek", "Tried the new Levantine place; debriefed her job interview."),
                             new SeedInteraction(19, EnInteractionType.Message, "Apartment viewing in New Cairo", "Sent photos of the Rehab flat — overpriced, keep looking."),
                             new SeedInteraction(27, EnInteractionType.Call, "Weekly catch-up", "Talked her through the promotion calibration outcome."),
+                        },
+                        null,
+                        new[]
+                        {
+                            new SeedEvent(RelationshipEventType.Birthday, "Dina's birthday", new DateOnly(1993, 8, 17), true, 3, "Splitting the gift with mom as usual."),
                         }),
                     new("Yasmine Riad", "yasmine.riad@gmail.com", "+201099900011", GenderOptions.Female,
                         new DateTime(1996, 4, 5), "Egypt", "Heliopolis, Cairo",
@@ -275,6 +344,31 @@ namespace Servicess
                             InteractionType = interaction.Type,
                             InteractionTitle = interaction.Title,
                             InteractionDescription = interaction.Description
+                        });
+                    }
+
+                    foreach (var memory in person.Memories ?? Enumerable.Empty<SeedMemory>())
+                    {
+                        await _memory.CreateAsync(new MemoryEntryCreateRequest
+                        {
+                            PersonId = added.PersonId,
+                            Kind = memory.Kind,
+                            Title = memory.Title,
+                            Detail = memory.Detail
+                        });
+                    }
+
+                    foreach (var evt in person.Events ?? Enumerable.Empty<SeedEvent>())
+                    {
+                        await _events.CreateAsync(new EventCreateRequest
+                        {
+                            PersonId = added.PersonId,
+                            Type = evt.Type,
+                            Title = evt.Title,
+                            OccursOn = evt.OccursOn,
+                            RepeatsYearly = evt.RepeatsYearly,
+                            Importance = evt.Importance,
+                            Notes = evt.Notes
                         });
                     }
                     created++;

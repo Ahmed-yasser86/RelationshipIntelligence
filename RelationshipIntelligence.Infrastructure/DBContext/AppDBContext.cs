@@ -35,6 +35,8 @@ namespace Entities
         public virtual DbSet<DigestDelivery> DigestDeliveries { get; set; }
         public virtual DbSet<DigestMetric> DigestMetrics { get; set; }
         public virtual DbSet<DigestPreference> DigestPreferences { get; set; }
+        public virtual DbSet<RelationshipMemoryEntry> RelationshipMemoryEntries { get; set; }
+        public virtual DbSet<RelationshipEvent> RelationshipEvents { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -75,6 +77,26 @@ namespace Entities
             modelBuilder.Entity<DigestPreference>().ToTable("DigestPreferences");
             modelBuilder.Entity<DigestPreference>()
                 .HasQueryFilter(p => p.ApplicationUserId == _currentUserId);
+            modelBuilder.Entity<RelationshipMemoryEntry>().ToTable("RelationshipMemoryEntries");
+            modelBuilder.Entity<RelationshipMemoryEntry>()
+                .HasIndex(e => new { e.ApplicationUserId, e.PersonId, e.Status });
+            modelBuilder.Entity<RelationshipMemoryEntry>()
+                .HasQueryFilter(e => e.ApplicationUserId == _currentUserId);
+            modelBuilder.Entity<RelationshipMemoryEntry>()
+                .HasOne(e => e.Person)
+                .WithMany()
+                .HasForeignKey(e => e.PersonId)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<RelationshipEvent>().ToTable("RelationshipEvents");
+            modelBuilder.Entity<RelationshipEvent>()
+                .HasIndex(e => new { e.ApplicationUserId, e.OccursOn });
+            modelBuilder.Entity<RelationshipEvent>()
+                .HasQueryFilter(e => e.ApplicationUserId == _currentUserId);
+            modelBuilder.Entity<RelationshipEvent>()
+                .HasOne(e => e.Person)
+                .WithMany()
+                .HasForeignKey(e => e.PersonId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Person>()
                 .HasOne(p => p.ApplicationUser)

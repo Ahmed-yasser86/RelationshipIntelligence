@@ -98,9 +98,12 @@ namespace CRUDTests
             var memoryService = new RelationshipMemoryService(
                 memoryRepo, personsMock.Object, uow, userMock.Object,
                 Mock.Of<ILogger<RelationshipMemoryService>>());
+            var eventsService = new EventService(
+                Mock.Of<RelationshipEventRepositoryContract>(), personsMock.Object, uow, userMock.Object,
+                Mock.Of<ILogger<EventService>>());
             return new MeetingService(
                 meetings, memoryRepo, personsMock.Object,
-                Mock.Of<IInteractionService>(), memoryService,
+                Mock.Of<IInteractionService>(), memoryService, eventsService,
                 Mock.Of<IRelationshipScoringService>(),
                 new RelationshipIntelligence.AI.StubMeetingExtractor(),
                 uow, userMock.Object, Mock.Of<ILogger<MeetingService>>());

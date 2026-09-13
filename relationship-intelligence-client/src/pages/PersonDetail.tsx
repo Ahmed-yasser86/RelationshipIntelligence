@@ -24,6 +24,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ExplainDrawer } from "@/components/explain-drawer";
 import { MemorySection } from "@/components/memory-section";
 import { EventsSection } from "@/components/events-section";
+import { PlanDialog } from "@/components/plan-dialog";
 import { StoryPanel } from "@/components/story-panel";
 import { useCopilot } from "@/lib/copilot";
 import {
@@ -460,6 +461,7 @@ export function PersonDetail() {
           <Button size="sm" variant="outline" onClick={() => openCopilot({ personId: person.personId, personName: person.name })}>
             Ask co-pilot
           </Button>
+          <PlanDialog personId={person.personId} personName={person.name} />
           <Button size="sm" variant="destructive" disabled={deleting} onClick={() => void onDelete()}>
             {deleting ? "Deleting…" : "Delete"}
           </Button>

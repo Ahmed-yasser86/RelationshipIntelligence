@@ -35,6 +35,17 @@ test.describe("co-pilot", () => {
     await expect(page.getByRole("link", { name: "Salma El-Sayed" })).toBeVisible();
   });
 
+  test("meeting follow-up questions cite recorded commitments", async ({ page }) => {
+    await page.getByRole("link", { name: "People", exact: true }).click();
+    await page.getByLabel("Search").fill("Salma");
+    await page.getByRole("button", { name: "Apply" }).click();
+    await page.locator("ul > li", { hasText: "Salma" }).locator("a").first().click();
+    await page.locator("main").getByRole("button", { name: "Ask co-pilot" }).click();
+    await page.getByLabel("Ask the co-pilot").fill("What did I promise Salma?");
+    await page.getByRole("button", { name: "Send", exact: true }).click();
+    await expect(page.getByText(/crit notes/i).first()).toBeVisible();
+  });
+
   test("briefing block renders on the overview", async ({ page }) => {
     await expect(page.getByRole("heading", { name: "Today's briefing" })).toBeVisible();
   });

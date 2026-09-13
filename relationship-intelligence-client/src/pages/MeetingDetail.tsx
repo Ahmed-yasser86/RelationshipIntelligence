@@ -98,8 +98,38 @@ function BriefView({ briefJson }: { briefJson: string }) {
           <p className="font-semibold">{String(p.displayName ?? p.personId ?? `Participant ${i + 1}`)}</p>
           {p.whoIsThis != null && <p className="mt-0.5 text-muted-foreground">Who: {String(p.whoIsThis)}</p>}
           {p.state != null && <p className="mt-0.5 text-muted-foreground">State: {JSON.stringify(p.state)}</p>}
+          {Array.isArray(p.thingsToRemember) && (p.thingsToRemember as unknown[]).length > 0 && (
+            <div className="mt-1">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Remember</p>
+              <ul className="list-disc pl-4 text-muted-foreground">
+                {(p.thingsToRemember as unknown[]).map((t, j) => (<li key={j}>{String(t)}</li>))}
+              </ul>
+            </div>
+          )}
+          {Array.isArray(p.talkingPoints) && (p.talkingPoints as unknown[]).length > 0 && (
+            <div className="mt-1">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Talking points</p>
+              <ul className="list-disc pl-4 text-muted-foreground">
+                {(p.talkingPoints as unknown[]).map((t, j) => (<li key={j}>{String(t)}</li>))}
+              </ul>
+            </div>
+          )}
+          {Array.isArray(p.questionsToAsk) && (p.questionsToAsk as unknown[]).length > 0 && (
+            <div className="mt-1">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Questions</p>
+              <ul className="list-disc pl-4 text-muted-foreground">
+                {(p.questionsToAsk as unknown[]).map((t, j) => (<li key={j}>{String(t)}</li>))}
+              </ul>
+            </div>
+          )}
           {Array.isArray(p.commitments) && p.commitments.length > 0 && (
             <p className="mt-0.5 text-muted-foreground">Open commitments: {(p.commitments as string[]).join("; ")}</p>
+          )}
+          {Array.isArray(p.relevantEvents) && (p.relevantEvents as unknown[]).length > 0 && (
+            <p className="mt-0.5 text-muted-foreground">Relevant events: {(p.relevantEvents as string[]).join("; ")}</p>
+          )}
+          {Array.isArray(p.relevantGoals) && (p.relevantGoals as unknown[]).length > 0 && (
+            <p className="mt-0.5 text-muted-foreground">Goals: {(p.relevantGoals as string[]).join("; ")}</p>
           )}
         </li>
       ))}

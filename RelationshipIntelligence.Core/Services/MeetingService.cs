@@ -25,6 +25,7 @@ namespace Servicess
         private readonly PersonRepositryContract _persons;
         private readonly IInteractionService _interactions;
         private readonly IRelationshipMemoryService _memory;
+        private readonly IEventService _events;
         private readonly IRelationshipScoringService _scoring;
         private readonly IMeetingExtractor _extractor;
         private readonly IUnitOfWork _unitOfWork;
@@ -37,6 +38,7 @@ namespace Servicess
             PersonRepositryContract persons,
             IInteractionService interactions,
             IRelationshipMemoryService memory,
+            IEventService events,
             IRelationshipScoringService scoring,
             IMeetingExtractor extractor,
             IUnitOfWork unitOfWork,
@@ -48,6 +50,7 @@ namespace Servicess
             _persons = persons;
             _interactions = interactions;
             _memory = memory;
+            _events = events;
             _scoring = scoring;
             _extractor = extractor;
             _unitOfWork = unitOfWork;
@@ -621,11 +624,34 @@ namespace Servicess
                     var queue = await _scoring.GetQueueAsync(200);
                     var state = queue.FirstOrDefault(q => q.PersonId == person.PersonId);
                     var orgs = person.Circles?.Select(c => c.Name).ToList() ?? new List<string>();
+                    var entries = await ActiveEntriesAsync(person.PersonId);
+                    var interactions = await _interactions.ListForPersonAsync(person.PersonId);
+                    var recentTopics = interactions
+                        .OrderByDescending(i => i.TimeOfInteraction)
+                        .Take(3)
+                        .Select(i => $"{i.InteractionTitle} ({i.TimeOfInteraction:yyyy-MM-dd})")
+                        .ToList();
+                    var personEvents = await _eventsForBriefAsync(person.PersonId);
+                    var openCommitments = entries
+                        .Where(e => e.Kind == RelationshipMemoryKind.Commitment)
+                        .Select(e => e.Title)
+                        .ToList();
+                    var goals = entries
+                        .Where(e => e.Kind == RelationshipMemoryKind.Goal || e.Kind == RelationshipMemoryKind.Intent)
+                        .Select(e => e.Title)
+                        .ToList();
+                    var silenceLine = state == null || state.LastContactAtUtc == null
+                        ? "No contact recorded."
+                        : $"Last contact {state.LastContactAtUtc.Value:yyyy-MM-dd}" +
+                          (state.CadenceReferenceDays == null ? "." : $" vs ~{Math.Round(state.CadenceReferenceDays.Value)}d rhythm.");
+
                     participantSections.Add(new
                     {
                         personId = person.PersonId,
                         displayName = row.DetectedName,
                         whoIsThis = person.Origin ?? (orgs.Count == 0 ? null : string.Join(", ", orgs)),
+                        relationshipHistory = recentTopics,
+                        lastInteraction = recentTopics.FirstOrDefault(),
                         state = state == null ? null : new
                         {
                             band = state.Band,
@@ -634,13 +660,42 @@ namespace Servicess
                             cadenceDays = state.CadenceReferenceDays,
                             evidence = state.EvidenceStatus
                         },
-                        commitments = await ActiveCommitmentTitlesAsync(person.PersonId)
+                        recentTopics,
+                        sharedProjects = entries
+                            .Where(e => e.Kind == RelationshipMemoryKind.SharedProject)
+                            .Select(e => e.Title)
+                            .ToList(),
+                        commitments = openCommitments,
+                        relevantEvents = personEvents,
+                        relevantGoals = goals,
+                        thingsToRemember = openCommitments
+                            .Select(c => $"Open commitment: {c}")
+                            .Concat(personEvents.Select(e => $"{e} approaching."))
+                            .Concat(new[] { silenceLine })
+                            .Take(6)
+                            .ToList(),
+                        talkingPoints = recentTopics
+                            .Select(t => $"Revisit: {t}")
+                            .Concat(openCommitments.Select(c => $"Follow up on: {c}"))
+                            .Take(6)
+                            .ToList(),
+                        questionsToAsk = openCommitments
+                            .Select(c => $"What is the status of: {c}?")
+                            .Concat(goals.Select(g => $"How is this going: {g}?"))
+                            .Take(5)
+                            .ToList()
                     });
                 }
 
                 var brief = new
                 {
-                    meeting = new { title = meeting.Title, plannedAt = meeting.OccurredAtUtc, agenda = meeting.Agenda },
+                    meeting = new
+                    {
+                        title = meeting.Title,
+                        plannedAt = meeting.OccurredAtUtc,
+                        agenda = meeting.Agenda,
+                        goal = meeting.Brief?.Goal
+                    },
                     participants = participantSections
                 };
                 var json = JsonSerializer.Serialize(brief);
@@ -692,11 +747,33 @@ namespace Servicess
             return titles;
         }
 
+        private async Task<List<MemoryEntryResponse>> ActiveEntriesAsync(Guid personId)
+        {
+            try
+            {
+                return (await _memory.ListForPersonAsync(personId))
+                    .Where(e => e.Status == 0)
+                    .ToList();
+            }
+            catch (KeyNotFoundException)
+            {
+                return new List<MemoryEntryResponse>();
+            }
+        }
+
+        private async Task<List<string>> _eventsForBriefAsync(Guid personId)
+        {
+            var upcoming = await _events.GetUpcomingAsync(60);
+            return upcoming
+                .Where(e => e.PersonId == personId)
+                .Select(e => $"{e.Title} in {e.InDays}d")
+                .ToList();
+        }
+
         private async Task<List<string>> ActiveCommitmentTitlesAsync(Guid personId)
         {
-            var entries = await _memory.ListForPersonAsync(personId);
-            return entries
-                .Where(e => e.Status == 0 && e.Kind == RelationshipMemoryKind.Commitment)
+            return (await ActiveEntriesAsync(personId))
+                .Where(e => e.Kind == RelationshipMemoryKind.Commitment)
                 .Select(e => e.Title)
                 .ToList();
         }

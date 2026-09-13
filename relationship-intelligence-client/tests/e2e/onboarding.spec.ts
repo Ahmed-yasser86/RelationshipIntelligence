@@ -18,17 +18,22 @@ test.describe("onboarding", () => {
       [body.token as string, (body.personeEmail as string) || TEST_EMAIL],
     );
     await page.reload();
-    await expect(page.getByText("How this works (1 of 4)")).toBeVisible();
+    await expect(page.getByText("How this works (1 of 8)")).toBeVisible();
   });
 
   test("walks through the product story and dismisses", async ({ page }) => {
-    await expect(page.getByText("How this works (1 of 4)")).toBeVisible();
+    await expect(page.getByText("How this works (1 of 8)")).toBeVisible();
     await expect(page.getByText(/dated contact events/)).toBeVisible();
     await page.getByRole("button", { name: "Next" }).click();
-    await expect(page.getByText("How this works (2 of 4)")).toBeVisible();
+    await expect(page.getByText("How this works (2 of 8)")).toBeVisible();
     await page.getByRole("button", { name: "Next" }).click();
     await page.getByRole("button", { name: "Next" }).click();
-    await expect(page.getByText("How this works (4 of 4)")).toBeVisible();
+    await page.getByRole("button", { name: "Next" }).click();
+    await page.getByRole("button", { name: "Next" }).click();
+    await page.getByRole("button", { name: "Next" }).click();
+    await page.getByRole("button", { name: "Next" }).click();
+    await expect(page.getByText("How this works (8 of 8)")).toBeVisible();
+    await expect(page.getByText(/never invents/)).toBeVisible();
     await expect(
       page.getByRole("button", { name: "Load demo workspace" }),
     ).toBeVisible();

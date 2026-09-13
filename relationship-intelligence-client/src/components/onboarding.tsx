@@ -24,7 +24,23 @@ const STEPS = [
   },
   {
     title: "Your network has a shape",
-    body: "Shared organizations, tags, and channels reveal shared-context groups and articulation points — the people holding your worlds together. Not sure where to start? Load the demo workspace below and watch the loop work on realistic data.",
+    body: "Shared organizations, tags, and channels reveal shared-context groups and articulation points — the people holding your worlds together.",
+  },
+  {
+    title: "Context makes it personal",
+    body: "Record what each relationship is, what you promised, and what matters — plus birthdays and milestones. Memory and events join the evidence: the queue can tell you Sarah's birthday is in 4 days and you have not spoken in 6 weeks.",
+  },
+  {
+    title: "Meetings become evidence",
+    body: "Paste a transcript or a few notes and the co-pilot extracts topics, commitments, and people. You map names to contacts, review every finding, and confirm — only then does the meeting join each relationship's history.",
+  },
+  {
+    title: "Outreach turns insight into action",
+    body: "The system suggests who is worth contacting and why. Pick the people, choose one channel, review every personalized draft or call brief, and approve. Approval never sends anything — you stay in control.",
+  },
+  {
+    title: "The co-pilot explains, never invents",
+    body: "Ask what is happening, why someone needs attention, or what to do before a call. Answers separate what you logged, what the model derived, and what is suggested. Not sure where to start? Load the demo workspace below and watch the loop work on realistic data.",
   },
 ];
 

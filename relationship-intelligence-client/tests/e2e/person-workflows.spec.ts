@@ -81,6 +81,9 @@ test.describe("person workflows", () => {
     await expect(page.getByRole("heading", { name: "The story so far" })).toBeVisible();
     await expect(page.getByText("Relationship context")).toBeVisible();
     await expect(page.getByText("Important events")).toBeVisible();
+    await page.getByRole("button", { name: "Plan relationship" }).click();
+    await expect(page.getByText(/Advisory only/i)).toBeVisible();
+    await page.keyboard.press("Escape");
     await expect(page.getByRole("heading", { name: "History", exact: true })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Trajectory" })).toBeVisible();
     await expect(

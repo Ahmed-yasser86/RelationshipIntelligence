@@ -108,7 +108,7 @@ function ThresholdBar({ value }: { value: number }) {
   );
 }
 
-function RhythmBar({
+export function RhythmBar({
   silence,
   rhythm,
   band,

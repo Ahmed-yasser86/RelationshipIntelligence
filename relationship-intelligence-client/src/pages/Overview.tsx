@@ -1,8 +1,11 @@
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { useCallback, useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { EmptyState, ErrorState, NavButton } from "@/components/states";
+import { AttentionRow } from "@/components/attention-row";
 import { BriefingBlock } from "@/components/briefing-block";
+import { QuickLog } from "@/components/quick-log";
 import { ApiError, api } from "@/lib/api";
+import { useCopilot } from "@/lib/copilot";
 import { daysSince } from "@/lib/format";
 import { EventTypes } from "@/lib/types";
 import type { NetworkGraph, RelationshipHealth } from "@/lib/types";
@@ -29,20 +32,34 @@ interface ComingUp {
 }
 
 export function Overview() {
+  const navigate = useNavigate();
+  const { openCopilot } = useCopilot();
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
+  const [topAttention, setTopAttention] = useState<RelationshipHealth[]>([]);
   const [comingUp, setComingUp] = useState<ComingUp[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const loadQueue = useCallback(async () => {
+    try {
+      const queue = await api.get<RelationshipHealth[]>("/api/Contacts/GetRelationshipQueue?top=50");
+      setTopAttention(queue.slice(0, 3));
+      return queue;
+    } catch {
+      return null;
+    }
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
         const [queue, graph, digest] = await Promise.all([
-          api.get<RelationshipHealth[]>("/api/Contacts/GetRelationshipQueue?top=50"),
+          loadQueue(),
           api.get<NetworkGraph>("/api/Network/GetNetworkGraph"),
           api.get<{ entries: unknown[] }>("/api/Digest/GetWeeklyDigest"),
         ]);
         if (cancelled) return;
+        if (queue === null) throw new Error("Could not load the overview.");
         const upcoming: ComingUp[] = [];
         for (const q of queue) {
           for (const ev of q.upcomingEvents ?? []) {
@@ -84,6 +101,7 @@ export function Overview() {
     return () => {
       cancelled = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -102,6 +120,30 @@ export function Overview() {
         <p className="text-sm text-muted-foreground">Loading your network snapshot…</p>
       )}
       <BriefingBlock />
+
+      {topAttention.length > 0 && (
+        <section aria-label="Top attention">
+          <div className="mb-2 flex items-center justify-between">
+            <h2 className="font-display text-xl font-semibold">Needs attention first</h2>
+            <NavButton to="/attention" size="sm" variant="ghost">
+              Full queue →
+            </NavButton>
+          </div>
+          <ol className="flex flex-col gap-3">
+            {topAttention.map((item, i) => (
+              <AttentionRow
+                key={item.personId}
+                item={item}
+                rank={i + 1}
+                onLogDone={() => void loadQueue()}
+                onExplain={() => navigate("/attention")}
+                onAsk={(entry) => openCopilot({ personId: entry.personId, personName: entry.name })}
+                logAction={(person, onDone) => <QuickLog person={person} onDone={onDone} />}
+              />
+            ))}
+          </ol>
+        </section>
+      )}
       {snapshot !== null && (
         <section aria-label="This week">
           <h2 className="mb-2 font-display text-xl font-semibold">This week in your network</h2>

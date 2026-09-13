@@ -57,6 +57,15 @@ test.describe("attention queue", () => {
     await expect(page.locator("ol > li").first().locator("a").first()).toContainText(name);
   });
 
+  test("row details expand inline evidence without leaving the queue", async ({ page }) => {
+    const row = page.locator("ol > li").first();
+    await row.getByRole("button", { name: "Details" }).click();
+    await expect(row.getByText("Silence against rhythm")).toBeVisible();
+    await expect(row.getByText("Recent evidence")).toBeVisible();
+    await row.getByRole("button", { name: "Hide details" }).click();
+    await expect(row.getByText("Silence against rhythm")).toHaveCount(0);
+  });
+
   test("show more loads beyond the top 7", async ({ page }) => {
     await expect(page.locator("ol > li")).toHaveCount(7);
     await page.getByRole("button", { name: "Show more" }).click();

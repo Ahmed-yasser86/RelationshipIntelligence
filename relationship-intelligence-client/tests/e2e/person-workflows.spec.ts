@@ -75,6 +75,18 @@ test.describe("person workflows", () => {
     await expect(page.getByText("Follow Up", { exact: true }).first()).toBeVisible();
   });
 
+  test("next step drafts outreach and prepares meetings in place", async ({ page }) => {
+    await page.goto("/people");
+    await page.locator("ul > li a").first().click();
+    await expect(page.getByText("Consider next")).toBeVisible();
+    await page.getByRole("button", { name: "Draft a message" }).click();
+    await expect(page.getByRole("heading", { name: "1 · Who to contact" })).toBeVisible();
+    await page.goBack();
+    await expect(page.getByText("Consider next")).toBeVisible();
+    await page.getByRole("button", { name: "Prepare a meeting" }).click();
+    await expect(page.getByText("Preparation", { exact: true }).first()).toBeVisible();
+  });
+
   test("person detail tells the relationship story", async ({ page }) => {
     await page.goto("/people");
     await page.locator("ul > li a").first().click();

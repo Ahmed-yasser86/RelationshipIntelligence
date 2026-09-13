@@ -39,11 +39,27 @@ namespace RelationshipIntelligence.AI
             if (personId == null)
             {
                 var queue = await _scoring.GetQueueAsync(5);
-                var top = queue.Count == 0
-                    ? "The attention queue is empty — every relationship is within its rhythm."
-                    : "Top of your attention queue: " + string.Join("; ",
-                        queue.Take(3).Select(q => $"{q.Name} ({q.Band}, urgency {Math.Round(q.UrgencyScore)})"));
-                return new CopilotAnswer { Text = $"[Observed] {top}" };
+                var upcoming = await _events.GetUpcomingAsync(14);
+                if (queue.Count == 0)
+                    return new CopilotAnswer { Text = "Every relationship is within its natural rhythm, and no dates are approaching. Nothing is asking for action right now." };
+
+                var sb = new StringBuilder();
+                sb.Append("This week deserves attention in ");
+                sb.Append(queue.Count == 1 ? "one place" : $"{Math.Min(3, queue.Count)} places");
+                sb.Append(": ");
+                sb.Append(string.Join("; ", queue.Take(3).Select(q =>
+                    $"{q.Name} is {q.Band.ToLowerInvariant()} (urgency {Math.Round(q.UrgencyScore)})" +
+                    (q.LastContactAtUtc == null ? " with no contact recorded" :
+                    $", last contact {(int)(DateTime.UtcNow - q.LastContactAtUtc.Value).TotalDays}d ago" +
+                    (q.CadenceReferenceDays == null ? "" : $" against a ~{Math.Round(q.CadenceReferenceDays.Value)}d rhythm")))));
+                sb.Append(".");
+                if (upcoming.Count > 0)
+                {
+                    var first = upcoming[0];
+                    sb.Append($" Also coming up: {first.Title} for {first.PersonName ?? "a contact"} " +
+                        (first.InDays == 0 ? "today." : $"in {first.InDays}d."));
+                }
+                return new CopilotAnswer { Text = sb.ToString() };
             }
 
             var person = await _persons.GetPersonByPersonId(personId.Value);
@@ -54,17 +70,30 @@ namespace RelationshipIntelligence.AI
             var last = interactions.OrderByDescending(i => i.TimeOfInteraction).FirstOrDefault();
             var memory = await _memory.ListForPersonAsync(personId.Value);
             var active = memory.Where(m => m.Status == 0).ToList();
+            var commitments = active.Where(m => m.Kind == Entities.RelationshipMemoryKind.Commitment).ToList();
 
-            var sb = new StringBuilder();
-            sb.Append($"[Observed] {person.Name}: {interactions.Count} logged interaction(s)");
-            sb.Append(last == null ? ", none yet." : $", last contact {last.TimeOfInteraction:yyyy-MM-dd} ({last.InteractionTitle}).");
-            sb.Append(active.Count == 0
-                ? " [Suggested] No relationship context recorded — add what this relationship is so future answers improve."
-                : $" [Observed] Recorded context: {string.Join("; ", active.Take(3).Select(m => m.Title))}.");
+            var answer = new StringBuilder();
+            var displayName = person.Name ?? "This contact";
+            if (last == null)
+            {
+                answer.Append($"{displayName} has no logged contact yet, so there is no rhythm to read. ");
+            }
+            else
+            {
+                var days = (int)(DateTime.UtcNow - last.TimeOfInteraction).TotalDays;
+                answer.Append($"{displayName} was last in touch {days}d ago ({last.InteractionTitle}). ");
+                answer.Append($"Their history holds {interactions.Count} logged interaction(s). ");
+            }
+            if (commitments.Count > 0)
+                answer.Append($"Open commitments: {string.Join("; ", commitments.Take(3).Select(c => c.Title))}. ");
+            else if (active.Count > 0)
+                answer.Append($"Recorded context: {string.Join("; ", active.Take(3).Select(m => m.Title))}. ");
+            else
+                answer.Append("No relationship context is recorded yet — adding what this relationship is would sharpen every future answer. ");
 
             return new CopilotAnswer
             {
-                Text = sb.ToString(),
+                Text = answer.ToString().Trim(),
                 Citations = new List<CopilotCitation>
                 {
                     new() { Kind = "person", Id = personId, Label = person.Name ?? "contact" }
@@ -74,9 +103,21 @@ namespace RelationshipIntelligence.AI
 
         public async Task<CopilotAnswer> SummarizePersonAsync(Guid personId)
         {
-            var answer = await AskAsync("Summarize this relationship.", personId, null);
-            answer.Text = answer.Text.Replace("[Observed] ", "[Observed] Briefing — ");
-            return answer;
+            var person = await _persons.GetPersonByPersonId(personId);
+            if (person == null)
+                return new CopilotAnswer { Text = "Not recorded — I have no contact with that id." };
+
+            var queue = await _scoring.GetQueueAsync(200);
+            var state = queue.FirstOrDefault(q => q.PersonId == personId);
+            var base_ = await AskAsync("Summarize this relationship.", personId, null);
+            var prefix = state == null
+                ? $"{person.Name ?? "This contact"} is unscored — no rhythm measured yet. "
+                : $"{person.Name ?? "This contact"} sits at {state.Band.ToLowerInvariant()} with urgency {Math.Round(state.UrgencyScore)} out of 100. ";
+            return new CopilotAnswer
+            {
+                Text = "Briefing — " + prefix + base_.Text,
+                Citations = base_.Citations
+            };
         }
 
         public async Task<BriefingDto> BuildBriefingAsync()

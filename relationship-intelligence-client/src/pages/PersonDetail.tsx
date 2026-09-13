@@ -24,6 +24,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ExplainDrawer } from "@/components/explain-drawer";
 import { MemorySection } from "@/components/memory-section";
 import { EventsSection } from "@/components/events-section";
+import { NextStep } from "@/components/next-step";
 import { PlanDialog } from "@/components/plan-dialog";
 import { StoryPanel } from "@/components/story-panel";
 import { useCopilot } from "@/lib/copilot";
@@ -448,7 +449,6 @@ export function PersonDetail() {
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
-          <LogInteractionDialog personId={person.personId} onDone={() => void reload()} />
           <ImportDialog personId={person.personId} onDone={() => void reload()} />
           {state && (
             <Button size="sm" variant="outline" onClick={() => setExplaining(true)}>
@@ -461,7 +461,6 @@ export function PersonDetail() {
           <Button size="sm" variant="outline" onClick={() => openCopilot({ personId: person.personId, personName: person.name })}>
             Ask co-pilot
           </Button>
-          <PlanDialog personId={person.personId} personName={person.name} />
           <Button size="sm" variant="destructive" disabled={deleting} onClick={() => void onDelete()}>
             {deleting ? "Deleting…" : "Delete"}
           </Button>
@@ -497,6 +496,15 @@ export function PersonDetail() {
       )}
 
       <StoryPanel person={person} state={state} neighbors={neighbors} nodeInfo={nodeInfo ?? null} />
+      <div className="mt-4">
+        <NextStep
+          personId={person.personId}
+          personName={person.name}
+          state={state}
+          logAction={<LogInteractionDialog personId={person.personId} onDone={() => void reload()} />}
+          planAction={<PlanDialog personId={person.personId} personName={person.name} />}
+        />
+      </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_320px]">
         <section>

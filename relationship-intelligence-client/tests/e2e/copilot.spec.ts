@@ -17,11 +17,12 @@ test.describe("co-pilot", () => {
     await expect(page.getByLabel(/API key/)).toHaveValue("");
   });
 
-  test("ask returns a grounded answer with citations", async ({ page }) => {
+  test("ask returns a grounded synthesis, not raw records", async ({ page }) => {
     await page.getByRole("button", { name: "Ask co-pilot" }).click();
     await page.getByLabel("Ask the co-pilot").fill("Who should I follow up with this week?");
     await page.getByRole("button", { name: "Send", exact: true }).click();
-    await expect(page.getByText(/\[Observed\]/).first()).toBeVisible();
+    await expect(page.getByText(/deserves attention/i).first()).toBeVisible();
+    await expect(page.getByText(/urgency \d+/i).first()).toBeVisible();
   });
 
   test("person-scoped ask cites the person", async ({ page }) => {

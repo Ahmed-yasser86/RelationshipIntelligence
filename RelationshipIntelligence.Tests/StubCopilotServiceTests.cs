@@ -110,5 +110,30 @@ namespace CRUDTests
             var intent = OutreachIntentMatcher.Match("Tell me about the weather.");
             intent.NeedsClarification.Should().BeTrue();
         }
+
+        [Fact]
+        public async Task Ask_SynthesizesNarrativeFromActualData()
+        {
+            ArrangeQueue();
+            _personsMock.Setup(p => p.GetPersonByPersonId(_salmaId)).ReturnsAsync(
+                new PersonRespones { PersonId = _salmaId, Name = "Salma El-Sayed" });
+            _interactionsMock.Setup(i => i.ListForPersonAsync(_salmaId)).ReturnsAsync(
+                new List<ServiceContracts.DTOs.InteractionResponse>
+                {
+                    new() { InteractionId = Guid.NewGuid(), PersonId = _salmaId, InteractionType = ContactsManger.Core.Domain.Entities.EEnums.EnInteractionType.Call, InteractionTitle = "Design crit", TimeOfInteraction = DateTime.UtcNow.AddDays(-9) }
+                });
+            _memoryMock.Setup(m => m.ListForPersonAsync(_salmaId)).ReturnsAsync(
+                new List<ServiceContracts.DTOs.MemoryDTOs.MemoryEntryResponse>());
+
+            var general = await Service().AskAsync("Who needs attention?", null, null);
+            general.Text.Should().Contain("deserves attention");
+            general.Text.Should().Contain("Salma El-Sayed");
+            general.Text.Should().NotContain("[Observed]");
+
+            var personal = await Service().AskAsync("What happened?", _salmaId, null);
+            personal.Text.Should().Contain("Salma El-Sayed was last in touch 9d ago");
+            personal.Text.Should().Contain("Design crit");
+            personal.Citations.Should().ContainSingle(c => c.Label == "Salma El-Sayed");
+        }
     }
 }

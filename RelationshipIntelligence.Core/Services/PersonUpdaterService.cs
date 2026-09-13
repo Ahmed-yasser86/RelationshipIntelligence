@@ -223,7 +223,9 @@ namespace Servicess
 
             foreach (var name in namesStillNeeded.Where(n => !foundNames.Contains(n)))
             {
-                person.Circles.Add(new Circle { CircleId = Guid.NewGuid(), Name = name });
+                var circle = new Circle { CircleId = Guid.NewGuid(), Name = name };
+                await _circleRepository.AddCircle(circle);
+                person.Circles.Add(circle);
             }
         }
 
@@ -266,12 +268,19 @@ namespace Servicess
 
                 var existingElsewhere = await _contactItemRoleRepository.GetContactItemRoleByPersonAndRole(person.PersonId, roleName);
 
-                person.ContactItemRoles.Add(existingElsewhere ?? new ContactItemRole
+                if (existingElsewhere != null)
+                {
+                    person.ContactItemRoles.Add(existingElsewhere);
+                    continue;
+                }
+
+                var row = new ContactItemRole
                 {
                     ContactsRoleId = Guid.NewGuid(),
                     Role = roleName,
                     PersonId = person.PersonId
-                });
+                };
+                await _contactItemRoleRepository.AddContactItemRole(row);
             }
         }
 
@@ -316,7 +325,9 @@ namespace Servicess
                     ConnectionChannelId = Guid.NewGuid(),
                     ConnectionChannelName = name
                 };
-                person.ContactChannels.Add(new ContactChannel
+                if (existing == null)
+                    await _connectionChannelRepository.AddConnectionChannel(channel);
+                await PersonRipository.AddContactChannelAsync(new ContactChannel
                 {
                     PersonId = person.PersonId,
                     ConnectionChannelId = channel.ConnectionChannelId,
@@ -355,11 +366,19 @@ namespace Servicess
             foreach (var name in namesStillNeeded)
             {
                 var existing = await _userDefinedTagsRepository.GetUserDefinedTagByName(name);
-                person.UserDefinedTags.Add(existing ?? new UserDefinedTags
+                if (existing != null)
+                {
+                    person.UserDefinedTags.Add(existing);
+                    continue;
+                }
+
+                var tag = new UserDefinedTags
                 {
                     TagId = Guid.NewGuid(),
                     TagName = name
-                });
+                };
+                await _userDefinedTagsRepository.AddUserDefinedTag(tag);
+                person.UserDefinedTags.Add(tag);
             }
         }
 

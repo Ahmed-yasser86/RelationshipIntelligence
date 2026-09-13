@@ -25,6 +25,8 @@ namespace ServiceContracts.DTOs
         [StringLength(2000, ErrorMessage = "Description is too long")]
         public string? InteractionDescription { get; set; }
 
+        public Guid? SourceMeetingId { get; set; }
+
         public Interaction ToInteraction()
         {
             return new Interaction
@@ -34,7 +36,8 @@ namespace ServiceContracts.DTOs
                 TimeOfInteraction = ((DateTime)TimeOfInteraction!).ToUniversalTime(),
                 InteractionType = (EnInteractionType)InteractionType!,
                 InteractionTitle = InteractionTitle!,
-                InteractionDescription = InteractionDescription
+                InteractionDescription = InteractionDescription,
+                SourceMeetingId = SourceMeetingId
             };
         }
     }

@@ -27,6 +27,7 @@ namespace Entities
         public virtual DbSet<UserDefinedTags> UserDefinedTags { get; set; }
         public virtual DbSet<SystemStatusTag> SystemStatusTags { get; set; }
         public virtual DbSet<Circle> Circles { get; set; }
+        public virtual DbSet<ContactChannel> ContactChannels { get; set; }
         public virtual DbSet<Note> Notes { get; set; }
         public virtual DbSet<Interaction> Interactions { get; set; }
         public virtual DbSet<SocialMediaAccount> SocialMediaAccounts { get; set; }
@@ -38,6 +39,10 @@ namespace Entities
         public virtual DbSet<RelationshipMemoryEntry> RelationshipMemoryEntries { get; set; }
         public virtual DbSet<RelationshipEvent> RelationshipEvents { get; set; }
         public virtual DbSet<AiProviderSettings> AiProviderSettings { get; set; }
+        public virtual DbSet<Meeting> Meetings { get; set; }
+        public virtual DbSet<MeetingPerson> MeetingPersons { get; set; }
+        public virtual DbSet<MeetingFinding> MeetingFindings { get; set; }
+        public virtual DbSet<MeetingBrief> MeetingBriefs { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -101,6 +106,46 @@ namespace Entities
             modelBuilder.Entity<AiProviderSettings>().ToTable("AiProviderSettings");
             modelBuilder.Entity<AiProviderSettings>()
                 .HasQueryFilter(s => s.ApplicationUserId == _currentUserId);
+            modelBuilder.Entity<Meeting>().ToTable("Meetings");
+            modelBuilder.Entity<Meeting>()
+                .HasIndex(m => new { m.ApplicationUserId, m.Status });
+            modelBuilder.Entity<Meeting>()
+                .HasQueryFilter(m => m.ApplicationUserId == _currentUserId);
+            modelBuilder.Entity<MeetingPerson>().ToTable("MeetingPersons");
+            modelBuilder.Entity<MeetingPerson>()
+                .HasIndex(p => p.MeetingId);
+            modelBuilder.Entity<MeetingPerson>()
+                .HasOne(p => p.Meeting)
+                .WithMany(m => m.People)
+                .HasForeignKey(p => p.MeetingId)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<MeetingPerson>()
+                .HasOne(p => p.MappedPerson)
+                .WithMany()
+                .HasForeignKey(p => p.MappedPersonId)
+                .OnDelete(DeleteBehavior.SetNull);
+            modelBuilder.Entity<MeetingFinding>().ToTable("MeetingFindings");
+            modelBuilder.Entity<MeetingFinding>()
+                .HasIndex(f => new { f.MeetingId, f.MappedPersonId });
+            modelBuilder.Entity<MeetingFinding>()
+                .HasOne(f => f.Meeting)
+                .WithMany(m => m.Findings)
+                .HasForeignKey(f => f.MeetingId)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<MeetingFinding>()
+                .HasOne(f => f.MappedPerson)
+                .WithMany()
+                .HasForeignKey(f => f.MappedPersonId)
+                .OnDelete(DeleteBehavior.SetNull);
+            modelBuilder.Entity<MeetingBrief>().ToTable("MeetingBriefs");
+            modelBuilder.Entity<MeetingBrief>()
+                .HasIndex(b => b.MeetingId)
+                .IsUnique();
+            modelBuilder.Entity<MeetingBrief>()
+                .HasOne(b => b.Meeting)
+                .WithOne(m => m.Brief)
+                .HasForeignKey<MeetingBrief>(b => b.MeetingId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Person>()
                 .HasOne(p => p.ApplicationUser)

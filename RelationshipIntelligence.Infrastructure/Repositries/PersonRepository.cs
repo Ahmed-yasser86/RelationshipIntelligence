@@ -53,6 +53,14 @@ namespace Repositories
             return person;
         }
 
+        public async Task AddContactChannelAsync(ContactChannel channel)
+        {
+            if (channel == null)
+                throw new ArgumentNullException(nameof(channel));
+
+            await _db.ContactChannels.AddAsync(channel);
+        }
+
         public async Task<bool> DeletePerson(Guid? id)
         {
             if (id == null)

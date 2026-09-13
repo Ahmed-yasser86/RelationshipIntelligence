@@ -125,6 +125,50 @@ export interface AiProviderSettings {
   hasKey: boolean;
   updatedAtUtc: string | null;
 }
+export interface MeetingPersonDto {
+  meetingPersonId: string;
+  detectedName: string;
+  mappedPersonId: string | null;
+  mappedPersonName: string | null;
+  matchStatus: number;
+  selectedForLogging: boolean;
+}
+export interface MeetingFindingDto {
+  meetingFindingId: string;
+  mappedPersonId: string | null;
+  mappedPersonName: string | null;
+  kind: number;
+  title: string;
+  detail: string | null;
+  status: number;
+  sourceExcerpt: string | null;
+  acceptedAsEntryId: string | null;
+}
+export interface MeetingBriefDto {
+  goal: string | null;
+  briefJson: string;
+  updatedAtUtc: string;
+}
+export interface MeetingResponse {
+  meetingId: string;
+  title: string;
+  occurredAtUtc: string;
+  actualOccurredAtUtc: string | null;
+  description: string | null;
+  agenda: string | null;
+  userInstructions: string | null;
+  hasTranscript: boolean;
+  hasNotes: boolean;
+  processedSummary: string | null;
+  status: number;
+  createdAtUtc: string;
+  updatedAtUtc: string;
+  people: MeetingPersonDto[];
+  findings: MeetingFindingDto[];
+  brief: MeetingBriefDto | null;
+}
+export const MeetingStatuses = ["Preparation", "Draft", "Processing", "Processed", "Confirmed", "Discarded"] as const;
+export const FindingKinds = ["Topic", "Decision", "Commitment", "Action item", "Follow-up", "Question", "Event", "Person fact", "Project", "Date mention"] as const;
 export interface ContactChannelRequest {
   name: string;
   value: string | null;

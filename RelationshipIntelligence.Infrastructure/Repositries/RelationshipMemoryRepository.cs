@@ -42,6 +42,16 @@ namespace Repositories
             }
         }
 
+        public async Task<List<RelationshipMemoryEntry>> ListByMeetingAsync(Guid ownerId, Guid meetingId)
+        {
+            using (Operation.Time("List memory entries by meeting"))
+            {
+                return await _db.RelationshipMemoryEntries
+                    .Where(e => e.ApplicationUserId == ownerId && e.SourceMeetingId == meetingId)
+                    .ToListAsync();
+            }
+        }
+
         public async Task AddAsync(RelationshipMemoryEntry entry)
         {
             if (entry == null)

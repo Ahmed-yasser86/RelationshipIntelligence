@@ -9,6 +9,7 @@ import { useCopilot } from "@/lib/copilot";
 import { cn } from "cn";
 import {
   Building2,
+  CalendarDays,
   HeartPulse,
   LayoutDashboard,
   LogOut,
@@ -23,6 +24,7 @@ const NAV = [
   { to: "/attention", label: "Attention", icon: HeartPulse, end: true },
   { to: "/people", label: "People", icon: Users, end: false },
   { to: "/organizations", label: "Organizations", icon: Building2, end: true },
+  { to: "/meetings", label: "Meetings", icon: CalendarDays, end: false },
   { to: "/network", label: "Network", icon: Network, end: false },
   { to: "/digest", label: "Digest", icon: Newspaper, end: false },
 ];

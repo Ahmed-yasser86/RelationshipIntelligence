@@ -1073,6 +1073,10 @@ namespace CRUDTests
             _connectionChannelRepositryContractMoq
                 .Setup(repo => repo.GetConnectionChannelByName("Telegram"))
                 .ReturnsAsync((ConnectionChannel?)null);
+            _personRepositryContractMoq
+                .Setup(repo => repo.AddContactChannelAsync(It.IsAny<ContactChannel>()))
+                .Callback<ContactChannel>(c => person.ContactChannels.Add(c))
+                .Returns(Task.CompletedTask);
 
             PersonUpdateRequest toUpdate = person.ConvertToPersonRespons().ToPersonUpdateRequest();
             toUpdate.Organizations = null;

@@ -79,9 +79,17 @@ builder.Services.AddScoped<KernelFactory>();
 builder.Services.AddScoped<RelationshipPlugin>();
 var copilotMode = builder.Configuration["Copilot:Mode"];
 if (string.Equals(copilotMode, "Stub", StringComparison.OrdinalIgnoreCase))
+{
     builder.Services.AddScoped<ICopilotService, StubCopilotService>();
+    builder.Services.AddScoped<IMeetingExtractor, StubMeetingExtractor>();
+}
 else
+{
     builder.Services.AddScoped<ICopilotService, CopilotService>();
+    builder.Services.AddScoped<IMeetingExtractor, MeetingExtractor>();
+}
+builder.Services.AddScoped<IMeetingService, MeetingService>();
+builder.Services.AddScoped<MeetingRepositoryContract, MeetingRepository>();
 builder.Services.AddScoped<INetworkAnalysisService, NetworkAnalysisService>();
 builder.Services.AddScoped<RelationshipStateRepositoryContract, RelationshipStateRepository>();
 builder.Services.AddScoped<DigestRepositoryContract, DigestRepository>();
@@ -111,7 +119,7 @@ builder.Services.AddScoped<ISystemTagsGetter, SystemTagsGetterService>();
 builder.Services.AddScoped<IjwtAuthentication, JwtServices>();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddScoped<PersonOwnershipFilter>();
-
+builder.Services.AddScoped<MeetingOwnershipFilter>();
 builder.Services.AddDbContext<AppDBContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("ContactDb"));

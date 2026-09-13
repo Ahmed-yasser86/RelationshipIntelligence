@@ -4,6 +4,8 @@ import { AuthProvider, useAuth } from "@/lib/auth";
 import { CopilotProvider } from "@/lib/copilot";
 import { Digest } from "@/pages/Digest";
 import { Login } from "@/pages/Login";
+import { MeetingDetail } from "@/pages/MeetingDetail";
+import { Meetings } from "@/pages/Meetings";
 import { Network } from "@/pages/Network";
 import { Organizations } from "@/pages/Organizations";
 import { Overview } from "@/pages/Overview";
@@ -65,6 +67,8 @@ export function App() {
           <Route path="people/:id" element={<PersonDetail />} />
           <Route path="people/:id/edit" element={<PersonEdit />} />
           <Route path="organizations" element={<Organizations />} />
+          <Route path="meetings" element={<Meetings />} />
+          <Route path="meetings/:id" element={<MeetingDetail />} />
           <Route path="network" element={<Network />} />
           <Route path="digest" element={<Digest />} />
         </Route>

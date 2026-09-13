@@ -32,5 +32,11 @@ namespace ContactsManger.Core.Domain.Entities
 
         [ForeignKey("PersonId")]
         public Person? Person { get; set; }
+
+        /// <summary>
+        /// When this interaction was logged from a confirmed meeting, references it.
+        /// Provenance for meeting-derived evidence. Null otherwise.
+        /// </summary>
+        public Guid? SourceMeetingId { get; set; }
     }
 }

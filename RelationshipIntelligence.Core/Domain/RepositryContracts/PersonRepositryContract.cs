@@ -13,6 +13,8 @@ namespace RepositryContracts
 
         Task<Person> AddPerson(Person person);
 
+        Task AddContactChannelAsync(ContactChannel channel);
+
         [Obsolete("Update flows mutate the tracked entity loaded via GetPersonById and commit once through IUnitOfWork. This merge API is retained only for compatibility and is no longer called by any service.")]
         Task<Person> UpdatePerson(Person person);
 

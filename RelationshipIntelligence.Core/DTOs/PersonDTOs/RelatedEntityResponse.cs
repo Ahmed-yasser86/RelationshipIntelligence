@@ -59,6 +59,7 @@ namespace ServiceContracts.DTOs
         public string InteractionTitle { get; set; }
         public string? InteractionDescription { get; set; }
         public DateTime TimeOfInteraction { get; set; }
+        public Guid? SourceMeetingId { get; set; }
     }
 
     public static class RelatedEntityResponseExtensions
@@ -145,7 +146,8 @@ namespace ServiceContracts.DTOs
                 InteractionType = interaction.InteractionType,
                 InteractionTitle = interaction.InteractionTitle,
                 InteractionDescription = interaction.InteractionDescription,
-                TimeOfInteraction = interaction.TimeOfInteraction
+                TimeOfInteraction = interaction.TimeOfInteraction,
+                SourceMeetingId = interaction.SourceMeetingId
             };
         }
 

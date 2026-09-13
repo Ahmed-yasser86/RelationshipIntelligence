@@ -11,6 +11,8 @@ namespace RepositryContracts
 
         Task<RelationshipMemoryEntry?> GetAsync(Guid ownerId, Guid entryId);
 
+        Task<List<RelationshipMemoryEntry>> ListByMeetingAsync(Guid ownerId, Guid meetingId);
+
         Task AddAsync(RelationshipMemoryEntry entry);
 
         Task RemoveAsync(RelationshipMemoryEntry entry);

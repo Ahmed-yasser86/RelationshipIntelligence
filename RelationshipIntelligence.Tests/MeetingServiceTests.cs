@@ -23,6 +23,7 @@ namespace CRUDTests
         private readonly Mock<PersonRepositryContract> _personsMock = new();
         private readonly Mock<IInteractionService> _interactionsMock = new();
         private readonly Mock<IRelationshipMemoryService> _memoryMock = new();
+        private readonly Mock<IEventService> _eventsMock = new();
         private readonly Mock<IRelationshipScoringService> _scoringMock = new();
         private readonly Mock<IMeetingExtractor> _extractorMock = new();
         private readonly Mock<IUnitOfWork> _uowMock = new();
@@ -36,6 +37,7 @@ namespace CRUDTests
             _personsMock.Object,
             _interactionsMock.Object,
             _memoryMock.Object,
+            _eventsMock.Object,
             _scoringMock.Object,
             _extractorMock.Object,
             _uowMock.Object,
@@ -222,6 +224,36 @@ namespace CRUDTests
         }
 
         [Fact]
+        public async Task Delete_Draft_PreservesDerivedMemoryWithStamp()
+        {
+            ArrangeStore();
+            var meeting = CreatePrep();
+            meeting.Status = MeetingStatus.Draft;
+            _store.Add(meeting);
+            var derived = new RelationshipMemoryEntry
+            {
+                MemoryEntryId = Guid.NewGuid(),
+                ApplicationUserId = _userA,
+                PersonId = Guid.NewGuid(),
+                Kind = RelationshipMemoryKind.Fact,
+                Title = "Derived fact",
+                Provenance = MemoryProvenance.MeetingDerived,
+                SourceMeetingId = meeting.MeetingId,
+                Status = MemoryEntryStatus.Active
+            };
+            _memoryRepoMock.Setup(r => r.ListByMeetingAsync(_userA, meeting.MeetingId))
+                .ReturnsAsync(new List<RelationshipMemoryEntry> { derived });
+            _meetingsMock.Setup(r => r.RemoveAsync(It.IsAny<Meeting>()))
+                .Callback<Meeting>(m => _store.Remove(m))
+                .Returns(Task.CompletedTask);
+
+            await Service().DeleteAsync(meeting.MeetingId);
+
+            _store.Should().BeEmpty();
+            derived.SourceMeetingDeleted.Should().BeTrue();
+        }
+
+        [Fact]
         public async Task Process_MapsDetectedPersonToSuggestion()
         {
             ArrangeStore();
@@ -280,6 +312,7 @@ namespace CRUDTests
                 _personsMock.Object,
                 _interactionsMock.Object,
                 _memoryMock.Object,
+                _eventsMock.Object,
                 _scoringMock.Object,
                 new RelationshipIntelligence.AI.StubMeetingExtractor(),
                 _uowMock.Object,
@@ -302,6 +335,153 @@ namespace CRUDTests
 
             await Assert.ThrowsAsync<InvalidOperationException>(() => Service().ProcessAsync(meeting.MeetingId));
             meeting.Status.Should().Be(MeetingStatus.Draft);
+        }
+
+        [Fact]
+        public async Task Process_SkipsFindingDuplicatingActiveMemory()
+        {
+            ArrangeStore();
+            var salmaId = Guid.NewGuid();
+            _personsMock.Setup(r => r.GetAllPersons()).ReturnsAsync(new List<Person>
+            {
+                new() { PersonId = salmaId, ApplicationUserId = _userA, Name = "Salma El-Sayed" }
+            }.AsEnumerable());
+            _memoryMock.Setup(m => m.ListForPersonAsync(salmaId)).ReturnsAsync(new List<ServiceContracts.DTOs.MemoryDTOs.MemoryEntryResponse>
+            {
+                new() { MemoryEntryId = Guid.NewGuid(), PersonId = salmaId, Kind = RelationshipMemoryKind.Commitment, Title = "Send crit notes", Status = MemoryEntryStatus.Active, Provenance = MemoryProvenance.User }
+            });
+            _personsMock.Setup(r => r.GetPersonById(salmaId)).ReturnsAsync(
+                new Person { PersonId = salmaId, ApplicationUserId = _userA, Name = "Salma El-Sayed" });
+            _extractorMock.Setup(e => e.ExtractAsync(It.IsAny<MeetingExtractionInput>()))
+                .ReturnsAsync(new MeetingExtraction
+                {
+                    Summary = "Same topic again.",
+                    Topics = new List<string>(),
+                    Decisions = new List<string>(),
+                    Findings = new List<ExtractedFinding>
+                    {
+                        new() { Kind = FindingKind.Commitment, Title = "Send crit notes", PersonName = "Salma El-Sayed" }
+                    },
+                    DetectedPeople = new List<string> { "Salma El-Sayed" }
+                });
+
+            var meeting = CreatePrep();
+            meeting.Status = MeetingStatus.Draft;
+            meeting.RawNotes = "Salma El-Sayed joined.";
+            _store.Add(meeting);
+
+            var result = await Service().ProcessAsync(meeting.MeetingId);
+
+            result.Findings.Should().BeEmpty();
+        }
+
+        [Fact]
+        public async Task Process_PassesActiveMemoryTitlesToExtractor()
+        {
+            ArrangeStore();
+            var personId = Guid.NewGuid();
+            _personsMock.Setup(r => r.GetAllPersons()).ReturnsAsync(new List<Person>
+            {
+                new() { PersonId = personId, ApplicationUserId = _userA, Name = "Salma" }
+            }.AsEnumerable());
+            _personsMock.Setup(r => r.GetPersonById(personId)).ReturnsAsync(
+                new Person { PersonId = personId, ApplicationUserId = _userA, Name = "Salma" });
+            MeetingExtractionInput? captured = null;
+            _extractorMock.Setup(e => e.ExtractAsync(It.IsAny<MeetingExtractionInput>()))
+                .Callback<MeetingExtractionInput>(i => captured = i)
+                .ReturnsAsync(new MeetingExtraction { Summary = "Done." });
+            _memoryMock.Setup(m => m.ListForPersonAsync(It.IsAny<Guid>()))
+                .ReturnsAsync(new List<ServiceContracts.DTOs.MemoryDTOs.MemoryEntryResponse>
+                {
+                    new() { MemoryEntryId = Guid.NewGuid(), Kind = RelationshipMemoryKind.Fact, Title = "User-corrected role", Status = MemoryEntryStatus.Active, Provenance = MemoryProvenance.User }
+                });
+
+            var meeting = CreatePrep();
+            meeting.Status = MeetingStatus.Draft;
+            meeting.RawNotes = "Some notes.";
+            _store.Add(meeting);
+
+            await Service().ProcessAsync(meeting.MeetingId);
+
+            captured.Should().NotBeNull();
+            captured!.ActiveMemoryTitles.Should().Contain("User-corrected role");
+        }
+
+        [Fact]
+        public async Task ReviewFinding_Accept_CreatesMemoryEntryWithProvenanceChain()
+        {
+            ArrangeStore();
+            var personId = Guid.NewGuid();
+            _personsMock.Setup(r => r.GetPersonById(personId))
+                .ReturnsAsync(new Person { PersonId = personId, ApplicationUserId = _userA, Name = "Salma" });
+
+            var meeting = CreatePrep();
+            meeting.Status = MeetingStatus.Processed;
+            var findingId = Guid.NewGuid();
+            meeting.Findings.Add(new MeetingFinding
+            {
+                MeetingFindingId = findingId,
+                MeetingId = meeting.MeetingId,
+                MappedPersonId = personId,
+                Kind = FindingKind.Commitment,
+                Title = "Send the proposal",
+                Detail = "By Friday",
+                Status = FindingStatus.Suggested,
+                SourceExcerpt = "I will send it",
+                CreatedAtUtc = DateTime.UtcNow
+            });
+            _store.Add(meeting);
+
+            RelationshipMemoryEntry? saved = null;
+            _memoryRepoMock.Setup(r => r.AddAsync(It.IsAny<RelationshipMemoryEntry>()))
+                .Callback<RelationshipMemoryEntry>(e => saved = e)
+                .Returns(Task.CompletedTask);
+
+            var result = await Service().ReviewFindingAsync(new FindingReviewRequest
+            {
+                MeetingFindingId = findingId,
+                Status = FindingStatus.Accepted
+            });
+
+            saved.Should().NotBeNull();
+            saved!.SourceMeetingId.Should().Be(meeting.MeetingId);
+            saved.SourceFindingId.Should().Be(findingId);
+            saved.SourceExcerpt.Should().Be("I will send it");
+            saved.Provenance.Should().Be(MemoryProvenance.MeetingDerived);
+            saved.Kind.Should().Be(RelationshipMemoryKind.Commitment);
+            result.Findings.Single(f => f.MeetingFindingId == findingId).AcceptedAsEntryId.Should().Be(saved.MemoryEntryId);
+        }
+
+        [Fact]
+        public async Task GenerateBrief_ContainsRequiredParticipantSections()
+        {
+            ArrangeStore();
+            var personId = Guid.NewGuid();
+            _personsMock.Setup(r => r.GetPersonById(personId))
+                .ReturnsAsync(new Person { PersonId = personId, ApplicationUserId = _userA, Name = "Salma", Origin = "Met at work" });
+            _scoringMock.Setup(s => s.GetQueueAsync(It.IsAny<int>())).ReturnsAsync(new List<RelationshipHealthResponse>());
+            _interactionsMock.Setup(i => i.ListForPersonAsync(It.IsAny<Guid?>()))
+                .ReturnsAsync(new List<ServiceContracts.DTOs.InteractionResponse>());
+            _memoryMock.Setup(m => m.ListForPersonAsync(It.IsAny<Guid>()))
+                .ReturnsAsync(new List<ServiceContracts.DTOs.MemoryDTOs.MemoryEntryResponse>());
+            _eventsMock.Setup(e => e.GetUpcomingAsync(It.IsAny<int>()))
+                .ReturnsAsync(new List<ServiceContracts.DTOs.EventDTOs.EventOccurrenceDto>());
+
+            var meeting = CreatePrep();
+            meeting.People.First().MappedPersonId = personId;
+            _store.Add(meeting);
+
+            var result = await Service().GenerateBriefAsync(meeting.MeetingId);
+
+            result.Brief.Should().NotBeNull();
+            var json = System.Text.Json.JsonDocument.Parse(result.Brief!.BriefJson);
+            json.RootElement.TryGetProperty("meeting", out _).Should().BeTrue();
+            var participants = json.RootElement.GetProperty("participants");
+            participants.GetArrayLength().Should().Be(1);
+            var first = participants[0];
+            foreach (var section in new[] { "displayName", "thingsToRemember", "talkingPoints", "questionsToAsk" })
+                first.TryGetProperty(section, out _).Should().BeTrue($"section '{section}' is required");
+            Servicess.MeetingBriefValidator.Validate(result.Brief.BriefJson);
         }
     }
 }

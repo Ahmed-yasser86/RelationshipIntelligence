@@ -408,8 +408,11 @@ namespace CRUDTests
         }
 
         [Fact]
-        public async Task ReviewFinding_Accept_CreatesMemoryEntryWithProvenanceChain()
+        public async Task ReviewFinding_Accept_StagesFinding_Confirm_WritesMemoryWithProvenanceChain()
         {
+            // Approval model (§21): finding-Accept only stages; durable memory
+            // is written once at meeting Confirm, so unconfirmed-meeting facts
+            // never leak into Copilot/queue.
             ArrangeStore();
             var personId = Guid.NewGuid();
             _personsMock.Setup(r => r.GetPersonById(personId))
@@ -417,6 +420,10 @@ namespace CRUDTests
 
             var meeting = CreatePrep();
             meeting.Status = MeetingStatus.Processed;
+            meeting.OccurredAtUtc = DateTime.UtcNow.AddDays(-1);
+            meeting.People.First().MappedPersonId = personId;
+            meeting.People.First().MatchStatus = PersonMatchStatus.Confirmed;
+            meeting.People.First().SelectedForLogging = true;
             var findingId = Guid.NewGuid();
             meeting.Findings.Add(new MeetingFinding
             {
@@ -437,11 +444,20 @@ namespace CRUDTests
                 .Callback<RelationshipMemoryEntry>(e => saved = e)
                 .Returns(Task.CompletedTask);
 
-            var result = await Service().ReviewFindingAsync(new FindingReviewRequest
+            var staged = await Service().ReviewFindingAsync(new FindingReviewRequest
             {
                 MeetingFindingId = findingId,
                 Status = FindingStatus.Accepted
             });
+
+            staged.Findings.Single(f => f.MeetingFindingId == findingId).Status.Should().Be(FindingStatus.Accepted);
+            staged.Findings.Single(f => f.MeetingFindingId == findingId).AcceptedAsEntryId.Should().BeNull();
+            _memoryRepoMock.Verify(r => r.AddAsync(It.IsAny<RelationshipMemoryEntry>()), Times.Never);
+
+            _interactionsMock.Setup(i => i.LogAsync(It.IsAny<InteractionAddRequest>()))
+                .ReturnsAsync(new ServiceContracts.DTOs.InteractionResponse());
+
+            var confirmed = await Service().ConfirmAsync(new MeetingConfirmRequest { MeetingId = meeting.MeetingId });
 
             saved.Should().NotBeNull();
             saved!.SourceMeetingId.Should().Be(meeting.MeetingId);
@@ -449,7 +465,7 @@ namespace CRUDTests
             saved.SourceExcerpt.Should().Be("I will send it");
             saved.Provenance.Should().Be(MemoryProvenance.MeetingDerived);
             saved.Kind.Should().Be(RelationshipMemoryKind.Commitment);
-            result.Findings.Single(f => f.MeetingFindingId == findingId).AcceptedAsEntryId.Should().Be(saved.MemoryEntryId);
+            confirmed.Findings.Single(f => f.MeetingFindingId == findingId).AcceptedAsEntryId.Should().Be(saved.MemoryEntryId);
         }
 
         [Fact]

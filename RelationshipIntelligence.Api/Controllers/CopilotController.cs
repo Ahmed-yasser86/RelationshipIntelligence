@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using RelationshipIntelligence.AI;
 using ServiceContracts;
+using ServiceContracts.DTOs.AgentDTOs;
 using ServiceContracts.DTOs.CopilotDTOs;
 using System;
 using System.Threading.Tasks;
@@ -10,12 +11,42 @@ namespace ContactsManager.API.Controllers
     public class CopilotController : CustomWebController
     {
         private readonly ICopilotService _copilot;
+        private readonly ICopilotAgent _agent;
         private readonly IAiProviderSettingsService _providerSettings;
 
-        public CopilotController(ICopilotService copilot, IAiProviderSettingsService providerSettings)
+        public CopilotController(ICopilotService copilot, ICopilotAgent agent, IAiProviderSettingsService providerSettings)
         {
             _copilot = copilot;
+            _agent = agent;
             _providerSettings = providerSettings;
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> PostAgentChat([FromBody] AgentChatRequest request)
+        {
+            if (request == null || string.IsNullOrWhiteSpace(request.Message))
+                return BadRequest("Message is required.");
+
+            try
+            {
+                return Ok(await _agent.ChatAsync(request));
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (CopilotNotConfiguredException ex)
+            {
+                return Conflict(ex.Message);
+            }
+            catch (CopilotUnavailableException ex)
+            {
+                return StatusCode(503, ex.Message);
+            }
         }
 
         [HttpPost]

@@ -19,10 +19,59 @@ test.describe("co-pilot", () => {
 
   test("ask returns a grounded synthesis, not raw records", async ({ page }) => {
     await page.getByRole("button", { name: "Ask co-pilot" }).click();
-    await page.getByLabel("Ask the co-pilot").fill("Who should I follow up with this week?");
+    await page.getByLabel("Ask the co-pilot").fill("Who is losing touch right now?");
     await page.getByRole("button", { name: "Send", exact: true }).click();
-    await expect(page.getByText(/deserves attention/i).first()).toBeVisible();
-    await expect(page.getByText(/urgency \d+/i).first()).toBeVisible();
+    await expect(page.getByText(/deserving attention now/i).first()).toBeVisible();
+    await expect(page.getByText(/Why\? Show evidence/i).first()).toBeVisible();
+    await expect(page.getByRole("button", { name: "Open attention queue" })).toBeVisible();
+  });
+
+  test("follow-ups keep context without repeating names", async ({ page }) => {
+    await page.getByRole("link", { name: "People", exact: true }).click();
+    await page.getByLabel("Search").fill("Salma");
+    await page.getByRole("button", { name: "Apply" }).click();
+    await page.locator("ul > li", { hasText: "Salma" }).locator("a").first().click();
+    await page.locator("main").getByRole("button", { name: "Ask co-pilot" }).click();
+    await page.getByLabel("Ask the co-pilot").fill("What happened here?");
+    await page.getByRole("button", { name: "Send", exact: true }).click();
+    await expect(page.getByRole("link", { name: "Salma El-Sayed" })).toBeVisible();
+    await page.getByLabel("Ask the co-pilot").fill("Why does that matter?");
+    await page.getByRole("button", { name: "Send", exact: true }).click();
+    await expect(page.getByText(/Salma El-Sayed.*(urgency|rhythm|silence)/i).first()).toBeVisible();
+  });
+
+  test("unknown people get honesty, not invention", async ({ page }) => {
+    await page.getByRole("button", { name: "Ask co-pilot" }).click();
+    await page.getByLabel("Ask the co-pilot").fill("Tell me about my relationship with Ahmed.");
+    await page.getByRole("button", { name: "Send", exact: true }).click();
+    await expect(page.getByText(/don't have a contact matching/i).first()).toBeVisible();
+  });
+
+  test("meeting prep asks who instead of inventing", async ({ page }) => {
+    await page.getByRole("button", { name: "Ask co-pilot" }).click();
+    await page.getByLabel("Ask the co-pilot").fill("Prepare a meeting for tomorrow.");
+    await page.getByRole("button", { name: "Send", exact: true }).click();
+    await expect(page.getByText(/Who are you meeting/i).first()).toBeVisible();
+  });
+
+  test("outreach runs as a working session with approval", async ({ page }) => {
+    await page.getByRole("button", { name: "Ask co-pilot" }).click();
+    await page.getByLabel("Ask the co-pilot").fill("Find everyone I should reconnect with this week.");
+    await page.getByRole("button", { name: "Send", exact: true }).click();
+    await expect(page.getByText(/worth considering/i).first()).toBeVisible();
+    await expect(page.getByText(/Working on: outreach/i)).toBeVisible();
+    await page.getByLabel("Ask the co-pilot").fill("Use LinkedIn for the rest.");
+    await page.getByRole("button", { name: "Send", exact: true }).click();
+    await expect(page.getByText(/Channel set to LinkedIn/i).first()).toBeVisible();
+    await page.getByLabel("Ask the co-pilot").fill("Prepare them.");
+    await page.getByRole("button", { name: "Send", exact: true }).click();
+    await expect(page.getByText(/personalized draft/i).first()).toBeVisible();
+    await page.getByLabel("Ask the co-pilot").fill("Approve.");
+    await page.getByRole("button", { name: "Send", exact: true }).click();
+    await expect(page.getByText(/Ready to approve/i).first()).toBeVisible();
+    await page.getByLabel("Ask the co-pilot").fill("Approve now.");
+    await page.getByRole("button", { name: "Send", exact: true }).click();
+    await expect(page.getByText(/Approved \d+ draft/i).first()).toBeVisible();
   });
 
   test("person-scoped ask cites the person", async ({ page }) => {

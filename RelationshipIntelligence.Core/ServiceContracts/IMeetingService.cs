@@ -9,6 +9,8 @@ namespace ServiceContracts
     {
         Task<List<MeetingResponse>> ListAsync();
 
+        Task<List<MeetingResponse>> ListMeetingsForPersonAsync(Guid personId);
+
         Task<MeetingResponse> GetAsync(Guid meetingId);
 
         Task<MeetingResponse> CreatePrepAsync(MeetingCreateRequest request);

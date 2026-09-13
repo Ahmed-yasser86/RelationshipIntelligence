@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { EvidenceChip } from "@/components/evidence-chip";
 import { api } from "@/lib/api";
-import { daysSince, formatDate } from "@/lib/format";
+import { formatDate, silenceDays } from "@/lib/format";
 import { EventTypes } from "@/lib/types";
 import type {
   InteractionResponse,
@@ -89,7 +89,7 @@ export function StoryPanel({
     .filter((x) => x.label !== null)
     .slice(0, 3);
 
-  const silent = daysSince(state?.lastContactAtUtc ?? person.interactions?.[0]?.timeOfInteraction);
+  const silent = silenceDays(state?.silenceDays, state?.lastContactAtUtc ?? interactions[0]?.timeOfInteraction);
   const pastRhythm =
     state?.cadenceReferenceDays != null && silent != null && silent > state.cadenceReferenceDays;
 

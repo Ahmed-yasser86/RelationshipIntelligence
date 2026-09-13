@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
+using Servicess;
 using ServiceContracts;
 using ServiceContracts.DTOs.CopilotDTOs;
 using System;
@@ -221,6 +222,27 @@ namespace RelationshipIntelligence.AI
             var activeCommitments = await ActiveCommitmentsAsync();
             briefing.FollowUpsDue = activeCommitments.Take(8).ToList();
 
+            briefing.SuggestedActions = queue.Take(5).Select(q =>
+            {
+                var silent = q.SilenceDays ?? TieDecayModel.SilenceDays(q.LastContactAtUtc, now);
+                var soon = upcoming.FirstOrDefault(e => e.PersonId == q.PersonId && e.InDays <= 7);
+                return soon != null
+                    ? $"Reconnect with {q.Name} before {soon.Title} ({(soon.InDays == 0 ? "today" : $"in {soon.InDays}d")}) — {q.Band}, quiet {silent}d."
+                    : $"Check in with {q.Name} — {q.Band} (urgency {Math.Round(q.UrgencyScore)}), quiet {silent}d.";
+            }).ToList();
+            briefing.Changes = queue
+                .Where(q => q.SilenceQuantile != null)
+                .OrderByDescending(q => q.UrgencyScore)
+                .Take(4)
+                .Select(q => new BriefingChangeItem
+                {
+                    PersonId = q.PersonId,
+                    Name = q.Name,
+                    Direction = (q.SilenceQuantile ?? 0) > 0.5 ? "drifting" : "steady",
+                    Detail = $"Quiet {(q.SilenceDays ?? TieDecayModel.SilenceDays(q.LastContactAtUtc, now))}d, " +
+                        $"longer than {Math.Round((q.SilenceQuantile ?? 0) * 100)}% of past gaps."
+                }).ToList();
+
             try
             {
                 briefing.Summary = await ChatAsync(
@@ -243,8 +265,8 @@ namespace RelationshipIntelligence.AI
         {
             var row = queue.FirstOrDefault(q => q.PersonId == personId);
             if (row?.LastContactAtUtc == null) return "no contact recorded";
-            var days = (int)(DateTime.UtcNow - row.LastContactAtUtc.Value).TotalDays;
-            return days <= 0 ? "in touch today" : $"quiet for {days}d";
+            var days = row.SilenceDays ?? TieDecayModel.SilenceDays(row.LastContactAtUtc, DateTime.UtcNow);
+            return days == null || days <= 0 ? "in touch today" : $"quiet for {days}d";
         }
 
         private async Task<List<string>> ActiveCommitmentsAsync()
@@ -366,7 +388,19 @@ namespace RelationshipIntelligence.AI
                 $"Write {channelShape} for the person above. " +
                 $"Communication intent: {request.Intent}. " +
                 (string.IsNullOrWhiteSpace(instruction) ? "" : $"Global instruction: {instruction.Trim()}. ") +
-                "Rules: ground every specific claim in the supplied context — never invent details, dates, or commitments. " +
+                "First decide why the user would contact this person now, from strongest to weakest: " +
+                "an unresolved commitment to follow up on; an upcoming event to check in about; " +
+                "continuing a recent substantive thread; a remembered topic worth raising; " +
+                "or, if there is nothing beyond a long silence, a plain human reconnection with no manufactured reason. " +
+                "Let that reason shape the CONTENT of the message — different evidence must produce a materially different message. " +
+                "Rules: write as the user in first person, natural and concise. Ground every specific claim in the supplied context — " +
+                "never invent details, dates, commitments, feelings, outcomes, or conversations. " +
+                "When context is thin, stay conservative and general. " +
+                "Never mention bands, scores, urgency numbers, days-silent counts, rhythm, cadence, or any bracketed evidence label " +
+                "(PERSON/STATE/RHYTHM/INTERACTION/MEMORY/EVENT/COMMITMENT, [Call], [Intent/User], dates like 2026-08-01). " +
+                "Never write meta-commentary such as 'based on our relationship history', 'according to our previous interactions', " +
+                "'I noticed we haven't spoken in N days', or 'your relationship rhythm suggests'. " +
+                "Never enumerate past interactions or paste evidence lines into the message. " +
                 "Do not substitute only the name into a template. " +
                 "End with two lines: CONTEXT-USED: <semicolon-separated list of the context items you used, or NONE> and " +
                 "SUBJECT: <subject for email, else ->.";

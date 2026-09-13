@@ -212,9 +212,9 @@ namespace Servicess
 
         private static string QueueReason(RelationshipHealthResponse row)
         {
-            var silence = row.LastContactAtUtc == null
-                ? "no contact recorded"
-                : $"{(int)(DateTime.UtcNow - row.LastContactAtUtc.Value).TotalDays}d silent";
+            // Prefer server-canonical SilenceDays; fall back to canonical calc.
+            var days = row.SilenceDays ?? TieDecayModel.SilenceDays(row.LastContactAtUtc, DateTime.UtcNow);
+            var silence = days == null ? "no contact recorded" : $"{days}d silent";
             var rhythm = row.CadenceReferenceDays == null ? "no measured rhythm" : $"normally ~{Math.Round(row.CadenceReferenceDays.Value)}d";
             return $"{row.Band} — urgency {Math.Round(row.UrgencyScore)}. {rhythm}, now {silence}.";
         }
@@ -249,18 +249,19 @@ namespace Servicess
                 {
                     foreach (var row in queue.Where(q => q.CadenceReferenceDays != null && q.LastContactAtUtc != null))
                     {
-                        var silence = (DateTime.UtcNow - row.LastContactAtUtc!.Value).TotalDays;
-                        if (silence <= row.CadenceReferenceDays!.Value) continue;
+                        var silenceExact = (DateTime.UtcNow.ToUniversalTime() - row.LastContactAtUtc!.Value.ToUniversalTime()).TotalDays;
+                        if (silenceExact <= row.CadenceReferenceDays!.Value) continue;
                         if (skipped.Contains(row.PersonId)) continue;
-                        Add(row.PersonId, $"Normally ~{Math.Round(row.CadenceReferenceDays.Value)}d, now {(int)silence}d silent.");
+                        var silenceDays = row.SilenceDays ?? TieDecayModel.SilenceDays(row.LastContactAtUtc, DateTime.UtcNow);
+                        Add(row.PersonId, $"Normally ~{Math.Round(row.CadenceReferenceDays.Value)}d, now {silenceDays}d silent.");
                     }
                 }
                 else if (signal == "neglected")
                 {
                     foreach (var row in queue.Where(q => q.InteractionCount >= 2 && q.CadenceReferenceDays != null && q.LastContactAtUtc != null)
-                        .OrderByDescending(q => (DateTime.UtcNow - q.LastContactAtUtc!.Value).TotalDays / Math.Max(1, q.CadenceReferenceDays!.Value)))
+                        .OrderByDescending(q => (DateTime.UtcNow.ToUniversalTime() - q.LastContactAtUtc!.Value.ToUniversalTime()).TotalDays / Math.Max(1, q.CadenceReferenceDays!.Value)))
                     {
-                        var ratio = (DateTime.UtcNow - row.LastContactAtUtc!.Value).TotalDays / Math.Max(1, row.CadenceReferenceDays!.Value);
+                        var ratio = (DateTime.UtcNow.ToUniversalTime() - row.LastContactAtUtc!.Value.ToUniversalTime()).TotalDays / Math.Max(1, row.CadenceReferenceDays!.Value);
                         if (ratio < 2) continue;
                         if (skipped.Contains(row.PersonId)) continue;
                         Add(row.PersonId, $"Neglected: {ratio:F1}x past the usual rhythm ({row.InteractionCount} past interactions).");
@@ -442,6 +443,40 @@ namespace Servicess
             }
         }
 
+        public async Task<DraftCommunicationResult> PreviewDraftAsync(Guid personId, OutreachChannel channel, string intent, string? instruction)
+        {
+            var ownerId = OwnerId();
+            var person = await _persons.GetPersonById(personId);
+            if (person == null || person.ApplicationUserId != ownerId)
+                throw new KeyNotFoundException($"No person found with id '{personId}'.");
+
+            return await GenerateForAsync(
+                personId,
+                person.Name,
+                channel,
+                channel == OutreachChannel.CallPrep ? DraftKind.CallPrep : DraftKind.Message,
+                string.IsNullOrWhiteSpace(intent) ? "Reconnect" : intent.Trim(),
+                instruction);
+        }
+
+        private async Task<DraftCommunicationResult> GenerateForAsync(
+            Guid personId, string? name, OutreachChannel channel, DraftKind kind, string intent, string? instruction)
+        {
+            var queue = await _scoring.GetQueueAsync(200);
+            var context = await BuildDraftContextAsync(personId, name, queue.ToDictionary(q => q.PersonId));
+            var generated = await _copilot.DraftCommunicationAsync(new DraftCommunicationRequest
+            {
+                Person = context,
+                Kind = kind,
+                Channel = channel,
+                Intent = intent,
+                GlobalInstruction = instruction,
+                CustomInstruction = instruction
+            });
+            ValidateGenerated(kind, generated);
+            return generated;
+        }
+
         public async Task<OutreachBatchResponse> GenerateDraftsAsync(Guid batchId)
         {
             using (Operation.Time("Generate outreach drafts"))
@@ -450,9 +485,6 @@ namespace Servicess
                 var batch = await RequireBatchAsync(ownerId, batchId);
                 if (batch.Status != BatchStatus.Draft && batch.Status != BatchStatus.Ready)
                     throw new InvalidOperationException("Drafts cannot be generated after approval.");
-
-                var queue = await _scoring.GetQueueAsync(200);
-                var states = queue.ToDictionary(q => q.PersonId);
 
                 foreach (var member in batch.Members.Where(m => !m.Excluded))
                 {
@@ -469,17 +501,13 @@ namespace Servicess
 
                     var channel = member.ChannelOverride ?? batch.Channel;
                     var kind = channel == OutreachChannel.CallPrep ? DraftKind.CallPrep : DraftKind.Message;
-                    var context = await BuildDraftContextAsync(member.PersonId, person.Name, states);
-                    var generated = await _copilot.DraftCommunicationAsync(new DraftCommunicationRequest
-                    {
-                        Person = context,
-                        Kind = kind,
-                        Channel = channel,
-                        Intent = string.IsNullOrWhiteSpace(member.IntentOverride) ? batch.Intent : member.IntentOverride!.Trim(),
-                        GlobalInstruction = string.IsNullOrWhiteSpace(member.CustomInstruction) ? batch.GlobalInstruction : null,
-                        CustomInstruction = member.CustomInstruction
-                    });
-                    ValidateGenerated(kind, generated);
+                    var generated = await GenerateForAsync(
+                        member.PersonId,
+                        person.Name,
+                        channel,
+                        kind,
+                        string.IsNullOrWhiteSpace(member.IntentOverride) ? batch.Intent : member.IntentOverride!.Trim(),
+                        string.IsNullOrWhiteSpace(member.CustomInstruction) ? batch.GlobalInstruction : member.CustomInstruction);
 
                     var now = DateTime.UtcNow;
                     var draft = new CommunicationDraft
@@ -634,17 +662,13 @@ namespace Servicess
                     throw new KeyNotFoundException($"No person found with id '{draft.PersonId}'.");
 
                 var queue = await _scoring.GetQueueAsync(200);
-                var context = await BuildDraftContextAsync(draft.PersonId, person.Name, queue.ToDictionary(q => q.PersonId));
-                var generated = await _copilot.DraftCommunicationAsync(new DraftCommunicationRequest
-                {
-                    Person = context,
-                    Kind = draft.Kind,
-                    Channel = member.ChannelOverride ?? batch.Channel,
-                    Intent = string.IsNullOrWhiteSpace(member.IntentOverride) ? batch.Intent : member.IntentOverride!.Trim(),
-                    GlobalInstruction = batch.GlobalInstruction,
-                    CustomInstruction = string.IsNullOrWhiteSpace(customInstruction) ? member.CustomInstruction : customInstruction!.Trim()
-                });
-                ValidateGenerated(draft.Kind, generated);
+                var generated = await GenerateForAsync(
+                    draft.PersonId,
+                    person.Name,
+                    member.ChannelOverride ?? batch.Channel,
+                    draft.Kind,
+                    string.IsNullOrWhiteSpace(member.IntentOverride) ? batch.Intent : member.IntentOverride!.Trim(),
+                    string.IsNullOrWhiteSpace(customInstruction) ? (string.IsNullOrWhiteSpace(member.CustomInstruction) ? batch.GlobalInstruction : member.CustomInstruction) : customInstruction!.Trim());
 
                 draft.Body = generated.Body.Trim();
                 draft.Subject = draft.Channel == OutreachChannel.Email ? CleanNullable(generated.Subject, 200) : null;

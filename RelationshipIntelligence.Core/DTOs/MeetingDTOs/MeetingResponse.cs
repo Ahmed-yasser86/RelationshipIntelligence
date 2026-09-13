@@ -25,6 +25,15 @@ namespace ServiceContracts.DTOs.MeetingDTOs
 
         public bool HasNotes { get; set; }
 
+        /// <summary>
+        /// Raw evidence (§18/§22). Returned so the UI can show the verbatim
+        /// transcript/notes behind the derived summary. Ownership-scoped like
+        /// the rest of the response.
+        /// </summary>
+        public string? RawTranscript { get; set; }
+
+        public string? RawNotes { get; set; }
+
         public string? ProcessedSummary { get; set; }
 
         public MeetingStatus Status { get; set; }
@@ -50,6 +59,8 @@ namespace ServiceContracts.DTOs.MeetingDTOs
             UserInstructions = meeting.UserInstructions,
             HasTranscript = !string.IsNullOrWhiteSpace(meeting.RawTranscript),
             HasNotes = !string.IsNullOrWhiteSpace(meeting.RawNotes),
+            RawTranscript = meeting.RawTranscript,
+            RawNotes = meeting.RawNotes,
             ProcessedSummary = meeting.ProcessedSummary,
             Status = meeting.Status,
             CreatedAtUtc = meeting.CreatedAtUtc,

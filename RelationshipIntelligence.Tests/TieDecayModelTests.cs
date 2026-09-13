@@ -72,6 +72,38 @@ namespace CRUDTests
         }
 
         [Fact]
+        public void SilenceDays_NullContact_ReturnsNull()
+        {
+            TieDecayModel.SilenceDays(null, Now).Should().BeNull();
+        }
+
+        [Fact]
+        public void SilenceDays_FutureContact_ReturnsZero()
+        {
+            TieDecayModel.SilenceDays(Now.AddHours(5), Now).Should().Be(0);
+        }
+
+        [Fact]
+        public void SilenceDays_FloorsFractionalDays_Canonical()
+        {
+            // 118.9d must show 118 everywhere — floor, never round/ceiling.
+            // This is the 118d-vs-119d regression guard (§11).
+            TieDecayModel.SilenceDays(Now.AddDays(-118.9), Now).Should().Be(118);
+            TieDecayModel.SilenceDays(Now.AddDays(-119.0), Now).Should().Be(119);
+            TieDecayModel.SilenceDays(Now.AddDays(-25.9), Now).Should().Be(25);
+            TieDecayModel.SilenceDays(Now.AddDays(-6.1), Now).Should().Be(6);
+        }
+
+        [Fact]
+        public void SilenceDays_NormalizesToUtc()
+        {
+            var local = new DateTime(2026, 9, 1, 12, 0, 0, DateTimeKind.Local);
+            var utc = local.ToUniversalTime();
+            TieDecayModel.SilenceDays(local, Now)
+                .Should().Be(TieDecayModel.SilenceDays(utc, Now));
+        }
+
+        [Fact]
         public void SilenceQuantile_NoHistory_ReturnsNull()
         {
             TieDecayModel.SilenceQuantile(new List<double>(), 50).Should().BeNull();

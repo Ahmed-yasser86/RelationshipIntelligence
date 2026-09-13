@@ -44,6 +44,26 @@ namespace Servicess
             return Math.Min(180, Math.Max(3, reference));
         }
 
+        /// <summary>
+        /// Canonical current-silence definition (§11). Single source of truth for
+        /// "days since last contact": floor of elapsed UTC days, null when there is
+        /// no contact, 0 for future timestamps. All backend and frontend surfaces
+        /// must use this (frontend mirrors it in lib/format.ts daysSince).
+        /// Using floor (not round, not ceiling) and UTC on both ends eliminates the
+        /// 118d-vs-119d class of off-by-one disagreements.
+        /// </summary>
+        public static int? SilenceDays(DateTime? lastContactUtc, DateTime nowUtc)
+        {
+            if (lastContactUtc == null)
+                return null;
+            var last = lastContactUtc.Value.ToUniversalTime();
+            var now = nowUtc.ToUniversalTime();
+            double totalDays = (now - last).TotalDays;
+            if (totalDays <= 0)
+                return 0;
+            return (int)Math.Floor(totalDays);
+        }
+
         public static double? SilenceQuantile(IReadOnlyList<double> gapsDays, double currentSilenceDays)
         {
             if (gapsDays == null || gapsDays.Count == 0)

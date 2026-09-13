@@ -5,11 +5,11 @@ import { Badge } from "@/components/ui/badge";
 import { BandBadge, NavButton, PersonAvatar, UrgencyBar } from "@/components/states";
 import { RhythmBar } from "@/components/explain-drawer";
 import { api } from "@/lib/api";
-import { daysSince, formatDate, timeAgo } from "@/lib/format";
+import { formatDate, silenceDays, timeAgo } from "@/lib/format";
 import type { InteractionResponse, MemoryEntryResponse, RelationshipHealth } from "@/lib/types";
 
 export function cadenceLine(item: RelationshipHealth): string {
-  const silent = daysSince(item.lastContactAtUtc);
+  const silent = silenceDays(item.silenceDays, item.lastContactAtUtc);
   const rhythm =
     item.cadenceReferenceDays != null
       ? `roughly every ${Math.round(item.cadenceReferenceDays)} days`
@@ -63,7 +63,7 @@ export function AttentionRow({
     }
   }
 
-  const silent = daysSince(item.lastContactAtUtc);
+  const silent = silenceDays(item.silenceDays, item.lastContactAtUtc);
   const recent = [...(evidence ?? [])]
     .sort((a, b) => +new Date(b.timeOfInteraction) - +new Date(a.timeOfInteraction))
     .slice(0, 3);

@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { EvidenceChip } from "@/components/evidence-chip";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -12,9 +11,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { EvidenceChip } from "@/components/evidence-chip";
 import { ApiError, api } from "@/lib/api";
 import { useCopilot } from "@/lib/copilot";
-import type { AiProviderSettings, ChatTurn, CopilotAnswer } from "@/lib/types";
+import type { AiProviderSettings, ChatTurn } from "@/lib/types";
 
 const PROVIDERS = ["OpenAI", "Gemini", "Custom"] as const;
 const PRESETS: Record<string, { model: string; baseUrl: string }> = {
@@ -23,10 +23,55 @@ const PRESETS: Record<string, { model: string; baseUrl: string }> = {
   Custom: { model: "", baseUrl: "https://api.openai.com/v1" },
 };
 
+interface AgentCitation {
+  kind: string;
+  id: string | null;
+  label: string;
+}
+
+interface AgentEvidence {
+  title: string;
+  detail: string;
+  kind: string;
+  refId: string | null;
+  refKind: string | null;
+}
+
+interface AgentAction {
+  kind: string;
+  label: string;
+  payload: string | null;
+}
+
+interface AgentWorkingState {
+  currentTask: string | null;
+  selectedPeople: string[];
+  batchId: string | null;
+  meetingId: string | null;
+  channel: string | null;
+  intent: string | null;
+  pendingApprovals: string[];
+}
+
+interface AgentReply {
+  sessionId: string;
+  text: string;
+  citations: AgentCitation[];
+  evidence: AgentEvidence[];
+  actions: AgentAction[];
+  workingState: AgentWorkingState | null;
+  needsInput: { prompt: string; options: string[] } | null;
+  limitedContext: boolean;
+}
+
 interface Msg {
   role: "user" | "assistant";
   text: string;
-  citations?: CopilotAnswer["citations"];
+  citations?: AgentCitation[];
+  evidence?: AgentEvidence[];
+  actions?: AgentAction[];
+  workingState?: AgentWorkingState | null;
+  needsInput?: { prompt: string; options: string[] } | null;
 }
 
 function ProviderSettings({ onSaved }: { onSaved: () => void }) {
@@ -132,17 +177,18 @@ function ProviderSettings({ onSaved }: { onSaved: () => void }) {
 
 export function CopilotDrawer() {
   const { open, closeCopilot, personId, personName } = useCopilot();
+  const navigate = useNavigate();
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [workingState, setWorkingState] = useState<AgentWorkingState | null>(null);
   const [needsSetup, setNeedsSetup] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (open) {
-      setMessages([]);
-      setNeedsSetup(false);
       bottomRef.current?.scrollIntoView();
     }
   }, [open, personId]);
@@ -151,21 +197,78 @@ export function CopilotDrawer() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  async function send(e?: React.FormEvent) {
-    e?.preventDefault();
-    const question = input.trim();
+  function startNew() {
+    setSessionId(null);
+    setMessages([]);
+    setWorkingState(null);
+    setNeedsSetup(false);
+  }
+
+  async function runAction(action: AgentAction) {
+    switch (action.kind) {
+      case "open":
+        if (action.payload) navigate(`/people/${action.payload}`);
+        break;
+      case "open-queue":
+        navigate("/attention");
+        break;
+      case "open-batch":
+        if (action.payload) navigate(`/outreach/${action.payload}`);
+        break;
+      case "log":
+      case "explain":
+        if (action.payload) navigate(`/people/${action.payload}`);
+        break;
+      case "prepare-meeting":
+        navigate("/meetings");
+        break;
+      case "approve-batch":
+        if (!action.payload) break;
+        setBusy(true);
+        try {
+          await api.post(`/api/Outreach/PostBatchApprove?id=${action.payload}`, {});
+          await sendMessage("What is the status of that batch now?", true);
+        } catch (err) {
+          setMessages((m) => [...m, { role: "assistant", text: err instanceof ApiError ? err.body || err.message : "Approval failed." }]);
+        } finally {
+          setBusy(false);
+        }
+        break;
+      default:
+        break;
+    }
+  }
+
+  async function sendMessage(text: string, silent = false) {
+    const question = text.trim();
     if (question === "" || busy) return;
-    const history: ChatTurn[] = messages.map((m) => ({ role: m.role, text: m.text }));
-    setMessages((m) => [...m, { role: "user", text: question }]);
+    if (!silent) setMessages((m) => [...m, { role: "user", text: question }]);
     setInput("");
     setBusy(true);
     try {
-      const answer = await api.post<CopilotAnswer>("/api/Copilot/PostAsk", {
-        Question: question,
-        PersonId: personId,
-        History: history.slice(-8),
+      const history: ChatTurn[] = messages
+        .slice(-8)
+        .map((m) => ({ role: m.role, text: m.text }));
+      const answer = await api.post<AgentReply>("/api/Copilot/PostAgentChat", {
+        SessionId: sessionId,
+        Message: question,
+        AppContext: { EntryPoint: personId ? "person" : "general", PersonId: personId },
+        History: history,
       });
-      setMessages((m) => [...m, { role: "assistant", text: answer.text, citations: answer.citations }]);
+      setSessionId(answer.sessionId);
+      if (answer.workingState) setWorkingState(answer.workingState);
+      setMessages((m) => [
+        ...m,
+        {
+          role: "assistant",
+          text: answer.text,
+          citations: answer.citations,
+          evidence: answer.evidence,
+          actions: answer.actions,
+          workingState: answer.workingState,
+          needsInput: answer.needsInput,
+        },
+      ]);
     } catch (err) {
       if (err instanceof ApiError && err.status === 409) {
         setNeedsSetup(true);
@@ -178,6 +281,11 @@ export function CopilotDrawer() {
     } finally {
       setBusy(false);
     }
+  }
+
+  async function send(e?: React.FormEvent) {
+    e?.preventDefault();
+    await sendMessage(input);
   }
 
   if (!open) return null;
@@ -195,6 +303,9 @@ export function CopilotDrawer() {
           <Button size="sm" variant="ghost" onClick={() => setShowSettings((s) => !s)}>
             {showSettings ? "Hide setup" : "Setup"}
           </Button>
+          <Button size="sm" variant="ghost" onClick={startNew} title="Start a new conversation (clears working state)">
+            New
+          </Button>
           <Button size="sm" variant="ghost" onClick={closeCopilot} aria-label="Close co-pilot">
             ✕
           </Button>
@@ -204,6 +315,25 @@ export function CopilotDrawer() {
       {(showSettings || needsSetup) && (
         <div className="border-b px-4 py-3">
           <ProviderSettings onSaved={() => setNeedsSetup(false)} />
+        </div>
+      )}
+
+      {workingState?.currentTask && (
+        <div className="border-b px-4 py-2" aria-live="polite">
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+            Working on: {workingState.currentTask}
+          </p>
+          {workingState.selectedPeople.length > 0 && (
+            <p className="mt-0.5 text-xs tabular-nums">
+              {workingState.selectedPeople.slice(0, 4).join(" · ")}
+              {workingState.selectedPeople.length > 4 ? ` · +${workingState.selectedPeople.length - 4} more` : ""}
+            </p>
+          )}
+          {(workingState.channel || workingState.intent) && (
+            <p className="text-xs text-muted-foreground">
+              {[workingState.channel, workingState.intent].filter(Boolean).join(" · ")}
+            </p>
+          )}
         </div>
       )}
 
@@ -224,9 +354,34 @@ export function CopilotDrawer() {
               <EvidenceChip kind="suggested" label="Assistant" className="self-start" title="AI interpretation over your data — observed facts, derived scores, and suggestions are labeled inside" />
             )}
             <p className="whitespace-pre-wrap">{m.text}</p>
+            {(m.evidence ?? []).length > 0 && (
+              <details className="mt-1 rounded-md border bg-background px-2 py-1 text-xs">
+                <summary className="cursor-pointer font-medium">Why? Show evidence ({m.evidence!.length})</summary>
+                <ul className="mt-1 space-y-1">
+                  {m.evidence!.map((e, j) => (
+                    <li key={j}>
+                      <span className="font-medium">{e.title}</span>
+                      <span className="text-muted-foreground"> — {e.detail}</span>
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            )}
+            {m.needsInput && (
+              <div className="mt-1 flex flex-col gap-1.5 rounded-md border border-amber-300 bg-amber-50/50 px-2 py-1.5">
+                <p className="text-xs font-medium">{m.needsInput.prompt}</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {m.needsInput.options.map((o) => (
+                    <Button key={o} size="sm" variant="outline" disabled={busy} onClick={() => void sendMessage(o)}>
+                      {o}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            )}
             {(m.citations ?? []).length > 0 && (
               <div className="flex flex-wrap gap-1">
-                {(m.citations ?? []).map((c, j) => (
+                {m.citations!.map((c, j) => (
                   c.id ? (
                     <Link key={j} to={`/people/${c.id}`} className="text-xs underline opacity-80">
                       {c.label}
@@ -234,6 +389,15 @@ export function CopilotDrawer() {
                   ) : (
                     <span key={j} className="text-xs opacity-70">{c.label}</span>
                   )
+                ))}
+              </div>
+            )}
+            {(m.actions ?? []).length > 0 && (
+              <div className="flex flex-wrap gap-1.5 pt-0.5">
+                {m.actions!.map((a, j) => (
+                  <Button key={j} size="sm" variant="outline" disabled={busy} onClick={() => void runAction(a)}>
+                    {a.label}
+                  </Button>
                 ))}
               </div>
             )}

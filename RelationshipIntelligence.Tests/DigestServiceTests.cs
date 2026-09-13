@@ -59,7 +59,7 @@ namespace CRUDTests
             var wanted = Entry(Guid.NewGuid(), "Hot", 90, now.AddDays(-30));
             var tooHealthy = Entry(Guid.NewGuid(), "Fine", 20, now.AddDays(-30));
             var justContacted = Entry(Guid.NewGuid(), "Fresh", 95, now.AddDays(-1));
-            _scoringMock.Setup(s => s.GetQueueAsync(50))
+            _scoringMock.Setup(s => s.GetQueueAsync(200))
                 .ReturnsAsync(new List<RelationshipHealthResponse> { justContacted, wanted, tooHealthy });
             _interactionsMock.Setup(r => r.ListForPersonAsync(It.IsAny<Guid>()))
                 .ReturnsAsync(new List<Interaction>());
@@ -85,7 +85,7 @@ namespace CRUDTests
             {
                 new() { PersonId = personId, ApplicationUserId = _userA, UpdatedAtUtc = DateTime.UtcNow, LastContactAtUtc = DateTime.UtcNow.AddDays(-5) }
             });
-            _scoringMock.Setup(s => s.GetQueueAsync(50))
+            _scoringMock.Setup(s => s.GetQueueAsync(200))
                 .ReturnsAsync(new List<RelationshipHealthResponse>());
 
             await Service().BuildAsync("https://app.test");
@@ -110,7 +110,7 @@ namespace CRUDTests
                 new() { PersonId = freshId, ApplicationUserId = _userA, UpdatedAtUtc = DateTime.UtcNow },
                 new() { PersonId = staleId, ApplicationUserId = _userA, UpdatedAtUtc = DateTime.UtcNow.AddDays(-2) }
             });
-            _scoringMock.Setup(s => s.GetQueueAsync(50))
+            _scoringMock.Setup(s => s.GetQueueAsync(200))
                 .ReturnsAsync(new List<RelationshipHealthResponse>());
 
             await Service().BuildAsync("https://app.test");
@@ -134,7 +134,7 @@ namespace CRUDTests
             {
                 new() { PersonId = personId, ApplicationUserId = _userA, UpdatedAtUtc = DateTime.UtcNow, EvidenceStatus = EvidenceStatus.NoHistory }
             });
-            _scoringMock.Setup(s => s.GetQueueAsync(50))
+            _scoringMock.Setup(s => s.GetQueueAsync(200))
                 .ReturnsAsync(new List<RelationshipHealthResponse>());
 
             await Service().BuildAsync("https://app.test");
@@ -151,7 +151,7 @@ namespace CRUDTests
             var existing = new DigestDelivery { DigestDeliveryId = Guid.NewGuid(), ApplicationUserId = _userA };
             _digestsMock.Setup(d => d.FindDeliveryAsync(_userA, It.IsAny<DateTime>()))
                 .ReturnsAsync(existing);
-            _scoringMock.Setup(s => s.GetQueueAsync(50))
+            _scoringMock.Setup(s => s.GetQueueAsync(200))
                 .ReturnsAsync(new List<RelationshipHealthResponse>());
 
             var first = await Service().BuildAsync("https://app.test");
@@ -179,7 +179,7 @@ namespace CRUDTests
         public async Task DeliverAsync_NoEntries_SendsNothing()
         {
             ArrangeOwner();
-            _scoringMock.Setup(s => s.GetQueueAsync(50))
+            _scoringMock.Setup(s => s.GetQueueAsync(200))
                 .ReturnsAsync(new List<RelationshipHealthResponse>());
 
             var result = await Service().DeliverAsync("https://app.test", "user@test.com");
@@ -245,7 +245,7 @@ namespace CRUDTests
         public async Task PreviewAsync_ReturnsFullEmailWithoutSending()
         {
             ArrangeOwner();
-            _scoringMock.Setup(s => s.GetQueueAsync(50))
+            _scoringMock.Setup(s => s.GetQueueAsync(200))
                 .ReturnsAsync(new List<RelationshipHealthResponse>
                 {
                     Entry(Guid.NewGuid(), "Hot", 90, DateTime.UtcNow.AddDays(-30))

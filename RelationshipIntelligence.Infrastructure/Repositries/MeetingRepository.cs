@@ -37,6 +37,21 @@ namespace Repositories
             }
         }
 
+        public async Task<List<Meeting>> ListForMappedPersonAsync(Guid ownerId, Guid personId)
+        {
+            using (Operation.Time("List meetings for person"))
+            {
+                if (ownerId == Guid.Empty || personId == Guid.Empty)
+                    return new List<Meeting>();
+
+                return await WithDetails()
+                    .Where(m => m.ApplicationUserId == ownerId
+                        && m.People.Any(p => p.MappedPersonId == personId))
+                    .OrderByDescending(m => m.OccurredAtUtc)
+                    .ToListAsync();
+            }
+        }
+
         public async Task<Meeting?> GetAsync(Guid ownerId, Guid meetingId)
         {
             using (Operation.Time("Get meeting"))

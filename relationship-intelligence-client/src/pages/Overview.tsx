@@ -6,7 +6,7 @@ import { BriefingBlock } from "@/components/briefing-block";
 import { QuickLog } from "@/components/quick-log";
 import { ApiError, api } from "@/lib/api";
 import { useCopilot } from "@/lib/copilot";
-import { daysSince } from "@/lib/format";
+import { silenceDays } from "@/lib/format";
 import { EventTypes } from "@/lib/types";
 import type { NetworkGraph, RelationshipHealth } from "@/lib/types";
 
@@ -41,7 +41,9 @@ export function Overview() {
 
   const loadQueue = useCallback(async () => {
     try {
-      const queue = await api.get<RelationshipHealth[]>("/api/Contacts/GetRelationshipQueue?top=50");
+      // top=200 covers the full network so band counts are totals, not a
+      // capped subset (§14). Display still slices top 3.
+      const queue = await api.get<RelationshipHealth[]>("/api/Contacts/GetRelationshipQueue?top=200");
       setTopAttention(queue.slice(0, 3));
       return queue;
     } catch {
@@ -63,7 +65,7 @@ export function Overview() {
         const upcoming: ComingUp[] = [];
         for (const q of queue) {
           for (const ev of q.upcomingEvents ?? []) {
-            const silent = daysSince(q.lastContactAtUtc);
+            const silent = silenceDays(q.silenceDays, q.lastContactAtUtc);
             upcoming.push({
               personId: q.personId,
               personName: q.name,

@@ -71,7 +71,12 @@ function PersonSearch({
                   setOpen(false);
                 }}
               >
-                {p.name ?? "Unnamed contact"}
+                <span className="font-medium">{p.name ?? "Unnamed contact"}</span>
+                {(p.circles?.[0]?.name || p.contactItemRoles?.[0]?.role) && (
+                  <span className="block truncate text-xs text-muted-foreground">
+                    {[p.contactItemRoles?.[0]?.role, p.circles?.[0]?.name].filter(Boolean).join(" · ")}
+                  </span>
+                )}
               </button>
             </li>
           ))}
@@ -269,12 +274,27 @@ export function MeetingDetail() {
           )}
         </div>
         {!editingSource && (
-          <p className="text-sm text-muted-foreground">
-            {meeting.hasTranscript ? "Transcript attached. " : ""}
-            {meeting.hasNotes ? "Notes attached. " : ""}
-            {!meeting.hasTranscript && !meeting.hasNotes ? "No transcript or notes yet. " : ""}
-            Raw source is preserved separately from AI interpretation.
-          </p>
+          <div className="flex flex-col gap-2">
+            <p className="text-sm text-muted-foreground">
+              {meeting.hasTranscript ? "Transcript attached. " : ""}
+              {meeting.hasNotes ? "Notes attached. " : ""}
+              {!meeting.hasTranscript && !meeting.hasNotes ? "No transcript or notes yet. " : ""}
+              Raw source is preserved separately from AI interpretation.
+            </p>
+            {(meeting.rawTranscript || meeting.rawNotes) && (
+              <details className="rounded-lg border px-3 py-2">
+                <summary className="cursor-pointer text-sm font-medium">
+                  View raw source (observed evidence)
+                </summary>
+                {meeting.rawTranscript && (
+                  <pre className="mt-2 max-h-64 overflow-auto whitespace-pre-wrap text-xs">{meeting.rawTranscript}</pre>
+                )}
+                {meeting.rawNotes && (
+                  <pre className="mt-2 max-h-40 overflow-auto whitespace-pre-wrap text-xs">{meeting.rawNotes}</pre>
+                )}
+              </details>
+            )}
+          </div>
         )}
         {editingSource && (
           <div className="flex flex-col gap-2 rounded-lg border p-3">
@@ -375,7 +395,14 @@ export function MeetingDetail() {
       <section>
         <h2 className="mb-2 text-base font-semibold">Findings ({meeting.findings.length})</h2>
         {meeting.processedSummary && (
-          <p className="mb-2 rounded-lg border bg-card px-3 py-2 text-sm">{meeting.processedSummary}</p>
+          <div className="mb-2 rounded-lg border bg-card px-3 py-2">
+            <p className="mb-1 text-xs text-muted-foreground">
+              {meeting.status === 4
+                ? "Meeting summary — confirmed by you, safe to rely on."
+                : "AI-derived summary — pending your confirmation. Verify against the raw source above before confirming the meeting."}
+            </p>
+            <p className="text-sm">{meeting.processedSummary}</p>
+          </div>
         )}
         {meeting.findings.length === 0 && <p className="text-sm text-muted-foreground">No findings yet.</p>}
         <ul className="flex flex-col gap-2">

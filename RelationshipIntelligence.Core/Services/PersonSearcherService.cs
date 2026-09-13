@@ -344,7 +344,14 @@ namespace Servicess
                         predicate = predicate.And(p => p.phone != null && p.phone.Contains(filter.Phone));
 
                     if (!string.IsNullOrWhiteSpace(filter.CircleName))
-                        predicate = predicate.And(p => p.Circles.Any(c => c.Name.Contains(filter.CircleName)));
+                    {
+                        // Exact (trimmed) company match — never raw-substring (§27).
+                        // Case-insensitivity relies on the database collation, matching
+                        // organization identity; avoids false positives like "Pro"
+                        // matching "Proceedit".
+                        var circleName = filter.CircleName.Trim();
+                        predicate = predicate.And(p => p.Circles.Any(c => c.Name.Trim() == circleName));
+                    }
 
                     if (!string.IsNullOrWhiteSpace(filter.ContactItemRole))
                         predicate = predicate.And(p => p.ContactItemRoles.Any(r => r.Role.Contains(filter.ContactItemRole)));

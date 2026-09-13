@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { EvidenceChip } from "@/components/evidence-chip";
 import { ApiError, api } from "@/lib/api";
-import { daysSince } from "@/lib/format";
+import { silenceDays } from "@/lib/format";
 import type { EventOccurrence, MemoryEntryResponse, OutreachBatch, RelationshipHealth } from "@/lib/types";
 
 export function NextStep({
@@ -50,7 +50,7 @@ export function NextStep({
     };
   }, [personId]);
 
-  const silent = daysSince(state?.lastContactAtUtc);
+  const silent = silenceDays(state?.silenceDays, state?.lastContactAtUtc);
   const pastRhythm =
     state?.cadenceReferenceDays != null && silent != null && silent > state.cadenceReferenceDays;
   const soonEvent = (events ?? []).find((e) => e.inDays <= 7);

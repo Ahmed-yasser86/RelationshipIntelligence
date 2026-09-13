@@ -159,6 +159,8 @@ export interface MeetingResponse {
   userInstructions: string | null;
   hasTranscript: boolean;
   hasNotes: boolean;
+  rawTranscript: string | null;
+  rawNotes: string | null;
   processedSummary: string | null;
   status: number;
   createdAtUtc: string;
@@ -287,6 +289,8 @@ export interface RelationshipHealth {
   name: string | null;
   tieStrength: number;
   lastContactAtUtc: string | null;
+  /** Canonical server-computed silence (§11). Prefer over recomputing. */
+  silenceDays?: number | null;
   interactionCount: number;
   evidenceStatus: string;
   cadenceReferenceDays: number | null;

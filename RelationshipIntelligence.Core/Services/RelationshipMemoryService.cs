@@ -103,6 +103,79 @@ namespace Servicess
             }
         }
 
+        public async Task<MemoryEntryResponse> SuggestEntryAsync(Guid personId, RelationshipMemoryKind kind, string title, string? detail)
+        {
+            using (Operation.Time("Suggest relationship memory entry"))
+            {
+                var cleanTitle = (title ?? string.Empty).Trim();
+                if (cleanTitle.Length == 0 || cleanTitle.Length > 200)
+                    throw new ArgumentException("Suggested title must be 1-200 characters.", nameof(title));
+
+                var cleanDetail = string.IsNullOrWhiteSpace(detail) ? null : detail.Trim();
+                if (cleanDetail?.Length > 2000)
+                    throw new ArgumentException("Suggested detail cannot exceed 2000 characters.", nameof(detail));
+
+                var ownerId = OwnerId();
+                await RequireOwnedPersonAsync(ownerId, personId);
+
+                var existing = await _entries.ListForPersonAsync(ownerId, personId);
+                if (existing.Any(e => e.Status == 0 && Normalize(e.Title) == Normalize(cleanTitle)))
+                    throw new InvalidOperationException("An active entry with the same title already exists.");
+
+                var now = DateTime.UtcNow;
+                var entry = new RelationshipMemoryEntry
+                {
+                    MemoryEntryId = Guid.NewGuid(),
+                    ApplicationUserId = ownerId,
+                    PersonId = personId,
+                    Kind = kind,
+                    Title = cleanTitle,
+                    Detail = cleanDetail,
+                    Status = MemoryEntryStatus.Active,
+                    Provenance = MemoryProvenance.AiSuggested,
+                    CreatedAtUtc = now,
+                    UpdatedAtUtc = now
+                };
+
+                await _entries.AddAsync(entry);
+                await _unitOfWork.SaveChangesAsync();
+                return MemoryEntryResponse.FromEntry(entry);
+            }
+        }
+
+        private static string Normalize(string value) =>
+            new string((value ?? string.Empty).Trim().ToLowerInvariant().Where(char.IsLetterOrDigit).ToArray());
+
+        public async Task<List<MemoryEntryResponse>> ProposeGapsAsync(Guid personId)
+        {
+            using (Operation.Time("Propose relationship memory gaps"))
+            {
+                var ownerId = OwnerId();
+                await RequireOwnedPersonAsync(ownerId, personId);
+
+                var active = (await _entries.ListForPersonAsync(ownerId, personId))
+                    .Where(e => e.Status == 0)
+                    .ToList();
+                var proposed = new List<MemoryEntryResponse>();
+
+                if (!active.Any(e => e.Kind == RelationshipMemoryKind.Intent || e.Kind == RelationshipMemoryKind.Goal))
+                {
+                    proposed.Add(await SuggestEntryAsync(personId, RelationshipMemoryKind.Intent,
+                        "Define what this relationship is for",
+                        "No intent or goal is recorded. Stating one focuses future plans and outreach."));
+                }
+
+                if (!active.Any(e => e.Kind == RelationshipMemoryKind.Topic))
+                {
+                    proposed.Add(await SuggestEntryAsync(personId, RelationshipMemoryKind.Topic,
+                        "Capture shared topics",
+                        "No recurring topics are recorded. Noting what you usually discuss sharpens briefings and drafts."));
+                }
+
+                return proposed;
+            }
+        }
+
         public async Task<MemoryEntryResponse> UpdateAsync(MemoryEntryUpdateRequest request)
         {
             using (Operation.Time("Update relationship memory entry"))

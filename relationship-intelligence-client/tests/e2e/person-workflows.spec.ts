@@ -58,7 +58,7 @@ test.describe("person workflows", () => {
     expect([403, 404]).toContain(check.status());
   });
 
-  test("full add form creates a contact", async ({ page }) => {
+  test("full add form creates a contact", async ({ page, request }) => {
     await page.goto("/people/new");
     await page.getByRole("tab", { name: "Full profile" }).click();
     await page.getByLabel("Name", { exact: true }).fill(`E2E Full ${Date.now()}`);
@@ -73,6 +73,12 @@ test.describe("person workflows", () => {
     await page.getByRole("button", { name: "Add person", exact: true }).last().click();
     await expect(page).toHaveURL(/\/people\/[0-9a-f-]{36}/);
     await expect(page.getByText("Follow Up", { exact: true }).first()).toBeVisible();
+    // Cleanup so the probe never pollutes queue/briefing/network counts (§15).
+    const personId = page.url().split("/").pop()!;
+    const token = await page.evaluate(() => localStorage.getItem("ri.token"));
+    await request.delete(`${API_URL}/api/Contacts/DeletePersoneObject?id=${personId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
   });
 
   test("next step drafts outreach and prepares meetings in place", async ({ page }) => {

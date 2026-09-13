@@ -74,6 +74,13 @@ namespace Servicess
             return meeting;
         }
 
+        private async Task RequireOwnedPersonAsync(Guid ownerId, Guid personId)
+        {
+            var person = await _persons.GetPersonById(personId);
+            if (person == null || person.ApplicationUserId != ownerId)
+                throw new KeyNotFoundException($"No person found with id '{personId}'.");
+        }
+
         private async Task<Dictionary<Guid, string?>> NameMapAsync()
         {
             var people = await _persons.GetAllPersons();
@@ -129,6 +136,19 @@ namespace Servicess
             {
                 var ownerId = OwnerId();
                 var meetings = await _meetings.ListAsync(ownerId);
+                var names = await NameMapAsync();
+                return meetings.Select(m => MeetingResponse.FromMeeting(m,
+                    id => names.TryGetValue(id, out var name) ? name : null)).ToList();
+            }
+        }
+
+        public async Task<List<MeetingResponse>> ListMeetingsForPersonAsync(Guid personId)
+        {
+            using (Operation.Time("List meetings for person"))
+            {
+                var ownerId = OwnerId();
+                await RequireOwnedPersonAsync(ownerId, personId);
+                var meetings = await _meetings.ListForMappedPersonAsync(ownerId, personId);
                 var names = await NameMapAsync();
                 return meetings.Select(m => MeetingResponse.FromMeeting(m,
                     id => names.TryGetValue(id, out var name) ? name : null)).ToList();
@@ -332,6 +352,10 @@ namespace Servicess
                     continue;
 
                 var match = SuggestMatch(name, owned);
+                // No duplicate rows for one canonical person (§17): a second
+                // spelling variant pointing at the same person is skipped.
+                if (match != null && meeting.People.Any(p => p.MappedPersonId != null && p.MappedPersonId == match.PersonId))
+                    continue;
                 var row = new MeetingPerson
                 {
                     MeetingPersonId = Guid.NewGuid(),
@@ -347,21 +371,13 @@ namespace Servicess
             }
         }
 
+        // Entity resolution (§17/§20): exact full-name match only. Never guess
+        // from a first name or prefix — the user chooses from candidates.
         private static Person? SuggestMatch(string detected, List<Person?> owned)
         {
-            var exact = owned.Where(p => string.Equals(p?.Name?.Trim(), detected, StringComparison.OrdinalIgnoreCase)).ToList();
+            var exact = owned.Where(p => string.Equals(p?.Name?.Trim(), detected.Trim(), StringComparison.OrdinalIgnoreCase)).ToList();
             if (exact.Count == 1) return exact[0];
-            if (exact.Count > 1) return null;
-
-            var firstToken = detected.Split(' ', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
-            if (string.IsNullOrWhiteSpace(firstToken)) return null;
-
-            var candidates = owned.Where(p =>
-                (p?.Name ?? string.Empty).StartsWith(detected, StringComparison.OrdinalIgnoreCase)
-                || (p?.Name ?? string.Empty).StartsWith(firstToken + " ", StringComparison.OrdinalIgnoreCase)
-                || (p?.Name ?? string.Empty).Split(' ', StringSplitOptions.RemoveEmptyEntries)
-                    .Any(part => string.Equals(part, firstToken, StringComparison.OrdinalIgnoreCase))).ToList();
-            return candidates.Count == 1 ? candidates[0] : null;
+            return null;
         }
 
         private async Task PersistFindingsAsync(Guid ownerId, Meeting meeting, MeetingExtraction extraction)
@@ -506,7 +522,10 @@ namespace Servicess
                         finding.Detail = request.Detail.Trim().Length > 2000 ? request.Detail.Trim()[..2000] : request.Detail.Trim();
                     finding.Status = FindingStatus.Accepted;
                     finding.ResolutionNote = CleanNullable(request.ResolutionNote, 500, nameof(request.ResolutionNote));
-                    finding.AcceptedAsEntryId = await ConvertToMemoryAsync(ownerId, meeting, finding);
+                    // Approval model (§21): finding-Accept only stages the finding.
+                    // Durable memory is written once at meeting Confirm, so
+                    // unconfirmed-meeting facts never leak into Copilot/queue.
+                    // (ConfirmAsync sweeps Accepted findings with null entry id.)
                 }
                 else
                 {
@@ -520,13 +539,21 @@ namespace Servicess
             }
         }
 
+        // Every FindingKind maps somewhere: Accept must never silently drop
+        // evidence (§19). Action-oriented kinds become commitments, open
+        // questions stay visible as topics, date mentions persist as milestones.
         private static readonly Dictionary<FindingKind, RelationshipMemoryKind> FindingToMemoryKind = new()
         {
             { FindingKind.Commitment, RelationshipMemoryKind.Commitment },
+            { FindingKind.ActionItem, RelationshipMemoryKind.Commitment },
+            { FindingKind.FollowUp, RelationshipMemoryKind.Commitment },
             { FindingKind.PersonFact, RelationshipMemoryKind.Fact },
             { FindingKind.Project, RelationshipMemoryKind.SharedProject },
             { FindingKind.Topic, RelationshipMemoryKind.Topic },
-            { FindingKind.Decision, RelationshipMemoryKind.Fact }
+            { FindingKind.Question, RelationshipMemoryKind.Topic },
+            { FindingKind.Decision, RelationshipMemoryKind.Fact },
+            { FindingKind.Event, RelationshipMemoryKind.Milestone },
+            { FindingKind.DateMention, RelationshipMemoryKind.Milestone }
         };
 
         private async Task<Guid?> ConvertToMemoryAsync(Guid ownerId, Meeting meeting, MeetingFinding finding)

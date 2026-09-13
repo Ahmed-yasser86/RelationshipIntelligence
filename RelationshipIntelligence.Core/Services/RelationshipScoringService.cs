@@ -190,7 +190,7 @@ namespace Servicess
                 TakenAtUtc = now,
                 TieStrength = state.TieStrength,
                 UrgencyScore = state.UrgencyScore,
-                Band = TieDecayModel.BandFor(state.UrgencyScore).ToString()
+                    Band = CapBandForEvidence(TieDecayModel.BandFor(state.UrgencyScore), state.EvidenceStatus).ToString()
             });
         }
 
@@ -205,6 +205,7 @@ namespace Servicess
                 .ToDictionary(p => p!.PersonId);
             var states = await _states.ListForOwnerAsync(userId.Value);
 
+            var now = DateTime.UtcNow;
             var queue = states
                 .Where(s => people.ContainsKey(s.PersonId))
                 .Where(s => s.EvidenceStatus != EvidenceStatus.NoHistory)
@@ -218,12 +219,13 @@ namespace Servicess
                     Name = people[s.PersonId].Name ?? string.Empty,
                     TieStrength = s.TieStrength,
                     LastContactAtUtc = s.LastContactAtUtc,
+                    SilenceDays = TieDecayModel.SilenceDays(s.LastContactAtUtc, now),
                     InteractionCount = s.InteractionCount,
                     EvidenceStatus = s.EvidenceStatus.ToString(),
                     CadenceReferenceDays = s.CadenceReferenceDays,
                     SilenceQuantile = s.SilenceQuantile,
                     UrgencyScore = s.UrgencyScore,
-                    Band = TieDecayModel.BandFor(s.UrgencyScore).ToString(),
+                    Band = CapBandForEvidence(TieDecayModel.BandFor(s.UrgencyScore), s.EvidenceStatus).ToString(),
                     IsBridge = s.IsBridge,
                     IsImportant = IsImportant(people[s.PersonId])
                 })
@@ -252,9 +254,11 @@ namespace Servicess
                     continue;
 
                 row.UpcomingEvents = personEvents;
+                // Exact elapsed days for threshold comparison; display uses
+                // canonical floor via row.SilenceDays. UTC-normalized both ends.
                 var silenceDays = row.LastContactAtUtc == null
                     ? (double?)null
-                    : (now - row.LastContactAtUtc.Value).TotalDays;
+                    : (now.ToUniversalTime() - row.LastContactAtUtc.Value.ToUniversalTime()).TotalDays;
                 row.HasEventSignal = personEvents.Any(e => e.InDays <= 7)
                     && (row.UrgencyScore > 65
                         || (silenceDays != null && row.CadenceReferenceDays != null && silenceDays > row.CadenceReferenceDays));
@@ -279,6 +283,19 @@ namespace Servicess
         {
             return person.TagNames.Any(t =>
                 string.Equals(t, "NoScore", StringComparison.OrdinalIgnoreCase));
+        }
+
+        /// <summary>
+        /// With insufficient evidence (fewer than 3 observed gaps), cap the
+        /// display band at Drifting so we never signal "Critical" confidence
+        /// when the rhythm is only estimated. UrgencyScore is untouched — it
+        /// still drives queue ordering correctly.
+        /// </summary>
+        private static HealthBand CapBandForEvidence(HealthBand band, EvidenceStatus evidence)
+        {
+            if (evidence != EvidenceStatus.Insufficient)
+                return band;
+            return band > HealthBand.Drifting ? HealthBand.Drifting : band;
         }
 
         private static RelationshipState BuildState(

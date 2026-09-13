@@ -14,8 +14,8 @@ import {
 } from "@/components/ui/select";
 import { EmptyState, ErrorState, LoadingList, NavButton, PersonAvatar } from "@/components/states";
 import { ApiError, api } from "@/lib/api";
-import { timeAgo } from "@/lib/format";
-import type { PagedResult, PersonView, SystemStatusTagResponse } from "@/lib/types";
+import { silenceDays, timeAgo } from "@/lib/format";
+import type { PagedResult, PersonView, RelationshipHealth, SystemStatusTagResponse } from "@/lib/types";
 
 const PAGE_SIZE = 10;
 
@@ -47,12 +47,19 @@ export function People() {
   });
   const [showFilters, setShowFilters] = useState(false);
   const [statusTags, setStatusTags] = useState<SystemStatusTagResponse[]>([]);
+  // Canonical relationship state (§27): same queue rows used by briefing,
+  // digest, and detail — never a second scoring path.
+  const [healthById, setHealthById] = useState<Map<string, RelationshipHealth>>(new Map());
   const requestId = useRef(0);
 
   useEffect(() => {
     api.get<string[]>("/api/Contacts/GetValidSearchFields").then(setSearchFields).catch(() => undefined);
     api.get<string[]>("/api/Contacts/GetValidSortFields").then(setSortFields).catch(() => undefined);
     api.get<SystemStatusTagResponse[]>("/api/Contacts/GetSystemStatusTags").then(setStatusTags).catch(() => undefined);
+    api
+      .get<RelationshipHealth[]>("/api/Contacts/GetRelationshipQueue?top=200")
+      .then((q) => setHealthById(new Map(q.map((h) => [h.personId, h]))))
+      .catch(() => undefined);
   }, []);
 
   const load = useCallback(
@@ -368,6 +375,12 @@ export function People() {
                         .filter(Boolean)
                         .join(" · ") || p.countryName || p.email || ""}
                       {" · "}last contact {lastContact(p)}
+                      {(() => {
+                        const h = healthById.get(p.personId);
+                        if (!h) return null;
+                        const s = silenceDays(h.silenceDays, h.lastContactAtUtc);
+                        return ` · ${h.band} (urgency ${Math.round(h.urgencyScore)}${s == null ? "" : `, quiet ${s}d`})`;
+                      })()}
                     </p>
                     <div className="mt-1 flex flex-wrap gap-1">
                       {p.systemStatusTags.slice(0, 3).map((t) => (

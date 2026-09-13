@@ -1,3 +1,4 @@
+using Entities;
 using ServiceContracts.DTOs.CopilotDTOs;
 using ServiceContracts.DTOs.OutreachDTOs;
 using System;
@@ -24,10 +25,11 @@ namespace ServiceContracts
 
         Task<OutreachBatchResponse> GenerateDraftsAsync(Guid batchId);
 
+        Task<DraftCommunicationResult> PreviewDraftAsync(Guid personId, OutreachChannel channel, string intent, string? instruction);
+
         Task<CommunicationDraftDto> ReviewDraftAsync(Guid draftId, DraftReviewRequest request);
 
         Task<CommunicationDraftDto> RegenerateDraftAsync(Guid draftId, string? customInstruction);
-
         Task<OutreachBatchResponse> ApproveAsync(Guid batchId, List<Guid>? draftIds);
 
         Task DiscardBatchAsync(Guid batchId);

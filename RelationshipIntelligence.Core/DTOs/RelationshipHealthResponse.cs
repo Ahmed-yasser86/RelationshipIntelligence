@@ -10,6 +10,13 @@ namespace ServiceContracts.DTOs
         public string Name { get; set; } = string.Empty;
         public double TieStrength { get; set; }
         public DateTime? LastContactAtUtc { get; set; }
+        /// <summary>
+        /// Canonical silence (§11), computed server-side via TieDecayModel.SilenceDays
+        /// at query time. Clients must display this instead of recomputing from
+        /// LastContactAtUtc (client clocks skew by hours and reintroduce off-by-one).
+        /// Null when LastContactAtUtc is null.
+        /// </summary>
+        public int? SilenceDays { get; set; }
         public int InteractionCount { get; set; }
         public string EvidenceStatus { get; set; } = string.Empty;
         public double? CadenceReferenceDays { get; set; }

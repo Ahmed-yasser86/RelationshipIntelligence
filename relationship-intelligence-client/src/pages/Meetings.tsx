@@ -9,7 +9,74 @@ import { EmptyState, ErrorState, LoadingList, NavButton } from "@/components/sta
 import { ApiError, api } from "@/lib/api";
 import { formatDate } from "@/lib/format";
 import { MeetingStatuses } from "@/lib/types";
-import type { MeetingResponse } from "@/lib/types";
+import type { MeetingResponse, PagedResult, PersonView } from "@/lib/types";
+
+// Participant picker (§17): search existing people and add their canonical
+// names. The user chooses — no guessing, no duplicate people from spelling
+// variants. Free typing remains for genuinely new names.
+function ParticipantPicker({ onAdd }: { onAdd: (name: string) => void }) {
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState<PersonView[]>([]);
+  const [open, setOpen] = useState(false);
+
+  async function search(q: string) {
+    setQuery(q);
+    if (q.trim().length < 2) {
+      setResults([]);
+      setOpen(false);
+      return;
+    }
+    try {
+      const res = await api.get<PagedResult<PersonView>>(
+        `/api/Contacts/GetContactsFilteredByBatches?QueryParamter=${encodeURIComponent(q.trim())}&SearchBy=Name&pageNumber=1&pageSize=8`,
+      );
+      setResults(res.items);
+      setOpen(true);
+    } catch {
+      setResults([]);
+    }
+  }
+
+  return (
+    <div className="relative">
+      <Input
+        aria-label="Search existing contacts to add"
+        value={query}
+        onChange={(e) => void search(e.target.value)}
+        onFocus={() => {
+          if (results.length > 0) setOpen(true);
+        }}
+        onBlur={() => setTimeout(() => setOpen(false), 150)}
+        placeholder="Search contacts to add…"
+      />
+      {open && results.length > 0 && (
+        <ul className="absolute z-10 mt-1 max-h-48 w-full overflow-auto rounded-md border bg-background shadow-lg">
+          {results.map((p) => (
+            <li key={p.personId}>
+              <button
+                type="button"
+                className="w-full px-3 py-1.5 text-left text-sm hover:bg-secondary"
+                onMouseDown={() => {
+                  if (p.name) onAdd(p.name);
+                  setQuery("");
+                  setResults([]);
+                  setOpen(false);
+                }}
+              >
+                <span className="font-medium">{p.name ?? "Unnamed contact"}</span>
+                {(p.circles?.[0]?.name || p.contactItemRoles?.[0]?.role) && (
+                  <span className="block truncate text-xs text-muted-foreground">
+                    {[p.contactItemRoles?.[0]?.role, p.circles?.[0]?.name].filter(Boolean).join(" · ")}
+                  </span>
+                )}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
 
 function StatusBadge({ status }: { status: number }) {
   const cls =
@@ -123,8 +190,18 @@ export function Meetings() {
             <Textarea id="mtg-agenda" rows={2} value={agenda} maxLength={2000} onChange={(e) => setAgenda(e.target.value)} placeholder="What should be covered?" />
           </div>
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="mtg-part">Participants (comma-separated names)</Label>
+            <Label htmlFor="mtg-part">Participants</Label>
+            <ParticipantPicker
+              onAdd={(name) =>
+                setParticipants((prev) =>
+                  prev.trim() === "" ? name : `${prev.replace(/,\s*$/, "")}, ${name}`,
+                )
+              }
+            />
             <Input id="mtg-part" value={participants} onChange={(e) => setParticipants(e.target.value)} placeholder="e.g. Salma El-Sayed, Karim Naguib" />
+            <p className="text-xs text-muted-foreground">
+              Search above to add existing contacts (uses canonical names), or type names separated by commas.
+            </p>
           </div>
           <div className="flex gap-2">
             <Button type="submit" size="sm" disabled={busy || title.trim() === ""}>

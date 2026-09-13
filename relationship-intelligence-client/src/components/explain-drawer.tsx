@@ -248,7 +248,7 @@ export function ExplainDrawer({
     (a, b) => +new Date(a.timeOfInteraction) - +new Date(b.timeOfInteraction),
   );
   const n = events.length;
-  const silent = daysSince(health.lastContactAtUtc);
+  const silent = health.silenceDays ?? daysSince(health.lastContactAtUtc);
   const estimated =
     health.evidenceStatus === "Insufficient" ||
     (health.cadenceReferenceDays != null && n < 3);

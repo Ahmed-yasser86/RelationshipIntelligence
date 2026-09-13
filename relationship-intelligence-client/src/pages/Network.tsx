@@ -49,21 +49,29 @@ export function Network() {
     void load();
   }, [load]);
 
-  const urgencyById = useMemo(() => {
-    const map = new Map<string, number>();
-    for (const n of graph?.nodes ?? []) map.set(n.personId, n.urgencyScore);
+  const nodeById = useMemo(() => {
+    const map = new Map<string, { urgencyScore: number; evidenceStatus: string }>();
+    for (const n of graph?.nodes ?? [])
+      map.set(n.personId, { urgencyScore: n.urgencyScore, evidenceStatus: n.evidenceStatus });
     return map;
   }, [graph]);
 
+  // Mirrors server CapBandForEvidence: Insufficient evidence never shows
+  // above Drifting, matching queue/digest bands (§13).
   const bandOf = useCallback(
     (id: string): string => {
-      const u = urgencyById.get(id) ?? 0;
-      if (u > 85) return "Critical";
-      if (u > 65) return "AtRisk";
-      if (u >= 40) return "Drifting";
-      return "Healthy";
+      const n = nodeById.get(id);
+      const u = n?.urgencyScore ?? 0;
+      let band: string;
+      if (u > 85) band = "Critical";
+      else if (u > 65) band = "AtRisk";
+      else if (u >= 40) band = "Drifting";
+      else band = "Healthy";
+      if (n?.evidenceStatus === "Insufficient" && (band === "Critical" || band === "AtRisk"))
+        return "Drifting";
+      return band;
     },
-    [urgencyById],
+    [nodeById],
   );
 
   const visible = useMemo(() => {

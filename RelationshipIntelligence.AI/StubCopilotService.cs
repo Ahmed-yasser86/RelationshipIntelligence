@@ -1,3 +1,4 @@
+using Servicess;
 using ServiceContracts;
 using ServiceContracts.DTOs.CopilotDTOs;
 using System;
@@ -10,7 +11,7 @@ namespace RelationshipIntelligence.AI
 {
     /// <summary>
     /// Deterministic co-pilot used when Copilot:Mode is Stub (development, e2e).
-    /// Answers are templated but built from the caller's real data — never invented.
+    /// Drafts are composed reason-first from the caller's real context — never invented.
     /// </summary>
     public sealed class StubCopilotService : ICopilotService
     {
@@ -50,7 +51,7 @@ namespace RelationshipIntelligence.AI
                 sb.Append(string.Join("; ", queue.Take(3).Select(q =>
                     $"{q.Name} is {q.Band.ToLowerInvariant()} (urgency {Math.Round(q.UrgencyScore)})" +
                     (q.LastContactAtUtc == null ? " with no contact recorded" :
-                    $", last contact {(int)(DateTime.UtcNow - q.LastContactAtUtc.Value).TotalDays}d ago" +
+                    $", last contact {(q.SilenceDays ?? TieDecayModel.SilenceDays(q.LastContactAtUtc, DateTime.UtcNow))}d ago" +
                     (q.CadenceReferenceDays == null ? "" : $" against a ~{Math.Round(q.CadenceReferenceDays.Value)}d rhythm")))));
                 sb.Append(".");
                 if (upcoming.Count > 0)
@@ -80,7 +81,7 @@ namespace RelationshipIntelligence.AI
             }
             else
             {
-                var days = (int)(DateTime.UtcNow - last.TimeOfInteraction).TotalDays;
+                var days = TieDecayModel.SilenceDays(last.TimeOfInteraction, DateTime.UtcNow);
                 answer.Append($"{displayName} was last in touch {days}d ago ({last.InteractionTitle}). ");
                 answer.Append($"Their history holds {interactions.Count} logged interaction(s). ");
             }
@@ -146,6 +147,27 @@ namespace RelationshipIntelligence.AI
                     ? "A quiet network — nothing outside its rhythm and no dates approaching."
                     : $"{queue.Count} relationship(s) in the queue; {upcoming.Count} event(s) approaching."
             };
+            // Evidence-based actions + trajectory (never empty when queue isn't).
+            briefing.SuggestedActions = queue.Take(5).Select(q =>
+            {
+                var silent = q.SilenceDays ?? TieDecayModel.SilenceDays(q.LastContactAtUtc, DateTime.UtcNow);
+                var soon = upcoming.FirstOrDefault(e => e.PersonId == q.PersonId && e.InDays <= 7);
+                return soon != null
+                    ? $"Reconnect with {q.Name} before {soon.Title} ({(soon.InDays == 0 ? "today" : $"in {soon.InDays}d")}) — {q.Band}, quiet {silent}d."
+                    : $"Check in with {q.Name} — {q.Band} (urgency {Math.Round(q.UrgencyScore)}), quiet {silent}d.";
+            }).ToList();
+            briefing.Changes = queue
+                .Where(q => q.SilenceQuantile != null)
+                .OrderByDescending(q => q.UrgencyScore)
+                .Take(4)
+                .Select(q => new BriefingChangeItem
+                {
+                    PersonId = q.PersonId,
+                    Name = q.Name,
+                    Direction = (q.SilenceQuantile ?? 0) > 0.5 ? "drifting" : "steady",
+                    Detail = $"Quiet {(q.SilenceDays ?? TieDecayModel.SilenceDays(q.LastContactAtUtc, DateTime.UtcNow))}d, " +
+                        $"longer than {Math.Round((q.SilenceQuantile ?? 0) * 100)}% of past gaps."
+                }).ToList();
             return briefing;
         }
 
@@ -206,54 +228,17 @@ namespace RelationshipIntelligence.AI
             signals.AddRange(p.UpcomingEvents.Take(2));
             signals.AddRange(p.OpenCommitments.Take(2));
 
-            var greeting = request.Channel switch
-            {
-                Entities.OutreachChannel.Text => $"Hi {p.Name} — ",
-                Entities.OutreachChannel.LinkedIn => $"Hi {p.Name}, ",
-                _ => $"Hi {p.Name},\n\n"
-            };
-            var intentLine = string.IsNullOrWhiteSpace(request.CustomInstruction)
-                ? request.GlobalInstruction
-                : request.CustomInstruction;
-            var purpose = string.IsNullOrWhiteSpace(intentLine)
-                ? $"I wanted to {request.Intent.ToLowerInvariant()}."
-                : intentLine.Trim();
-
             string body;
+            string? subject = null;
             if (request.Kind == Entities.DraftKind.CallPrep)
             {
-                var sb = new StringBuilder();
-                sb.AppendLine($"Call prep — {p.Name}");
-                sb.AppendLine();
-                sb.AppendLine("Before the call:");
-                sb.AppendLine($"- Relationship: {(p.Band == null ? "no scored state" : $"{p.Band}, urgency {(p.UrgencyScore == null ? "?" : Math.Round(p.UrgencyScore.Value).ToString())}")}.");
-                if (!string.IsNullOrWhiteSpace(p.CadenceLine)) sb.AppendLine($"- Rhythm: {p.CadenceLine}");
-                foreach (var s in signals.Take(4)) sb.AppendLine($"- {s}");
-                sb.AppendLine();
-                sb.AppendLine("During the call:");
-                foreach (var c in p.OpenCommitments.Take(3)) sb.AppendLine($"- Clarify commitment: {c}");
-                if (p.OpenCommitments.Count == 0) sb.AppendLine("- No open commitments recorded — ask what matters most right now.");
-                sb.AppendLine();
-                sb.AppendLine("After the call:");
-                sb.AppendLine("- Log the call as an interaction.");
-                sb.AppendLine("- Record any new commitments in relationship memory.");
-                body = sb.ToString().Trim();
-            }
-            else if (request.Channel == Entities.OutreachChannel.Text)
-            {
-                body = $"{greeting}{purpose} " +
-                    (signals.Count == 0 ? "Hope you're well!" : signals[0]);
+                body = BuildCallPrep(p, signals);
             }
             else
             {
-                var sb = new StringBuilder();
-                sb.Append(greeting);
-                sb.AppendLine(purpose);
-                sb.AppendLine();
-                foreach (var s in signals.Take(3)) sb.AppendLine($"- {s}");
-                sb.AppendLine();
-                sb.Append("Would love to catch up properly. Let me know what works for you.");
-                body = sb.ToString().Trim();
+                var composed = ComposeMessage(p, request);
+                body = composed.Body;
+                subject = request.Channel == Entities.OutreachChannel.Email ? composed.Subject : null;
             }
 
             if (body.Length > 4000)
@@ -261,13 +246,217 @@ namespace RelationshipIntelligence.AI
 
             return Task.FromResult(new DraftCommunicationResult
             {
-                Subject = request.Channel == Entities.OutreachChannel.Email
-                    ? $"Reconnecting with {p.Name}"[..Math.Min(200, $"Reconnecting with {p.Name}".Length)]
-                    : null,
+                Subject = subject == null ? null : subject.Length > 200 ? subject[..200] : subject,
                 Body = body,
                 ContextUsed = signals.Take(8).ToList(),
                 LimitedContext = signals.Count == 0
             });
         }
+
+        private sealed record ComposedMessage(string Body, string Subject);
+
+        /// <summary>
+        /// Deterministic reason-first composition. Picks the strongest available
+        /// reason (open commitment, upcoming event, recent thread, remembered
+        /// topic) and expresses it in prose. Raw evidence strings stay in
+        /// ContextUsed (grounding) and never leak into the message: no bands,
+        /// scores, dates, rhythm language, or bracketed evidence labels.
+        /// </summary>
+        private static ComposedMessage ComposeMessage(
+            ServiceContracts.DTOs.CopilotDTOs.PersonDraftContext p,
+            DraftCommunicationRequest request)
+        {
+            var greeting = request.Channel switch
+            {
+                Entities.OutreachChannel.Text => $"Hi {p.Name} — ",
+                Entities.OutreachChannel.LinkedIn => $"Hi {p.Name}, ",
+                _ => $"Hi {p.Name},\n\n"
+            };
+
+            var instruction = string.IsNullOrWhiteSpace(request.CustomInstruction)
+                ? request.GlobalInstruction
+                : request.CustomInstruction;
+            var lead = string.IsNullOrWhiteSpace(instruction) ? null : WithPeriod(instruction.Trim());
+
+            string reason;
+            string subject;
+            if (p.OpenCommitments.Count > 0)
+            {
+                // Verbatim title: commitments are usually imperative ("Send X");
+                // lowercasing the verb would manufacture ungrammatical prose.
+                var title = p.OpenCommitments[0].Trim();
+                reason = $"I wanted to follow up on {title}. Would you have some time this week to go through it together?";
+                subject = $"Following up: {Truncate(title, 60)}";
+            }
+            else if (p.UpcomingEvents.Count > 0 && TrySplitEvent(p.UpcomingEvents[0], out var eventTitle, out var eventDays))
+            {
+                reason = $"I saw {eventTitle} is coming up {RelativeWhen(eventDays)} and wanted to check in beforehand. Would be good to catch up around it if you'll be there.";
+                subject = $"{eventTitle} coming up";
+            }
+            else if (FirstActionableMemory(p) is { } intent)
+            {
+                // A recorded intent/goal outranks generic thread continuity:
+                // it is the user's own stated reason to re-engage.
+                reason = $"One thing I wanted to raise: {intent}. Would be good to get your perspective when you have a moment.";
+                subject = "Catching up";
+            }
+            else if (p.RecentInteractions.Count > 0)
+            {
+                var title = LowerLead(StripInteractionPrefix(p.RecentInteractions[0]));
+                reason = $"I've been thinking about our {title} and wanted to pick up the thread. I'd like to hear how things have moved on your side since.";
+                subject = $"Thinking about our {StripInteractionPrefix(p.RecentInteractions[0]).Trim()}";
+            }
+            else if (FirstBackgroundMemory(p) is { } topic)
+            {
+                reason = $"I've been thinking about {LowerLead(topic)} lately. Would be good to hear your take when you have a moment.";
+                subject = "Catching up";
+            }
+            else
+            {
+                reason = "It's been a while since we last spoke, and I wanted to check in. Would be nice to catch up properly when you have a moment.";
+                subject = "Checking in";
+            }
+
+            string body;
+            if (request.Channel == Entities.OutreachChannel.Text)
+            {
+                var single = lead ?? FirstSentence(reason);
+                body = $"{greeting}{single}";
+            }
+            else if (request.Channel == Entities.OutreachChannel.LinkedIn)
+            {
+                body = lead == null ? $"{greeting}{reason}" : $"{greeting}{lead} {reason}";
+            }
+            else
+            {
+                var paragraph = lead == null ? reason : $"{lead} {reason}";
+                body = $"{greeting}{paragraph}".Trim();
+            }
+            return new ComposedMessage(body, subject);
+        }
+
+        private static string BuildCallPrep(
+            ServiceContracts.DTOs.CopilotDTOs.PersonDraftContext p,
+            List<string> signals)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine($"Call prep — {p.Name}");
+            sb.AppendLine();
+            sb.AppendLine("Before the call:");
+            sb.AppendLine($"- Relationship: {(p.Band == null ? "no scored state" : $"{p.Band}, urgency {(p.UrgencyScore == null ? "?" : Math.Round(p.UrgencyScore.Value).ToString())}")}.");
+            if (!string.IsNullOrWhiteSpace(p.CadenceLine)) sb.AppendLine($"- Rhythm: {p.CadenceLine}");
+            foreach (var s in signals.Take(4)) sb.AppendLine($"- {s}");
+            sb.AppendLine();
+            sb.AppendLine("During the call:");
+            foreach (var c in p.OpenCommitments.Take(3)) sb.AppendLine($"- Clarify commitment: {c}");
+            if (p.OpenCommitments.Count == 0) sb.AppendLine("- No open commitments recorded — ask what matters most right now.");
+            sb.AppendLine();
+            sb.AppendLine("After the call:");
+            sb.AppendLine("- Log the call as an interaction.");
+            sb.AppendLine("- Record any new commitments in relationship memory.");
+            return sb.ToString().Trim();
+        }
+
+        /// <summary>Interaction strings look like "2026-09-01 [Call] Title".</summary>
+        private static string StripInteractionPrefix(string raw)
+        {
+            var close = raw.IndexOf(']');
+            var title = close >= 0 ? raw[(close + 1)..] : raw;
+            return string.IsNullOrWhiteSpace(title) ? raw.Trim() : title.Trim();
+        }
+
+        /// <summary>Memory strings look like "[Kind/Provenance] Title".</summary>
+        private static string StripMemoryPrefix(string raw) => SplitMemory(raw).Title;
+
+        private static (string Kind, string Title) SplitMemory(string raw)
+        {
+            var title = raw.Trim();
+            var kind = string.Empty;
+            if (title.StartsWith('['))
+            {
+                var close = title.IndexOf(']');
+                if (close > 1)
+                {
+                    var head = title[1..close];
+                    kind = head.Split('/')[0].Trim();
+                    title = title[(close + 1)..].Trim();
+                }
+            }
+            if (string.IsNullOrWhiteSpace(title))
+                title = raw.Trim();
+            return (kind, title);
+        }
+
+        private static bool IsActionableKind(string kind) =>
+            kind.Equals("Intent", StringComparison.OrdinalIgnoreCase) ||
+            kind.Equals("Goal", StringComparison.OrdinalIgnoreCase) ||
+            kind.Equals("Commitment", StringComparison.OrdinalIgnoreCase);
+
+        private static string? FirstActionableMemory(
+            ServiceContracts.DTOs.CopilotDTOs.PersonDraftContext p)
+        {
+            foreach (var raw in p.MemoryHighlights)
+            {
+                var (kind, title) = SplitMemory(raw);
+                if (IsActionableKind(kind))
+                    return title;
+            }
+            return null;
+        }
+
+        private static string? FirstBackgroundMemory(
+            ServiceContracts.DTOs.CopilotDTOs.PersonDraftContext p)
+        {
+            foreach (var raw in p.MemoryHighlights)
+            {
+                var (kind, title) = SplitMemory(raw);
+                if (!IsActionableKind(kind))
+                    return title;
+            }
+            return null;
+        }
+
+        /// <summary>Event strings look like "Title in 4d".</summary>
+        private static bool TrySplitEvent(string raw, out string title, out int days)
+        {
+            title = raw.Trim();
+            days = -1;
+            var match = System.Text.RegularExpressions.Regex.Match(title, @"^(.*)\s+in\s+(\d+)d\s*$");
+            if (!match.Success)
+                return false;
+            title = match.Groups[1].Value.Trim();
+            days = int.Parse(match.Groups[2].Value);
+            return title.Length > 0;
+        }
+
+        private static string RelativeWhen(int days) =>
+            days switch
+            {
+                < 0 => "soon",
+                0 => "today",
+                1 => "tomorrow",
+                <= 7 => "in a few days",
+                <= 14 => "next week",
+                _ => "soon"
+            };
+
+        private static string LowerLead(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+                return text;
+            return char.ToLowerInvariant(text[0]) + text[1..];
+        }
+
+        private static string WithPeriod(string text) =>
+            text.EndsWith('.') || text.EndsWith('!') || text.EndsWith('?') ? text : text + ".";
+
+        private static string FirstSentence(string text)
+        {
+            var end = text.IndexOf(". ", StringComparison.Ordinal);
+            return (end >= 0 ? text[..(end + 1)] : text).Trim();
+        }
+
+        private static string Truncate(string text, int max) =>
+            text.Length <= max ? text : text[..max];
     }
 }

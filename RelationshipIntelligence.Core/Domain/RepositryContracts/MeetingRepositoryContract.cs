@@ -9,6 +9,8 @@ namespace RepositryContracts
     {
         Task<List<Meeting>> ListAsync(Guid ownerId);
 
+        Task<List<Meeting>> ListForMappedPersonAsync(Guid ownerId, Guid personId);
+
         Task<Meeting?> GetAsync(Guid ownerId, Guid meetingId);
 
         Task AddAsync(Meeting meeting);

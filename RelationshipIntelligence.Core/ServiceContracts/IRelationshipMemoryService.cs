@@ -1,3 +1,4 @@
+using Entities;
 using ServiceContracts.DTOs.MemoryDTOs;
 using System;
 using System.Collections.Generic;
@@ -10,6 +11,10 @@ namespace ServiceContracts
         Task<List<MemoryEntryResponse>> ListForPersonAsync(Guid personId);
 
         Task<MemoryEntryResponse> CreateAsync(MemoryEntryCreateRequest request);
+
+        Task<MemoryEntryResponse> SuggestEntryAsync(Guid personId, RelationshipMemoryKind kind, string title, string? detail);
+
+        Task<List<MemoryEntryResponse>> ProposeGapsAsync(Guid personId);
 
         Task<MemoryEntryResponse> UpdateAsync(MemoryEntryUpdateRequest request);
 

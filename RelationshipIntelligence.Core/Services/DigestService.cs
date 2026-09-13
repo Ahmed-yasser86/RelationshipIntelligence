@@ -93,7 +93,9 @@ namespace Servicess
                     return payload;
 
                 await RefreshStaleStatesAsync(ownerId.Value);
-                var queue = await _scoring.GetQueueAsync(50);
+                // 200 covers the full network so digest selection is over every
+                // ranked relationship, not a capped subset (§14).
+                var queue = await _scoring.GetQueueAsync(200);
                 var now = DateTime.UtcNow;
 
                 var selected = queue

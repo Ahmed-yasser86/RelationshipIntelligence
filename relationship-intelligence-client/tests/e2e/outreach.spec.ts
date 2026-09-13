@@ -18,6 +18,15 @@ test.describe("outreach batches", () => {
     await page.getByRole("button", { name: /Prepare \d+ personalized drafts?/ }).click();
     await expect(page.getByText("Grounded in:").first()).toBeVisible();
 
+    const bodies = await page.locator("li p.whitespace-pre-wrap").allTextContents();
+    expect(bodies.length).toBeGreaterThan(1);
+    for (const body of bodies) {
+      expect(body).not.toContain("[");
+      expect(body).not.toMatch(/\d{4}-\d{2}-\d{2}/);
+      expect(body.toLowerCase()).not.toContain("urgency");
+    }
+    expect(new Set(bodies.map((b) => b.trim())).size).toBeGreaterThan(1);
+
     await page.getByRole("button", { name: /Approve all reviewed/ }).click();
     await expect(page.getByText(/approved\. Nothing was sent/i)).toBeVisible();
   });

@@ -82,12 +82,18 @@ if (string.Equals(copilotMode, "Stub", StringComparison.OrdinalIgnoreCase))
 {
     builder.Services.AddScoped<ICopilotService, StubCopilotService>();
     builder.Services.AddScoped<IMeetingExtractor, StubMeetingExtractor>();
+    builder.Services.AddScoped<ICopilotAgent, StubCopilotAgent>();
 }
 else
 {
     builder.Services.AddScoped<ICopilotService, CopilotService>();
     builder.Services.AddScoped<IMeetingExtractor, MeetingExtractor>();
+    builder.Services.AddScoped<ICopilotAgent, CopilotAgent>();
 }
+builder.Services.AddSingleton<IAgentSessionStore, AgentSessionStore>();
+builder.Services.AddScoped<RelationshipQueryPlugin>();
+builder.Services.AddScoped<PlanningPlugin>();
+builder.Services.AddScoped<ActionPlugin>();
 builder.Services.AddScoped<IMeetingService, MeetingService>();
 builder.Services.AddScoped<MeetingRepositoryContract, MeetingRepository>();
 builder.Services.AddScoped<IOutreachService, OutreachService>();

@@ -20,9 +20,24 @@ export function formatDate(iso: string | null | undefined): string {
   });
 }
 
+/**
+ * Canonical silence mirror (§11). Must match backend TieDecayModel.SilenceDays:
+ * floor of elapsed UTC days, null when no contact, 0 for future timestamps.
+ * Clients must prefer the server-provided `silenceDays` (no client-clock skew);
+ * use this only as a fallback when the field is absent (e.g. cached payloads).
+ */
 export function daysSince(iso: string | null | undefined): number | null {
   if (!iso) return null;
   return Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 86_400_000));
+}
+
+/** Prefer server-canonical silence; fall back to local daysSince. */
+export function silenceDays(
+  serverDays: number | null | undefined,
+  iso: string | null | undefined,
+): number | null {
+  if (serverDays != null) return serverDays;
+  return daysSince(iso);
 }
 
 const BAND_STYLES: Record<string, string> = {

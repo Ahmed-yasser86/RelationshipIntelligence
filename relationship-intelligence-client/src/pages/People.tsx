@@ -204,7 +204,7 @@ export function People() {
     <div>
       <div className="mb-4 flex items-end justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">People</h1>
+          <h1 className="font-display text-3xl font-semibold tracking-tight">People</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             {data ? `${data.totalCount} people in your network` : "Your network"}
           </p>

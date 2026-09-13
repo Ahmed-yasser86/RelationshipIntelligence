@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { EvidenceChip } from "@/components/evidence-chip";
 import { Separator } from "@/components/ui/separator";
 import { ErrorState, LoadingList, NavButton } from "@/components/states";
 import { ApiError, api } from "@/lib/api";
@@ -233,7 +234,7 @@ export function MeetingDetail() {
         ← Meetings
       </NavButton>
       <div className="flex flex-wrap items-center gap-2">
-        <h1 className="text-2xl font-semibold tracking-tight">{meeting.title}</h1>
+        <h1 className="font-display text-3xl font-semibold tracking-tight">{meeting.title}</h1>
         <Badge variant="outline">{MeetingStatuses[meeting.status]}</Badge>
       </div>
       <p className="mt-1 text-sm tabular-nums text-muted-foreground">
@@ -382,7 +383,13 @@ export function MeetingDetail() {
             <li key={f.meetingFindingId} className="rounded-lg border px-3 py-2">
               <div className="flex flex-wrap items-center gap-1.5">
                 <Badge variant="secondary">{FindingKinds[f.kind] ?? f.kind}</Badge>
-                <Badge variant="outline">{f.status === 0 ? "Suggested" : f.status === 1 ? "Accepted" : "Rejected"}</Badge>
+                {f.status === 0 && <EvidenceChip kind="suggested" />}
+                {f.status === 1 && <EvidenceChip kind="user" label="Accepted" title="You accepted this finding — it now counts as your confirmed understanding" />}
+                {f.status === 2 && (
+                  <Badge variant="outline" title="You rejected this finding — it will not be used">
+                    Rejected
+                  </Badge>
+                )}
                 {f.mappedPersonName && <span className="text-xs text-muted-foreground">→ {f.mappedPersonName}</span>}
               </div>
               <p className="mt-1 text-sm font-medium">{f.title}</p>

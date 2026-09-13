@@ -178,7 +178,7 @@ export function Digest() {
     <div>
       <div className="mb-4 flex items-end justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Weekly digest</h1>
+          <h1 className="font-display text-3xl font-semibold tracking-tight">Weekly digest</h1>
           <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
             {payload
               ? `Week of ${formatDate(payload.weekStartUtc)} · network health ${payload.networkHealth}/100. Review the exact email before anything sends — nothing goes out without your confirmation.`

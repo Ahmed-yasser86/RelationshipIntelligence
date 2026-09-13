@@ -410,7 +410,7 @@ export function PersonDetail() {
       <div className="flex flex-wrap items-start gap-4">
         <PersonAvatar name={person.name} className="h-14 w-14 text-base" />
         <div className="min-w-0 flex-1">
-          <h1 className="text-2xl font-semibold tracking-tight">{person.name}</h1>
+          <h1 className="font-display text-3xl font-semibold tracking-tight">{person.name}</h1>
           <p className="mt-0.5 text-sm text-muted-foreground">
             {[
               person.contactItemRoles?.[0]?.role,
@@ -500,13 +500,13 @@ export function PersonDetail() {
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_320px]">
         <section>
-          <h2 className="mb-3 text-base font-semibold">Trajectory</h2>
+          <h2 className="mb-3 font-display text-xl font-semibold">Trajectory</h2>
           <Trajectory points={history} />
         </section>
       </div>
       <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_320px]">
         <section>
-          <h2 className="mb-3 text-base font-semibold">History</h2>
+          <h2 className="mb-3 font-display text-xl font-semibold">History</h2>
           <Timeline interactions={person.interactions ?? []} />
         </section>
         <aside className="flex min-w-0 flex-col gap-5">

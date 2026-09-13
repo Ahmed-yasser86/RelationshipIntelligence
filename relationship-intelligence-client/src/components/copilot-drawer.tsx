@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { EvidenceChip } from "@/components/evidence-chip";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -219,6 +220,9 @@ export function CopilotDrawer() {
         )}
         {messages.map((m, i) => (
           <div key={i} className={`flex flex-col gap-1 rounded-lg px-3 py-2 text-sm ${m.role === "user" ? "self-end bg-primary text-primary-foreground" : "self-start border bg-card"}`}>
+            {m.role === "assistant" && (
+              <EvidenceChip kind="suggested" label="Assistant" className="self-start" title="AI interpretation over your data — observed facts, derived scores, and suggestions are labeled inside" />
+            )}
             <p className="whitespace-pre-wrap">{m.text}</p>
             {(m.citations ?? []).length > 0 && (
               <div className="flex flex-wrap gap-1">

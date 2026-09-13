@@ -83,7 +83,7 @@ export function Organizations() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl font-semibold tracking-tight">Organizations</h1>
+        <h1 className="font-display text-3xl font-semibold tracking-tight">Organizations</h1>
         <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
           The shared directory behind every contact — companies, communities, families.
           Rename freely; members follow. Deletion is refused while contacts still belong.
@@ -119,7 +119,7 @@ export function Organizations() {
         />
       )}
       {orgs !== null && orgs.length > 0 && (
-        <div className="rounded-lg border">
+        <div className="overflow-x-auto rounded-lg border">
           <Table>
             <TableHeader>
               <TableRow>

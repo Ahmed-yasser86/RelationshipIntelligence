@@ -26,6 +26,7 @@ export function Network() {
   const [band, setBand] = useState("All");
   const [bridgesOnly, setBridgesOnly] = useState(false);
   const [showIsolates, setShowIsolates] = useState(false);
+  const [view, setView] = useState<"map" | "list">("map");
 
   const selectedId = searchParams.get("person");
   const setSelectedId = useCallback(
@@ -111,7 +112,7 @@ export function Network() {
   return (
     <div>
       <div className="mb-4">
-        <h1 className="text-2xl font-semibold tracking-tight">Network</h1>
+        <h1 className="font-display text-3xl font-semibold tracking-tight">Network</h1>
         <p className="mt-1 max-w-3xl text-sm text-muted-foreground">
           {graph
             ? `${visible?.total ?? 0} people in view (${graph.nodes.length} received) · ${graph.edges.length} shared-context connections · ${graph.clusterCount} shared-context groups. Ringed nodes are articulation points (bridges) — removing one would split its region.`
@@ -192,8 +193,61 @@ export function Network() {
             <Button variant="outline" size="sm" onClick={() => void load()}>
               Refresh
             </Button>
+            <div className="flex rounded-md border p-0.5 text-xs" role="group" aria-label="Network view">
+              {(["map", "list"] as const).map((v) => (
+                <button
+                  key={v}
+                  type="button"
+                  aria-pressed={view === v}
+                  onClick={() => setView(v)}
+                  className={`rounded px-2.5 py-1 font-medium capitalize transition-colors duration-150 ${
+                    view === v ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {v === "map" ? "Map" : "List"}
+                </button>
+              ))}
+            </div>
           </div>
 
+          {view === "list" ? (
+            <div className="rounded-lg border">
+              <ul className="divide-y">
+                {visible.nodes.map((n) => {
+                  const conns = visible!.edges.filter((e) => e.from === n.personId || e.to === n.personId);
+                  return (
+                    <li key={n.personId} className="px-4 py-2.5">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Link to={`/people/${n.personId}`} className="text-sm font-semibold hover:underline">
+                          {n.name ?? "Unnamed contact"}
+                        </Link>
+                        {n.isBridge && (
+                          <span className="rounded-full border border-violet-300 bg-violet-50 px-2 py-0.5 text-[11px] text-violet-900" title="Articulation point — removal would split its network region">
+                            Articulation point
+                          </span>
+                        )}
+                        <span className="text-xs tabular-nums text-muted-foreground">
+                          {conns.length} shared-context connection{conns.length === 1 ? "" : "s"}
+                        </span>
+                      </div>
+                      {conns.length > 0 && (
+                        <p className="mt-0.5 text-xs text-muted-foreground">
+                          {conns
+                            .slice(0, 4)
+                            .map((e) => {
+                              const other = e.from === n.personId ? e.to : e.from;
+                              return `${neighborNames.get(other) ?? "contact"} (${e.reason})`;
+                            })
+                            .join(" · ")}
+                          {conns.length > 4 ? ` · +${conns.length - 4} more` : ""}
+                        </p>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          ) : (
           <div className="grid gap-4 xl:grid-cols-[1fr_320px]">
             <GraphCanvas
               nodes={visible.nodes}
@@ -308,6 +362,7 @@ export function Network() {
               )}
             </aside>
           </div>
+          )}
         </>
       )}
     </div>

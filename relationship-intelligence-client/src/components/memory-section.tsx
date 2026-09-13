@@ -11,26 +11,18 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { EvidenceChip } from "@/components/evidence-chip";
 import { ApiError, api } from "@/lib/api";
-import { MemoryKinds, MemoryProvenanceLabels } from "@/lib/types";
+import { MemoryKinds } from "@/lib/types";
 import type { MemoryEntryResponse } from "@/lib/types";
 
 const STATUS_LABELS = ["Active", "Done", "Dropped"] as const;
 
 function ProvenanceBadge({ provenance }: { provenance: number }) {
-  const cls =
-    provenance === 0
-      ? "border-border"
-      : provenance === 1
-        ? "border-amber-300 bg-amber-50 text-amber-800"
-        : provenance === 2
-          ? "border-emerald-300 bg-emerald-50 text-emerald-800"
-          : "border-sky-300 bg-sky-50 text-sky-800";
-  return (
-    <Badge variant="outline" className={cls} title={provenance === 0 ? "Written by you" : provenance === 1 ? "Proposed by the assistant — accept or reject" : provenance === 2 ? "Assistant proposal you confirmed" : "Derived from a meeting you confirmed"}>
-      {MemoryProvenanceLabels[provenance] ?? provenance}
-    </Badge>
-  );
+  if (provenance === 1) return <EvidenceChip kind="suggested" />;
+  if (provenance === 2) return <EvidenceChip kind="user" label="Confirmed" title="Assistant proposal you confirmed — now canonical" />;
+  if (provenance === 3) return <EvidenceChip kind="meeting" />;
+  return <EvidenceChip kind="user" label="Your note" />;
 }
 
 export function MemorySection({ personId }: { personId: string }) {

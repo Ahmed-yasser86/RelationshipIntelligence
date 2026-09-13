@@ -31,7 +31,7 @@ test.describe("relationship events", () => {
   });
 
   test("upcoming events surface on the overview", async ({ page }) => {
-    await page.getByRole("link", { name: "Overview", exact: true }).click();
+    await page.getByRole("link", { name: "Today", exact: true }).click();
     await expect(page.getByRole("heading", { name: "Coming up" })).toBeVisible();
   });
 });

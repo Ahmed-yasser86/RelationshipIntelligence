@@ -137,7 +137,7 @@ export function PersonNew() {
       <NavButton to="/people" variant="ghost" size="sm" className="mb-4">
         ← People
       </NavButton>
-      <h1 className="text-2xl font-semibold tracking-tight">Add person</h1>
+      <h1 className="font-display text-3xl font-semibold tracking-tight">Add person</h1>
       <p className="mt-1 text-sm text-muted-foreground">
         Quick add captures the essentials; the full form records everything known.
       </p>

@@ -35,9 +35,9 @@ test.describe("attention queue", () => {
     page,
   }) => {
     await page.locator("ol > li").first().getByRole("button", { name: "Explain" }).click();
-    await expect(page.getByText("Observed", { exact: true })).toBeVisible();
-    await expect(page.getByText("Derived", { exact: true })).toBeVisible();
-    await expect(page.getByText("Result", { exact: true })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Observed", exact: true })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Derived", exact: true })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Result", exact: true })).toBeVisible();
     await expect(page.getByText(/typical rhythm/i).first()).toBeVisible();
     await expect(page.getByText("Silence against typical rhythm")).toBeVisible();
     await expect(page.getByText("Silence against own history")).toBeVisible();

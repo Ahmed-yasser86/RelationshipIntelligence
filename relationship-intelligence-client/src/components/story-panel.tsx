@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { EvidenceChip } from "@/components/evidence-chip";
 import { api } from "@/lib/api";
 import { daysSince, formatDate } from "@/lib/format";
 import { EventTypes } from "@/lib/types";
@@ -104,7 +105,13 @@ export function StoryPanel({
 
   return (
     <section aria-label="Relationship story" className="mt-4 rounded-lg border bg-card px-4 py-3">
-      <h2 className="mb-2 text-base font-semibold">The story so far</h2>
+      <h2 className="mb-1 font-display text-xl font-semibold">The story so far</h2>
+      <div className="mb-2 flex flex-wrap gap-1.5" aria-label="How to read this story">
+        <EvidenceChip kind="user" />
+        <EvidenceChip kind="observed" />
+        <EvidenceChip kind="derived" />
+        <EvidenceChip kind="unknown" />
+      </div>
       <dl className="space-y-1.5 text-sm">
         <div className="flex gap-2">
           <dt className="w-28 shrink-0 text-muted-foreground">Who</dt>

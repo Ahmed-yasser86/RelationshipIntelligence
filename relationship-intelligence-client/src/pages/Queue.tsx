@@ -255,7 +255,7 @@ export function Queue() {
     <div>
       <div className="mb-6 flex items-end justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Needs attention</h1>
+          <h1 className="font-display text-3xl font-semibold tracking-tight">Needs attention</h1>
           <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
             Ranked by how far each relationship has drifted past its own rhythm —
             not by recency alone. Log, explain, or snooze each one right here;
@@ -289,7 +289,7 @@ export function Queue() {
       {visible !== null && visible.length > 0 && (
         <ol className="flex flex-col gap-3">
           {visible.map((item, i) => (
-            <li key={`${item.personId}-${i}`} className="rounded-lg border px-4 py-3">
+            <li key={`${item.personId}-${i}`} className="rounded-xl border bg-card px-4 py-3 transition-colors duration-150 hover:border-foreground/20">
               <div className="flex items-center gap-3">
                 <input
                   type="checkbox"

@@ -77,7 +77,7 @@ export function BriefingBlock() {
   if (loading && briefing === null) {
     return (
       <section aria-label="Briefing">
-        <h2 className="mb-2 text-base font-semibold">Today&apos;s briefing</h2>
+        <h2 className="mb-2 font-display text-xl font-semibold">Today&apos;s briefing</h2>
         <p className="text-sm text-muted-foreground">Composing your briefing…</p>
       </section>
     );
@@ -86,7 +86,7 @@ export function BriefingBlock() {
   if (error && briefing === null) {
     return (
       <section aria-label="Briefing">
-        <h2 className="mb-2 text-base font-semibold">Today&apos;s briefing</h2>
+        <h2 className="mb-2 font-display text-xl font-semibold">Today&apos;s briefing</h2>
         <p className="text-sm text-muted-foreground">{error}</p>
         <div className="mt-2">
           <Button size="sm" variant="outline" onClick={() => void refresh()}>
@@ -102,7 +102,7 @@ export function BriefingBlock() {
   return (
     <section aria-label="Briefing">
       <div className="mb-2 flex items-center justify-between">
-        <h2 className="text-base font-semibold">Today&apos;s briefing</h2>
+        <h2 className="font-display text-xl font-semibold">Today&apos;s briefing</h2>
         <div className="flex gap-2">
           <Button size="sm" variant="ghost" onClick={() => openCopilot()}>
             Discuss with co-pilot

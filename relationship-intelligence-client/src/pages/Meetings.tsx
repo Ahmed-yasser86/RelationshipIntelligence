@@ -85,7 +85,7 @@ export function Meetings() {
     <div>
       <div className="mb-6 flex items-end justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Meetings</h1>
+          <h1 className="font-display text-3xl font-semibold tracking-tight">Meetings</h1>
           <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
             Raw meetings become structured evidence — transcript in, reviewed findings out,
             confirmed interactions into your relationships. Nothing is logged without your mapping and confirmation.

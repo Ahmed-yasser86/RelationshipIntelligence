@@ -142,7 +142,7 @@ export function PersonEdit() {
       <NavButton to={`/people/${id}`} variant="ghost" size="sm" className="mb-4">
         ← Back
       </NavButton>
-      <h1 className="text-2xl font-semibold tracking-tight">Edit {person.name}</h1>
+      <h1 className="font-display text-3xl font-semibold tracking-tight">Edit {person.name}</h1>
       <form onSubmit={submit} className="mt-6 flex flex-col gap-3">
         <div className="grid grid-cols-2 gap-3">
           <div className="flex flex-col gap-1.5">

@@ -89,27 +89,12 @@ export function Overview() {
   return (
     <div className="flex max-w-3xl flex-col gap-8">
       <section>
-        <h1 className="text-3xl font-semibold tracking-tight">Overview</h1>
+        <h1 className="font-display text-4xl font-semibold tracking-tight">Today</h1>
         <p className="mt-2 max-w-2xl text-[15px] leading-relaxed text-muted-foreground">
           This is <strong className="text-foreground">relationship intelligence</strong>,
-          not a contact manager. Every contact you log builds a temporal record; an
-          exponential tie-decay model scores each relationship against its own rhythm;
-          and the system tells you <strong className="text-foreground">who is cooling,
-          why the evidence says so, and what to do this week</strong>.
+          not a contact manager. Who is cooling, why the evidence says so, and what
+          to do this week.
         </p>
-        <ol className="mt-4 grid gap-2 sm:grid-cols-4">
-          {[
-            ["Observe", "Log interactions as they happen"],
-            ["Understand", "See rhythm, drift, and state"],
-            ["Discover", "Find articulation points, shared-context groups, and risks"],
-            ["Act", "Work the weekly queue"],
-          ].map(([step, desc]) => (
-            <li key={step} className="rounded-lg border px-3 py-2.5">
-              <p className="text-sm font-semibold">{step}</p>
-              <p className="mt-0.5 text-xs text-muted-foreground">{desc}</p>
-            </li>
-          ))}
-        </ol>
       </section>
 
       {error && <ErrorState message={error} />}
@@ -119,9 +104,9 @@ export function Overview() {
       <BriefingBlock />
       {snapshot !== null && (
         <section aria-label="This week">
-          <h2 className="mb-2 text-base font-semibold">This week in your network</h2>
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-2 rounded-lg border px-4 py-3 text-sm">
-            <span>
+          <h2 className="mb-2 font-display text-xl font-semibold">This week in your network</h2>
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-2 rounded-lg border bg-card px-4 py-3 text-sm">
+            <span className="tnum">
               <strong className="text-red-700">{snapshot.critical} critical</strong>
               {" · "}
               <strong className="text-amber-700">{snapshot.atRisk} at risk</strong>
@@ -144,7 +129,7 @@ export function Overview() {
 
       {comingUp !== null && comingUp.length > 0 && (
         <section aria-label="Coming up">
-          <h2 className="mb-2 text-base font-semibold">Coming up</h2>
+          <h2 className="mb-2 font-display text-xl font-semibold">Coming up</h2>
           <ul className="flex flex-col gap-2">
             {comingUp.map((c) => (
               <li key={`${c.personId}-${c.title}`} className="rounded-lg border px-4 py-2.5 text-sm">
@@ -170,7 +155,7 @@ export function Overview() {
       )}
 
       <section aria-label="Explore">
-        <h2 className="mb-2 text-base font-semibold">Explore</h2>
+        <h2 className="mb-2 font-display text-xl font-semibold">Explore</h2>
         <div className="grid gap-2 sm:grid-cols-3">
           <Link to="/network" className="rounded-lg border px-4 py-3 hover:bg-secondary/50">
             <p className="text-sm font-semibold">Network structure</p>
@@ -194,7 +179,7 @@ export function Overview() {
       </section>
 
       <section aria-label="Method">
-        <h2 className="mb-2 text-base font-semibold">How the scores work</h2>
+        <h2 className="mb-2 font-display text-xl font-semibold">How the scores work</h2>
         <div className="rounded-lg border px-4 py-3 text-sm text-muted-foreground">
           <p>
             Tie strength decays exponentially between logged interactions (60-day

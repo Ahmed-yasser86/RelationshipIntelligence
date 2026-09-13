@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/badge";
+import { EvidenceChip } from "@/components/evidence-chip";
 import {
   Dialog,
   DialogContent,
@@ -31,7 +32,7 @@ function Row({ k, v }: { k: string; v: string }) {
   );
 }
 
-function Step({ n, title, hint }: { n: string; title: string; hint: string }) {
+function Step({ n, title, hint, kind }: { n: string; title: string; hint: string; kind: "observed" | "derived" }) {
   return (
     <div className="mb-2 flex items-center gap-2">
       <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[11px] font-bold text-primary-foreground">
@@ -39,6 +40,7 @@ function Step({ n, title, hint }: { n: string; title: string; hint: string }) {
       </span>
       <h3 className="text-xs font-semibold uppercase tracking-wide">{title}</h3>
       <span className="text-xs text-muted-foreground">· {hint}</span>
+      <EvidenceChip kind={kind} className="ml-auto" />
     </div>
   );
 }
@@ -287,7 +289,7 @@ export function ExplainDrawer({
 
         <div className="flex flex-col gap-4">
           <section>
-            <Step n="1" title="Observed" hint="what you logged" />
+            <Step n="1" title="Observed" hint="what you logged" kind="observed" />
             <EventTimeline events={events} />
             <dl className="mt-2">
               <Row k="Logged interactions" v={String(n)} />
@@ -310,7 +312,7 @@ export function ExplainDrawer({
           <Separator />
 
           <section>
-            <Step n="2" title="Derived" hint="what the model infers" />
+            <Step n="2" title="Derived" hint="what the model infers" kind="derived" />
             <div className="flex flex-col gap-3">
               <div>
                 <p className="mb-1 text-xs font-medium">
@@ -342,7 +344,7 @@ export function ExplainDrawer({
           <Separator />
 
           <section>
-            <Step n="3" title="Result" hint="where it lands" />
+            <Step n="3" title="Result" hint="where it lands" kind="derived" />
             <ThresholdBar value={health.urgencyScore} />
             <dl className="mt-2">
               <Row k="Band" v={health.band} />

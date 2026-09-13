@@ -32,5 +32,5 @@ export async function expectSignedIn(page: Page): Promise<void> {
     }
     await page.getByRole("button", { name: "Start exploring" }).click();
   }
-  await expect(page.getByRole("heading", { name: "Overview" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Today", exact: true })).toBeVisible();
 }

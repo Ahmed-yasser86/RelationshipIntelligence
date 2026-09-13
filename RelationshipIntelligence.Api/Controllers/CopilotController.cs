@@ -3,7 +3,6 @@ using RelationshipIntelligence.AI;
 using ServiceContracts;
 using ServiceContracts.DTOs.CopilotDTOs;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace ContactsManager.API.Controllers
@@ -19,17 +18,8 @@ namespace ContactsManager.API.Controllers
             _providerSettings = providerSettings;
         }
 
-        public class AskRequest
-        {
-            public string? Question { get; set; }
-
-            public Guid? PersonId { get; set; }
-
-            public List<ChatTurnDto>? History { get; set; }
-        }
-
         [HttpPost]
-        public async Task<IActionResult> PostAsk([FromBody] AskRequest request)
+        public async Task<IActionResult> PostAsk([FromBody] CopilotAskRequest request)
         {
             if (request == null || string.IsNullOrWhiteSpace(request.Question))
                 return BadRequest("Question is required.");
@@ -49,7 +39,7 @@ namespace ContactsManager.API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> PostSummarize([FromBody] AskRequest request)
+        public async Task<IActionResult> PostSummarize([FromBody] CopilotAskRequest request)
         {
             if (request?.PersonId == null)
                 return BadRequest("PersonId is required.");
@@ -85,13 +75,6 @@ namespace ContactsManager.API.Controllers
             }
         }
 
-        public class PlanRequest
-        {
-            public Guid PersonId { get; set; }
-
-            public Guid? IntentEntryId { get; set; }
-        }
-
         [HttpPost]
         public async Task<IActionResult> PostSuggestPlan([FromBody] PlanRequest request)
         {
@@ -114,11 +97,6 @@ namespace ContactsManager.API.Controllers
             {
                 return StatusCode(503, ex.Message);
             }
-        }
-
-        public class ParseIntentRequest
-        {
-            public string? Text { get; set; }
         }
 
         [HttpPost]

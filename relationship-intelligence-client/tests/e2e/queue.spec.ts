@@ -60,7 +60,8 @@ test.describe("attention queue", () => {
   test("show more loads beyond the top 7", async ({ page }) => {
     await expect(page.locator("ol > li")).toHaveCount(7);
     await page.getByRole("button", { name: "Show more" }).click();
-    await expect(page.locator("ol > li").first()).toBeVisible();
-    expect(await page.locator("ol > li").count()).toBeGreaterThan(7);
+    await expect
+      .poll(async () => page.locator("ol > li").count(), { timeout: 20000 })
+      .toBeGreaterThan(7);
   });
 });

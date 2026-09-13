@@ -68,11 +68,6 @@ namespace ContactsManager.API.Controllers
             }
         }
 
-        public class BatchFromNlRequest
-        {
-            public string? Text { get; set; }
-        }
-
         [HttpPost]
         public async Task<IActionResult> PostBatchFromNL([FromBody] BatchFromNlRequest request)
         {
@@ -184,13 +179,8 @@ namespace ContactsManager.API.Controllers
             }
         }
 
-        public class RegenerateRequest
-        {
-            public string? CustomInstruction { get; set; }
-        }
-
         [HttpPost]
-        public async Task<IActionResult> PostDraftRegenerate(Guid id, [FromBody] RegenerateRequest? request)
+        public async Task<IActionResult> PostDraftRegenerate(Guid id, [FromBody] DraftRegenerateRequest? request)
         {
             try
             {
@@ -214,13 +204,8 @@ namespace ContactsManager.API.Controllers
             }
         }
 
-        public class ApproveRequest
-        {
-            public List<Guid>? DraftIds { get; set; }
-        }
-
         [HttpPost]
-        public async Task<IActionResult> PostBatchApprove(Guid id, [FromBody] ApproveRequest? request)
+        public async Task<IActionResult> PostBatchApprove(Guid id, [FromBody] BatchApproveRequest? request)
         {
             try
             {

@@ -30,7 +30,10 @@ namespace CRUDTests
             List<string>? interactions = null,
             List<string>? memory = null,
             List<string>? events = null,
-            List<string>? commitments = null) => new()
+            List<string>? commitments = null,
+            List<string>? style = null,
+            List<string>? examples = null,
+            List<string>? styleNotes = null) => new()
             {
                 PersonId = Guid.NewGuid(),
                 Name = name,
@@ -40,7 +43,10 @@ namespace CRUDTests
                 RecentInteractions = interactions ?? new(),
                 MemoryHighlights = memory ?? new(),
                 UpcomingEvents = events ?? new(),
-                OpenCommitments = commitments ?? new()
+                OpenCommitments = commitments ?? new(),
+                CommunicationStyle = style ?? new(),
+                MessageExamples = examples ?? new(),
+                StyleNotes = styleNotes ?? new()
             };
 
         private Task<DraftCommunicationResult> DraftAsync(PersonDraftContext person,
@@ -149,6 +155,57 @@ namespace CRUDTests
             result.Body.Should().StartWith("Hi Aisha Bello — ");
             result.Body.Should().Contain("proposal");
             result.Body.Split(". ", StringSplitOptions.None).Should().HaveCountLessThanOrEqualTo(2);
+        }
+
+        [Fact]
+        public async Task Draft_CasualProfile_UsesHeyGreeting()
+        {
+            var casual = await DraftAsync(Context(
+                interactions: new() { "2026-08-20 [Meeting] Lunch" },
+                style: new() { "casual, direct" }));
+            var def = await DraftAsync(Context(
+                interactions: new() { "2026-08-20 [Meeting] Lunch" }));
+
+            casual.Body.Should().StartWith("Hey Aisha,");
+            def.Body.Should().StartWith("Hi Aisha Bello,");
+            casual.Body.Should().NotBe(def.Body);
+        }
+
+        [Fact]
+        public async Task Draft_ShortProfile_CompressesToOneSentence()
+        {
+            var result = await DraftAsync(Context(
+                interactions: new() { "2026-08-20 [Meeting] Lunch" },
+                style: new() { "short messages" }));
+
+            result.Body.Split(". ", StringSplitOptions.None).Should().HaveCountLessThanOrEqualTo(2);
+            result.ContextUsed.Should().Contain(s => s.StartsWith("Style:"));
+        }
+
+        [Fact]
+        public async Task Draft_ExampleMessage_ShapesGreetingWithoutProfile()
+        {
+            var result = await DraftAsync(Context(
+                interactions: new() { "2026-08-20 [Meeting] Lunch" },
+                examples: new() { "Hey Aisha, are we still on for Thursday?" }));
+
+            result.Body.Should().StartWith("Hey Aisha,");
+            result.ContextUsed.Should().Contain(s => s.StartsWith("Wrote before:"));
+        }
+
+        [Fact]
+        public async Task Draft_DifferentProfiles_ProduceMateriallyDifferentBodies()
+        {
+            var casual = await DraftAsync(Context(
+                interactions: new() { "2026-08-20 [Meeting] Lunch" },
+                style: new() { "casual, direct" }));
+            var formal = await DraftAsync(Context(
+                interactions: new() { "2026-08-20 [Meeting] Lunch" },
+                style: new() { "formal, polished", }));
+
+            casual.Body.Should().NotBe(formal.Body);
+            ShouldNotLeakInternalRepresentation(casual.Body);
+            ShouldNotLeakInternalRepresentation(formal.Body);
         }
     }
 }

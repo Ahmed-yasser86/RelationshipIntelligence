@@ -11,7 +11,7 @@ import { formatDate } from "@/lib/format";
 import { MeetingStatuses } from "@/lib/types";
 import type { MeetingResponse, PagedResult, PersonView } from "@/lib/types";
 
-// Participant picker (§17): search existing people and add their canonical
+// Participant picker: search existing people and add their canonical
 // names. The user chooses — no guessing, no duplicate people from spelling
 // variants. Free typing remains for genuinely new names.
 function ParticipantPicker({ onAdd }: { onAdd: (name: string) => void }) {

@@ -45,7 +45,7 @@ namespace Servicess
         }
 
         /// <summary>
-        /// Canonical current-silence definition (§11). Single source of truth for
+        /// Canonical current-silence definition. Single source of truth for
         /// "days since last contact": floor of elapsed UTC days, null when there is
         /// no contact, 0 for future timestamps. All backend and frontend surfaces
         /// must use this (frontend mirrors it in lib/format.ts daysSince).

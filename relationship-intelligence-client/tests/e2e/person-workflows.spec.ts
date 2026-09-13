@@ -73,10 +73,10 @@ test.describe("person workflows", () => {
     await page.getByRole("button", { name: "Add person", exact: true }).last().click();
     await expect(page).toHaveURL(/\/people\/[0-9a-f-]{36}/);
     await expect(page.getByText("Follow Up", { exact: true }).first()).toBeVisible();
-    // Cleanup so the probe never pollutes queue/briefing/network counts (§15).
+    // Cleanup so the probe never pollutes queue/briefing/network counts.
     const personId = page.url().split("/").pop()!;
     const token = await page.evaluate(() => localStorage.getItem("ri.token"));
-    await request.delete(`${API_URL}/api/Contacts/DeletePersoneObject?id=${personId}`, {
+    await request.post(`${API_URL}/api/Contacts/DeletePersoneObject?id=${personId}`, { data: {},
       headers: { Authorization: `Bearer ${token}` },
     });
   });

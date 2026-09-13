@@ -72,7 +72,10 @@ namespace Servicess
                         case nameof(PersonRespones.Name):
                             {
                                 _logger.LogDebug("Searching persons by Name containing: {Parameter}", PersonParamter);
-                                var (people, count) = await PersonRipository.GetFilteredPersonsPaged(pageNumber, pageSize, p => p.Name != null && p.Name.Contains(PersonParamter));
+                                // Name queries are never case-sensitive: explicit
+                                // lower-casing on both sides, independent of collation.
+                                var nameParam = (PersonParamter ?? string.Empty).ToLower();
+                                var (people, count) = await PersonRipository.GetFilteredPersonsPaged(pageNumber, pageSize, p => p.Name != null && p.Name.ToLower().Contains(nameParam));
                                 totalCount = count;
                                 MatchingResults = people
                                     .Where(p => p != null)
@@ -83,7 +86,8 @@ namespace Servicess
                         case nameof(PersonRespones.email):
                             {
                                 _logger.LogDebug("Searching persons by Email containing: {Parameter}", PersonParamter);
-                                var (people, count) = await PersonRipository.GetFilteredPersonsPaged(pageNumber, pageSize, p => p.email != null && p.email.Contains(PersonParamter));
+                                var emailParam = (PersonParamter ?? string.Empty).ToLower();
+                                var (people, count) = await PersonRipository.GetFilteredPersonsPaged(pageNumber, pageSize, p => p.email != null && p.email.ToLower().Contains(emailParam));
                                 totalCount = count;
                                 MatchingResults = people
                                     .Where(p => p != null)
@@ -335,7 +339,10 @@ namespace Servicess
                     Expression<Func<Person, bool>> predicate = PredicateBuilder.True<Person>();
 
                     if (!string.IsNullOrWhiteSpace(filter.Name))
-                        predicate = predicate.And(p => p.Name != null && p.Name.Contains(filter.Name));
+                    {
+                        var nameFilter = filter.Name.Trim().ToLower();
+                        predicate = predicate.And(p => p.Name != null && p.Name.ToLower().Contains(nameFilter));
+                    }
 
                     if (!string.IsNullOrWhiteSpace(filter.Email))
                         predicate = predicate.And(p => p.email != null && p.email.Contains(filter.Email));
@@ -345,12 +352,12 @@ namespace Servicess
 
                     if (!string.IsNullOrWhiteSpace(filter.CircleName))
                     {
-                        // Exact (trimmed) company match — never raw-substring (§27).
-                        // Case-insensitivity relies on the database collation, matching
-                        // organization identity; avoids false positives like "Pro"
-                        // matching "Proceedit".
-                        var circleName = filter.CircleName.Trim();
-                        predicate = predicate.And(p => p.Circles.Any(c => c.Name.Trim() == circleName));
+                        // Exact (trimmed) company match — never raw-substring.
+                        // Explicitly case-insensitive on both sides, independent of
+                        // collation; avoids false positives like "Pro" matching
+                        // "Proceedit".
+                        var circleName = filter.CircleName.Trim().ToLower();
+                        predicate = predicate.And(p => p.Circles.Any(c => c.Name.Trim().ToLower() == circleName));
                     }
 
                     if (!string.IsNullOrWhiteSpace(filter.ContactItemRole))

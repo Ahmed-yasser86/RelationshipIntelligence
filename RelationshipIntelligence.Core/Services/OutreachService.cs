@@ -587,9 +587,32 @@ namespace Servicess
                     .Select(i => $"{i.TimeOfInteraction:yyyy-MM-dd} [{i.InteractionType}] {i.InteractionTitle}")
                     .ToList(),
                 MemoryHighlights = memory
-                    .Where(m => m.Status == 0)
+                    .Where(m => m.Status == 0
+                        && m.Kind != Entities.RelationshipMemoryKind.CommunicationStyle
+                        && m.Kind != Entities.RelationshipMemoryKind.MessageExample)
                     .Take(6)
                     .Select(m => $"[{m.Kind}/{m.Provenance}] {m.Title}")
+                    .ToList(),
+                // Personalization signals: style guidance and examples
+                // travel in dedicated fields — never as message topics.
+                CommunicationStyle = memory
+                    .Where(m => m.Status == 0 && m.Kind == Entities.RelationshipMemoryKind.CommunicationStyle)
+                    .Take(4)
+                    .Select(m => m.Detail == null ? m.Title : $"{m.Title} — {m.Detail}")
+                    .ToList(),
+                MessageExamples = memory
+                    .Where(m => m.Status == 0 && m.Kind == Entities.RelationshipMemoryKind.MessageExample)
+                    .Take(3)
+                    .Select(m => m.Detail == null ? m.Title : $"{m.Title} — {m.Detail}")
+                    .ToList(),
+                StyleNotes = memory
+                    .Where(m => m.Status == 0
+                        && m.Kind == Entities.RelationshipMemoryKind.Preference
+                        && (m.Provenance == Entities.MemoryProvenance.AiConfirmed
+                            || m.Provenance == Entities.MemoryProvenance.User)
+                        && m.Title.StartsWith("Style:", StringComparison.OrdinalIgnoreCase))
+                    .Take(4)
+                    .Select(m => m.Detail == null ? m.Title : $"{m.Title} — {m.Detail}")
                     .ToList(),
                 UpcomingEvents = upcoming
                     .Where(e => e.PersonId == personId)
@@ -627,8 +650,15 @@ namespace Servicess
                         throw new ArgumentException("Draft body cannot exceed 4000 characters.", nameof(request.Body));
                     if (body != draft.Body)
                     {
+                        // Preserve history — stash the AI original once, never
+                        // overwrite it. The edit becomes a personalization signal.
+                        var aiBody = draft.OriginalBody ?? (draft.IsAiGenerated ? draft.Body : null);
+                        if (aiBody != null && draft.OriginalBody == null)
+                            draft.OriginalBody = aiBody;
                         draft.Body = body;
                         draft.IsAiGenerated = false;
+                        if (aiBody != null && !string.Equals(Normalize(aiBody), Normalize(body), StringComparison.Ordinal))
+                            await SuggestStyleFromEditAsync(draft.PersonId, draft.Channel, aiBody, body);
                     }
                 }
                 if (request.Subject != null)
@@ -642,6 +672,68 @@ namespace Servicess
                 return ToDraftDto(draft, names);
             }
         }
+
+        /// <summary>
+        /// Derives conservative style signals from a user edit and stores
+        /// each as an AI-SUGGESTED preference — never a silent global rule.
+        /// The user accepts/rejects/edits them like any other suggestion, so a
+        /// one-off edit never becomes a permanent preference unreviewed.
+        /// </summary>
+        private async Task SuggestStyleFromEditAsync(Guid personId, OutreachChannel channel, string aiBody, string userBody)
+        {
+            var signals = new List<string>();
+            var ai = aiBody.Trim();
+            var user = userBody.Trim();
+            if (ai.Length > 0)
+            {
+                double ratio = (double)user.Length / ai.Length;
+                if (ratio < 0.6)
+                    signals.Add("Style: prefers shorter messages than drafted");
+                else if (ratio > 1.6)
+                    signals.Add("Style: adds more detail than drafted");
+            }
+            if (StartsWithGreeting(ai) && !StartsWithGreeting(user))
+                signals.Add("Style: skips formal greetings");
+            if (HasSignOff(ai) && !HasSignOff(user))
+                signals.Add("Style: no formal sign-off");
+
+            foreach (var signal in signals.Distinct().Take(3))
+            {
+                try
+                {
+                    await _memory.SuggestEntryAsync(
+                        personId,
+                        Entities.RelationshipMemoryKind.Preference,
+                        signal,
+                        $"Observed when editing a {channel} draft. Accept to apply to future drafts for this person.");
+                }
+                catch (InvalidOperationException)
+                {
+                    // Same signal already suggested or recorded — nothing to learn.
+                }
+            }
+        }
+
+        private static bool StartsWithGreeting(string text)
+        {
+            var first = text.TrimStart().Split('\n')[0].Trim();
+            return first.StartsWith("Hi ", StringComparison.OrdinalIgnoreCase)
+                || first.StartsWith("Hi,", StringComparison.OrdinalIgnoreCase)
+                || first.StartsWith("Hey ", StringComparison.OrdinalIgnoreCase)
+                || first.StartsWith("Hello ", StringComparison.OrdinalIgnoreCase)
+                || first.StartsWith("Dear ", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static bool HasSignOff(string text)
+        {
+            var lower = text.ToLowerInvariant();
+            return lower.Contains("\nbest,") || lower.Contains("\nbest ")
+                || lower.Contains("\nthanks") || lower.Contains("\nregards")
+                || lower.Contains("\ncheers") || lower.Contains("\nwarmly");
+        }
+
+        private static string Normalize(string value) =>
+            new string((value ?? string.Empty).Trim().ToLowerInvariant().Where(char.IsLetterOrDigit).ToArray());
 
         public async Task<CommunicationDraftDto> RegenerateDraftAsync(Guid draftId, string? customInstruction)
         {
@@ -754,6 +846,7 @@ namespace Servicess
             Channel = draft.Channel,
             Subject = draft.Subject,
             Body = draft.Body,
+            OriginalBody = draft.OriginalBody,
             ContextUsed = draft.ContextUsed,
             LimitedContext = draft.LimitedContext,
             IsAiGenerated = draft.IsAiGenerated,

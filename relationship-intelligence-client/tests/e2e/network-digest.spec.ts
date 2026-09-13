@@ -38,6 +38,7 @@ test.describe("network", () => {
       for (const id of created) {
         await request.post(`${API_URL}/api/Contacts/DeletePersoneObject?id=${id}`, {
           headers,
+          data: {},
         });
       }
     }

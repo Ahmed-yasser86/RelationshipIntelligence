@@ -62,6 +62,7 @@ interface AgentReply {
   workingState: AgentWorkingState | null;
   needsInput: { prompt: string; options: string[] } | null;
   limitedContext: boolean;
+  activity: string[];
 }
 
 interface Msg {
@@ -72,6 +73,7 @@ interface Msg {
   actions?: AgentAction[];
   workingState?: AgentWorkingState | null;
   needsInput?: { prompt: string; options: string[] } | null;
+  activity?: string[];
 }
 
 function ProviderSettings({ onSaved }: { onSaved: () => void }) {
@@ -267,6 +269,7 @@ export function CopilotDrawer() {
           actions: answer.actions,
           workingState: answer.workingState,
           needsInput: answer.needsInput,
+          activity: answer.activity ?? [],
         },
       ]);
     } catch (err) {
@@ -354,6 +357,11 @@ export function CopilotDrawer() {
               <EvidenceChip kind="suggested" label="Assistant" className="self-start" title="AI interpretation over your data — observed facts, derived scores, and suggestions are labeled inside" />
             )}
             <p className="whitespace-pre-wrap">{m.text}</p>
+            {(m.activity ?? []).length > 0 && (
+              <p className="text-[11px] text-muted-foreground" title="What the assistant checked — activity states, not reasoning">
+                Checked: {(m.activity ?? []).join(" · ")}
+              </p>
+            )}
             {(m.evidence ?? []).length > 0 && (
               <details className="mt-1 rounded-md border bg-background px-2 py-1 text-xs">
                 <summary className="cursor-pointer font-medium">Why? Show evidence ({m.evidence!.length})</summary>

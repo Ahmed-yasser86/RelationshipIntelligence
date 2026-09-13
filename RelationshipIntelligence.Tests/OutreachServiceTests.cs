@@ -228,5 +228,78 @@ namespace CRUDTests
 
             await Assert.ThrowsAsync<InvalidOperationException>(() => Service().ApproveAsync(batch.OutreachBatchId, null));
         }
+
+        [Fact]
+        public async Task ReviewDraft_UserEdit_PreservesOriginalAndSuggestsStyle()
+        {
+            // AI draft → user edit history preserved; edit becomes a
+            // SUGGESTION for the user to approve, never a silent rule.
+            Arrange();
+            _memoryMock.Setup(m => m.SuggestEntryAsync(
+                    It.IsAny<Guid>(), It.IsAny<RelationshipMemoryKind>(),
+                    It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(new ServiceContracts.DTOs.MemoryDTOs.MemoryEntryResponse
+                {
+                    MemoryEntryId = Guid.NewGuid(), Kind = RelationshipMemoryKind.Preference,
+                    Title = "Style: prefers shorter messages than drafted",
+                    Status = MemoryEntryStatus.Active, Provenance = MemoryProvenance.AiSuggested
+                });
+            var batch = await Service().BuildFromSignalsAsync(new BuildBatchFromSignalsRequest
+            {
+                SignalFilters = new List<string> { "attentionQueue" },
+                Intent = "Reconnect"
+            });
+            var generated = await Service().GenerateDraftsAsync(batch.OutreachBatchId);
+            var salma = generated.Drafts.Single(d => d.PersonId == _salmaId);
+            var aiBody = salma.Body;
+            aiBody.Should().StartWith("Hi ");
+
+            var edited = await Service().ReviewDraftAsync(salma.CommunicationDraftId, new DraftReviewRequest
+            {
+                Status = DraftStatus.Edited,
+                Body = "Sending the crit notes now — let me know what you think."
+            });
+
+            edited.Status.Should().Be(DraftStatus.Edited);
+            edited.IsAiGenerated.Should().BeFalse();
+            edited.OriginalBody.Should().Be(aiBody);
+            _memoryMock.Verify(m => m.SuggestEntryAsync(
+                _salmaId, RelationshipMemoryKind.Preference,
+                It.Is<string>(t => t.StartsWith("Style:")), It.IsAny<string>()), Times.AtLeastOnce);
+        }
+
+        [Fact]
+        public async Task ReviewDraft_SecondEdit_KeepsFirstOriginal()
+        {
+            Arrange();
+            _memoryMock.Setup(m => m.SuggestEntryAsync(
+                    It.IsAny<Guid>(), It.IsAny<RelationshipMemoryKind>(),
+                    It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(new ServiceContracts.DTOs.MemoryDTOs.MemoryEntryResponse
+                {
+                    MemoryEntryId = Guid.NewGuid(), Kind = RelationshipMemoryKind.Preference,
+                    Title = "Style: prefers shorter messages than drafted",
+                    Status = MemoryEntryStatus.Active, Provenance = MemoryProvenance.AiSuggested
+                });
+            var batch = await Service().BuildFromSignalsAsync(new BuildBatchFromSignalsRequest
+            {
+                SignalFilters = new List<string> { "attentionQueue" },
+                Intent = "Reconnect"
+            });
+            var generated = await Service().GenerateDraftsAsync(batch.OutreachBatchId);
+            var salma = generated.Drafts.Single(d => d.PersonId == _salmaId);
+            var aiBody = salma.Body;
+
+            await Service().ReviewDraftAsync(salma.CommunicationDraftId, new DraftReviewRequest
+            {
+                Status = DraftStatus.Edited, Body = "Sending the crit notes now."
+            });
+            var twice = await Service().ReviewDraftAsync(salma.CommunicationDraftId, new DraftReviewRequest
+            {
+                Status = DraftStatus.Edited, Body = "Crit notes sent, let me know."
+            });
+
+            twice.OriginalBody.Should().Be(aiBody);
+        }
     }
 }

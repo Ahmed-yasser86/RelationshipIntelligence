@@ -19,7 +19,11 @@ namespace RelationshipIntelligence.AI
     /// </summary>
     public sealed class ActionPlugin
     {
-        private static readonly JsonSerializerOptions Json = new() { WriteIndented = false };
+        private static readonly JsonSerializerOptions Json = new()
+        {
+            WriteIndented = false,
+            PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase
+        };
 
         private readonly IEventService _events;
         private readonly IRelationshipMemoryService _memory;

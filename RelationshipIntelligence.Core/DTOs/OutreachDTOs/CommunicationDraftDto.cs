@@ -19,6 +19,9 @@ namespace ServiceContracts.DTOs.OutreachDTOs
 
         public string Body { get; set; } = string.Empty;
 
+        /// <summary>Original AI body, present once the user has edited.</summary>
+        public string? OriginalBody { get; set; }
+
         public string? ContextUsed { get; set; }
 
         public bool LimitedContext { get; set; }

@@ -33,7 +33,7 @@ export function PersonNew() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  const [quick, setQuick] = useState({ Name: "", email: "", CurrentRoles: "", Origin: "" });
+  const [quick, setQuick] = useState({ Name: "", email: "", CurrentRoles: "", Origin: "", TalkStyle: "" });
   const [quickOrgs, setQuickOrgs] = useState<string[]>([]);
   const [fullOrgs, setFullOrgs] = useState<string[]>([]);
   const [fullChannels, setFullChannels] = useState<ContactChannelRequest[]>([]);
@@ -85,6 +85,20 @@ export function PersonNew() {
         CurrentRoles: splitList(quick.CurrentRoles),
         Origin: quick.Origin.trim() === "" ? null : quick.Origin.trim(),
       });
+      // Optional communication profile: stored as memory, same endpoint
+      // and ownership as every other entry. Never blocks navigation.
+      if (quick.TalkStyle.trim() !== "") {
+        try {
+          await api.post("/api/Contacts/PostMemoryEntry", {
+            PersonId: res.personId,
+            Kind: 10,
+            Title: quick.TalkStyle.trim().slice(0, 200),
+            Detail: null,
+          });
+        } catch {
+          /* profile stays teachable later from the person's page */
+        }
+      }
       navigate(`/people/${res.personId}`);
     } catch (err) {
       setError(err instanceof ApiError ? err.body || err.message : "Could not add person.");
@@ -165,6 +179,16 @@ export function PersonNew() {
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="q-origin">How you met</Label>
               <Textarea id="q-origin" rows={2} value={quick.Origin} onChange={setQ("Origin")} />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="q-talk">How you talk to them (optional)</Label>
+              <Textarea
+                id="q-talk"
+                rows={2}
+                value={quick.TalkStyle}
+                onChange={setQ("TalkStyle")}
+                placeholder="e.g. casual, direct, short messages"
+              />
             </div>
             {error && <p className="text-sm text-destructive">{error}</p>}
             <Button type="submit" disabled={busy}>

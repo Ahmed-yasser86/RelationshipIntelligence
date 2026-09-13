@@ -49,6 +49,8 @@ export const MemoryKinds = [
   "Intent",
   "Preference",
   "Milestone",
+  "Communication style",
+  "Message example",
 ] as const;
 export const MemoryProvenanceLabels = ["Your note", "Suggested", "Confirmed", "From meeting"] as const;
 export interface PersonEvent {
@@ -190,6 +192,7 @@ export interface CommunicationDraft {
   channel: number;
   subject: string | null;
   body: string;
+  originalBody: string | null;
   contextUsed: string | null;
   limitedContext: boolean;
   isAiGenerated: boolean;
@@ -289,7 +292,7 @@ export interface RelationshipHealth {
   name: string | null;
   tieStrength: number;
   lastContactAtUtc: string | null;
-  /** Canonical server-computed silence (§11). Prefer over recomputing. */
+  /** Canonical server-computed silence. Prefer over recomputing. */
   silenceDays?: number | null;
   interactionCount: number;
   evidenceStatus: string;

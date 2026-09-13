@@ -26,7 +26,7 @@ namespace ServiceContracts.DTOs.MeetingDTOs
         public bool HasNotes { get; set; }
 
         /// <summary>
-        /// Raw evidence (§18/§22). Returned so the UI can show the verbatim
+        /// Raw evidence. Returned so the UI can show the verbatim
         /// transcript/notes behind the derived summary. Ownership-scoped like
         /// the rest of the response.
         /// </summary>

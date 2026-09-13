@@ -21,7 +21,7 @@ export function formatDate(iso: string | null | undefined): string {
 }
 
 /**
- * Canonical silence mirror (§11). Must match backend TieDecayModel.SilenceDays:
+ * Canonical silence mirror. Must match backend TieDecayModel.SilenceDays:
  * floor of elapsed UTC days, null when no contact, 0 for future timestamps.
  * Clients must prefer the server-provided `silenceDays` (no client-clock skew);
  * use this only as a fallback when the field is absent (e.g. cached payloads).

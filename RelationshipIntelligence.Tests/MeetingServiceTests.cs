@@ -410,7 +410,7 @@ namespace CRUDTests
         [Fact]
         public async Task ReviewFinding_Accept_StagesFinding_Confirm_WritesMemoryWithProvenanceChain()
         {
-            // Approval model (§21): finding-Accept only stages; durable memory
+            // Finding-Accept only stages; durable memory
             // is written once at meeting Confirm, so unconfirmed-meeting facts
             // never leak into Copilot/queue.
             ArrangeStore();

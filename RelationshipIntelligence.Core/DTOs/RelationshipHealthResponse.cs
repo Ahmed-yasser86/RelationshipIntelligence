@@ -11,7 +11,7 @@ namespace ServiceContracts.DTOs
         public double TieStrength { get; set; }
         public DateTime? LastContactAtUtc { get; set; }
         /// <summary>
-        /// Canonical silence (§11), computed server-side via TieDecayModel.SilenceDays
+        /// Canonical silence, computed server-side via TieDecayModel.SilenceDays
         /// at query time. Clients must display this instead of recomputing from
         /// LastContactAtUtc (client clocks skew by hours and reintroduce off-by-one).
         /// Null when LastContactAtUtc is null.

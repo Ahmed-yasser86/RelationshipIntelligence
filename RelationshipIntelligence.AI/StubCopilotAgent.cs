@@ -84,16 +84,30 @@ namespace RelationshipIntelligence.AI
                 return response;
             }
 
+            if (await AdoptPendingChoiceAsync(session, ownerId, message, lower, response))
+                return response;
+
             var names = await KnownNamesAsync();
             var mentioned = names.Where(n => lower.Contains(n.ToLowerInvariant())).ToList();
-            if (mentioned.Count > 1)
+            // Identical names collapse: two "Omar Khalil" contacts are one
+            // ambiguous reference, not two distinct mentions.
+            var distinctMentioned = mentioned.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+            if (distinctMentioned.Count > 1)
             {
-                response.Text = $"Several names came up ({string.Join(", ", mentioned)}). Which relationship should I focus on?";
-                response.NeedsInput = new AgentClarification { Prompt = "Which person?", Options = mentioned };
+                if (IsComparison(lower))
+                {
+                    await AnswerCompareAsync(distinctMentioned.Take(3).ToList(), response);
+                    await _sessions.SaveAsync(ownerId, session);
+                    response.WorkingState = await WorkingStateAsync(session);
+                    return response;
+                }
+                response.Text = $"Several names came up ({string.Join(", ", distinctMentioned)}). Which relationship should I focus on?";
+                response.NeedsInput = new AgentClarification { Prompt = "Which person?", Options = distinctMentioned };
                 await _sessions.SaveAsync(ownerId, session);
                 response.WorkingState = await WorkingStateAsync(session);
                 return response;
             }
+            mentioned = distinctMentioned;
             if (mentioned.Count == 1)
             {
                 var resolved = await ResolveAsync(mentioned[0]);
@@ -104,8 +118,13 @@ namespace RelationshipIntelligence.AI
                 }
                 else if (resolved.Count > 1)
                 {
+                    var detailed = await ResolveDetailedAsync(mentioned[0]);
+                    var choices = PersonChoiceLabels.Build(detailed);
+                    session.PendingCandidates.Clear();
+                    session.PendingCandidates.AddRange(choices.Select(c =>
+                        new ServiceContracts.DTOs.AgentDTOs.AgentCandidateOption { PersonId = c.Id, Label = c.Label }));
                     response.Text = $"I found several people matching \"{mentioned[0]}\". Which one do you mean?";
-                    response.NeedsInput = new AgentClarification { Prompt = "Which person?", Options = resolved.Select(r => r.Name).ToList() };
+                    response.NeedsInput = new AgentClarification { Prompt = "Which person?", Options = choices.Select(c => c.Label).ToList() };
                     await _sessions.SaveAsync(ownerId, session);
                     response.WorkingState = await WorkingStateAsync(session);
                     return response;
@@ -168,8 +187,13 @@ namespace RelationshipIntelligence.AI
                 }
                 if (resolved.Count > 1)
                 {
+                    var detailed = await ResolveDetailedAsync(unknownName);
+                    var choices = PersonChoiceLabels.Build(detailed);
+                    session.PendingCandidates.Clear();
+                    session.PendingCandidates.AddRange(choices.Select(c =>
+                        new ServiceContracts.DTOs.AgentDTOs.AgentCandidateOption { PersonId = c.Id, Label = c.Label }));
                     response.Text = $"I found several people matching \"{unknownName}\". Which one do you mean?";
-                    response.NeedsInput = new AgentClarification { Prompt = "Which person?", Options = resolved.Select(r => r.Name).ToList() };
+                    response.NeedsInput = new AgentClarification { Prompt = "Which person?", Options = choices.Select(c => c.Label).ToList() };
                     await _sessions.SaveAsync(ownerId, session);
                     response.WorkingState = await WorkingStateAsync(session);
                     return response;
@@ -185,9 +209,18 @@ namespace RelationshipIntelligence.AI
                 return response;
             }
 
-            if (session.PersonId != null && (IsFollowUp(lower) || IsGenericQuestion(lower)))
+            if (session.PersonId != null && (IsFollowUp(lower) || IsGenericQuestion(lower) ||
+                (HasPronounReference(lower) && !IsNewSearch(lower))))
             {
                 await AnswerPersonAsync(session, session.PersonId.Value, lower, response);
+                await _sessions.SaveAsync(ownerId, session);
+                response.WorkingState = await WorkingStateAsync(session);
+                return response;
+            }
+
+            if (session.BatchId != null && IsFollowUp(lower))
+            {
+                await AnswerBatchEvidenceAsync(session, response);
                 await _sessions.SaveAsync(ownerId, session);
                 response.WorkingState = await WorkingStateAsync(session);
                 return response;
@@ -225,6 +258,30 @@ namespace RelationshipIntelligence.AI
                 return response;
             }
 
+            if (IsOverviewQuestion(lower))
+            {
+                await AnswerOverviewAsync(response);
+                await _sessions.SaveAsync(ownerId, session);
+                response.WorkingState = await WorkingStateAsync(session);
+                return response;
+            }
+
+            if (HasPronounReference(lower))
+            {
+                if (session.PersonId != null)
+                {
+                    await AnswerPersonAsync(session, session.PersonId.Value, lower, response);
+                    await _sessions.SaveAsync(ownerId, session);
+                    response.WorkingState = await WorkingStateAsync(session);
+                    return response;
+                }
+                response.Text = "Which person do you mean? Name someone in your network and I'll look into their relationship state, history, and what I'd do next.";
+                response.Actions.Add(new AgentAction { Kind = "open-queue", Label = "Who needs attention?" });
+                await _sessions.SaveAsync(ownerId, session);
+                response.WorkingState = await WorkingStateAsync(session);
+                return response;
+            }
+
             response.Text = "I can help with that from your relationship data. Try asking who needs attention, what is coming up, what happened with someone by name, or tell me to prepare messages or a meeting. What would you like to do?";
             response.Actions.Add(new AgentAction { Kind = "open-queue", Label = "Who needs attention?" });
             await _sessions.SaveAsync(ownerId, session);
@@ -252,8 +309,12 @@ namespace RelationshipIntelligence.AI
             lower.Contains("what can you") || lower.Contains("help me with") || lower.Contains("how do you work");
 
         private static bool IsFollowUp(string lower) =>
-            lower.StartsWith("why ") || lower.StartsWith("what should i do") || lower.StartsWith("draft ") ||
-            lower.Contains("that matter") || lower.Contains("about it") || lower == "why?" || lower.Contains("explain");
+            lower.StartsWith("why ") || lower.StartsWith("why") || lower.StartsWith("what should i do") || lower.StartsWith("draft ") ||
+            lower.Contains("that matter") || lower.Contains("about it") || lower == "why?" || lower.Contains("explain") ||
+            lower.Contains("should i do") || lower.Contains("should do") || lower.Contains("recommend") ||
+            lower.Contains("advice") || lower.Contains("suggest") || lower.Contains("what would you do") ||
+            lower.Contains("next step") || lower.Contains("priorit") || lower.Contains("compar") ||
+            lower.Contains("evidence") || lower.Contains("support") || lower.Contains("based on");
 
         private static bool IsGenericQuestion(string lower) =>
             lower.Contains("what happened") || lower.Contains("tell me about") || lower.Contains("going on") ||
@@ -295,6 +356,26 @@ namespace RelationshipIntelligence.AI
             lower.Contains("changed") || lower.Contains("changing") || lower.Contains("healthier") ||
             lower.Contains("recently") && lower.Contains("relationship");
 
+        // Broad network evaluations: aggregate first, then go deeper
+        // only where attention is actually needed — never a canned dump.
+        private static bool IsOverviewQuestion(string lower) =>
+            lower.Contains("all my contacts") || lower.Contains("all contacts") ||
+            lower.Contains("general evaluation") || lower.Contains("overview of") ||
+            lower.Contains("brief about all") || lower.Contains("everyone") ||
+            lower.Contains("whole network") || lower.Contains("my relationships") ||
+            lower.Contains("overestimating") || lower.Contains("neglecting");
+
+        // Side-by-side asks: compare, prioritize, choose between named people.
+        private static bool IsComparison(string lower) =>
+            lower.Contains("compar") || lower.Contains("priorit") || lower.Contains(" versus ") ||
+            lower.Contains(" vs ") || lower.Contains(" vs. ") || lower.Contains("between") ||
+            lower.Contains("both") || lower.Contains("who should");
+
+        // Pronoun follow-ups: "him/her/them" inherit the session focus.
+        private static bool HasPronounReference(string lower) =>
+            System.Text.RegularExpressions.Regex.IsMatch(lower,
+                @"\b(him|her|them|his|hers|their|theirs|he|she|they)\b");
+
         private async Task<List<string>> KnownNamesAsync()
         {
             var people = await _persons.GetAllPersons();
@@ -307,6 +388,40 @@ namespace RelationshipIntelligence.AI
             return result.Items.Select(p => (p.PersonId, p.Name ?? "?")).ToList();
         }
 
+        private async Task<List<(Guid Id, string Name, string? Org, string? Role)>> ResolveDetailedAsync(string name)
+        {
+            var result = await _searcher.SearchPersonsBy_Batched(name, "Name", 1, 10);
+            return result.Items.Select(p => (
+                p.PersonId,
+                p.Name ?? "?",
+                Org: p.Circles.FirstOrDefault()?.Name,
+                Role: p.ContactItemRoles.FirstOrDefault()?.Role)).ToList();
+        }
+
+        /// <summary>
+        /// Applies a pending disambiguation pick. Returns true when the message
+        /// chose one of the offered labels (exact, case-insensitive) and answers
+        /// for that person immediately. Anything else clears the pending pick so
+        /// a new question is never trapped behind an old clarification.
+        /// </summary>
+        private async Task<bool> AdoptPendingChoiceAsync(
+            AgentSession session, Guid ownerId, string message, string lower, AgentResponse response)
+        {
+            if (session.PendingCandidates.Count == 0)
+                return false;
+            var options = session.PendingCandidates.Select(c => (c.PersonId, c.Label)).ToList();
+            var picked = PersonChoiceLabels.MatchChoice(options, message);
+            session.PendingCandidates.Clear();
+            if (picked == null)
+                return false;
+            session.PersonId = picked.Value;
+            session.CurrentTask = null;
+            await AnswerPersonAsync(session, picked.Value, lower, response);
+            await _sessions.SaveAsync(ownerId, session);
+            response.WorkingState = await WorkingStateAsync(session);
+            return true;
+        }
+
         private async Task AnswerPersonAsync(AgentSession session, Guid personId, string lower, AgentResponse response)
         {
             var person = await _persons.GetPersonByPersonId(personId);
@@ -316,14 +431,17 @@ namespace RelationshipIntelligence.AI
                 return;
             }
 
+            response.Activity.Add($"Checking {person.Name ?? "their"} relationship state…");
             var queue = await _scoring.GetQueueAsync(200);
             var state = queue.FirstOrDefault(q => q.PersonId == personId);
+            response.Activity.Add("Looking at the relationship history…");
             var interactions = await _interactions.ListForPersonAsync(personId);
             var last = interactions.OrderByDescending(i => i.TimeOfInteraction).FirstOrDefault();
             var memory = await _memory.ListForPersonAsync(personId);
             var active = memory.Where(m => m.Status == 0).ToList();
             var commitments = active.Where(m => m.Kind == Entities.RelationshipMemoryKind.Commitment).ToList();
             var displayName = person.Name ?? "This contact";
+            response.Activity.Add("I found enough context.");
 
             var sb = new StringBuilder();
             if (state != null)
@@ -341,19 +459,34 @@ namespace RelationshipIntelligence.AI
                     ? $"No open commitments are recorded for {displayName}."
                     : $"Open commitments: {string.Join("; ", commitments.Take(3).Select(c => c.Title))}.");
             }
-            else if (lower.Contains("why") || lower.Contains("matter") || lower.Contains("queue"))
+            else if (lower.Contains("why") || lower.Contains("matter") || lower.Contains("queue") ||
+                lower.Contains("attention") || lower.Contains("urgent") || lower.Contains("need"))
             {
-                sb.Append(state == null
-                    ? "They are not currently in the attention queue."
-                    : state.UrgencyScore > 65
-                        ? $"They surface because silence has run past their usual rhythm — that is what the urgency score measures."
-                        : $"Their score is modest; they surface lower in the queue than more drifted relationships.");
+                // Attention verdict for the person in focus.
+                if (state == null)
+                    sb.Append("They are not currently in the attention queue.");
+                else if (state.UrgencyScore > 65)
+                    sb.Append($"Yes — {displayName} needs attention: {state.Band.ToLowerInvariant()} at urgency {Math.Round(state.UrgencyScore)}. " +
+                        (last == null ? "No contact is recorded yet."
+                        : $"Quiet {TieDecayModel.SilenceDays(last.TimeOfInteraction, DateTime.UtcNow)}d" +
+                        (state.CadenceReferenceDays == null ? "." : $" against a ~{Math.Round(state.CadenceReferenceDays.Value)}d rhythm.")));
+                else
+                    sb.Append($"No — {displayName} looks steady: {state.Band.ToLowerInvariant()} at urgency {Math.Round(state.UrgencyScore)}. They surface lower in the queue than more drifted relationships.");
             }
-            else if (lower.Contains("what should i do") || lower.Contains("draft"))
+            else if (lower.Contains("should i do") || lower.Contains("should do") || lower.Contains("draft") ||
+                lower.Contains("recommend") || lower.Contains("advice") || lower.Contains("suggest") ||
+                lower.Contains("what would you do") || lower.Contains("next step") || lower.Contains("priorit"))
             {
-                sb.Append(commitments.Count > 0
-                    ? $"Start from the open commitment: {commitments[0].Title}. I can draft a message or prepare a call brief — say the word."
-                    : "Log the latest contact first so the rhythm stays honest, or tell me to draft a check-in message.");
+                // Recommendation from actual data: open commitment first,
+                // else evidence-shaped guidance — never a generic platitude.
+                if (commitments.Count > 0)
+                    sb.Append($"Start from the open commitment: {commitments[0].Title}. I can draft a message or prepare a call brief — say the word.");
+                else if (state == null || last == null)
+                    sb.Append("There is no scored history yet — log the latest contact first so the rhythm stays honest, or tell me to draft a check-in message.");
+                else if (state.UrgencyScore > 65)
+                    sb.Append($"I'd send a short follow-up rather than wait longer — quiet {TieDecayModel.SilenceDays(last.TimeOfInteraction, DateTime.UtcNow)}d against a ~{(state.CadenceReferenceDays == null ? "?" : Math.Round(state.CadenceReferenceDays.Value).ToString())}d rhythm. I can draft it — say the word.");
+                else
+                    sb.Append("Nothing looks overdue — their score is modest. I can still draft a light check-in if you want.");
             }
             else
             {
@@ -436,8 +569,154 @@ namespace RelationshipIntelligence.AI
                 response.Evidence.Add(new AgentEvidence { Title = e.Title, Detail = $"{e.PersonName} in {e.InDays}d", Kind = "observed", RefId = e.PersonId, RefKind = "person" });
         }
 
+        /// <summary>
+        /// Broad network evaluation: aggregate the full queue into
+        /// band patterns, then name only the relationships that actually need
+        /// attention — progressive retrieval, not a data dump.
+        /// </summary>
+        private async Task AnswerOverviewAsync(AgentResponse response)
+        {
+            response.Activity.Add("Reading your relationship queue…");
+            var queue = await _scoring.GetQueueAsync(200);
+            response.Activity.Add($"Reviewed {queue.Count} ranked relationship(s).");
+            if (queue.Count == 0)
+            {
+                response.Text = "Every relationship is within its natural rhythm, and nothing is recorded as needing attention. Log interactions and I will start reading patterns.";
+                return;
+            }
+            var critical = queue.Count(q => q.Band == "Critical");
+            var atRisk = queue.Count(q => q.Band == "AtRisk");
+            var drifting = queue.Count(q => q.Band == "Drifting");
+            var sb = new StringBuilder();
+            sb.Append($"Across {queue.Count} ranked relationship(s): {critical} critical, {atRisk} at risk, {drifting} drifting. ");
+            var top = queue.Take(3).ToList();
+            response.Activity.Add("Checking what the top relationships need…");
+            sb.Append("Worth your attention first: ");
+            sb.Append(string.Join("; ", top.Select(q =>
+                $"{q.Name} ({q.Band.ToLowerInvariant()}, urgency {Math.Round(q.UrgencyScore)})" +
+                (q.LastContactAtUtc == null ? " — no contact recorded yet"
+                : $" — quiet {(q.SilenceDays ?? TieDecayModel.SilenceDays(q.LastContactAtUtc, DateTime.UtcNow))}d"))));
+            sb.Append(". Name anyone and I'll investigate their history and recommend a next step.");
+            response.Text = sb.ToString();
+            foreach (var q in top)
+            {
+                response.Citations.Add(new CopilotCitation { Kind = "person", Id = q.PersonId, Label = q.Name });
+                response.Evidence.Add(new AgentEvidence
+                {
+                    Title = q.Name,
+                    Detail = $"Band {q.Band}, urgency {Math.Round(q.UrgencyScore)}, {q.InteractionCount} interactions.",
+                    Kind = "derived",
+                    RefId = q.PersonId,
+                    RefKind = "person"
+                });
+            }
+            response.Activity.Add("I found enough context.");
+            response.Actions.Add(new AgentAction { Kind = "open-queue", Label = "Open attention queue" });
+        }
+
+        /// <summary>
+        /// Side-by-side comparison from canonical state: retrieve each named
+        /// person, compare band, urgency, silence, and open commitments, then
+        /// explain who to prioritize and why.
+        /// </summary>
+        private async Task AnswerCompareAsync(List<string> mentioned, AgentResponse response)
+        {
+            response.Activity.Add("Reading each relationship state…");
+            var queue = await _scoring.GetQueueAsync(200);
+            var rows = new List<(string Name, ServiceContracts.DTOs.RelationshipHealthResponse? State, int Silence, int Commitments)>();
+            foreach (var name in mentioned)
+            {
+                var resolved = await ResolveAsync(name);
+                if (resolved.Count == 0)
+                    continue;
+                var id = resolved[0].Id;
+                var state = queue.FirstOrDefault(q => q.PersonId == id);
+                var memory = await _memory.ListForPersonAsync(id);
+                var open = memory.Count(m => m.Status == 0 && m.Kind == Entities.RelationshipMemoryKind.Commitment);
+                var silent = state?.SilenceDays
+                    ?? (state?.LastContactAtUtc == null ? (int?)null : TieDecayModel.SilenceDays(state.LastContactAtUtc, DateTime.UtcNow));
+                rows.Add((resolved[0].Name, state, silent ?? -1, open));
+            }
+            if (rows.Count < 2)
+            {
+                response.Text = "I could only place one of those names in your network — name two contacts I know and I'll compare them.";
+                return;
+            }
+            response.Activity.Add("Comparing urgency, silence, and open commitments…");
+            var ordered = rows.OrderByDescending(r => r.State?.UrgencyScore ?? -1).ToList();
+            var sb = new StringBuilder();
+            sb.Append(string.Join(" — ", ordered.Select(r =>
+                $"{r.Name}: {(r.State == null ? "unscored" : $"{r.State.Band.ToLowerInvariant()}, urgency {Math.Round(r.State.UrgencyScore)}")}" +
+                (r.Silence < 0 ? "" : $", quiet {r.Silence}d") +
+                (r.Commitments == 0 ? "" : $", {r.Commitments} open commitment(s)"))));
+            var top = ordered[0];
+            sb.Append($". I'd prioritize {top.Name}: " +
+                (top.Commitments > 0 ? "an open commitment is waiting. "
+                : top.State == null ? "they have no scored history yet, so a first touch establishes the rhythm. "
+                : $"highest urgency at {Math.Round(top.State.UrgencyScore)}. "));
+            sb.Append("Say the word and I'll draft the message.");
+            response.Text = sb.ToString();
+            foreach (var r in ordered)
+            {
+                var id = queue.FirstOrDefault(q => q.Name == r.Name)?.PersonId;
+                if (id != null)
+                {
+                    response.Citations.Add(new CopilotCitation { Kind = "person", Id = id, Label = r.Name });
+                    response.Evidence.Add(new AgentEvidence
+                    {
+                        Title = r.Name,
+                        Detail = r.State == null ? "Unscored — no ranked state."
+                            : $"Band {r.State.Band}, urgency {Math.Round(r.State.UrgencyScore)}, {r.State.InteractionCount} interactions.",
+                        Kind = "derived",
+                        RefId = id,
+                        RefKind = "person"
+                    });
+                }
+            }
+            response.Activity.Add("I found enough context.");
+        }
+
+        /// <summary>
+        /// Evidence behind the current shortlist: each member with the reason
+        /// they were selected — the same reasons shown in the outreach flow.
+        /// </summary>
+        private async Task AnswerBatchEvidenceAsync(AgentSession session, AgentResponse response)
+        {
+            response.Activity.Add("Recalling why each person was shortlisted…");
+            try
+            {
+                var batch = await _outreach.GetAsync(session.BatchId!.Value);
+                var members = batch.Members.Where(m => !m.Excluded).Take(5).ToList();
+                if (members.Count == 0)
+                {
+                    response.Text = "The shortlist is currently empty — nobody is selected, so there is no evidence to show.";
+                    return;
+                }
+                response.Text = "The shortlist rests on: " + string.Join("; ",
+                    members.Select(m => $"{m.PersonName ?? "A contact"} — {m.Reason}")) + ".";
+                foreach (var m in members)
+                {
+                    response.Citations.Add(new CopilotCitation { Kind = "person", Id = m.PersonId, Label = m.PersonName ?? "contact" });
+                    response.Evidence.Add(new AgentEvidence
+                    {
+                        Title = m.PersonName ?? "contact",
+                        Detail = m.Reason,
+                        Kind = "observed",
+                        RefId = m.PersonId,
+                        RefKind = "person"
+                    });
+                }
+                response.Activity.Add("I found enough context.");
+            }
+            catch (Exception)
+            {
+                response.Text = "I could not reopen that shortlist — it may have been discarded. Tell me who to look at and I'll start over.";
+            }
+        }
+
         private async Task AnswerAttentionAsync(AgentResponse response)
         {
+            response.Activity.Add("Reading your attention queue…");
             var queue = await _scoring.GetQueueAsync(7);
             if (queue.Count == 0)
             {

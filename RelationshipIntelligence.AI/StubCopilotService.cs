@@ -227,6 +227,11 @@ namespace RelationshipIntelligence.AI
             signals.AddRange(p.MemoryHighlights.Take(2));
             signals.AddRange(p.UpcomingEvents.Take(2));
             signals.AddRange(p.OpenCommitments.Take(2));
+            // Personalization grounding: style guidance stays visible so
+            // voice-matching never becomes unexplained hallucination.
+            signals.AddRange(p.CommunicationStyle.Take(2).Select(s => $"Style: {s}"));
+            signals.AddRange(p.StyleNotes.Take(2));
+            signals.AddRange(p.MessageExamples.Take(1).Select(e => $"Wrote before: {Truncate(e, 80)}"));
 
             string body;
             string? subject = null;
@@ -261,16 +266,24 @@ namespace RelationshipIntelligence.AI
         /// topic) and expresses it in prose. Raw evidence strings stay in
         /// ContextUsed (grounding) and never leak into the message: no bands,
         /// scores, dates, rhythm language, or bracketed evidence labels.
+        /// Personalization: the user's communication profile, approved
+        /// style notes, and example messages deterministically shape greeting
+        /// and length — different profiles produce materially different drafts.
         /// </summary>
         private static ComposedMessage ComposeMessage(
             ServiceContracts.DTOs.CopilotDTOs.PersonDraftContext p,
             DraftCommunicationRequest request)
         {
-            var greeting = request.Channel switch
+            var voice = VoiceFor(p);
+            var firstName = p.Name.Split(' ', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault() ?? p.Name;
+            var greeting = (request.Channel, voice) switch
             {
-                Entities.OutreachChannel.Text => $"Hi {p.Name} — ",
-                Entities.OutreachChannel.LinkedIn => $"Hi {p.Name}, ",
-                _ => $"Hi {p.Name},\n\n"
+                (_, Voice.NoGreeting) => string.Empty,
+                (Entities.OutreachChannel.Text, Voice.Casual) => $"Hey {firstName} — ",
+                (_, Voice.Casual) => $"Hey {firstName}, ",
+                (Entities.OutreachChannel.Text, _) => $"Hi {p.Name} — ",
+                (Entities.OutreachChannel.LinkedIn, _) => $"Hi {p.Name}, ",
+                (_, _) => $"Hi {p.Name},\n\n"
             };
 
             var instruction = string.IsNullOrWhiteSpace(request.CustomInstruction)
@@ -317,6 +330,11 @@ namespace RelationshipIntelligence.AI
                 subject = "Checking in";
             }
 
+            // A short voice compresses to the first sentence — the user's own
+            // brevity preference, not a template change.
+            if (voice == Voice.Short)
+                reason = FirstSentence(reason);
+
             string body;
             if (request.Channel == Entities.OutreachChannel.Text)
             {
@@ -334,6 +352,48 @@ namespace RelationshipIntelligence.AI
             }
             return new ComposedMessage(body, subject);
         }
+
+        private enum Voice { Default, Casual, NoGreeting, Short }
+
+        /// <summary>
+        /// Reads the deterministic voice from profile + approved style notes +
+        /// examples. Explicit user guidance wins; examples only inform
+        /// greeting/length when no explicit profile exists.
+        /// </summary>
+        private static Voice VoiceFor(ServiceContracts.DTOs.CopilotDTOs.PersonDraftContext p)
+        {
+            var lines = p.CommunicationStyle.Concat(p.StyleNotes).ToList();
+            var text = string.Join("\n", lines).ToLowerInvariant();
+            if (text.Contains("no greeting") || text.Contains("no formal greeting"))
+                return Voice.NoGreeting;
+            if (text.Contains("short"))
+                return Voice.Short;
+            if (text.Contains("casual") || text.Contains("hey") || text.Contains("direct"))
+                return Voice.Casual;
+
+            var example = p.MessageExamples.FirstOrDefault();
+            if (example != null)
+            {
+                var trimmed = example.TrimStart();
+                if (trimmed.StartsWith("Hey ", StringComparison.OrdinalIgnoreCase))
+                    return Voice.Casual;
+                if (!StartsWithGreetingWord(trimmed) && trimmed.Length < 120)
+                    return Voice.Short;
+                if (CountWords(example) < 25)
+                    return Voice.Short;
+            }
+            return Voice.Default;
+        }
+
+        private static bool StartsWithGreetingWord(string text) =>
+            text.StartsWith("Hi ", StringComparison.OrdinalIgnoreCase)
+            || text.StartsWith("Hi,", StringComparison.OrdinalIgnoreCase)
+            || text.StartsWith("Hey ", StringComparison.OrdinalIgnoreCase)
+            || text.StartsWith("Hello ", StringComparison.OrdinalIgnoreCase)
+            || text.StartsWith("Dear ", StringComparison.OrdinalIgnoreCase);
+
+        private static int CountWords(string text) =>
+            text.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries).Length;
 
         private static string BuildCallPrep(
             ServiceContracts.DTOs.CopilotDTOs.PersonDraftContext p,

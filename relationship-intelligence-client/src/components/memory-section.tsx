@@ -37,6 +37,10 @@ export function MemorySection({ personId }: { personId: string }) {
   const [editTitle, setEditTitle] = useState("");
   const [editDetail, setEditDetail] = useState("");
   const [editStatus, setEditStatus] = useState("0");
+  // Communication profile: compact style + example capture.
+  const [showStyle, setShowStyle] = useState(false);
+  const [styleText, setStyleText] = useState("");
+  const [exampleText, setExampleText] = useState("");
 
   const load = useCallback(async () => {
     setError(null);
@@ -65,6 +69,29 @@ export function MemorySection({ personId }: { personId: string }) {
       setTitle("");
       setDetail("");
       setAdding(false);
+      await load();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.body || err.message : "Could not save.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  // Saves one communication-profile line (style kind 10, example kind 11).
+  // Same endpoint, ownership, and validation as every other memory entry.
+  async function saveProfile(kind: number, text: string) {
+    const clean = text.trim();
+    if (clean === "") return;
+    setBusy(true);
+    try {
+      await api.post("/api/Contacts/PostMemoryEntry", {
+        PersonId: personId,
+        Kind: kind,
+        Title: clean.length > 200 ? clean.slice(0, 200) : clean,
+        Detail: null,
+      });
+      if (kind === 10) setStyleText("");
+      else setExampleText("");
       await load();
     } catch (err) {
       setError(err instanceof ApiError ? err.body || err.message : "Could not save.");
@@ -137,6 +164,59 @@ export function MemorySection({ personId }: { personId: string }) {
         Your understanding of this relationship — what it is, what matters, what was promised.
         Observed interaction data and system scores stay separate.
       </p>
+
+      <div className="mb-3 rounded-lg border px-3 py-2">
+        <div className="flex items-center justify-between">
+          <p className="text-sm font-medium">How you talk to them</p>
+          <Button size="sm" variant="ghost" onClick={() => setShowStyle((s) => !s)}>
+            {showStyle ? "Hide" : "Teach"}
+          </Button>
+        </div>
+        {(() => {
+          const styles = (entries ?? []).filter((e) => e.kind === 10 && e.status === 0);
+          const examples = (entries ?? []).filter((e) => e.kind === 11 && e.status === 0);
+          if (styles.length === 0 && examples.length === 0 && !showStyle)
+            return <p className="mt-0.5 text-xs text-muted-foreground">Not taught yet — drafts use generic tone.</p>;
+          return (
+            <div className="mt-1 flex flex-col gap-1">
+              {styles.map((s) => (
+                <p key={s.memoryEntryId} className="text-xs">Style: {s.title}</p>
+              ))}
+              {examples.length > 0 && (
+                <p className="text-xs text-muted-foreground">{examples.length} example message{examples.length === 1 ? "" : "s"} saved — drafts mirror how you write.</p>
+              )}
+            </div>
+          );
+        })()}
+        {showStyle && (
+          <div className="mt-2 flex flex-col gap-2">
+            <div className="flex gap-2">
+              <Input
+                aria-label="Describe your style with them"
+                value={styleText}
+                maxLength={200}
+                onChange={(e) => setStyleText(e.target.value)}
+                placeholder="e.g. casual, direct, short messages, no formal greetings"
+              />
+              <Button size="sm" disabled={busy || styleText.trim() === ""} onClick={() => void saveProfile(10, styleText)}>
+                Save
+              </Button>
+            </div>
+            <div className="flex gap-2">
+              <Input
+                aria-label="Paste an actual message you wrote"
+                value={exampleText}
+                maxLength={200}
+                onChange={(e) => setExampleText(e.target.value)}
+                placeholder="Paste something you actually wrote to them"
+              />
+              <Button size="sm" disabled={busy || exampleText.trim() === ""} onClick={() => void saveProfile(11, exampleText)}>
+                Save
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
 
       {adding && (
         <form onSubmit={create} className="mb-3 flex flex-col gap-2 rounded-lg border p-3">

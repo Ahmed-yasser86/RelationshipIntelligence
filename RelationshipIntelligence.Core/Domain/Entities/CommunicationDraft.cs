@@ -33,6 +33,13 @@ namespace Entities
         [Required]
         public string Body { get; set; } = string.Empty;
 
+        /// <summary>
+        /// The original AI-generated body, stashed on first user edit.
+        /// Never overwritten: AI draft → user edit history is preserved so
+        /// edits become future personalization signals, not lost data.
+        /// </summary>
+        public string? OriginalBody { get; set; }
+
         [StringLength(1000)]
         public string? ContextUsed { get; set; }
 

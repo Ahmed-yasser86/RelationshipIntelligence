@@ -352,7 +352,7 @@ namespace Servicess
                     continue;
 
                 var match = SuggestMatch(name, owned);
-                // No duplicate rows for one canonical person (§17): a second
+                // No duplicate rows for one canonical person: a second
                 // spelling variant pointing at the same person is skipped.
                 if (match != null && meeting.People.Any(p => p.MappedPersonId != null && p.MappedPersonId == match.PersonId))
                     continue;
@@ -371,7 +371,7 @@ namespace Servicess
             }
         }
 
-        // Entity resolution (§17/§20): exact full-name match only. Never guess
+        // Entity resolution: exact full-name match only. Never guess
         // from a first name or prefix — the user chooses from candidates.
         private static Person? SuggestMatch(string detected, List<Person?> owned)
         {
@@ -522,7 +522,7 @@ namespace Servicess
                         finding.Detail = request.Detail.Trim().Length > 2000 ? request.Detail.Trim()[..2000] : request.Detail.Trim();
                     finding.Status = FindingStatus.Accepted;
                     finding.ResolutionNote = CleanNullable(request.ResolutionNote, 500, nameof(request.ResolutionNote));
-                    // Approval model (§21): finding-Accept only stages the finding.
+                    // Finding-Accept only stages the finding.
                     // Durable memory is written once at meeting Confirm, so
                     // unconfirmed-meeting facts never leak into Copilot/queue.
                     // (ConfirmAsync sweeps Accepted findings with null entry id.)
@@ -540,7 +540,7 @@ namespace Servicess
         }
 
         // Every FindingKind maps somewhere: Accept must never silently drop
-        // evidence (§19). Action-oriented kinds become commitments, open
+        // evidence. Action-oriented kinds become commitments, open
         // questions stay visible as topics, date mentions persist as milestones.
         private static readonly Dictionary<FindingKind, RelationshipMemoryKind> FindingToMemoryKind = new()
         {

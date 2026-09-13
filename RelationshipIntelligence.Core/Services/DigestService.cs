@@ -94,7 +94,7 @@ namespace Servicess
 
                 await RefreshStaleStatesAsync(ownerId.Value);
                 // 200 covers the full network so digest selection is over every
-                // ranked relationship, not a capped subset (§14).
+                // ranked relationship, not a capped subset.
                 var queue = await _scoring.GetQueueAsync(200);
                 var now = DateTime.UtcNow;
 

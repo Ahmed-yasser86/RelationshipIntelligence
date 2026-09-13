@@ -15,7 +15,11 @@ namespace RelationshipIntelligence.AI
     /// </summary>
     public sealed class RelationshipPlugin
     {
-        private static readonly JsonSerializerOptions Json = new() { WriteIndented = false };
+        private static readonly JsonSerializerOptions Json = new()
+        {
+            WriteIndented = false,
+            PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase
+        };
 
         private readonly IRelationshipScoringService _scoring;
         private readonly IInteractionService _interactions;

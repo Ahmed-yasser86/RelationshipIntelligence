@@ -42,7 +42,7 @@ export function Overview() {
   const loadQueue = useCallback(async () => {
     try {
       // top=200 covers the full network so band counts are totals, not a
-      // capped subset (§14). Display still slices top 3.
+      // capped subset. Display still slices top 3.
       const queue = await api.get<RelationshipHealth[]>("/api/Contacts/GetRelationshipQueue?top=200");
       setTopAttention(queue.slice(0, 3));
       return queue;

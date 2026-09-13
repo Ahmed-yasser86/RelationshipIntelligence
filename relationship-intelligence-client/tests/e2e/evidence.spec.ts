@@ -28,6 +28,7 @@ test.describe("evidence honesty", () => {
     } finally {
       await request.post(`${API_URL}/api/Contacts/DeletePersoneObject?id=${personId}`, {
         headers,
+        data: {},
       });
     }
   });

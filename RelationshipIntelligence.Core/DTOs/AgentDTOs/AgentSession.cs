@@ -30,6 +30,13 @@ namespace ServiceContracts.DTOs.AgentDTOs
 
         public List<string> PendingApprovals { get; set; } = new();
 
+        /// <summary>
+        /// Candidates awaiting a user pick. Labels are always distinguishable
+        /// (organization/role context or numbered fallback) so contacts sharing
+        /// a name resolve on the first pick instead of looping.
+        /// </summary>
+        public List<AgentCandidateOption> PendingCandidates { get; set; } = new();
+
         public string? CurrentTask { get; set; }
 
         public DateTime UpdatedAtUtc { get; set; }

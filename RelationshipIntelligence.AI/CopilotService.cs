@@ -380,6 +380,9 @@ namespace RelationshipIntelligence.AI
             foreach (var m in p.MemoryHighlights.Take(6)) context.AppendLine($"MEMORY: {m}");
             foreach (var e in p.UpcomingEvents.Take(3)) context.AppendLine($"EVENT: {e}");
             foreach (var c in p.OpenCommitments.Take(5)) context.AppendLine($"COMMITMENT: {c}");
+            foreach (var s in p.CommunicationStyle.Take(4)) context.AppendLine($"STYLE: {s}");
+            foreach (var n in p.StyleNotes.Take(4)) context.AppendLine($"STYLE: {n}");
+            foreach (var x in p.MessageExamples.Take(3)) context.AppendLine($"EXAMPLE: {x}");
 
             var instruction = string.IsNullOrWhiteSpace(request.CustomInstruction)
                 ? request.GlobalInstruction
@@ -393,11 +396,15 @@ namespace RelationshipIntelligence.AI
                 "continuing a recent substantive thread; a remembered topic worth raising; " +
                 "or, if there is nothing beyond a long silence, a plain human reconnection with no manufactured reason. " +
                 "Let that reason shape the CONTENT of the message — different evidence must produce a materially different message. " +
-                "Rules: write as the user in first person, natural and concise. Ground every specific claim in the supplied context — " +
+                "Rules: write as the user in first person, natural and concise. " +
+                "Match the user's voice: STYLE lines describe how they write to this person — apply them to greeting, length, and tone. " +
+                "EXAMPLE lines show actual messages they wrote — mirror their greeting habit, length, and directness. " +
+                "STYLE and EXAMPLE govern HOW to write; they never supply facts. " +
+                "Ground every specific claim in the supplied context — " +
                 "never invent details, dates, commitments, feelings, outcomes, or conversations. " +
                 "When context is thin, stay conservative and general. " +
                 "Never mention bands, scores, urgency numbers, days-silent counts, rhythm, cadence, or any bracketed evidence label " +
-                "(PERSON/STATE/RHYTHM/INTERACTION/MEMORY/EVENT/COMMITMENT, [Call], [Intent/User], dates like 2026-08-01). " +
+                "(PERSON/STATE/RHYTHM/INTERACTION/MEMORY/EVENT/COMMITMENT/STYLE/EXAMPLE, [Call], [Intent/User], dates like 2026-08-01). " +
                 "Never write meta-commentary such as 'based on our relationship history', 'according to our previous interactions', " +
                 "'I noticed we haven't spoken in N days', or 'your relationship rhythm suggests'. " +
                 "Never enumerate past interactions or paste evidence lines into the message. " +

@@ -21,5 +21,11 @@ namespace ServiceContracts.DTOs.AgentDTOs
         public AgentClarification? NeedsInput { get; set; }
 
         public bool LimitedContext { get; set; }
+
+        /// <summary>
+        /// User-facing retrieval progress: concise activity states, never
+        /// chain-of-thought. Rendered as progress while the agent investigates.
+        /// </summary>
+        public List<string> Activity { get; set; } = new();
     }
 }

@@ -15,7 +15,11 @@ namespace RelationshipIntelligence.AI
     /// </summary>
     public sealed class PlanningPlugin
     {
-        private static readonly JsonSerializerOptions Json = new() { WriteIndented = false };
+        private static readonly JsonSerializerOptions Json = new()
+        {
+            WriteIndented = false,
+            PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase
+        };
 
         private readonly IMeetingService _meetings;
         private readonly IOutreachService _outreach;

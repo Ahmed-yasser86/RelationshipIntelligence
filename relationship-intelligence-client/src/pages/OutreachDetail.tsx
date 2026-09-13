@@ -230,6 +230,14 @@ function DraftCard({
       ) : (
         <p className="mt-1 whitespace-pre-wrap text-sm">{draft.body}</p>
       )}
+      {draft.originalBody && (
+        <details className="mt-1 rounded border px-2 py-1">
+          <summary className="cursor-pointer text-xs text-muted-foreground">
+            View original AI draft (your edit is shown above)
+          </summary>
+          <p className="mt-1 whitespace-pre-wrap text-xs text-muted-foreground">{draft.originalBody}</p>
+        </details>
+      )}
       {draft.contextUsed && <p className="mt-1 text-xs text-muted-foreground">Grounded in: {draft.contextUsed}</p>}
       {error && <p className="mt-1 text-xs text-destructive">{error}</p>}
       <div className="mt-1.5 flex flex-wrap gap-1.5">

@@ -47,7 +47,7 @@ export function People() {
   });
   const [showFilters, setShowFilters] = useState(false);
   const [statusTags, setStatusTags] = useState<SystemStatusTagResponse[]>([]);
-  // Canonical relationship state (§27): same queue rows used by briefing,
+  // Canonical relationship state: same queue rows used by briefing,
   // digest, and detail — never a second scoring path.
   const [healthById, setHealthById] = useState<Map<string, RelationshipHealth>>(new Map());
   const requestId = useRef(0);

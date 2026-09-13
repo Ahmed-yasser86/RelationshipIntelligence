@@ -57,7 +57,7 @@ export function Network() {
   }, [graph]);
 
   // Mirrors server CapBandForEvidence: Insufficient evidence never shows
-  // above Drifting, matching queue/digest bands (§13).
+  // above Drifting, matching queue/digest bands.
   const bandOf = useCallback(
     (id: string): string => {
       const n = nodeById.get(id);

@@ -85,6 +85,10 @@ namespace RelationshipIntelligence.AI
             var session = await _sessions.GetOrCreateAsync(request.SessionId, ownerId);
             AdoptAppContext(session, request.AppContext);
 
+            // A just-made disambiguation pick sets the focus; routing below
+            // then skips name extraction because the focus is already resolved.
+            AdoptPendingChoice(session, request.Message.Trim());
+
             var kernel = await _kernels.CreateAsync();
             kernel.Plugins.AddFromObject(_query, "relationships");
             kernel.Plugins.AddFromObject(_planning, "planning");
@@ -214,8 +218,14 @@ namespace RelationshipIntelligence.AI
 
         private async Task<List<(Guid Id, string Name)>> ResolveCandidatesAsync(string name)
         {
+            return (await ResolveDetailedCandidatesAsync(name))
+                .Select(c => (c.Id, c.Name)).ToList();
+        }
+
+        private async Task<List<(Guid Id, string Name, string? Org, string? Role)>> ResolveDetailedCandidatesAsync(string name)
+        {
             var raw = await _query.SearchPeopleAsync(name);
-            var result = new List<(Guid, string)>();
+            var result = new List<(Guid, string, string?, string?)>();
             try
             {
                 using var doc = JsonDocument.Parse(raw);
@@ -223,12 +233,40 @@ namespace RelationshipIntelligence.AI
                     return result;
                 foreach (var el in doc.RootElement.EnumerateArray().Take(5))
                 {
-                    if (el.TryGetProperty("personId", out var idProp) && el.TryGetProperty("name", out var nameProp))
-                        result.Add((idProp.GetGuid(), nameProp.GetString() ?? "?"));
+                    if (!el.TryGetProperty("personId", out var idProp) || !el.TryGetProperty("name", out var nameProp))
+                        continue;
+                    string? org = null;
+                    string? role = null;
+                    if (el.TryGetProperty("organizations", out var orgs) && orgs.ValueKind == JsonValueKind.Array)
+                        org = orgs.EnumerateArray().Select(e => e.GetString()).FirstOrDefault(s => !string.IsNullOrWhiteSpace(s));
+                    if (el.TryGetProperty("roles", out var roles) && roles.ValueKind == JsonValueKind.Array)
+                        role = roles.EnumerateArray().Select(e => e.GetString()).FirstOrDefault(s => !string.IsNullOrWhiteSpace(s));
+                    result.Add((idProp.GetGuid(), nameProp.GetString() ?? "?", org, role));
                 }
             }
             catch (JsonException) { }
             return result;
+        }
+
+        /// <summary>
+        /// Applies a pending disambiguation pick. On a match the focus is set
+        /// and routing continues with the focus already resolved, so the name
+        /// inside the label is never re-extracted into a second prompt.
+        /// Anything else clears the pending pick — a new question is never
+        /// trapped behind an old clarification.
+        /// </summary>
+        private static bool AdoptPendingChoice(AgentSession session, string message)
+        {
+            if (session.PendingCandidates.Count == 0)
+                return false;
+            var picked = PersonChoiceLabels.MatchChoice(
+                session.PendingCandidates.Select(c => (c.PersonId, c.Label)).ToList(), message);
+            session.PendingCandidates.Clear();
+            if (picked == null)
+                return false;
+            session.PersonId = picked.Value;
+            session.CurrentTask = null;
+            return true;
         }
 
         private async Task HandleConversationalAsync(Kernel kernel, AgentSession session, AgentChatRequest request, GoalClassification goal, AgentResponse response)
@@ -238,7 +276,7 @@ namespace RelationshipIntelligence.AI
                 var candidate = PersonNameExtractor.ExtractUnknownName(request.Message.Trim());
                 if (candidate != null)
                 {
-                    var matches = await ResolveCandidatesAsync(candidate);
+                    var matches = await ResolveDetailedCandidatesAsync(candidate);
                     if (matches.Count == 0)
                     {
                         response.Text += $"I don't have a contact matching \"{candidate}\". I can only reason about people in your network — want to add them first, or ask about someone else?";
@@ -246,8 +284,12 @@ namespace RelationshipIntelligence.AI
                     }
                     if (matches.Count > 1)
                     {
+                        var choices = PersonChoiceLabels.Build(matches);
+                        session.PendingCandidates.Clear();
+                        session.PendingCandidates.AddRange(choices.Select(c =>
+                            new AgentCandidateOption { PersonId = c.Id, Label = c.Label }));
                         response.Text += $"I found several people matching \"{candidate}\". Which one do you mean?";
-                        response.NeedsInput = new AgentClarification { Prompt = "Which person?", Options = matches.Select(m => m.Name).ToList() };
+                        response.NeedsInput = new AgentClarification { Prompt = "Which person?", Options = choices.Select(c => c.Label).ToList() };
                         return;
                     }
                     session.PersonId = matches[0].Id;
@@ -255,7 +297,7 @@ namespace RelationshipIntelligence.AI
             }
             if (goal.PersonRefs.Count > 0 && session.PersonId == null)
             {
-                var candidates = await ResolveCandidatesAsync(goal.PersonRefs[0]);
+                var candidates = await ResolveDetailedCandidatesAsync(goal.PersonRefs[0]);
                 if (candidates.Count == 0)
                 {
                     response.Text += $"I don't have a contact matching \"{goal.PersonRefs[0]}\". I can only reason about people in your network — want to add them first, or ask about someone else?";
@@ -263,11 +305,15 @@ namespace RelationshipIntelligence.AI
                 }
                 if (candidates.Count > 1)
                 {
+                    var choices = PersonChoiceLabels.Build(candidates);
+                    session.PendingCandidates.Clear();
+                    session.PendingCandidates.AddRange(choices.Select(c =>
+                        new AgentCandidateOption { PersonId = c.Id, Label = c.Label }));
                     response.Text += $"I found several people matching \"{goal.PersonRefs[0]}\". Which one do you mean?";
                     response.NeedsInput = new AgentClarification
                     {
                         Prompt = "Which person?",
-                        Options = candidates.Select(c => c.Name).ToList()
+                        Options = choices.Select(c => c.Label).ToList()
                     };
                     session.PendingApprovals.Add("person:" + goal.PersonRefs[0]);
                     return;

@@ -90,6 +90,8 @@ else
 }
 builder.Services.AddScoped<IMeetingService, MeetingService>();
 builder.Services.AddScoped<MeetingRepositoryContract, MeetingRepository>();
+builder.Services.AddScoped<IOutreachService, OutreachService>();
+builder.Services.AddScoped<OutreachRepositoryContract, OutreachRepository>();
 builder.Services.AddScoped<INetworkAnalysisService, NetworkAnalysisService>();
 builder.Services.AddScoped<RelationshipStateRepositoryContract, RelationshipStateRepository>();
 builder.Services.AddScoped<DigestRepositoryContract, DigestRepository>();

@@ -43,6 +43,9 @@ namespace Entities
         public virtual DbSet<MeetingPerson> MeetingPersons { get; set; }
         public virtual DbSet<MeetingFinding> MeetingFindings { get; set; }
         public virtual DbSet<MeetingBrief> MeetingBriefs { get; set; }
+        public virtual DbSet<OutreachBatch> OutreachBatches { get; set; }
+        public virtual DbSet<OutreachBatchMember> OutreachBatchMembers { get; set; }
+        public virtual DbSet<CommunicationDraft> CommunicationDrafts { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -137,14 +140,43 @@ namespace Entities
                 .WithMany()
                 .HasForeignKey(f => f.MappedPersonId)
                 .OnDelete(DeleteBehavior.SetNull);
-            modelBuilder.Entity<MeetingBrief>().ToTable("MeetingBriefs");
-            modelBuilder.Entity<MeetingBrief>()
-                .HasIndex(b => b.MeetingId)
-                .IsUnique();
             modelBuilder.Entity<MeetingBrief>()
                 .HasOne(b => b.Meeting)
                 .WithOne(m => m.Brief)
                 .HasForeignKey<MeetingBrief>(b => b.MeetingId)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<OutreachBatch>().ToTable("OutreachBatches");
+            modelBuilder.Entity<OutreachBatch>()
+                .HasIndex(b => new { b.ApplicationUserId, b.Status });
+            modelBuilder.Entity<OutreachBatch>()
+                .HasQueryFilter(b => b.ApplicationUserId == _currentUserId);
+            modelBuilder.Entity<OutreachBatchMember>().ToTable("OutreachBatchMembers");
+            modelBuilder.Entity<OutreachBatchMember>()
+                .HasIndex(m => m.OutreachBatchId);
+            modelBuilder.Entity<OutreachBatchMember>()
+                .HasOne(m => m.Batch)
+                .WithMany(b => b.Members)
+                .HasForeignKey(m => m.OutreachBatchId)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<OutreachBatchMember>()
+                .HasOne(m => m.Person)
+                .WithMany()
+                .HasForeignKey(m => m.PersonId)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<CommunicationDraft>().ToTable("CommunicationDrafts");
+            modelBuilder.Entity<CommunicationDraft>()
+                .HasIndex(d => new { d.OutreachBatchId, d.PersonId });
+            modelBuilder.Entity<CommunicationDraft>()
+                .HasQueryFilter(d => d.ApplicationUserId == _currentUserId);
+            modelBuilder.Entity<CommunicationDraft>()
+                .HasOne(d => d.Batch)
+                .WithMany(b => b.Drafts)
+                .HasForeignKey(d => d.OutreachBatchId)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<CommunicationDraft>()
+                .HasOne(d => d.Person)
+                .WithMany()
+                .HasForeignKey(d => d.PersonId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Person>()

@@ -16,5 +16,7 @@ namespace ServiceContracts
         Task<PlanSuggestionDto> SuggestPlanAsync(Guid personId, Guid? intentEntryId);
 
         Task<BatchIntentDto> ParseOutreachIntentAsync(string text);
+
+        Task<DraftCommunicationResult> DraftCommunicationAsync(DraftCommunicationRequest request);
     }
 }

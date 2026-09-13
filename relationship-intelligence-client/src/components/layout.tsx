@@ -15,6 +15,7 @@ import {
   LogOut,
   Network,
   Newspaper,
+  Send,
   Sparkles,
   Users,
 } from "lucide-react";
@@ -25,6 +26,7 @@ const NAV = [
   { to: "/people", label: "People", icon: Users, end: false },
   { to: "/organizations", label: "Organizations", icon: Building2, end: true },
   { to: "/meetings", label: "Meetings", icon: CalendarDays, end: false },
+  { to: "/outreach", label: "Outreach", icon: Send, end: false },
   { to: "/network", label: "Network", icon: Network, end: false },
   { to: "/digest", label: "Digest", icon: Newspaper, end: false },
 ];

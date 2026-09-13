@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -153,9 +153,12 @@ function QuickLog({
 
 export function Queue() {
   const { openCopilot } = useCopilot();
+  const navigate = useNavigate();
   const [items, setItems] = useState<RelationshipHealth[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [top, setTop] = useState(PAGE_TOP);
+  const [selected, setSelected] = useState<string[]>([]);
+  const [outreachBusy, setOutreachBusy] = useState(false);
   const [snoozed, setSnoozed] = useState<Record<string, number>>(() => pruneSnoozed(readSnoozed()));
   const [explaining, setExplaining] = useState<RelationshipHealth | null>(null);
   const [evidence, setEvidence] = useState<InteractionResponse[]>([]);
@@ -228,6 +231,26 @@ export function Queue() {
     setTop(FULL_TOP);
   }
 
+  function toggleSelect(id: string) {
+    setSelected((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]));
+  }
+
+  async function startOutreach() {
+    if (selected.length === 0) return;
+    setOutreachBusy(true);
+    try {
+      const batch = await api.post<{ outreachBatchId: string }>("/api/Outreach/PostBatchFromPersons", {
+        PersonIds: selected,
+        Intent: "Follow up",
+      });
+      navigate(`/outreach/${batch.outreachBatchId}`);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.body || err.message : "Could not start outreach.");
+    } finally {
+      setOutreachBusy(false);
+    }
+  }
+
   return (
     <div>
       <div className="mb-6 flex items-end justify-between">
@@ -239,9 +262,16 @@ export function Queue() {
             snoozed items return in {SNOOZE_DAYS} days on this device.
           </p>
         </div>
-        <Button variant="outline" size="sm" onClick={() => void load()}>
-          Refresh
-        </Button>
+        <div className="flex gap-2">
+          {selected.length > 0 && (
+            <Button size="sm" disabled={outreachBusy} onClick={() => void startOutreach()}>
+              {outreachBusy ? "Starting…" : `Contact selected (${selected.length})`}
+            </Button>
+          )}
+          <Button variant="outline" size="sm" onClick={() => void load()}>
+            Refresh
+          </Button>
+        </div>
       </div>
 
       {error && <ErrorState message={error} onRetry={() => void load()} />}
@@ -261,6 +291,12 @@ export function Queue() {
           {visible.map((item, i) => (
             <li key={`${item.personId}-${i}`} className="rounded-lg border px-4 py-3">
               <div className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  aria-label={`Select ${item.name ?? "contact"} for outreach`}
+                  checked={selected.includes(item.personId)}
+                  onChange={() => toggleSelect(item.personId)}
+                />
                 <span className="w-5 shrink-0 text-sm tabular-nums text-muted-foreground">
                   {i + 1}
                 </span>

@@ -152,5 +152,81 @@ namespace RelationshipIntelligence.AI
         {
             return Task.FromResult(OutreachIntentMatcher.Match(text ?? string.Empty));
         }
+
+        public Task<DraftCommunicationResult> DraftCommunicationAsync(DraftCommunicationRequest request)
+        {
+            if (request == null)
+                throw new ArgumentNullException(nameof(request));
+
+            var p = request.Person;
+            var signals = new List<string>();
+            signals.AddRange(p.RecentInteractions.Take(2));
+            signals.AddRange(p.MemoryHighlights.Take(2));
+            signals.AddRange(p.UpcomingEvents.Take(2));
+            signals.AddRange(p.OpenCommitments.Take(2));
+
+            var greeting = request.Channel switch
+            {
+                Entities.OutreachChannel.Text => $"Hi {p.Name} — ",
+                Entities.OutreachChannel.LinkedIn => $"Hi {p.Name}, ",
+                _ => $"Hi {p.Name},\n\n"
+            };
+            var intentLine = string.IsNullOrWhiteSpace(request.CustomInstruction)
+                ? request.GlobalInstruction
+                : request.CustomInstruction;
+            var purpose = string.IsNullOrWhiteSpace(intentLine)
+                ? $"I wanted to {request.Intent.ToLowerInvariant()}."
+                : intentLine.Trim();
+
+            string body;
+            if (request.Kind == Entities.DraftKind.CallPrep)
+            {
+                var sb = new StringBuilder();
+                sb.AppendLine($"Call prep — {p.Name}");
+                sb.AppendLine();
+                sb.AppendLine("Before the call:");
+                sb.AppendLine($"- Relationship: {(p.Band == null ? "no scored state" : $"{p.Band}, urgency {(p.UrgencyScore == null ? "?" : Math.Round(p.UrgencyScore.Value).ToString())}")}.");
+                if (!string.IsNullOrWhiteSpace(p.CadenceLine)) sb.AppendLine($"- Rhythm: {p.CadenceLine}");
+                foreach (var s in signals.Take(4)) sb.AppendLine($"- {s}");
+                sb.AppendLine();
+                sb.AppendLine("During the call:");
+                foreach (var c in p.OpenCommitments.Take(3)) sb.AppendLine($"- Clarify commitment: {c}");
+                if (p.OpenCommitments.Count == 0) sb.AppendLine("- No open commitments recorded — ask what matters most right now.");
+                sb.AppendLine();
+                sb.AppendLine("After the call:");
+                sb.AppendLine("- Log the call as an interaction.");
+                sb.AppendLine("- Record any new commitments in relationship memory.");
+                body = sb.ToString().Trim();
+            }
+            else if (request.Channel == Entities.OutreachChannel.Text)
+            {
+                body = $"{greeting}{purpose} " +
+                    (signals.Count == 0 ? "Hope you're well!" : signals[0]);
+            }
+            else
+            {
+                var sb = new StringBuilder();
+                sb.Append(greeting);
+                sb.AppendLine(purpose);
+                sb.AppendLine();
+                foreach (var s in signals.Take(3)) sb.AppendLine($"- {s}");
+                sb.AppendLine();
+                sb.Append("Would love to catch up properly. Let me know what works for you.");
+                body = sb.ToString().Trim();
+            }
+
+            if (body.Length > 4000)
+                body = body[..4000];
+
+            return Task.FromResult(new DraftCommunicationResult
+            {
+                Subject = request.Channel == Entities.OutreachChannel.Email
+                    ? $"Reconnecting with {p.Name}"[..Math.Min(200, $"Reconnecting with {p.Name}".Length)]
+                    : null,
+                Body = body,
+                ContextUsed = signals.Take(8).ToList(),
+                LimitedContext = signals.Count == 0
+            });
+        }
     }
 }

@@ -169,6 +169,42 @@ export interface MeetingResponse {
 }
 export const MeetingStatuses = ["Preparation", "Draft", "Processing", "Processed", "Confirmed", "Discarded"] as const;
 export const FindingKinds = ["Topic", "Decision", "Commitment", "Action item", "Follow-up", "Question", "Event", "Person fact", "Project", "Date mention"] as const;
+export interface OutreachBatchMember {
+  outreachBatchMemberId: string;
+  personId: string;
+  personName: string | null;
+  reason: string;
+  channelOverride: number | null;
+  intentOverride: string | null;
+  customInstruction: string | null;
+  excluded: boolean;
+  skipFutureSuggestions: boolean;
+}
+export interface CommunicationDraft {
+  communicationDraftId: string;
+  personId: string;
+  personName: string | null;
+  kind: number;
+  channel: number;
+  subject: string | null;
+  body: string;
+  contextUsed: string | null;
+  limitedContext: boolean;
+  isAiGenerated: boolean;
+  status: number;
+}
+export interface OutreachBatch {
+  outreachBatchId: string;
+  intent: string;
+  channel: number;
+  globalInstruction: string | null;
+  status: number;
+  createdAtUtc: string;
+  members: OutreachBatchMember[];
+  drafts: CommunicationDraft[];
+}
+export const OutreachChannels = ["Email", "LinkedIn", "Text", "Prepare calls"] as const;
+export const DraftStatuses = ["Draft", "Edited", "Approved", "Rejected", "Discarded"] as const;
 export interface ContactChannelRequest {
   name: string;
   value: string | null;

@@ -8,6 +8,8 @@ import { MeetingDetail } from "@/pages/MeetingDetail";
 import { Meetings } from "@/pages/Meetings";
 import { Network } from "@/pages/Network";
 import { Organizations } from "@/pages/Organizations";
+import { Outreach } from "@/pages/Outreach";
+import { OutreachDetail } from "@/pages/OutreachDetail";
 import { Overview } from "@/pages/Overview";
 import { People } from "@/pages/People";
 import { PersonDetail } from "@/pages/PersonDetail";
@@ -69,6 +71,8 @@ export function App() {
           <Route path="organizations" element={<Organizations />} />
           <Route path="meetings" element={<Meetings />} />
           <Route path="meetings/:id" element={<MeetingDetail />} />
+          <Route path="outreach" element={<Outreach />} />
+          <Route path="outreach/:id" element={<OutreachDetail />} />
           <Route path="network" element={<Network />} />
           <Route path="digest" element={<Digest />} />
         </Route>

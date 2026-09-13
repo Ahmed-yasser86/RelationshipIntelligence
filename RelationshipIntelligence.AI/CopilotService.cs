@@ -329,6 +329,116 @@ namespace RelationshipIntelligence.AI
             }
         }
 
+        public async Task<DraftCommunicationResult> DraftCommunicationAsync(DraftCommunicationRequest request)
+        {
+            if (request == null)
+                throw new ArgumentNullException(nameof(request));
+            if (request.Person == null)
+                throw new ArgumentException("Person context is required.", nameof(request));
+
+            var channelShape = request.Kind == Entities.DraftKind.CallPrep
+                ? "a call-preparation brief with exactly these sections: Before the call / During the call / After the call"
+                : request.Channel switch
+                {
+                    Entities.OutreachChannel.Email => "an email with a Subject line and a structured body",
+                    Entities.OutreachChannel.LinkedIn => "a concise LinkedIn message (no subject, natural and brief)",
+                    Entities.OutreachChannel.Text => "a short conversational text message (two sentences or fewer)",
+                    _ => "an email with a Subject line and a structured body"
+                };
+
+            var context = new StringBuilder();
+            var p = request.Person;
+            context.AppendLine($"PERSON: {p.Name}.");
+            if (!string.IsNullOrWhiteSpace(p.Band))
+                context.AppendLine($"STATE: band {p.Band}" +
+                    (p.UrgencyScore == null ? "." : $", urgency {Math.Round(p.UrgencyScore.Value)}."));
+            if (!string.IsNullOrWhiteSpace(p.CadenceLine))
+                context.AppendLine($"RHYTHM: {p.CadenceLine}");
+            foreach (var i in p.RecentInteractions.Take(5)) context.AppendLine($"INTERACTION: {i}");
+            foreach (var m in p.MemoryHighlights.Take(6)) context.AppendLine($"MEMORY: {m}");
+            foreach (var e in p.UpcomingEvents.Take(3)) context.AppendLine($"EVENT: {e}");
+            foreach (var c in p.OpenCommitments.Take(5)) context.AppendLine($"COMMITMENT: {c}");
+
+            var instruction = string.IsNullOrWhiteSpace(request.CustomInstruction)
+                ? request.GlobalInstruction
+                : request.CustomInstruction;
+            var brief =
+                $"Write {channelShape} for the person above. " +
+                $"Communication intent: {request.Intent}. " +
+                (string.IsNullOrWhiteSpace(instruction) ? "" : $"Global instruction: {instruction.Trim()}. ") +
+                "Rules: ground every specific claim in the supplied context — never invent details, dates, or commitments. " +
+                "Do not substitute only the name into a template. " +
+                "End with two lines: CONTEXT-USED: <semicolon-separated list of the context items you used, or NONE> and " +
+                "SUBJECT: <subject for email, else ->.";
+
+            string content;
+            try
+            {
+                var (kernel, chat) = await KernelWithToolsAsync();
+                var history = new ChatHistory(CopilotPrompts.System);
+                history.AddUserMessage(context + "\n" + brief);
+                var result = await chat.GetChatMessageContentAsync(history, new OpenAIPromptExecutionSettings
+                {
+                    Temperature = 0.4,
+                    MaxTokens = 1200
+                }, kernel);
+                content = (result.Content ?? string.Empty).Trim();
+            }
+            catch (CopilotNotConfiguredException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Draft generation model call failed");
+                throw new CopilotUnavailableException("The assistant could not draft the message. Check provider settings and try again.", ex);
+            }
+
+            return ParseDraftOutput(content, request);
+        }
+
+        private static DraftCommunicationResult ParseDraftOutput(string content, DraftCommunicationRequest request)
+        {
+            var lines = content.Split('\n').Select(l => l.Trim()).ToList();
+            var contextUsed = new List<string>();
+            string? subject = null;
+            var bodyLines = new List<string>();
+
+            foreach (var line in lines)
+            {
+                if (line.StartsWith("CONTEXT-USED:", StringComparison.OrdinalIgnoreCase))
+                {
+                    var value = line["CONTEXT-USED:".Length..].Trim();
+                    if (!string.Equals(value, "NONE", StringComparison.OrdinalIgnoreCase))
+                        contextUsed.AddRange(value.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
+                }
+                else if (line.StartsWith("SUBJECT:", StringComparison.OrdinalIgnoreCase))
+                {
+                    var value = line["SUBJECT:".Length..].Trim();
+                    if (!string.Equals(value, "-", StringComparison.Ordinal) && value.Length > 0)
+                        subject = value.Length > 200 ? value[..200] : value;
+                }
+                else
+                {
+                    bodyLines.Add(line);
+                }
+            }
+
+            var body = string.Join("\n", bodyLines).Trim();
+            if (body.Length == 0)
+                throw new CopilotUnavailableException("The assistant returned an empty draft.");
+            if (body.Length > 4000)
+                body = body[..4000];
+
+            return new DraftCommunicationResult
+            {
+                Subject = request.Channel == Entities.OutreachChannel.Email ? subject : null,
+                Body = body,
+                ContextUsed = contextUsed.Take(8).ToList(),
+                LimitedContext = contextUsed.Count == 0
+            };
+        }
+
         private static string ExtractJson(string content)
         {
             var start = content.IndexOf('{');

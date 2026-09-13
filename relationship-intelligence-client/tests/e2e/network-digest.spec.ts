@@ -42,6 +42,59 @@ test.describe("network", () => {
       }
     }
   });
+
+  test("selecting a node does not rearrange the map", async ({ page }) => {
+    const svg = page.locator('svg[aria-label="Contact network graph"]');
+    await expect(svg).toBeVisible();
+    await expect(page.locator("[data-node-id]").first()).toBeVisible();
+
+    const result = await page.evaluate(
+      () =>
+        new Promise<{ settled: boolean; maxMove: number }>((resolve) => {
+          const snap = (): Record<string, [number, number]> => {
+            const out: Record<string, [number, number]> = {};
+            document.querySelectorAll("[data-node-id]").forEach((el) => {
+              const t = el.getAttribute("transform") ?? "";
+              const m = /translate\(([-\d.]+),([-\d.]+)\)/.exec(t);
+              if (m) out[el.getAttribute("data-node-id")!] = [parseFloat(m[1]), parseFloat(m[2])];
+            });
+            return out;
+          };
+          const dist = (a: Record<string, [number, number]>, b: Record<string, [number, number]>): number => {
+            let max = 0;
+            for (const id of Object.keys(a)) {
+              if (!(id in b)) return Number.POSITIVE_INFINITY;
+              max = Math.max(max, Math.hypot(a[id][0] - b[id][0], a[id][1] - b[id][1]));
+            }
+            return max;
+          };
+          let prev = snap();
+          const iv = setInterval(() => {
+            const cur = snap();
+            if (Object.keys(cur).length === 0) return;
+            if (dist(prev, cur) < 1.5) {
+              clearInterval(iv);
+              const first = document.querySelector("[data-node-id]");
+              if (first) {
+                first.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+                const before = snap();
+                setTimeout(() => resolve({ settled: true, maxMove: dist(before, snap()) }), 900);
+              } else {
+                resolve({ settled: false, maxMove: Number.POSITIVE_INFINITY });
+              }
+            } else {
+              prev = cur;
+            }
+          }, 700);
+          setTimeout(() => {
+            clearInterval(iv);
+            resolve({ settled: false, maxMove: Number.POSITIVE_INFINITY });
+          }, 30000);
+        }),
+    );
+    expect(result.settled).toBe(true);
+    expect(result.maxMove).toBeLessThan(5);
+  });
 });
 
 test.describe("digest", () => {

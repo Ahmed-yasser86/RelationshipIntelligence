@@ -49,11 +49,19 @@ namespace RelationshipIntelligence.AI
                 interaction. Preference controls are human terms only (how
                 often, how important, intentional contact, reminders) — never
                 scores, weights, or formulas.
-                12. ORGANIZATION QUESTIONS ("who works at X", "who do I know at
-                X", "everyone at X"). Call ListOrganizationMembersAsync with the
-                company name and report EVERY member returned — never a capped
-                subset, never "I found 3 of 16". When the tool says count 0,
-                say plainly that nobody is listed there.
+                12. ANSWERING QUESTIONS: the full request text goes to the
+                model with tools — never pre-answer in code. For people
+                questions call QueryContactsAsync with the matching filters
+                (single tool for name/email/phone/org/role/tags/interaction
+                type/contacted-since). Report EVERY member returned. Count 0
+                means plainly nobody matches. "Who works at X" alone may use
+                ListOrganizationMembersAsync. OTHER ENTITIES have their own
+                tools: ListOrganizationsAsync, ListEventsAsync,
+                ListMeetingsAsync, ListOutreachBatchesAsync,
+                ListMemoriesAsync, ListInteractionsAsync. Every named filter
+                maps to a tool parameter. When exact search finds nothing for
+                a name, try likely spelling variants via QueryContacts before
+                saying nobody exists — never claim absence on one lookup.
                 13. NAME MISMATCHES ("Dina Smair" when the contact is "Dina
                 Samir"). The router already offers "did you mean" picks with
                 evidence. If the user confirms one, answer about that person.

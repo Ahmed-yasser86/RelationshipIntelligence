@@ -33,6 +33,8 @@ namespace RelationshipIntelligence.AI
         private readonly IMeetingService _meetings;
         private readonly IDigestService _digest;
         private readonly IRelationshipPreferenceService _preferences;
+        private readonly IOrganizationService _organizations;
+        private readonly IOutreachService _outreach;
 
         public RelationshipQueryPlugin(
             IRelationshipScoringService scoring,
@@ -44,7 +46,9 @@ namespace RelationshipIntelligence.AI
             IPersonGetterService persons,
             IMeetingService meetings,
             IDigestService digest,
-            IRelationshipPreferenceService preferences)
+            IRelationshipPreferenceService preferences,
+            IOrganizationService? organizations = null,
+            IOutreachService? outreach = null)
         {
             _scoring = scoring;
             _interactions = interactions;
@@ -56,6 +60,8 @@ namespace RelationshipIntelligence.AI
             _meetings = meetings;
             _digest = digest;
             _preferences = preferences;
+            _organizations = organizations!;
+            _outreach = outreach!;
         }
 
         private static Guid? ParseId(string value) =>
@@ -265,7 +271,7 @@ namespace RelationshipIntelligence.AI
             }), Json);
         }
 
-        [KernelFunction, Description("List everyone who works at an organization (exact company match, case-insensitive). Use for 'who works at X / who do I know at X' questions. Returns all members, not a capped subset. Read-only.")]
+        [KernelFunction, Description("List everyone at one organization (exact company match, case-insensitive). Shortcut for organization-only questions; for anything combined (calls since X, role, tag) use QueryContacts instead. Read-only.")]
         public async Task<string> ListOrganizationMembersAsync(
             [Description("Organization/company name, e.g. Proceedit.")] string organization)
         {
@@ -289,6 +295,187 @@ namespace RelationshipIntelligence.AI
                     roles = p.ContactItemRoles.Select(r => r.Role)
                 })
             }, Json);
+        }
+
+        [KernelFunction, Description("Find contacts by any combination of filters (ANDed) — the general contact-finder tool. Use it for EVERY who/which/list/show/find question about people: name, email, phone, organization (exact, case-insensitive), role, system tag, user tag, interaction type (Call/Email/Meeting/Message), contacted-since date (yyyy-MM-dd). Pass whatever the user named; leave the rest empty. Never answer 'I don't have' without calling this first. Read-only.")]
+        public async Task<string> QueryContactsAsync(
+            [Description("Name contains, or empty.")] string name = "",
+            [Description("Email contains, or empty.")] string email = "",
+            [Description("Phone contains, or empty.")] string phone = "",
+            [Description("Organization exact name, or empty.")] string organization = "",
+            [Description("Role contains, or empty.")] string role = "",
+            [Description("System status tag contains, or empty.")] string systemTag = "",
+            [Description("User-defined tag contains, or empty.")] string userTag = "",
+            [Description("Interaction type Call/Email/Meeting/Message, or empty for any.")] string interactionType = "",
+            [Description("Only people contacted on/after this date yyyy-MM-dd, or empty.")] string contactedSince = "",
+            [Description("Maximum rows to return (1-200).")] int top = 50)
+        {
+            DateTime? since = null;
+            if (!string.IsNullOrWhiteSpace(contactedSince)
+                && DateTime.TryParse(contactedSince.Trim(), out var parsed))
+                since = parsed.ToUniversalTime();
+            var result = await _searcher.SearchPersonsByCompositeFilter(
+                new ContactsManger.Core.DTOs.PersonDTOs.PersonCompositeFilter
+                {
+                    Name = string.IsNullOrWhiteSpace(name) ? null : name.Trim(),
+                    Email = string.IsNullOrWhiteSpace(email) ? null : email.Trim(),
+                    Phone = string.IsNullOrWhiteSpace(phone) ? null : phone.Trim(),
+                    CircleName = string.IsNullOrWhiteSpace(organization) ? null : organization.Trim(),
+                    ContactItemRole = string.IsNullOrWhiteSpace(role) ? null : role.Trim(),
+                    SystemStatusTagName = string.IsNullOrWhiteSpace(systemTag) ? null : systemTag.Trim(),
+                    UserDefinedTagName = string.IsNullOrWhiteSpace(userTag) ? null : userTag.Trim(),
+                    InteractionType = string.IsNullOrWhiteSpace(interactionType) ? null : interactionType.Trim(),
+                    ContactedSinceUtc = since
+                }, 1, Math.Clamp(top, 1, 200));
+            var queue = await _scoring.GetQueueAsync(200);
+            var states = queue.ToDictionary(q => q.PersonId);
+            return JsonSerializer.Serialize(new
+            {
+                observed = true,
+                count = result.TotalCount,
+                members = result.Items.Select(p => new
+                {
+                    p.PersonId,
+                    p.Name,
+                    organizations = p.Circles.Select(c => c.Name),
+                    roles = p.ContactItemRoles.Select(r => r.Role),
+                    state = states.TryGetValue(p.PersonId, out var s)
+                        ? new { s.Band, urgency = Math.Round(s.UrgencyScore), s.LastContactAtUtc } as object
+                        : null
+                })
+            }, Json);
+        }
+
+        [KernelFunction, Description("Show one person's contact history, newest first, optionally filtered by type (Call/Email/Meeting/Message) and since date (yyyy-MM-dd). Use AFTER identifying the person (QueryContacts first for 'who did I call' style questions). Read-only.")]
+        public async Task<string> ListInteractionsAsync(
+            [Description("The person's id (Guid).")] string personId,
+            [Description("Interaction type Call/Email/Meeting/Message, or empty for all.")] string type = "",
+            [Description("Only interactions on/after this date yyyy-MM-dd, or empty.")] string since = "",
+            [Description("Maximum rows to return (1-100).")] int limit = 20)
+        {
+            var id = ParseId(personId);
+            if (id == null)
+                return JsonSerializer.Serialize(new { error = "Invalid person id." }, Json);
+            var rows = await _interactions.ListForPersonAsync(id.Value);
+            if (!string.IsNullOrWhiteSpace(type)
+                && Enum.TryParse<ContactsManger.Core.Domain.Entities.EEnums.EnInteractionType>(type.Trim(), true, out var parsed))
+                rows = rows.Where(r => r.InteractionType == parsed).ToList();
+            if (!string.IsNullOrWhiteSpace(since)
+                && DateTime.TryParse(since.Trim(), out var sinceDate))
+            {
+                var cutoff = sinceDate.ToUniversalTime();
+                rows = rows.Where(r => r.TimeOfInteraction.ToUniversalTime() >= cutoff).ToList();
+            }
+            return JsonSerializer.Serialize(rows
+                .OrderByDescending(r => r.TimeOfInteraction)
+                .Take(Math.Clamp(limit, 1, 100)), Json);
+        }
+
+        [KernelFunction, Description("List all organizations with member counts. Use for 'what companies / which orgs do I have' questions. Read-only.")]
+        public async Task<string> ListOrganizationsAsync()
+        {
+            if (_organizations == null)
+                return JsonSerializer.Serialize(new { error = "Organization lookup is unavailable." }, Json);
+            var orgs = await _organizations.GetAllAsync();
+            return JsonSerializer.Serialize(new
+            {
+                observed = true,
+                count = orgs.Count,
+                organizations = orgs.Select(o => new { o.CircleId, o.Name, o.MemberCount })
+            }, Json);
+        }
+
+        [KernelFunction, Description("List relationship events (birthdays, milestones, occasions), optionally for one person only. Filter by upcoming window in days and minimum importance 1-3. Powers 'what birthdays / events are coming' questions. Read-only.")]
+        public async Task<string> ListEventsAsync(
+            [Description("The person's id (Guid), or empty for everyone.")] string personId = "",
+            [Description("Upcoming window in days (1-60).")] int days = 30,
+            [Description("Minimum importance 1-3, or 0 for any.")] int minImportance = 0)
+        {
+            if (ParseId(personId) is Guid id)
+            {
+                var entries = await _events.ListForPersonAsync(id);
+                return JsonSerializer.Serialize(entries
+                    .Where(e => minImportance <= 0 || e.Importance >= Math.Clamp(minImportance, 1, 3))
+                    .OrderBy(e => e.OccursOn), Json);
+            }
+            var occurrences = await _events.GetUpcomingAsync(Math.Clamp(days, 1, 60));
+            return JsonSerializer.Serialize(occurrences
+                .Where(o => minImportance <= 0 || o.Importance >= Math.Clamp(minImportance, 1, 3))
+                .OrderBy(o => o.InDays), Json);
+        }
+
+        [KernelFunction, Description("List meetings, optionally for one person only. Filter by status (Preparation/Draft/Processing/Processed/Confirmed/Discarded, empty for all) and since date (yyyy-MM-dd, empty for all time). Powers 'what meetings did I have / what is planned' questions. Read-only.")]
+        public async Task<string> ListMeetingsAsync(
+            [Description("The person's id (Guid), or empty for everyone.")] string personId = "",
+            [Description("Meeting status, or empty for all.")] string status = "",
+            [Description("Only meetings on/after this date yyyy-MM-dd, or empty.")] string since = "")
+        {
+            List<ServiceContracts.DTOs.MeetingDTOs.MeetingResponse> meetings;
+            if (ParseId(personId) is Guid id)
+                meetings = await _meetings.ListMeetingsForPersonAsync(id);
+            else
+                meetings = await _meetings.ListAsync();
+            if (!string.IsNullOrWhiteSpace(status)
+                && Enum.TryParse<Entities.MeetingStatus>(status.Trim(), true, out var parsed))
+                meetings = meetings.Where(m => m.Status == parsed).ToList();
+            if (!string.IsNullOrWhiteSpace(since)
+                && DateTime.TryParse(since.Trim(), out var sinceDate))
+            {
+                var cutoff = sinceDate.ToUniversalTime();
+                meetings = meetings.Where(m =>
+                    (m.ActualOccurredAtUtc ?? m.OccurredAtUtc).ToUniversalTime() >= cutoff).ToList();
+            }
+            return JsonSerializer.Serialize(meetings
+                .OrderByDescending(m => m.ActualOccurredAtUtc ?? m.OccurredAtUtc)
+                .Take(50)
+                .Select(m => new
+                {
+                    m.MeetingId,
+                    m.Title,
+                    m.OccurredAtUtc,
+                    m.ActualOccurredAtUtc,
+                    m.Status,
+                    people = m.People.Count,
+                    findings = m.Findings.Count
+                }), Json);
+        }
+
+        [KernelFunction, Description("List outreach batches (who was suggested for contact, which channel, draft status). Powers 'what outreach did I plan / what drafts exist' questions. Read-only.")]
+        public async Task<string> ListOutreachBatchesAsync()
+        {
+            if (_outreach == null)
+                return JsonSerializer.Serialize(new { error = "Outreach lookup is unavailable." }, Json);
+            var batches = await _outreach.ListAsync();
+            return JsonSerializer.Serialize(batches
+                .OrderByDescending(b => b.CreatedAtUtc)
+                .Take(20)
+                .Select(b => new
+                {
+                    b.OutreachBatchId,
+                    b.Intent,
+                    b.Channel,
+                    b.Status,
+                    b.CreatedAtUtc,
+                    members = b.Members.Select(m => new { m.PersonId, m.PersonName, m.Reason, m.Excluded }),
+                    drafts = b.Drafts.Select(d => new { d.CommunicationDraftId, d.PersonId, d.PersonName, d.Channel, d.Status })
+                }), Json);
+        }
+
+        [KernelFunction, Description("List relationship memory entries (facts, goals, commitments, intent, preferences) for one person, optionally filtered by kind (Fact/Goal/Commitment/Intent/Preference/Topic/Milestone, empty for all). Powers 'what do I know / what did we agree' questions. Read-only.")]
+        public async Task<string> ListMemoriesAsync(
+            [Description("The person's id (Guid).")] string personId,
+            [Description("Memory kind, or empty for all.")] string kind = "")
+        {
+            var id = ParseId(personId);
+            if (id == null)
+                return JsonSerializer.Serialize(new { error = "Invalid person id." }, Json);
+            var entries = await _memory.ListForPersonAsync(id.Value);
+            if (!string.IsNullOrWhiteSpace(kind)
+                && Enum.TryParse<Entities.RelationshipMemoryKind>(kind.Trim(), true, out var parsed))
+                entries = entries.Where(e => e.Kind == parsed).ToList();
+            return JsonSerializer.Serialize(entries
+                .Where(e => e.Status == 0)
+                .OrderByDescending(e => e.UpdatedAtUtc), Json);
         }
 
         [KernelFunction, Description("Search relationships by name or organization across the network. Read-only.")]

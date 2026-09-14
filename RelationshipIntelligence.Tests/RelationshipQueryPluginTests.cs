@@ -96,6 +96,72 @@ namespace CRUDTests
         }
 
         [Fact]
+        public async Task ListOrganizationMembers_ReturnsEveryMember()
+        {
+            // "who works at Proceedit" must list ALL members — the tool pages
+            // 200, not the chat default of 10.
+            var searcherMock = new Mock<IPersonSearcherService>();
+            searcherMock.Setup(s => s.SearchPersonsByCompositeFilter(
+                    It.IsAny<ContactsManger.Core.DTOs.PersonDTOs.PersonCompositeFilter>(), 1, 200))
+                .ReturnsAsync(new ServiceContracts.DTOs.PagedResult<ContactsManger.Core.DTOs.PersonDTOs.PersonViewDTO>
+                {
+                    Items = new List<ContactsManger.Core.DTOs.PersonDTOs.PersonViewDTO>
+                    {
+                        new() { PersonId = Guid.NewGuid(), Name = "Member One" },
+                        new() { PersonId = Guid.NewGuid(), Name = "Member Two" },
+                        new() { PersonId = Guid.NewGuid(), Name = "Member Three" },
+                    },
+                    TotalCount = 16
+                });
+            var plugin = new RelationshipQueryPlugin(
+                _scoringMock.Object,
+                Mock.Of<IInteractionService>(),
+                Mock.Of<IRelationshipMemoryService>(),
+                Mock.Of<IEventService>(),
+                Mock.Of<INetworkAnalysisService>(),
+                searcherMock.Object,
+                Mock.Of<IPersonGetterService>(),
+                Mock.Of<IMeetingService>(),
+                Mock.Of<IDigestService>(),
+                Mock.Of<IRelationshipPreferenceService>());
+
+            var raw = await plugin.ListOrganizationMembersAsync("Proceedit");
+
+            using var doc = System.Text.Json.JsonDocument.Parse(raw);
+            doc.RootElement.GetProperty("count").GetInt32().Should().Be(16);
+            doc.RootElement.GetProperty("members").GetArrayLength().Should().Be(3);
+            raw.Should().Contain("Proceedit");
+        }
+
+        [Fact]
+        public async Task ListOrganizationMembers_EmptyOrg_SaysSoPlainly()
+        {
+            var searcherMock = new Mock<IPersonSearcherService>();
+            searcherMock.Setup(s => s.SearchPersonsByCompositeFilter(
+                    It.IsAny<ContactsManger.Core.DTOs.PersonDTOs.PersonCompositeFilter>(), 1, 200))
+                .ReturnsAsync(new ServiceContracts.DTOs.PagedResult<ContactsManger.Core.DTOs.PersonDTOs.PersonViewDTO>
+                {
+                    Items = new List<ContactsManger.Core.DTOs.PersonDTOs.PersonViewDTO>(),
+                    TotalCount = 0
+                });
+            var plugin = new RelationshipQueryPlugin(
+                _scoringMock.Object,
+                Mock.Of<IInteractionService>(),
+                Mock.Of<IRelationshipMemoryService>(),
+                Mock.Of<IEventService>(),
+                Mock.Of<INetworkAnalysisService>(),
+                searcherMock.Object,
+                Mock.Of<IPersonGetterService>(),
+                Mock.Of<IMeetingService>(),
+                Mock.Of<IDigestService>(),
+                Mock.Of<IRelationshipPreferenceService>());
+
+            var raw = await plugin.ListOrganizationMembersAsync("Nonexistent Corp");
+
+            raw.Should().Contain("Nobody");
+        }
+
+        [Fact]
         public void ProviderRejection_NamesStatusAndPointsAtSetup()
         {
             var rejected = new Microsoft.SemanticKernel.HttpOperationException("Service request failed.")

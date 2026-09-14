@@ -148,6 +148,19 @@ namespace RelationshipIntelligence.AI
             kernel.Plugins.AddFromObject(_planning, "planning");
             kernel.Plugins.AddFromObject(_actions, "actions");
 
+            // Deterministic pre-route: organization questions ("who works at
+            // X") and typo'd names never reach the LLM's person tools, which
+            // only do exact search. Handle them here with the right tool and
+            // evidence, so the answer can never be "nobody" when members
+            // exist, nor "I don't have" when it is a one-letter typo.
+            var fast = await TryFastResolveAsync(session, request.Message.Trim());
+            if (fast != null)
+            {
+                await _sessions.SaveAsync(ownerId, session);
+                fast.WorkingState = await WorkingStateAsync(session);
+                return fast;
+            }
+
             var goal = await ClassifyAsync(kernel, session, request);
             // The classifier is advisory: greet/act/meeting/multistep route as
             // classified, but any other label with strong flow verbs still
@@ -418,6 +431,169 @@ namespace RelationshipIntelligence.AI
             return result;
         }
 
+        private static readonly System.Text.RegularExpressions.Regex OrgQuestionPattern =
+            new(@"\b(who|which)\b.{0,60}?\b(at|in|from|with)\b\s+(?<org>[A-Za-z][A-Za-z0-9 .&'-]{1,60})",
+                System.Text.RegularExpressions.RegexOptions.IgnoreCase
+                | System.Text.RegularExpressions.RegexOptions.Compiled);
+
+        /// <summary>
+        /// Deterministic pre-route for two question shapes the LLM path
+        /// mishandles: (1) "who works at X" — exact-search tools answer
+        /// "nobody" because X is an org, not a person; (2) typo'd names —
+        /// the extractor takes the wrong token ("Smair") and search misses.
+        /// Returns null when the message is neither shape, letting normal
+        /// routing continue untouched.
+        /// </summary>
+        private async Task<AgentResponse?> TryFastResolveAsync(AgentSession session, string message)
+        {
+            if (string.IsNullOrWhiteSpace(message) || message.Length > 200)
+                return null;
+
+            var orgMatch = OrgQuestionPattern.Match(message);
+            if (orgMatch.Success)
+            {
+                // Trailing clause ("List everyone", "show me all") is not part
+                // of the company name: cut at the first sentence end or
+                // command verb.
+                var org = orgMatch.Groups["org"].Value;
+                org = System.Text.RegularExpressions.Regex.Split(
+                    org, @"[.?!]|\b(list|show|tell|give|display)\b",
+                    System.Text.RegularExpressions.RegexOptions.IgnoreCase)[0].Trim();
+                if (org.Length >= 2 && !PersonNameExtractor.DismissesPerson(message.ToLowerInvariant()))
+                    return await AnswerOrganizationAsync(session, org);
+            }
+
+            // Typo path: scan every capitalized token (not just the first
+            // non-initial one) for a near-match, so "Dina Smair" checks both
+            // "Dina" (exact hit, unhelpful alone) and "Smair" (fuzzy hit).
+            if (session.PersonId == null)
+            {
+                string? best = null;
+                var bestScore = 0.0;
+                foreach (System.Text.RegularExpressions.Match m in
+                    System.Text.RegularExpressions.Regex.Matches(message, @"\b[A-Z][a-z]{2,}\b"))
+                {
+                    var token = m.Value;
+                    if (await ResolveDetailedCandidatesAsync(token) is { Count: > 0 })
+                        continue;
+                    var near = await FindNearMatchesAsync(token);
+                    if (near.Count == 0)
+                        continue;
+                    var score = PersonNameExtractor.Similarity(token, near[0].Name);
+                    if (score > bestScore)
+                    {
+                        bestScore = score;
+                        best = token;
+                    }
+                }
+                if (best != null)
+                {
+                    var near = await FindNearMatchesAsync(best);
+                    var choices = PersonChoiceLabels.Build(near);
+                    session.PendingCandidates.Clear();
+                    session.PendingCandidates.AddRange(choices.Select(c =>
+                        new AgentCandidateOption { PersonId = c.Id, Label = c.Label }));
+                    return new AgentResponse
+                    {
+                        SessionId = session.SessionId,
+                        Text = $"I don't have \"{best}\", but did you mean {string.Join(" / ", choices.Select(c => c.Label))}?",
+                        NeedsInput = new AgentClarification { Prompt = "Did you mean one of these?", Options = choices.Select(c => c.Label).ToList() }
+                    };
+                }
+            }
+            return null;
+        }
+
+        private async Task<AgentResponse> AnswerOrganizationAsync(AgentSession session, string org)
+        {
+            var response = new AgentResponse { SessionId = session.SessionId };
+            string raw;
+            try
+            {
+                raw = await _query.ListOrganizationMembersAsync(org);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Organization lookup failed for {Org}", org);
+                response.Text = $"I couldn't look up '{org}' right now — try the Organizations tab, or ask again in a moment.";
+                return response;
+            }
+            try
+            {
+                using var doc = JsonDocument.Parse(raw);
+                var root = doc.RootElement;
+                if (root.TryGetProperty("count", out var countProp) && countProp.GetInt32() == 0)
+                {
+                    response.Text = $"Nobody in your network is listed at '{org}'. If someone there belongs in your contacts, add them and I'll include them next time.";
+                    return response;
+                }
+                var members = root.GetProperty("members").EnumerateArray()
+                    .Select(e => e.GetProperty("name").GetString() ?? "?").ToList();
+                var count = root.TryGetProperty("count", out var c) ? c.GetInt32() : members.Count;
+                var shown = string.Join(", ", members.Take(15));
+                response.Text = count > members.Count
+                    ? $"{count} people in your network work at {org}: {shown}, and {count - members.Count} more. Open the Organizations tab to see everyone."
+                    : $"{count} {(count == 1 ? "person" : "people")} in your network {(count == 1 ? "works" : "work")} at {org}: {shown}.";
+                foreach (var e in root.GetProperty("members").EnumerateArray())
+                {
+                    if (!e.TryGetProperty("personId", out var idProp))
+                        continue;
+                    var id = idProp.GetGuid();
+                    var name = e.TryGetProperty("name", out var nProp) ? nProp.GetString() ?? "contact" : "contact";
+                    response.Citations.Add(new CopilotCitation { Kind = "person", Id = id, Label = name });
+                    response.Evidence.Add(new AgentEvidence
+                    {
+                        Title = name,
+                        Detail = $"Listed at {org}.",
+                        Kind = "observed",
+                        RefId = id,
+                        RefKind = "person"
+                    });
+                    response.Actions.Add(new AgentAction { Kind = "open", Label = $"Open {name}", Payload = id.ToString() });
+                }
+                return response;
+            }
+            catch (JsonException)
+            {
+                response.Text = $"I couldn't read the member list for '{org}' — try the Organizations tab to see everyone there.";
+                return response;
+            }
+        }
+
+        /// <summary>
+        /// Typo-tolerant fallback over the user's own contacts. Scans the
+        /// directory (bounded at 500) and keeps names scoring >= 0.55, top 3.
+        /// Suggestions only: the caller presents them as "did you mean" and
+        /// the user picks — nothing is ever auto-attached.
+        /// </summary>
+        private async Task<List<(Guid Id, string Name, string? Org, string? Role)>> FindNearMatchesAsync(string name)
+        {
+            var scored = new List<(Guid Id, string Name, string? Org, string? Role, double Score)>();
+            try
+            {
+                var people = await _persons.GetAllPersons();
+                foreach (var p in people.Where(p => p != null).Take(500))
+                {
+                    var score = PersonNameExtractor.Similarity(name, p!.Name ?? string.Empty);
+                    if (score < 0.55)
+                        continue;
+                    var org = p!.Organizations.FirstOrDefault()?.Name;
+                    var role = p!.CurrentRoles.FirstOrDefault()?.Role;
+                    scored.Add((p!.PersonId, p!.Name ?? "?", org, role, score));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "Near-match scan skipped.");
+                return new List<(Guid, string, string?, string?)>();
+            }
+            return scored
+                .OrderByDescending(r => r.Score)
+                .Take(3)
+                .Select(r => (r.Id, r.Name, r.Org, r.Role))
+                .ToList();
+        }
+
         /// <summary>
         /// Applies a pending disambiguation pick. On a match the focus is set
         /// and routing continues with the focus already resolved, so the name
@@ -449,6 +625,20 @@ namespace RelationshipIntelligence.AI
                     var matches = await ResolveDetailedCandidatesAsync(candidate);
                     if (matches.Count == 0)
                     {
+                        // Exact search found nothing: fall back to typo-tolerant
+                        // suggestions ("Dina Smair" -> "Dina Samir?") instead of
+                        // a dead-end. Suggestions only — never auto-attached.
+                        var near = await FindNearMatchesAsync(candidate);
+                        if (near.Count > 0)
+                        {
+                            var choices = PersonChoiceLabels.Build(near);
+                            session.PendingCandidates.Clear();
+                            session.PendingCandidates.AddRange(choices.Select(c =>
+                                new AgentCandidateOption { PersonId = c.Id, Label = c.Label }));
+                            response.Text += $"I don't have \"{candidate}\", but did you mean {string.Join(" / ", choices.Select(c => c.Label))}?";
+                            response.NeedsInput = new AgentClarification { Prompt = "Did you mean one of these?", Options = choices.Select(c => c.Label).ToList() };
+                            return;
+                        }
                         response.Text += $"I don't have a contact matching \"{candidate}\". I can only reason about people in your network — want to add them first, or ask about someone else?";
                         return;
                     }
@@ -470,6 +660,17 @@ namespace RelationshipIntelligence.AI
                 var candidates = await ResolveDetailedCandidatesAsync(goal.PersonRefs[0]);
                 if (candidates.Count == 0)
                 {
+                    var near = await FindNearMatchesAsync(goal.PersonRefs[0]);
+                    if (near.Count > 0)
+                    {
+                        var nearChoices = PersonChoiceLabels.Build(near);
+                        session.PendingCandidates.Clear();
+                        session.PendingCandidates.AddRange(nearChoices.Select(c =>
+                            new AgentCandidateOption { PersonId = c.Id, Label = c.Label }));
+                        response.Text += $"I don't have \"{goal.PersonRefs[0]}\", but did you mean {string.Join(" / ", nearChoices.Select(c => c.Label))}?";
+                        response.NeedsInput = new AgentClarification { Prompt = "Did you mean one of these?", Options = nearChoices.Select(c => c.Label).ToList() };
+                        return;
+                    }
                     response.Text += $"I don't have a contact matching \"{goal.PersonRefs[0]}\". I can only reason about people in your network — want to add them first, or ask about someone else?";
                     return;
                 }

@@ -265,6 +265,32 @@ namespace RelationshipIntelligence.AI
             }), Json);
         }
 
+        [KernelFunction, Description("List everyone who works at an organization (exact company match, case-insensitive). Use for 'who works at X / who do I know at X' questions. Returns all members, not a capped subset. Read-only.")]
+        public async Task<string> ListOrganizationMembersAsync(
+            [Description("Organization/company name, e.g. Proceedit.")] string organization)
+        {
+            if (string.IsNullOrWhiteSpace(organization))
+                return JsonSerializer.Serialize(new { error = "Organization name is required." }, Json);
+            var trimmed = organization.Trim();
+            var result = await _searcher.SearchPersonsByCompositeFilter(
+                new ContactsManger.Core.DTOs.PersonDTOs.PersonCompositeFilter { CircleName = trimmed }, 1, 200);
+            if (result.TotalCount == 0)
+                return JsonSerializer.Serialize(new { observed = true, count = 0, note = $"Nobody in your network is listed at '{trimmed}'." }, Json);
+            return JsonSerializer.Serialize(new
+            {
+                observed = true,
+                organization = trimmed,
+                count = result.TotalCount,
+                members = result.Items.Select(p => new
+                {
+                    p.PersonId,
+                    p.Name,
+                    organizations = p.Circles.Select(c => c.Name),
+                    roles = p.ContactItemRoles.Select(r => r.Role)
+                })
+            }, Json);
+        }
+
         [KernelFunction, Description("Search relationships by name or organization across the network. Read-only.")]
         public async Task<string> SearchRelationshipsAsync(
             [Description("Name or organization to search for.")] string query)

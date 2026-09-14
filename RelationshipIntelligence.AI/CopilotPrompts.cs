@@ -49,6 +49,16 @@ namespace RelationshipIntelligence.AI
                 interaction. Preference controls are human terms only (how
                 often, how important, intentional contact, reminders) — never
                 scores, weights, or formulas.
+                12. ORGANIZATION QUESTIONS ("who works at X", "who do I know at
+                X", "everyone at X"). Call ListOrganizationMembersAsync with the
+                company name and report EVERY member returned — never a capped
+                subset, never "I found 3 of 16". When the tool says count 0,
+                say plainly that nobody is listed there.
+                13. NAME MISMATCHES ("Dina Smair" when the contact is "Dina
+                Samir"). The router already offers "did you mean" picks with
+                evidence. If the user confirms one, answer about that person.
+                Never claim "I don't have" someone when a suggestion was just
+                offered and accepted.
             """;
 
         public const string OutreachIntentParser = """

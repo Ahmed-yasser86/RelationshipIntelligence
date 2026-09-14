@@ -154,7 +154,7 @@ export function Organizations() {
                       <Link
                         to={`/people?org=${encodeURIComponent(org.name)}`}
                         className="hover:underline"
-                        title={`View members of ${org.name}`}
+                        title={`View all ${org.memberCount} member${org.memberCount === 1 ? "" : "s"} of ${org.name}`}
                       >
                         {org.memberCount}
                       </Link>

@@ -10,12 +10,16 @@ import type { InteractionResponse, MemoryEntryResponse, RelationshipHealth } fro
 
 export function cadenceLine(item: RelationshipHealth): string {
   const silent = silenceDays(item.silenceDays, item.lastContactAtUtc);
+  // Source-labelled: user intent ("You asked for…") vs inference ("Usual
+  // rhythm"). Never collapses the two into one ambiguous signal.
   const rhythm =
-    item.cadenceReferenceDays != null
-      ? `roughly every ${Math.round(item.cadenceReferenceDays)} days`
-      : "no rhythm established yet";
+    item.cadenceSourceLabel && item.cadenceSourceLabel !== "Usual rhythm"
+      ? item.cadenceSourceLabel.toLowerCase()
+      : item.cadenceReferenceDays != null
+        ? `usual rhythm of roughly every ${Math.round(item.cadenceReferenceDays)} days`
+        : "no rhythm established yet";
   const quiet = silent == null ? "no contact recorded" : `quiet for ${silent}d`;
-  return `Your rhythm: ${rhythm} — ${quiet}. Last contact ${timeAgo(item.lastContactAtUtc)}.`;
+  return `Needs attention — based on your relationship activity and configured cadence: ${rhythm} — ${quiet}. Last contact ${timeAgo(item.lastContactAtUtc)}.`;
 }
 
 export function AttentionRow({

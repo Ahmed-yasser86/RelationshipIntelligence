@@ -74,6 +74,8 @@ builder.Services.AddScoped<RelationshipMemoryRepositoryContract, RelationshipMem
 builder.Services.AddScoped<RelationshipEventRepositoryContract, RelationshipEventRepository>();
 builder.Services.AddScoped<IngestionRepositoryContract, IngestionRepository>();
 builder.Services.AddScoped<RelationshipPreferenceRepositoryContract, RelationshipPreferenceRepository>();
+builder.Services.AddScoped<PreferenceAuditRepositoryContract, PreferenceAuditRepository>();
+builder.Services.AddScoped<GlobalDefaultsRepositoryContract, GlobalDefaultsRepository>();
 builder.Services.AddScoped<IIngestionService, IngestionService>();
 builder.Services.AddScoped<IRelationshipPreferenceService, RelationshipPreferenceService>();
 builder.Services.AddScoped<IIngestionExtractor, IngestionExtractor>();

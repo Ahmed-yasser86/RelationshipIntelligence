@@ -21,6 +21,7 @@ namespace Servicess
         private readonly ILogger<RelationshipScoringService> _logger;
         private readonly IEventService? _events;
         private readonly RelationshipPreferenceRepositoryContract? _preferences;
+        private readonly GlobalDefaultsRepositoryContract? _defaults;
 
         public RelationshipScoringService(
             PersonRepositryContract persons,
@@ -29,7 +30,8 @@ namespace Servicess
             IUnitOfWork unitOfWork,
             ILogger<RelationshipScoringService> logger,
             IEventService? eventService = null,
-            RelationshipPreferenceRepositoryContract? preferences = null)
+            RelationshipPreferenceRepositoryContract? preferences = null,
+            GlobalDefaultsRepositoryContract? defaults = null)
         {
             _persons = persons;
             _states = states;
@@ -38,6 +40,7 @@ namespace Servicess
             _logger = logger;
             _events = eventService;
             _preferences = preferences;
+            _defaults = defaults;
         }
 
         public async Task<int> RecomputeForCurrentUserAsync()
@@ -214,6 +217,7 @@ namespace Servicess
             // event-signal threshold; priority breaks urgency ties. Reminders
             // never enter this path — they live in RelationshipPreferenceService.
             Dictionary<Guid, RelationshipPreference> intent = new();
+            int? globalCadence = null;
             if (_preferences != null)
             {
                 try
@@ -225,6 +229,20 @@ namespace Servicess
                 catch (Exception ex)
                 {
                     _logger.LogDebug(ex, "Preference intent skipped for queue.");
+                }
+            }
+            // Precedence chain: per-person explicit > global default >
+            // system inference. The global default only fills gaps — it never
+            // overrides an explicit per-person cadence.
+            if (_defaults != null)
+            {
+                try
+                {
+                    globalCadence = (await _defaults.GetAsync(userId.Value))?.DefaultCadenceDays;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogDebug(ex, "Global defaults skipped for queue.");
                 }
             }
             var queue = states
@@ -247,6 +265,9 @@ namespace Servicess
                     CadenceReferenceDays = s.CadenceReferenceDays,
                     DesiredCadenceDays = intent.TryGetValue(s.PersonId, out var pref) ? pref.DesiredCadenceDays : null,
                     KeepInTouchIntentionally = intent.TryGetValue(s.PersonId, out var pref2) && pref2.KeepInTouchIntentionally,
+                    CadenceSourceLabel = CadenceLabel(
+                        intent.TryGetValue(s.PersonId, out var pref3) ? pref3.DesiredCadenceDays : null,
+                        globalCadence),
                     SilenceQuantile = s.SilenceQuantile,
                     UrgencyScore = s.UrgencyScore,
                     Band = CapBandForEvidence(TieDecayModel.BandFor(s.UrgencyScore), s.EvidenceStatus).ToString(),
@@ -255,8 +276,17 @@ namespace Servicess
                 })
                 .ToList();
 
-            await EnrichWithUpcomingEventsAsync(queue, intent);
+            await EnrichWithUpcomingEventsAsync(queue, intent, globalCadence);
             return queue;
+        }
+
+        private static string CadenceLabel(int? explicitDays, int? globalDays)
+        {
+            if (explicitDays != null)
+                return $"You asked for every {explicitDays} days";
+            if (globalDays != null)
+                return $"Your default: every {globalDays} days";
+            return "Usual rhythm";
         }
 
         private static int PreferencePriority(Guid personId, Dictionary<Guid, RelationshipPreference> intent) =>
@@ -273,7 +303,8 @@ namespace Servicess
         /// </summary>
         private async Task EnrichWithUpcomingEventsAsync(
             List<RelationshipHealthResponse> queue,
-            Dictionary<Guid, RelationshipPreference>? intent = null)
+            Dictionary<Guid, RelationshipPreference>? intent = null,
+            int? globalCadence = null)
         {
             if (_events == null || queue.Count == 0)
                 return;
@@ -293,14 +324,20 @@ namespace Servicess
                 var silenceDays = row.LastContactAtUtc == null
                     ? (double?)null
                     : (now.ToUniversalTime() - row.LastContactAtUtc.Value.ToUniversalTime()).TotalDays;
-                // User cadence constrains the threshold without touching the
-                // model: an explicit "every N days" can only surface sooner.
+                // Precedence: explicit per-person cadence first, then the
+                // global default, then system inference. Any user value can
+                // only surface sooner — the model itself is untouched.
                 double? threshold = row.CadenceReferenceDays;
+                int? userDays = null;
                 if (intent != null && intent.TryGetValue(row.PersonId, out var pref)
                     && pref.DesiredCadenceDays != null)
+                    userDays = pref.DesiredCadenceDays.Value;
+                else if (globalCadence != null)
+                    userDays = globalCadence.Value;
+                if (userDays != null)
                     threshold = threshold == null
-                        ? pref.DesiredCadenceDays.Value
-                        : Math.Min(threshold.Value, pref.DesiredCadenceDays.Value);
+                        ? userDays.Value
+                        : Math.Min(threshold.Value, userDays.Value);
                 row.HasEventSignal = personEvents.Any(e => e.InDays <= 7)
                     && (row.UrgencyScore > 65
                         || (silenceDays != null && threshold != null && silenceDays > threshold));

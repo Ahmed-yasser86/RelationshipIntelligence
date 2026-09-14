@@ -71,6 +71,40 @@ namespace CRUDTests
         }
 
         [Fact]
+        public async Task LogAsync_WithEnabledReminder_ClearsCycleViaRealInteraction()
+        {
+            // V6 scenario 12/28: the canonical pipeline is the sole path that
+            // completes a reminder cycle. No fake interaction, no 409.
+            _userMock.Setup(u => u.UserId).Returns(_userA);
+            var person = OwnedPerson();
+            _personsMock.Setup(r => r.GetPersonById(person.PersonId)).ReturnsAsync(person);
+            _interactionsMock.Setup(r => r.AddAsync(It.IsAny<Interaction>()))
+                .ReturnsAsync((Interaction i) => i);
+            var pref = new RelationshipPreference
+            {
+                RelationshipPreferenceId = Guid.NewGuid(),
+                ApplicationUserId = _userA,
+                PersonId = person.PersonId,
+                ReminderEnabled = true,
+                ReminderIntervalDays = 10,
+                SnoozedUntilUtc = DateTime.UtcNow.AddDays(5),
+                CreatedAtUtc = DateTime.UtcNow,
+                UpdatedAtUtc = DateTime.UtcNow
+            };
+            var prefsMock = new Mock<RelationshipPreferenceRepositoryContract>();
+            prefsMock.Setup(r => r.GetAsync(_userA, person.PersonId)).ReturnsAsync(pref);
+            var service = new InteractionService(
+                _interactionsMock.Object, _personsMock.Object, _scoringMock.Object,
+                _userMock.Object, _unitOfWorkMock.Object,
+                Mock.Of<ILogger<InteractionService>>(), prefsMock.Object);
+
+            await service.LogAsync(ValidRequest(person.PersonId));
+
+            pref.LastCompletedAtUtc.Should().NotBeNull();
+            pref.SnoozedUntilUtc.Should().BeNull();
+        }
+
+        [Fact]
         public async Task LogAsync_ForeignPersonId_ThrowsArgumentException()
         {
             _userMock.Setup(u => u.UserId).Returns(_userA);

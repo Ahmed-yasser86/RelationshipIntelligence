@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { BandBadge, EmptyState, ErrorState, LoadingList, PersonAvatar } from "@/components/states";
 import { ApiError, api } from "@/lib/api";
 import { formatDate } from "@/lib/format";
+import { GlobalDefaultsCard } from "@/components/preference-card";
 import type { DigestPayload, DigestPreference } from "@/lib/types";
 
 interface EmailPreview {
@@ -284,6 +285,9 @@ export function Digest() {
 
       <h2 className="mb-2 text-base font-semibold">Preferences</h2>
       {pref && <Preferences pref={pref} onSaved={() => void load()} />}
+      <div className="mt-4">
+        <GlobalDefaultsCard />
+      </div>
     </div>
   );
 }

@@ -30,19 +30,40 @@ namespace RelationshipIntelligence.AI
         private readonly IInteractionService _interactions;
         private readonly IMeetingService _meetings;
         private readonly IRelationshipPreferenceService _preferences;
+        private readonly IPersonSearcherService _searcher;
 
         public ActionPlugin(
             IEventService events,
             IRelationshipMemoryService memory,
             IInteractionService interactions,
             IMeetingService meetings,
-            IRelationshipPreferenceService preferences)
+            IRelationshipPreferenceService preferences,
+            IPersonSearcherService? searcher = null)
         {
             _events = events;
             _memory = memory;
             _interactions = interactions;
             _meetings = meetings;
             _preferences = preferences;
+            _searcher = searcher!;
+        }
+
+        private async Task<List<(Guid PersonId, string Name)>> MatchPeopleAsync(string name)
+        {
+            var result = new List<(Guid, string)>();
+            if (_searcher == null || string.IsNullOrWhiteSpace(name))
+                return result;
+            try
+            {
+                var page = await _searcher.SearchPersonsBy_Batched(name.Trim(), "Name", 1, 10);
+                foreach (var item in page.Items.Take(5))
+                    result.Add((item.PersonId, item.Name ?? "contact"));
+            }
+            catch (Exception)
+            {
+                // Search failure surfaces as "no match", never as a write.
+            }
+            return result;
         }
 
         private static string NeedConfirmation(string what) =>
@@ -319,10 +340,101 @@ namespace RelationshipIntelligence.AI
                 return JsonSerializer.Serialize(new { error = "Invalid person id." }, Json);
             try
             {
-                var saved = await _preferences.DisableReminderAsync(id);
+                var saved = await _preferences.DisableReminderAsync(id, Entities.PreferenceChangeSource.Copilot);
                 return JsonSerializer.Serialize(saved, Json);
             }
             catch (KeyNotFoundException ex)
+            {
+                return JsonSerializer.Serialize(new { error = ex.Message }, Json);
+            }
+        }
+
+        [KernelFunction, Description("Propose a per-person reminder in two steps for natural-language scheduling: pass the person's NAME and a phrase like 'every 10 days' or 'twice a month'. Returns either a confirmation proposal (call again with confirmed=true) or an honest rejection when the schedule is unsupported. Never writes on the first call.")]
+        public async Task<string> ProposeReminderAsync(
+            [Description("The person's name as the user said it.")] string personName,
+            [Description("Schedule phrase, e.g. 'every 10 days', 'weekly', 'twice a month', 'monthly'.")] string schedule,
+            [Description("Set true only after the user confirmed the proposal.")] bool confirmed = false)
+        {
+            var parsed = PreferenceScheduleParser.ParseReminder(schedule ?? string.Empty);
+            if (parsed == null)
+                return JsonSerializer.Serialize(new
+                {
+                    error = $"I don't support '{schedule}'. Supported: daily, every 3/7/10/14 days, weekly, twice a month (~15 days), monthly (~30 days), or every N days (1-365)."
+                }, Json);
+            var matches = await MatchPeopleAsync(personName ?? string.Empty);
+            if (matches.Count == 0)
+                return JsonSerializer.Serialize(new { error = $"I don't have a contact matching '{personName}'." }, Json);
+            if (matches.Count > 1)
+                return JsonSerializer.Serialize(new
+                {
+                    needsConfirmation = true,
+                    prompt = $"Which '{personName}'? " + string.Join("; ", matches.Take(5).Select(m => m.Name)),
+                    candidates = matches.Take(5).Select(m => new { m.PersonId, m.Name }).ToList()
+                }, Json);
+            var match = matches[0];
+            if (!confirmed)
+                return JsonSerializer.Serialize(new
+                {
+                    needsConfirmation = true,
+                    prompt = $"Reminder for {match.Name}: every {parsed.Value} days. Confirm to set it.",
+                    proposal = new { personId = match.PersonId, personName = match.Name, intervalDays = parsed.Value }
+                }, Json);
+            try
+            {
+                var saved = await _preferences.SetReminderAsync(new ServiceContracts.DTOs.PreferenceDTOs.ReminderSetRequest
+                {
+                    PersonId = match.PersonId,
+                    IntervalDays = parsed.Value,
+                    Strict = false
+                }, Entities.PreferenceChangeSource.Copilot);
+                return JsonSerializer.Serialize(saved, Json);
+            }
+            catch (Exception ex) when (ex is KeyNotFoundException || ex is ArgumentException)
+            {
+                return JsonSerializer.Serialize(new { error = ex.Message }, Json);
+            }
+        }
+
+        [KernelFunction, Description("Propose a per-person contact cadence in two steps: pass the person's NAME and a phrase like 'twice a month'. Returns a confirmation proposal or an honest rejection. Never writes on the first call.")]
+        public async Task<string> ProposeCadenceAsync(
+            [Description("The person's name as the user said it.")] string personName,
+            [Description("Schedule phrase, e.g. 'every 10 days', 'weekly', 'twice a month', 'monthly'.")] string schedule,
+            [Description("Set true only after the user confirmed the proposal.")] bool confirmed = false)
+        {
+            var parsed = PreferenceScheduleParser.ParseReminder(schedule ?? string.Empty);
+            if (parsed == null)
+                return JsonSerializer.Serialize(new
+                {
+                    error = $"I don't support '{schedule}'. Supported: daily, every 3/7/10/14 days, weekly, twice a month (~15 days), monthly (~30 days), or every N days (1-365)."
+                }, Json);
+            var matches = await MatchPeopleAsync(personName ?? string.Empty);
+            if (matches.Count == 0)
+                return JsonSerializer.Serialize(new { error = $"I don't have a contact matching '{personName}'." }, Json);
+            if (matches.Count > 1)
+                return JsonSerializer.Serialize(new
+                {
+                    needsConfirmation = true,
+                    prompt = $"Which '{personName}'? " + string.Join("; ", matches.Take(5).Select(m => m.Name)),
+                    candidates = matches.Take(5).Select(m => new { m.PersonId, m.Name }).ToList()
+                }, Json);
+            var match = matches[0];
+            if (!confirmed)
+                return JsonSerializer.Serialize(new
+                {
+                    needsConfirmation = true,
+                    prompt = $"Cadence for {match.Name}: every {parsed.Value} days. Confirm to set it.",
+                    proposal = new { personId = match.PersonId, personName = match.Name, cadenceDays = parsed.Value }
+                }, Json);
+            try
+            {
+                var saved = await _preferences.SaveAsync(new ServiceContracts.DTOs.PreferenceDTOs.PreferenceSaveRequest
+                {
+                    PersonId = match.PersonId,
+                    DesiredCadenceDays = parsed.Value
+                }, Entities.PreferenceChangeSource.Copilot);
+                return JsonSerializer.Serialize(saved, Json);
+            }
+            catch (Exception ex) when (ex is KeyNotFoundException || ex is ArgumentException)
             {
                 return JsonSerializer.Serialize(new { error = ex.Message }, Json);
             }

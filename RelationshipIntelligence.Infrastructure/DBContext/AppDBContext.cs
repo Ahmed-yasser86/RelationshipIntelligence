@@ -49,6 +49,8 @@ namespace Entities
         public virtual DbSet<IngestionBatch> IngestionBatches { get; set; }
         public virtual DbSet<IngestionFinding> IngestionFindings { get; set; }
         public virtual DbSet<RelationshipPreference> RelationshipPreferences { get; set; }
+        public virtual DbSet<PreferenceAuditEntry> PreferenceAuditEntries { get; set; }
+        public virtual DbSet<GlobalPreferenceDefaults> GlobalPreferenceDefaults { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -216,6 +218,19 @@ namespace Entities
                 .WithMany()
                 .HasForeignKey(p => p.PersonId)
                 .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<PreferenceAuditEntry>().ToTable("PreferenceAuditEntries");
+            modelBuilder.Entity<PreferenceAuditEntry>()
+                .HasIndex(a => new { a.ApplicationUserId, a.PersonId, a.ChangedAtUtc });
+            modelBuilder.Entity<PreferenceAuditEntry>()
+                .HasQueryFilter(a => a.ApplicationUserId == _currentUserId);
+            modelBuilder.Entity<PreferenceAuditEntry>()
+                .HasOne(a => a.Person)
+                .WithMany()
+                .HasForeignKey(a => a.PersonId)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<GlobalPreferenceDefaults>().ToTable("GlobalPreferenceDefaults");
+            modelBuilder.Entity<GlobalPreferenceDefaults>()
+                .HasQueryFilter(d => d.ApplicationUserId == _currentUserId);
 
             modelBuilder.Entity<Person>()
                 .HasOne(p => p.ApplicationUser)

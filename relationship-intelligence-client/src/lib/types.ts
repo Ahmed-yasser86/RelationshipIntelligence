@@ -299,6 +299,7 @@ export interface RelationshipHealth {
   cadenceReferenceDays: number | null;
   desiredCadenceDays?: number | null;
   keepInTouchIntentionally?: boolean;
+  cadenceSourceLabel?: string | null;
   silenceQuantile: number | null;
   urgencyScore: number;
   band: string;
@@ -439,6 +440,20 @@ export interface ReminderDue {
   strict: boolean;
   silenceDays: number | null;
   sourceLabel: string;
+}
+
+export interface PreferenceAuditEntry {
+  personId: string;
+  field: string;
+  previousValue: string | null;
+  newValue: string | null;
+  source: string;
+  changedAtUtc: string;
+}
+
+export interface GlobalDefaults {
+  defaultCadenceDays: number | null;
+  defaultReminderStrict: boolean;
 }
 
 export const CadencePresets = [

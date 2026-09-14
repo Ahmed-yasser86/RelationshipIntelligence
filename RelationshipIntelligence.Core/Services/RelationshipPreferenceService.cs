@@ -21,6 +21,8 @@ namespace Servicess
         private readonly RelationshipPreferenceRepositoryContract _preferences;
         private readonly PersonRepositryContract _persons;
         private readonly IRelationshipScoringService _scoring;
+        private readonly PreferenceAuditRepositoryContract _audit;
+        private readonly GlobalDefaultsRepositoryContract _defaults;
         private readonly ICurrentUserService _currentUser;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<RelationshipPreferenceService> _logger;
@@ -31,7 +33,9 @@ namespace Servicess
             IRelationshipScoringService scoring,
             ICurrentUserService currentUser,
             IUnitOfWork unitOfWork,
-            ILogger<RelationshipPreferenceService> logger)
+            ILogger<RelationshipPreferenceService> logger,
+            PreferenceAuditRepositoryContract? audit = null,
+            GlobalDefaultsRepositoryContract? defaults = null)
         {
             _preferences = preferences;
             _persons = persons;
@@ -39,6 +43,35 @@ namespace Servicess
             _currentUser = currentUser;
             _unitOfWork = unitOfWork;
             _logger = logger;
+            _audit = audit!;
+            _defaults = defaults!;
+        }
+
+        private static string HumanDays(int? days) =>
+            days == null ? "not set" : $"every {days} days";
+
+        private static string HumanFlag(bool value) => value ? "on" : "off";
+
+        private static string HumanLevel(int value) => value == 1 ? "high" : "normal";
+
+        private async Task AuditAsync(Guid ownerId, Guid personId, string field, string? previous, string? current, PreferenceChangeSource source)
+        {
+            if (_audit == null)
+                return;
+            if (string.Equals(previous, current, StringComparison.Ordinal))
+                return;
+            await _audit.AddAsync(new PreferenceAuditEntry
+            {
+                PreferenceAuditEntryId = Guid.NewGuid(),
+                ApplicationUserId = ownerId,
+                PersonId = personId,
+                Field = field,
+                PreviousValue = previous,
+                NewValue = current,
+                Source = source,
+                ChangedById = ownerId,
+                ChangedAtUtc = DateTime.UtcNow
+            });
         }
 
         private Guid OwnerId()
@@ -74,7 +107,7 @@ namespace Servicess
             return ToDto(preference, person?.Name);
         }
 
-        public async Task<RelationshipPreferenceDto> SaveAsync(PreferenceSaveRequest request)
+        public async Task<RelationshipPreferenceDto> SaveAsync(PreferenceSaveRequest request, PreferenceChangeSource source = PreferenceChangeSource.User)
         {
             using (Operation.Time("Save relationship preference"))
             {
@@ -99,15 +132,35 @@ namespace Servicess
                     CreatedAtUtc = DateTime.UtcNow
                 };
                 if (request.DesiredCadenceDays != null)
+                {
+                    await AuditAsync(ownerId, request.PersonId, nameof(RelationshipPreference.DesiredCadenceDays),
+                        HumanDays(preference.DesiredCadenceDays), HumanDays(request.DesiredCadenceDays), source);
                     preference.DesiredCadenceDays = request.DesiredCadenceDays;
+                }
                 if (request.Importance != null)
+                {
+                    await AuditAsync(ownerId, request.PersonId, nameof(RelationshipPreference.Importance),
+                        HumanLevel(preference.Importance), HumanLevel(request.Importance.Value), source);
                     preference.Importance = request.Importance.Value;
+                }
                 if (request.Priority != null)
+                {
+                    await AuditAsync(ownerId, request.PersonId, nameof(RelationshipPreference.Priority),
+                        HumanLevel(preference.Priority), HumanLevel(request.Priority.Value), source);
                     preference.Priority = request.Priority.Value;
+                }
                 if (request.KeepInTouchIntentionally != null)
+                {
+                    await AuditAsync(ownerId, request.PersonId, nameof(RelationshipPreference.KeepInTouchIntentionally),
+                        HumanFlag(preference.KeepInTouchIntentionally), HumanFlag(request.KeepInTouchIntentionally.Value), source);
                     preference.KeepInTouchIntentionally = request.KeepInTouchIntentionally.Value;
+                }
                 if (request.ExcludeFromSuggestions != null)
+                {
+                    await AuditAsync(ownerId, request.PersonId, nameof(RelationshipPreference.ExcludeFromSuggestions),
+                        HumanFlag(preference.ExcludeFromSuggestions), HumanFlag(request.ExcludeFromSuggestions.Value), source);
                     preference.ExcludeFromSuggestions = request.ExcludeFromSuggestions.Value;
+                }
                 preference.UpdatedAtUtc = DateTime.UtcNow;
                 if (isNew)
                     await _preferences.AddAsync(preference);
@@ -116,7 +169,7 @@ namespace Servicess
             }
         }
 
-        public async Task<RelationshipPreferenceDto> SetReminderAsync(ReminderSetRequest request)
+        public async Task<RelationshipPreferenceDto> SetReminderAsync(ReminderSetRequest request, PreferenceChangeSource source = PreferenceChangeSource.User)
         {
             using (Operation.Time("Set reminder"))
             {
@@ -135,6 +188,12 @@ namespace Servicess
                     PersonId = request.PersonId,
                     CreatedAtUtc = DateTime.UtcNow
                 };
+                await AuditAsync(ownerId, request.PersonId, nameof(RelationshipPreference.ReminderEnabled),
+                    HumanFlag(preference.ReminderEnabled), HumanFlag(true), source);
+                await AuditAsync(ownerId, request.PersonId, nameof(RelationshipPreference.ReminderIntervalDays),
+                    HumanDays(preference.ReminderIntervalDays), HumanDays(request.IntervalDays), source);
+                await AuditAsync(ownerId, request.PersonId, nameof(RelationshipPreference.ReminderStrict),
+                    preference.ReminderStrict ? "strict" : "flexible", request.Strict ? "strict" : "flexible", source);
                 preference.ReminderEnabled = true;
                 preference.ReminderIntervalDays = request.IntervalDays;
                 preference.ReminderStrict = request.Strict;
@@ -176,30 +235,163 @@ namespace Servicess
 
         public async Task<RelationshipPreferenceDto> CompleteAsync(Guid personId)
         {
+            // V6 test scenario 12: completion is ONLY allowed via logging an
+            // actual interaction. This endpoint exists for backward
+            // compatibility but no longer marks anything complete: it tells
+            // the caller where to go instead. InteractionService.LogAsync is
+            // the sole writer of LastCompletedAtUtc.
+            var ownerId = OwnerId();
+            await RequireOwnedPersonAsync(ownerId, personId);
+            var preference = await _preferences.GetAsync(ownerId, personId)
+                ?? throw new KeyNotFoundException("No reminder is configured for this person.");
+            if (preference.ReminderEnabled)
+                throw new InvalidOperationException(
+                    "Marking done requires logging the actual interaction first — " +
+                    "log it (Person page, Copilot, or Meeting confirm) and this cycle clears itself.");
+            var dtoPerson = await _persons.GetPersonById(personId);
+            return ToDto(preference, dtoPerson?.Name);
+        }
+
+        public async Task<RelationshipPreferenceDto> DisableReminderAsync(Guid personId, PreferenceChangeSource source = PreferenceChangeSource.User)
+        {
             var ownerId = OwnerId();
             var person = await RequireOwnedPersonAsync(ownerId, personId);
             var preference = await _preferences.GetAsync(ownerId, personId)
                 ?? throw new KeyNotFoundException("No reminder is configured for this person.");
-            // Completing records the user's action only. Relationship state moves
-            // exclusively through logged interactions in the canonical pipeline.
-            preference.LastCompletedAtUtc = DateTime.UtcNow;
+            await AuditAsync(ownerId, personId, nameof(RelationshipPreference.ReminderEnabled),
+                HumanFlag(preference.ReminderEnabled), HumanFlag(false), source);
+            preference.ReminderEnabled = false;
             preference.SnoozedUntilUtc = null;
             preference.UpdatedAtUtc = DateTime.UtcNow;
             await _unitOfWork.SaveChangesAsync();
             return ToDto(preference, person.Name);
         }
 
-        public async Task<RelationshipPreferenceDto> DisableReminderAsync(Guid personId)
+        public async Task RemoveAsync(Guid personId, PreferenceChangeSource source = PreferenceChangeSource.User)
         {
             var ownerId = OwnerId();
-            var person = await RequireOwnedPersonAsync(ownerId, personId);
-            var preference = await _preferences.GetAsync(ownerId, personId)
-                ?? throw new KeyNotFoundException("No reminder is configured for this person.");
-            preference.ReminderEnabled = false;
-            preference.SnoozedUntilUtc = null;
-            preference.UpdatedAtUtc = DateTime.UtcNow;
+            await RequireOwnedPersonAsync(ownerId, personId);
+            var preference = await _preferences.GetAsync(ownerId, personId);
+            if (preference == null)
+                return;
+            // One audit row per previously-set field so the revert is
+            // explainable: removing the override returns the relationship to
+            // global defaults, then system inference.
+            if (preference.DesiredCadenceDays != null)
+                await AuditAsync(ownerId, personId, nameof(RelationshipPreference.DesiredCadenceDays),
+                    HumanDays(preference.DesiredCadenceDays), HumanDays(null), source);
+            if (preference.Importance != 0)
+                await AuditAsync(ownerId, personId, nameof(RelationshipPreference.Importance),
+                    HumanLevel(preference.Importance), HumanLevel(0), source);
+            if (preference.Priority != 0)
+                await AuditAsync(ownerId, personId, nameof(RelationshipPreference.Priority),
+                    HumanLevel(preference.Priority), HumanLevel(0), source);
+            if (preference.KeepInTouchIntentionally)
+                await AuditAsync(ownerId, personId, nameof(RelationshipPreference.KeepInTouchIntentionally),
+                    HumanFlag(true), HumanFlag(false), source);
+            if (preference.ExcludeFromSuggestions)
+                await AuditAsync(ownerId, personId, nameof(RelationshipPreference.ExcludeFromSuggestions),
+                    HumanFlag(true), HumanFlag(false), source);
+            if (preference.ReminderEnabled)
+                await AuditAsync(ownerId, personId, nameof(RelationshipPreference.ReminderEnabled),
+                    HumanFlag(true), HumanFlag(false), source);
+            await _preferences.RemoveAsync(preference);
             await _unitOfWork.SaveChangesAsync();
-            return ToDto(preference, person.Name);
+        }
+
+        public async Task<string> GetReminderStateAsync(Guid personId)
+        {
+            var ownerId = OwnerId();
+            await RequireOwnedPersonAsync(ownerId, personId);
+            var preference = await _preferences.GetAsync(ownerId, personId);
+            if (preference == null || !preference.ReminderEnabled)
+                return ReminderState.Disabled.ToString();
+            var now = DateTime.UtcNow;
+            if (preference.SnoozedUntilUtc != null && preference.SnoozedUntilUtc > now)
+            {
+                // Skipped cycles reuse the snooze field with a skip stamp;
+                // a plain snooze has no LastSkipped marker.
+                if (preference.LastSkippedAtUtc != null
+                    && preference.SnoozedUntilUtc > preference.LastSkippedAtUtc.Value.AddDays(-1))
+                    return ReminderState.Skipped.ToString();
+                return ReminderState.Snoozed.ToString();
+            }
+            if (preference.LastCompletedAtUtc != null
+                && (preference.SnoozedUntilUtc == null || preference.SnoozedUntilUtc <= now))
+            {
+                var interval = preference.ReminderIntervalDays ?? 7;
+                if ((now - preference.LastCompletedAtUtc.Value).TotalDays < interval)
+                    return ReminderState.Completed.ToString();
+            }
+            var due = await ListDueAsync();
+            return due.Any(d => d.PersonId == personId)
+                ? ReminderState.Due.ToString()
+                : ReminderState.Idle.ToString();
+        }
+
+        public async Task<List<PreferenceAuditDto>> GetHistoryAsync(Guid personId)
+        {
+            var ownerId = OwnerId();
+            await RequireOwnedPersonAsync(ownerId, personId);
+            if (_audit == null)
+                return new List<PreferenceAuditDto>();
+            var entries = await _audit.ListForPersonAsync(ownerId, personId);
+            return entries.Select(e => new PreferenceAuditDto
+            {
+                PersonId = e.PersonId,
+                Field = e.Field,
+                PreviousValue = e.PreviousValue,
+                NewValue = e.NewValue,
+                Source = e.Source.ToString(),
+                ChangedAtUtc = e.ChangedAtUtc
+            }).ToList();
+        }
+
+        public async Task<GlobalDefaultsDto> GetGlobalDefaultsAsync()
+        {
+            OwnerId();
+            if (_defaults == null)
+                return new GlobalDefaultsDto();
+            var ownerId = OwnerId();
+            var current = await _defaults.GetAsync(ownerId);
+            if (current == null)
+                return new GlobalDefaultsDto();
+            return new GlobalDefaultsDto
+            {
+                DefaultCadenceDays = current.DefaultCadenceDays,
+                DefaultReminderStrict = current.DefaultReminderStrict
+            };
+        }
+
+        public async Task<GlobalDefaultsDto> SaveGlobalDefaultsAsync(GlobalDefaultsSaveRequest request, PreferenceChangeSource source = PreferenceChangeSource.User)
+        {
+            if (request == null)
+                throw new ArgumentNullException(nameof(request));
+            if (request.DefaultCadenceDays != null)
+                ValidateInterval(request.DefaultCadenceDays.Value, nameof(request.DefaultCadenceDays));
+            var ownerId = OwnerId();
+            if (_defaults == null)
+                throw new InvalidOperationException("Global defaults are not available.");
+            var current = await _defaults.GetAsync(ownerId);
+            var previous = current?.DefaultCadenceDays;
+            await _defaults.UpsertAsync(new GlobalPreferenceDefaults
+            {
+                ApplicationUserId = ownerId,
+                DefaultCadenceDays = request.DefaultCadenceDays ?? current?.DefaultCadenceDays,
+                DefaultReminderStrict = request.DefaultReminderStrict ?? current?.DefaultReminderStrict ?? false,
+                UpdatedAtUtc = DateTime.UtcNow
+            });
+            await _unitOfWork.SaveChangesAsync();
+            _logger.LogInformation("Global defaults changed for {OwnerId} from {Previous} by {Source}",
+                ownerId, HumanDays(previous), source);
+            // Read back through the same repository contract so mocks and the
+            // real store behave identically (Upsert mutates the tracked row).
+            var refreshed = await _defaults.GetAsync(ownerId);
+            return new GlobalDefaultsDto
+            {
+                DefaultCadenceDays = refreshed?.DefaultCadenceDays,
+                DefaultReminderStrict = refreshed?.DefaultReminderStrict ?? false
+            };
         }
 
         public async Task<List<ReminderDueDto>> ListDueAsync()

@@ -150,7 +150,7 @@ namespace CRUDTests
         }
 
         [Fact]
-        public async Task ReminderLifecycle_SnoozeSkipComplete_DoesNotTouchInteractions()
+        public async Task ReminderLifecycle_SnoozeSkip_DoesNotTouchInteractions()
         {
             var person = OwnedPerson(_userA);
             AsUserA(person);
@@ -166,13 +166,25 @@ namespace CRUDTests
             var skipped = await Service().SkipAsync(person.PersonId);
             skipped.SnoozedUntilUtc.Should().NotBeNull();
 
-            pref.SnoozedUntilUtc = null;
-            var completed = await Service().CompleteAsync(person.PersonId);
-            completed.LastCompletedAtUtc.Should().NotBeNull();
-            completed.SnoozedUntilUtc.Should().BeNull();
-
             var disabled = await Service().DisableReminderAsync(person.PersonId);
             disabled.ReminderEnabled.Should().BeFalse();
+        }
+
+        [Fact]
+        public async Task CompleteAsync_AlwaysRequiresRealInteraction()
+        {
+            // V6 scenario 12: the endpoint can never mark a cycle complete.
+            // Only InteractionService.LogAsync writes LastCompletedAtUtc.
+            var person = OwnedPerson(_userA);
+            AsUserA(person);
+            var pref = Pref(_userA, person.PersonId);
+            pref.ReminderEnabled = true;
+            pref.ReminderIntervalDays = 10;
+            _prefsMock.Setup(r => r.GetAsync(_userA, person.PersonId)).ReturnsAsync(pref);
+
+            await Assert.ThrowsAsync<InvalidOperationException>(() => Service().CompleteAsync(person.PersonId));
+            pref.LastCompletedAtUtc.Should().BeNull();
+            _uowMock.Verify(u => u.SaveChangesAsync(), Times.Never);
         }
 
         [Fact]
@@ -220,6 +232,117 @@ namespace CRUDTests
                 .ReturnsAsync(OwnedPerson(_userB, personId));
 
             await Assert.ThrowsAsync<KeyNotFoundException>(() => Service().GetAsync(personId));
+        }
+
+        [Fact]
+        public async Task SaveAsync_WritesAuditRow_WithPreviousAndNew()
+        {
+            var person = OwnedPerson(_userA);
+            AsUserA(person);
+            var existing = Pref(_userA, person.PersonId);
+            existing.DesiredCadenceDays = 30;
+            _prefsMock.Setup(r => r.GetAsync(_userA, person.PersonId)).ReturnsAsync(existing);
+            var auditMock = new Mock<PreferenceAuditRepositoryContract>();
+            var added = new List<PreferenceAuditEntry>();
+            auditMock.Setup(a => a.AddAsync(It.IsAny<PreferenceAuditEntry>()))
+                .Callback<PreferenceAuditEntry>(e => added.Add(e))
+                .Returns(Task.CompletedTask);
+            var service = new RelationshipPreferenceService(
+                _prefsMock.Object, _personsMock.Object, _scoringMock.Object,
+                _userMock.Object, _uowMock.Object,
+                Mock.Of<ILogger<RelationshipPreferenceService>>(),
+                auditMock.Object, null);
+
+            await service.SaveAsync(new PreferenceSaveRequest
+            {
+                PersonId = person.PersonId,
+                DesiredCadenceDays = 10
+            }, PreferenceChangeSource.Copilot);
+
+            var row = added.Should().ContainSingle().Subject;
+            row.Field.Should().Be(nameof(RelationshipPreference.DesiredCadenceDays));
+            row.PreviousValue.Should().Contain("30");
+            row.NewValue.Should().Contain("10");
+            row.Source.Should().Be(PreferenceChangeSource.Copilot);
+            row.ChangedById.Should().Be(_userA);
+        }
+
+        [Fact]
+        public async Task RemoveAsync_DeletesRowAndAuditsRevert()
+        {
+            var person = OwnedPerson(_userA);
+            AsUserA(person);
+            var existing = Pref(_userA, person.PersonId);
+            existing.DesiredCadenceDays = 10;
+            existing.ReminderEnabled = true;
+            _prefsMock.Setup(r => r.GetAsync(_userA, person.PersonId)).ReturnsAsync(existing);
+            var auditMock = new Mock<PreferenceAuditRepositoryContract>();
+            var added = new List<PreferenceAuditEntry>();
+            auditMock.Setup(a => a.AddAsync(It.IsAny<PreferenceAuditEntry>()))
+                .Callback<PreferenceAuditEntry>(e => added.Add(e))
+                .Returns(Task.CompletedTask);
+            RelationshipPreference? removed = null;
+            _prefsMock.Setup(r => r.RemoveAsync(It.IsAny<RelationshipPreference>()))
+                .Callback<RelationshipPreference>(p => removed = p)
+                .Returns(Task.CompletedTask);
+            var service = new RelationshipPreferenceService(
+                _prefsMock.Object, _personsMock.Object, _scoringMock.Object,
+                _userMock.Object, _uowMock.Object,
+                Mock.Of<ILogger<RelationshipPreferenceService>>(),
+                auditMock.Object, null);
+
+            await service.RemoveAsync(person.PersonId);
+
+            removed.Should().NotBeNull();
+            added.Should().NotBeEmpty();
+            added.Should().Contain(e => e.NewValue != null && e.NewValue.Contains("not set"));
+        }
+
+        [Fact]
+        public async Task GetReminderStateAsync_ReportsMachineStates()
+        {
+            var person = OwnedPerson(_userA);
+            AsUserA(person);
+            var pref = Pref(_userA, person.PersonId);
+            _prefsMock.Setup(r => r.GetAsync(_userA, person.PersonId)).ReturnsAsync(pref);
+            _prefsMock.Setup(r => r.ListForOwnerAsync(_userA))
+                .ReturnsAsync(new List<RelationshipPreference>());
+
+            // No reminder configured at all.
+            (await Service().GetReminderStateAsync(person.PersonId)).Should().Be("Disabled");
+
+            // Snoozed into the future.
+            pref.ReminderEnabled = true;
+            pref.ReminderIntervalDays = 10;
+            pref.SnoozedUntilUtc = DateTime.UtcNow.AddDays(3);
+            pref.LastSkippedAtUtc = null;
+            (await Service().GetReminderStateAsync(person.PersonId)).Should().Be("Snoozed");
+        }
+
+        [Fact]
+        public async Task SaveGlobalDefaultsAsync_ValidatesAndPersists()
+        {
+            AsUserA();
+            var defaultsMock = new Mock<GlobalDefaultsRepositoryContract>();
+            GlobalPreferenceDefaults? saved = null;
+            defaultsMock.Setup(d => d.GetAsync(_userA)).ReturnsAsync(() => saved);
+            defaultsMock.Setup(d => d.UpsertAsync(It.IsAny<GlobalPreferenceDefaults>()))
+                .Callback<GlobalPreferenceDefaults>(d => saved = d)
+                .Returns(Task.CompletedTask);
+            var service = new RelationshipPreferenceService(
+                _prefsMock.Object, _personsMock.Object, _scoringMock.Object,
+                _userMock.Object, _uowMock.Object,
+                Mock.Of<ILogger<RelationshipPreferenceService>>(),
+                null, defaultsMock.Object);
+
+            await Assert.ThrowsAsync<ArgumentException>(() => service.SaveGlobalDefaultsAsync(
+                new GlobalDefaultsSaveRequest { DefaultCadenceDays = 999 }));
+
+            var dto = await service.SaveGlobalDefaultsAsync(
+                new GlobalDefaultsSaveRequest { DefaultCadenceDays = 14 });
+            saved.Should().NotBeNull();
+            saved!.DefaultCadenceDays.Should().Be(14);
+            dto.DefaultCadenceDays.Should().Be(14);
         }
     }
 }

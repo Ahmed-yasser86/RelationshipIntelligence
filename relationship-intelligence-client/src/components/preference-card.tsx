@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/select";
 import { ApiError, api } from "@/lib/api";
 import { CadencePresets } from "@/lib/types";
-import type { RelationshipPreference, ReminderDue } from "@/lib/types";
+import type { GlobalDefaults, PreferenceAuditEntry, RelationshipPreference, ReminderDue } from "@/lib/types";
 
 /**
  * User-controlled relationship parameters in human terms. Saves intention
@@ -142,12 +142,151 @@ export function PreferenceCard({ personId, personName }: { personId: string; per
         ))}
         {error && <p className="text-sm text-destructive">{error}</p>}
         {message && <p className="text-sm text-emerald-700">{message}</p>}
-        <div>
+        <div className="flex flex-wrap gap-1.5">
           <Button size="sm" disabled={busy} onClick={() => void save()}>
             {busy ? "Saving…" : pref ? "Save preferences" : "Set preferences"}
           </Button>
+          {pref && (
+            <Button
+              size="sm"
+              variant="ghost"
+              disabled={busy}
+              title="Removes your per-person settings for this contact. The relationship reverts to your defaults, then the usual rhythm."
+              onClick={() => {
+                if (!window.confirm(`Remove your preferences for ${personName}? The usual rhythm applies again.`)) return;
+                setError(null);
+                setMessage(null);
+                setBusy(true);
+                api
+                  .del(`/api/Preference/DeletePreference?personId=${personId}`)
+                  .then(() => {
+                    setPref(null);
+                    setCadence("");
+                    setCustomCadence("");
+                    setImportance(false);
+                    setPriority(false);
+                    setIntentional(false);
+                    setExcluded(false);
+                    setMessage("Preferences removed. The usual rhythm applies again.");
+                  })
+                  .catch((err) => setError(err instanceof ApiError ? err.body || err.message : "Could not remove."))
+                  .finally(() => setBusy(false));
+              }}
+            >
+              Remove my settings
+            </Button>
+          )}
         </div>
+        {pref && <PreferenceHistory personId={personId} />}
       </div>
+    </section>
+  );
+}
+
+export function PreferenceHistory({ personId }: { personId: string }) {
+  const [history, setHistory] = useState<PreferenceAuditEntry[] | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    api
+      .get<PreferenceAuditEntry[]>(`/api/Preference/GetPreferenceHistory?personId=${personId}`)
+      .then((h) => {
+        if (!cancelled) setHistory(h ?? []);
+      })
+      .catch(() => {
+        if (!cancelled) setHistory([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [personId]);
+
+  if (history === null || history.length === 0) return null;
+
+  return (
+    <details className="mt-2">
+      <summary className="cursor-pointer text-xs text-muted-foreground">
+        Why these settings? ({history.length} change{history.length === 1 ? "" : "s"})
+      </summary>
+      <ul className="mt-1.5 flex flex-col gap-1 text-xs text-muted-foreground">
+        {history.slice(0, 10).map((h, i) => (
+          <li key={i}>
+            {h.field}: {h.previousValue ?? "not set"} → {h.newValue ?? "not set"} ·{" "}
+            {new Date(h.changedAtUtc).toLocaleDateString()} · via {h.source}
+          </li>
+        ))}
+      </ul>
+    </details>
+  );
+}
+
+export function GlobalDefaultsCard() {
+  const [defaults, setDefaults] = useState<GlobalDefaults | null>(null);
+  const [cadence, setCadence] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    api
+      .get<GlobalDefaults>("/api/Preference/GetGlobalDefaults")
+      .then((d) => {
+        setDefaults(d);
+        if (d.defaultCadenceDays != null) setCadence(String(d.defaultCadenceDays));
+      })
+      .catch(() => undefined);
+  }, []);
+
+  async function save() {
+    setError(null);
+    setMessage(null);
+    setBusy(true);
+    try {
+      const days = cadence === "" ? null : Number(cadence);
+      if (days != null && (!Number.isFinite(days) || days < 1 || days > 365)) {
+        throw new ApiError(400, "Default must be between 1 and 365 days, or empty.");
+      }
+      const saved = await api.put<GlobalDefaults>("/api/Preference/PutGlobalDefaults", {
+        DefaultCadenceDays: days,
+      });
+      setDefaults(saved);
+      setMessage("Default saved. It applies only where you set no per-person rhythm.");
+    } catch (err) {
+      setError(err instanceof ApiError ? err.body || err.message : "Could not save.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <section aria-label="Default rhythm" className="rounded-lg border px-4 py-3">
+      <h3 className="font-display text-lg font-semibold">Your default rhythm</h3>
+      <p className="mt-0.5 text-xs text-muted-foreground">
+        Used only when a contact has no per-person setting. A per-person rhythm always wins.
+      </p>
+      <div className="mt-2.5 flex items-center gap-2">
+        <Input
+          type="number"
+          min={1}
+          max={365}
+          className="w-24"
+          aria-label="Default cadence in days"
+          placeholder="None"
+          value={cadence}
+          onChange={(e) => setCadence(e.target.value)}
+        />
+        <span className="text-sm text-muted-foreground">days</span>
+        <Button size="sm" disabled={busy} onClick={() => void save()}>
+          {busy ? "Saving…" : "Save default"}
+        </Button>
+      </div>
+      {defaults?.defaultCadenceDays != null && (
+        <p className="mt-1 text-xs text-muted-foreground">
+          Current default: every {defaults.defaultCadenceDays} days.
+        </p>
+      )}
+      {error && <p className="mt-1.5 text-sm text-destructive">{error}</p>}
+      {message && <p className="mt-1.5 text-sm text-emerald-700">{message}</p>}
     </section>
   );
 }
@@ -237,9 +376,10 @@ export function ReminderCard({ personId, personName }: { personId: string; perso
             <Button size="sm" variant="outline" disabled={busy} onClick={() => void run(() => api.post<RelationshipPreference>(`/api/Preference/PostSkip?personId=${personId}`, {}), "Skipped this round.")}>
               Skip
             </Button>
-            <Button size="sm" variant="outline" disabled={busy} onClick={() => void run(() => api.post<RelationshipPreference>(`/api/Preference/PostComplete?personId=${personId}`, {}), "Marked done — log a real interaction separately if you connected.")}>
-              Done
-            </Button>
+            <span className="text-xs text-muted-foreground">
+              To finish this cycle, log the actual interaction (Log interaction above, Copilot, or meeting
+              confirm) — the reminder clears itself. Viewing, snoozing, or tapping Done never logs contact.
+            </span>
             <Button size="sm" variant="ghost" disabled={busy} onClick={() => void run(() => api.del<RelationshipPreference>(`/api/Preference/DeleteReminder?personId=${personId}`), "Reminder turned off.")}>
               Turn off
             </Button>

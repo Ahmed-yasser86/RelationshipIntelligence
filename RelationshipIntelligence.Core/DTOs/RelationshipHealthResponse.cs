@@ -29,6 +29,12 @@ namespace ServiceContracts.DTOs
         public int? DesiredCadenceDays { get; set; }
         /// <summary>True when the user keeps this relationship intentionally.</summary>
         public bool KeepInTouchIntentionally { get; set; }
+        /// <summary>
+        /// Human-readable source of the effective cadence shown on this row:
+        /// "You asked for every N days", "Your default: every N days", or
+        /// "Usual rhythm" (system inference). Answers "why this cadence".
+        /// </summary>
+        public string CadenceSourceLabel { get; set; } = string.Empty;
         public double? SilenceQuantile { get; set; }
         public double UrgencyScore { get; set; }
         public string Band { get; set; } = string.Empty;

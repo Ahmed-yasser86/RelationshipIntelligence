@@ -17,6 +17,7 @@ namespace Servicess
         private readonly InteractionRepositoryContract _interactions;
         private readonly PersonRepositryContract _persons;
         private readonly IRelationshipScoringService _scoring;
+        private readonly RelationshipPreferenceRepositoryContract? _preferences;
         private readonly ICurrentUserService _currentUser;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<InteractionService> _logger;
@@ -27,7 +28,8 @@ namespace Servicess
             IRelationshipScoringService scoring,
             ICurrentUserService currentUser,
             IUnitOfWork unitOfWork,
-            ILogger<InteractionService> logger)
+            ILogger<InteractionService> logger,
+            RelationshipPreferenceRepositoryContract? preferences = null)
         {
             _interactions = interactions;
             _persons = persons;
@@ -35,6 +37,7 @@ namespace Servicess
             _currentUser = currentUser;
             _unitOfWork = unitOfWork;
             _logger = logger;
+            _preferences = preferences;
         }
 
         public async Task<InteractionResponse> LogAsync(InteractionAddRequest? request)
@@ -57,6 +60,27 @@ namespace Servicess
                     throw new ArgumentException("Given person ID does not exist.");
 
                 var saved = await _interactions.AddAsync(request.ToInteraction());
+                // Canonical completion: a real logged interaction clears the
+                // reminder cycle (snooze + completion stamp). Reminder actions
+                // themselves never write here — this is the only path that
+                // marks a cycle complete via actual contact.
+                if (_preferences != null && _currentUser.UserId != null)
+                {
+                    try
+                    {
+                        var preference = await _preferences.GetAsync(_currentUser.UserId.Value, request.PersonId!.Value);
+                        if (preference != null && preference.ReminderEnabled)
+                        {
+                            preference.LastCompletedAtUtc = DateTime.UtcNow;
+                            preference.SnoozedUntilUtc = null;
+                            preference.UpdatedAtUtc = DateTime.UtcNow;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogDebug(ex, "Reminder completion skipped for person {PersonId}", request.PersonId);
+                    }
+                }
                 await _unitOfWork.SaveChangesAsync();
                 await _scoring.RecomputeForPairAsync(request.PersonId);
                 return saved.ConvertToDto();

@@ -26,6 +26,7 @@ namespace Servicess
         private readonly IUnitOfWork _unitOfWork;
         private readonly ICurrentUserService _currentUser;
         private readonly ILogger<OutreachService> _logger;
+        private readonly RelationshipPreferenceRepositoryContract? _preferences;
 
         public OutreachService(
             OutreachRepositoryContract batches,
@@ -37,7 +38,8 @@ namespace Servicess
             ICopilotService copilot,
             IUnitOfWork unitOfWork,
             ICurrentUserService currentUser,
-            ILogger<OutreachService> logger)
+            ILogger<OutreachService> logger,
+            RelationshipPreferenceRepositoryContract? preferences = null)
         {
             _batches = batches;
             _persons = persons;
@@ -49,6 +51,7 @@ namespace Servicess
             _unitOfWork = unitOfWork;
             _currentUser = currentUser;
             _logger = logger;
+            _preferences = preferences;
         }
 
         private Guid OwnerId()
@@ -272,6 +275,23 @@ namespace Servicess
             }
 
             var skipped = await SkippedPersonIdsAsync(ownerId);
+            // Cross-product consistency: a per-person opt-out from proactive
+            // suggestions is canonical — Outreach must respect it on every
+            // signal path, not just the attention queue. Digest already does.
+            try
+            {
+                var prefs = _preferences;
+                if (prefs != null)
+                {
+                    foreach (var p in await prefs.ListForOwnerAsync(ownerId))
+                        if (p.ExcludeFromSuggestions)
+                            skipped.Add(p.PersonId);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "Suggestion exclusion skipped for outreach.");
+            }
 
             foreach (var signal in signals)
             {

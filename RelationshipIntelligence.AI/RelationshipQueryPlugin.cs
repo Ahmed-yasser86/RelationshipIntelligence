@@ -497,6 +497,49 @@ namespace RelationshipIntelligence.AI
             return JsonSerializer.Serialize(due, Json);
         }
 
+        [KernelFunction, Description("Get one person's reminder state machine state: Disabled, Idle, Due, Snoozed, Skipped, or Completed. Derived from stored fields, never a separate copy. Viewing this never records an interaction. Read-only.")]
+        public async Task<string> GetReminderStateAsync(
+            [Description("The person's id (Guid).")] string personId)
+        {
+            var id = ParseId(personId);
+            if (id == null)
+                return JsonSerializer.Serialize(new { error = "Invalid person id." }, Json);
+            try
+            {
+                var state = await _preferences.GetReminderStateAsync(id.Value);
+                return JsonSerializer.Serialize(new { personId = id.Value, state }, Json);
+            }
+            catch (KeyNotFoundException)
+            {
+                return JsonSerializer.Serialize(new { observed = false, note = "No such contact." }, Json);
+            }
+        }
+
+        [KernelFunction, Description("Get one person's preference change history: what changed, previous and new values in human terms, when, and through which path (User, Copilot, Import, Default). Read-only.")]
+        public async Task<string> GetPreferenceHistoryAsync(
+            [Description("The person's id (Guid).")] string personId)
+        {
+            var id = ParseId(personId);
+            if (id == null)
+                return JsonSerializer.Serialize(new { error = "Invalid person id." }, Json);
+            try
+            {
+                var history = await _preferences.GetHistoryAsync(id.Value);
+                return JsonSerializer.Serialize(history, Json);
+            }
+            catch (KeyNotFoundException)
+            {
+                return JsonSerializer.Serialize(new { observed = false, note = "No such contact." }, Json);
+            }
+        }
+
+        [KernelFunction, Description("Get the user's global preference defaults: fallback cadence and reminder strictness used only when a person has no explicit preference. Read-only.")]
+        public async Task<string> GetGlobalDefaultsAsync()
+        {
+            var defaults = await _preferences.GetGlobalDefaultsAsync();
+            return JsonSerializer.Serialize(defaults, Json);
+        }
+
         [KernelFunction, Description("Get unapproved AI proposals awaiting review: suggested memory entries and suggested meeting findings. Nothing here is durable truth. Read-only.")]
         public async Task<string> GetPendingReviewAsync()
         {

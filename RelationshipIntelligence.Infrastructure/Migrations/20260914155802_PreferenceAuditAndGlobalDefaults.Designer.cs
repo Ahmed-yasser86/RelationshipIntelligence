@@ -4,6 +4,7 @@ using Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ContactsManager.Inferastructure.Migrations
 {
     [DbContext(typeof(AppDBContext))]
-    partial class AppDBContextModelSnapshot : ModelSnapshot
+    [Migration("20260914155802_PreferenceAuditAndGlobalDefaults")]
+    partial class PreferenceAuditAndGlobalDefaults
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -696,7 +699,7 @@ namespace ContactsManager.Inferastructure.Migrations
 
                     b.HasKey("TagId");
 
-                    b.ToTable("UserDefinedTags", (string)null);
+                    b.ToTable("UserDefinedTags");
 
                     b.HasData(
                         new
@@ -1411,7 +1414,7 @@ namespace ContactsManager.Inferastructure.Migrations
                     b.HasIndex("MeetingId")
                         .IsUnique();
 
-                    b.ToTable("MeetingBriefs", (string)null);
+                    b.ToTable("MeetingBriefs");
                 });
 
             modelBuilder.Entity("Entities.MeetingFinding", b =>
@@ -2305,7 +2308,7 @@ namespace ContactsManager.Inferastructure.Migrations
 
                     b.HasIndex("SystemStatusTagsStatusTagId");
 
-                    b.ToTable("PersonSystemStatusTag", (string)null);
+                    b.ToTable("PersonSystemStatusTag");
 
                     b.HasData(
                         new
@@ -2372,7 +2375,7 @@ namespace ContactsManager.Inferastructure.Migrations
 
                     b.HasIndex("UserDefinedTagsTagId");
 
-                    b.ToTable("PersonUserDefinedTags", (string)null);
+                    b.ToTable("PersonUserDefinedTags");
 
                     b.HasData(
                         new

@@ -12,10 +12,16 @@ namespace ServiceContracts.DTOs.CopilotDTOs
         public static readonly string[] KnownSignals =
         {
             "outsideCadence", "recentMeetings", "neglected", "attentionQueue",
-            "upcomingEvents", "pendingCommitments"
+            "upcomingEvents", "pendingCommitments", "companyMembers"
         };
 
         public List<string> SignalFilters { get; set; } = new();
+
+        /// <summary>
+        /// Organization for the companyMembers signal, matched server-side
+        /// against the user's actual organizations. Never free text into matching.
+        /// </summary>
+        public string? CompanyName { get; set; }
 
         public string? Channel { get; set; }
 

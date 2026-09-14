@@ -37,6 +37,13 @@ namespace ServiceContracts.DTOs.AgentDTOs
         /// </summary>
         public List<AgentCandidateOption> PendingCandidates { get; set; } = new();
 
+        /// <summary>
+        /// Interaction log proposed from the user's own words, awaiting a
+        /// yes/no. Any unrelated message discards it — a "yes" elsewhere must
+        /// never record something the user walked away from.
+        /// </summary>
+        public PendingLogProposal? PendingLog { get; set; }
+
         public string? CurrentTask { get; set; }
 
         public DateTime UpdatedAtUtc { get; set; }

@@ -91,7 +91,7 @@ namespace RelationshipIntelligence.AI
             catch (Exception ex)
             {
                 _logger.LogWarning(ex, "Co-pilot model call failed");
-                throw new CopilotUnavailableException("The assistant could not reach the language model. Check provider settings and try again.", ex);
+                throw CopilotErrors.FromModelFailure(ex);
             }
         }
 
@@ -292,6 +292,19 @@ namespace RelationshipIntelligence.AI
             return result;
         }
 
+        private sealed class PlanStepDto
+        {
+            public string Action { get; set; } = string.Empty;
+            public string Why { get; set; } = string.Empty;
+            public string Outcome { get; set; } = string.Empty;
+        }
+
+        private sealed class PlanJsonDto
+        {
+            public string Summary { get; set; } = string.Empty;
+            public List<PlanStepDto> Steps { get; set; } = new();
+        }
+
         public async Task<PlanSuggestionDto> SuggestPlanAsync(Guid personId, Guid? intentEntryId)
         {
             var context = await PersonContextBlockAsync(personId);
@@ -302,18 +315,88 @@ namespace RelationshipIntelligence.AI
 
             var text = await ChatAsync(
                 $"CONTEXT:\n{context}\n\nUSER INTENT: {(intent == null ? "none stated — give general rhythm guidance, do not invent goals." : $"{intent.Kind}: {intent.Title}" + (string.IsNullOrWhiteSpace(intent.Detail) ? "" : $" — {intent.Detail}"))}\n\n" +
-                "Suggest a relationship plan as advisory bullet actions. Each action states: what to do, why now " +
-                "(cite the data), and the outcome pursued. The user decides; you only recommend.", null);
+                "Suggest a relationship plan as JSON ONLY, exactly this shape and nothing else: " +
+                "{\"summary\": \"one warm sentence framing the plan\", \"steps\": [{\"action\": \"what to do, plain human words\", \"why\": \"why now, citing the actual data above\", \"outcome\": \"what this achieves\"}]}. " +
+                "Two to four steps. Human voice throughout: no band/score jargon, no tool names, no section labels. The user decides; you only recommend.", null);
 
             var person = await _persons.GetPersonByPersonId(personId);
+            var actions = ParsePlanSteps(text, personId, person?.Name);
+            if (actions.Count == 0)
+                actions.Add(await FallbackPlanActionAsync(personId, person?.Name, text));
             return new PlanSuggestionDto
             {
                 PersonId = personId,
                 Intent = intent?.Title ?? "Maintain a healthy rhythm",
-                SuggestedActions = new List<PlanActionDto>
+                SuggestedActions = actions,
+                LimitedContext = entries.Count == 0
+            };
+        }
+
+        private static List<PlanActionDto> ParsePlanSteps(string text, Guid personId, string? personName)
+        {
+            try
+            {
+                var json = ExtractJson(text.Trim());
+                var parsed = JsonSerializer.Deserialize<PlanJsonDto>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                var steps = (parsed?.Steps ?? new List<PlanStepDto>())
+                    .Where(s => !string.IsNullOrWhiteSpace(s.Action))
+                    .Take(4)
+                    .Select(s => new PlanActionDto
+                    {
+                        Action = s.Action.Trim(),
+                        PersonId = personId,
+                        PersonName = personName,
+                        WhyNow = string.IsNullOrWhiteSpace(s.Why) ? "Based on the relationship context above." : s.Why.Trim(),
+                        Outcome = string.IsNullOrWhiteSpace(s.Outcome) ? string.Empty : s.Outcome.Trim()
+                    })
+                    .ToList();
+                if (!string.IsNullOrWhiteSpace(parsed?.Summary))
+                    steps.Insert(0, new PlanActionDto
+                    {
+                        Action = parsed!.Summary.Trim(),
+                        PersonId = personId,
+                        PersonName = personName,
+                        WhyNow = "The framing for the steps below.",
+                        Outcome = string.Empty
+                    });
+                return steps;
+            }
+            catch (Exception)
+            {
+                return new List<PlanActionDto>();
+            }
+        }
+
+        /// <summary>
+        /// When the model does not return the plan contract, keep its prose
+        /// but ground the "why" deterministically instead of a placeholder.
+        /// </summary>
+        private async Task<PlanActionDto> FallbackPlanActionAsync(Guid personId, string? personName, string text)
+        {
+            var why = "Based on the relationship context above.";
+            try
+            {
+                var queue = await _scoring.GetQueueAsync(200);
+                var state = queue.FirstOrDefault(q => q.PersonId == personId);
+                if (state != null)
                 {
-                    new() { Action = text, PersonId = personId, PersonName = person?.Name, WhyNow = "See cited context above.", Outcome = intent?.Title ?? "Steady relationship" }
+                    var silent = state.SilenceDays ?? TieDecayModel.SilenceDays(state.LastContactAtUtc, DateTime.UtcNow);
+                    why = $"{state.Band} at urgency {Math.Round(state.UrgencyScore)}" +
+                        (silent == null ? "." : $", quiet {silent}d") +
+                        (state.CadenceReferenceDays == null ? "." : $" against a ~{Math.Round(state.CadenceReferenceDays.Value)}d rhythm.");
                 }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "Plan fallback state lookup skipped.");
+            }
+            return new PlanActionDto
+            {
+                Action = text.Trim(),
+                PersonId = personId,
+                PersonName = personName,
+                WhyNow = why,
+                Outcome = string.Empty
             };
         }
 
@@ -338,7 +421,7 @@ namespace RelationshipIntelligence.AI
                 }, kernel);
                 var json = ExtractJson((result.Content ?? string.Empty).Trim());
                 var parsed = JsonSerializer.Deserialize<BatchIntentDto>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                return OutreachIntentMatcher.Validate(parsed!, text);
+                return ValidateIntent(parsed!, text);
             }
             catch (CopilotNotConfiguredException)
             {
@@ -346,9 +429,45 @@ namespace RelationshipIntelligence.AI
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Outreach intent parsing fell back to keyword matching");
-                return OutreachIntentMatcher.Match(text);
+                _logger.LogWarning(ex, "Outreach intent parsing failed outright");
+                throw CopilotErrors.FromModelFailure(ex);
             }
+        }
+
+        /// <summary>
+        /// Sanitizes model-produced intent: allowlisted signals, valid channels,
+        /// clamped windows. Invalid output asks for clarification — never a
+        /// silent keyword guess.
+        /// </summary>
+        private static BatchIntentDto ValidateIntent(BatchIntentDto? candidate, string originalText)
+        {
+            var signals = (candidate?.SignalFilters ?? new List<string>())
+                .Where(s => BatchIntentDto.KnownSignals.Contains(s))
+                .Distinct()
+                .ToList();
+            if (signals.Count == 0)
+                return new BatchIntentDto
+                {
+                    NeedsClarification = true,
+                    ClarificationPrompt = "I could not tell which relationships you mean. Try: reconnect, follow up after meetings, neglected, attention queue, upcoming events, or everyone at an organization."
+                };
+
+            string? channel = candidate!.Channel;
+            var validChannels = new[] { "Email", "LinkedIn", "Text", "CallPrep" };
+            if (channel != null && !validChannels.Contains(channel))
+                channel = null;
+
+            var company = string.IsNullOrWhiteSpace(candidate.CompanyName)
+                ? null
+                : candidate.CompanyName.Trim().Length > 100 ? candidate.CompanyName.Trim()[..100] : candidate.CompanyName.Trim();
+            return new BatchIntentDto
+            {
+                SignalFilters = signals,
+                CompanyName = company,
+                Channel = channel,
+                IntentText = string.IsNullOrWhiteSpace(candidate.IntentText) ? originalText.Trim() : candidate.IntentText.Trim(),
+                TimeWindowDays = Math.Clamp(candidate.TimeWindowDays <= 0 ? 7 : candidate.TimeWindowDays, 1, 60)
+            };
         }
 
         public async Task<DraftCommunicationResult> DraftCommunicationAsync(DraftCommunicationRequest request)
@@ -432,7 +551,7 @@ namespace RelationshipIntelligence.AI
             catch (Exception ex)
             {
                 _logger.LogWarning(ex, "Draft generation model call failed");
-                throw new CopilotUnavailableException("The assistant could not draft the message. Check provider settings and try again.", ex);
+                throw CopilotErrors.FromModelFailure(ex);
             }
 
             return ParseDraftOutput(content, request);

@@ -3,7 +3,6 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using RepositryContracts;
-using RelationshipIntelligence.AI;
 using ServiceContracts;
 using ServiceContracts.DTOs;
 using ServiceContracts.DTOs.OutreachDTOs;
@@ -27,6 +26,7 @@ namespace CRUDTests
         private readonly Mock<IEventService> _eventsMock = new();
         private readonly Mock<IUnitOfWork> _uowMock = new();
         private readonly Mock<ICurrentUserService> _userMock = new();
+        private readonly Mock<ICopilotService> _copilotMock = new();
 
         private readonly List<OutreachBatch> _store = new();
         private readonly Guid _salmaId = Guid.NewGuid();
@@ -34,12 +34,6 @@ namespace CRUDTests
 
         private OutreachService Service()
         {
-            var copilot = new StubCopilotService(
-                _scoringMock.Object,
-                _interactionsMock.Object,
-                _memoryMock.Object,
-                _eventsMock.Object,
-                Mock.Of<IPersonGetterService>());
             return new OutreachService(
                 _batchesMock.Object,
                 _personsMock.Object,
@@ -47,7 +41,7 @@ namespace CRUDTests
                 _interactionsMock.Object,
                 _memoryMock.Object,
                 _eventsMock.Object,
-                copilot,
+                _copilotMock.Object,
                 _uowMock.Object,
                 _userMock.Object,
                 Mock.Of<ILogger<OutreachService>>());
@@ -96,6 +90,40 @@ namespace CRUDTests
             });
             _eventsMock.Setup(e => e.GetUpcomingAsync(It.IsAny<int>()))
                 .ReturnsAsync(new List<ServiceContracts.DTOs.EventDTOs.EventOccurrenceDto>());
+            // Deterministic composer double: per-person grounding without the
+            // retired rule-based composer. Reason priority mirrors production:
+            // commitments, events, memory, recent thread, fallback.
+            _copilotMock.Setup(c => c.DraftCommunicationAsync(It.IsAny<ServiceContracts.DTOs.CopilotDTOs.DraftCommunicationRequest>()))
+                .ReturnsAsync((ServiceContracts.DTOs.CopilotDTOs.DraftCommunicationRequest req) =>
+                {
+                    var p = req.Person;
+                    if (req.Kind == Entities.DraftKind.CallPrep)
+                    {
+                        return new ServiceContracts.DTOs.CopilotDTOs.DraftCommunicationResult
+                        {
+                            Body = $"Call prep — {p.Name}. Before the call: review context. During the call: listen first. After the call: log it.",
+                            ContextUsed = new List<string> { p.Name },
+                            LimitedContext = false
+                        };
+                    }
+                    var reason = p.OpenCommitments.FirstOrDefault()
+                        ?? p.UpcomingEvents.FirstOrDefault()
+                        ?? p.MemoryHighlights.FirstOrDefault()
+                        ?? p.RecentInteractions.FirstOrDefault()
+                        ?? "checking in";
+                    var signals = p.RecentInteractions.Take(2)
+                        .Concat(p.MemoryHighlights.Take(2))
+                        .Concat(p.UpcomingEvents.Take(2))
+                        .Concat(p.OpenCommitments.Take(2))
+                        .ToList();
+                    return new ServiceContracts.DTOs.CopilotDTOs.DraftCommunicationResult
+                    {
+                        Subject = req.Channel == OutreachChannel.Email ? $"Hello {p.Name}" : null,
+                        Body = $"Hi {p.Name}, following up on {reason}.",
+                        ContextUsed = signals,
+                        LimitedContext = signals.Count == 0
+                    };
+                });
         }
 
         [Fact]
@@ -214,6 +242,60 @@ namespace CRUDTests
             approved.Status.Should().Be(BatchStatus.Approved);
             approved.Drafts.Should().OnlyContain(d => d.Status == DraftStatus.Approved);
             _interactionsMock.Verify(i => i.LogAsync(It.IsAny<ServiceContracts.DTOs.InteractionAddRequest>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task BuildFromSignals_CompanyMembers_ResolvesOrgByExactIdentity()
+        {
+            Arrange();
+            _personsMock.Setup(r => r.ListAffinitiesAsync()).ReturnsAsync(new List<RepositryContracts.PersonAffinity>
+            {
+                new(_salmaId, "Salma El-Sayed", new List<string> { "Proceedit" }, new List<string>(), new List<string>(), new List<string>(), null),
+                new(_karimId, "Karim Naguib", new List<string> { "Other" }, new List<string>(), new List<string>(), new List<string>(), null)
+            });
+
+            var batch = await Service().BuildFromSignalsAsync(new BuildBatchFromSignalsRequest
+            {
+                SignalFilters = new List<string> { "companyMembers" },
+                CompanyName = "proceedit",
+                Intent = "Reach out"
+            });
+
+            batch.Members.Should().ContainSingle(m => m.PersonId == _salmaId);
+            batch.Members.Single().Reason.Should().Contain("Proceedit");
+        }
+
+        [Fact]
+        public async Task BuildFromSignals_UnknownCompany_NamesRealOrganizations()
+        {
+            Arrange();
+            _personsMock.Setup(r => r.ListAffinitiesAsync()).ReturnsAsync(new List<RepositryContracts.PersonAffinity>
+            {
+                new(_salmaId, "Salma El-Sayed", new List<string> { "Proceedit" }, new List<string>(), new List<string>(), new List<string>(), null)
+            });
+
+            var act = () => Service().BuildFromSignalsAsync(new BuildBatchFromSignalsRequest
+            {
+                SignalFilters = new List<string> { "companyMembers" },
+                CompanyName = "Nonexistent",
+                Intent = "Reach out"
+            });
+
+            (await Assert.ThrowsAsync<ArgumentException>(act)).Message.Should().Contain("Proceedit");
+        }
+
+        [Fact]
+        public async Task BuildFromSignals_NoMembers_ThrowsInsteadOfSavingEmpty()
+        {
+            Arrange();
+
+            var act = () => Service().BuildFromSignalsAsync(new BuildBatchFromSignalsRequest
+            {
+                SignalFilters = new List<string> { "neglected" },
+                Intent = "Reach out"
+            });
+
+            (await Assert.ThrowsAsync<ArgumentException>(act)).Message.Should().Contain("No one currently matches");
         }
 
         [Fact]

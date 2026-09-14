@@ -11,5 +11,8 @@ namespace ServiceContracts.DTOs.OutreachDTOs
         public int MaxMembers { get; set; } = 12;
 
         public string Intent { get; set; } = "Reconnect";
+
+        /// <summary>Organization for the companyMembers signal. Optional.</summary>
+        public string? CompanyName { get; set; }
     }
 }

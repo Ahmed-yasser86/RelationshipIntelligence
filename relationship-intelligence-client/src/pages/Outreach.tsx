@@ -17,6 +17,7 @@ const SIGNAL_OPTIONS = [
   { value: "recentMeetings", label: "After recent meetings" },
   { value: "upcomingEvents", label: "Upcoming events" },
   { value: "pendingCommitments", label: "Pending commitments" },
+  { value: "companyMembers", label: "Company members" },
 ] as const;
 
 const BATCH_STATUSES = ["Draft", "Ready", "Approved", "Discarded"] as const;
@@ -27,6 +28,7 @@ export function Outreach() {
   const [error, setError] = useState<string | null>(null);
   const [signals, setSignals] = useState<string[]>(["attentionQueue"]);
   const [nlText, setNlText] = useState("");
+  const [companyName, setCompanyName] = useState("");
   const [busy, setBusy] = useState(false);
 
   const load = useCallback(async () => {
@@ -46,6 +48,16 @@ export function Outreach() {
     setSignals((s) => (s.includes(value) ? s.filter((x) => x !== value) : [...s, value]));
   }
 
+  async function remove(batch: OutreachBatch) {
+    if (!window.confirm(`Delete the batch "${batch.intent}"? Drafts in it go too.`)) return;
+    try {
+      await api.del(`/api/Outreach/DeleteBatch?id=${batch.outreachBatchId}`);
+      await load();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.body || err.message : "Could not delete batch.");
+    }
+  }
+
   async function buildFromSignals() {
     if (signals.length === 0) return;
     setError(null);
@@ -56,6 +68,7 @@ export function Outreach() {
         TimeWindowDays: 14,
         MaxMembers: 12,
         Intent: "Reconnect",
+        CompanyName: signals.includes("companyMembers") && companyName.trim() !== "" ? companyName.trim() : null,
       });
       navigate(`/outreach/${batch.outreachBatchId}`);
     } catch (err) {
@@ -128,6 +141,18 @@ export function Outreach() {
               );
             })}
           </div>
+          {signals.includes("companyMembers") && (
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="outreach-org">Organization</Label>
+              <Input
+                id="outreach-org"
+                value={companyName}
+                onChange={(e) => setCompanyName(e.target.value)}
+                placeholder="e.g. Proceedit"
+                maxLength={100}
+              />
+            </div>
+          )}
           <div>
             <Button size="sm" variant="outline" disabled={busy || signals.length === 0} onClick={() => void buildFromSignals()}>
               {busy ? "Building…" : "Build batch"}
@@ -166,6 +191,14 @@ export function Outreach() {
               <NavButton to={`/outreach/${b.outreachBatchId}`} size="sm" variant="ghost">
                 Open
               </NavButton>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="text-destructive hover:text-destructive"
+                onClick={() => void remove(b)}
+              >
+                Delete
+              </Button>
             </li>
           ))}
         </ul>

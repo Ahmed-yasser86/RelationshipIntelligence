@@ -146,7 +146,9 @@ namespace Servicess
                 var max = Math.Clamp(request.MaxMembers <= 0 ? 12 : request.MaxMembers, 1, 50);
                 var intent = string.IsNullOrWhiteSpace(request.Intent) ? "Reconnect" : request.Intent.Trim();
 
-                var members = await ResolveMembersAsync(signals, window, max);
+                var members = await ResolveMembersAsync(signals, window, max, request.CompanyName);
+                if (members.Count == 0)
+                    throw new ArgumentException("No one currently matches those signals. Try a wider window or different signals.", nameof(request.SignalFilters));
                 return await PersistBatchAsync(intent, OutreachChannel.Email, null, members);
             }
         }
@@ -196,7 +198,12 @@ namespace Servicess
                     throw new ArgumentException("No usable signals in the request.", nameof(intent.SignalFilters));
 
                 var channel = ParseChannel(intent.Channel);
-                var members = await ResolveMembersAsync(signals, Math.Clamp(intent.TimeWindowDays <= 0 ? 7 : intent.TimeWindowDays, 1, 60), 12);
+                var company = string.IsNullOrWhiteSpace(intent.CompanyName) ? null : intent.CompanyName.Trim();
+                if (signals.Contains("companyMembers") && company == null)
+                    company = await InferCompanyFromTextAsync(intent.IntentText);
+                var members = await ResolveMembersAsync(signals, Math.Clamp(intent.TimeWindowDays <= 0 ? 7 : intent.TimeWindowDays, 1, 60), 12, company);
+                if (members.Count == 0)
+                    throw new ArgumentException("No one currently matches those signals. Try a wider window or different signals.", nameof(intent.SignalFilters));
                 var text = string.IsNullOrWhiteSpace(intent.IntentText) ? "Reconnect" : intent.IntentText.Trim();
                 return await PersistBatchAsync(text, channel, text, members);
             }
@@ -219,7 +226,38 @@ namespace Servicess
             return $"{row.Band} — urgency {Math.Round(row.UrgencyScore)}. {rhythm}, now {silence}.";
         }
 
-        private async Task<List<(Guid PersonId, string Reason)>> ResolveMembersAsync(List<string> signals, int window, int max)
+        /// <summary>
+        /// Finds the user's organization named in free text by longest
+        /// case-insensitive match. Unknown names become a helpful error
+        /// listing real organizations — never a silent empty batch.
+        /// </summary>
+        private async Task<string?> InferCompanyFromTextAsync(string? text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+                return null;
+            var orgs = (await _persons.ListAffinitiesAsync())
+                .SelectMany(a => a.CircleNames)
+                .Where(c => !string.IsNullOrWhiteSpace(c))
+                .Select(c => c.Trim())
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderByDescending(c => c.Length)
+                .ToList();
+            return orgs.FirstOrDefault(o => text.Contains(o, StringComparison.OrdinalIgnoreCase));
+        }
+
+        private async Task<List<string>> UserOrganizationNamesAsync()
+        {
+            return (await _persons.ListAffinitiesAsync())
+                .SelectMany(a => a.CircleNames)
+                .Where(c => !string.IsNullOrWhiteSpace(c))
+                .Select(c => c.Trim())
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(c => c)
+                .ToList();
+        }
+
+        private async Task<List<(Guid PersonId, string Reason)>> ResolveMembersAsync(
+            List<string> signals, int window, int max, string? companyName = null)
         {
             var ownerId = OwnerId();
             var queue = await _scoring.GetQueueAsync(200);
@@ -300,6 +338,35 @@ namespace Servicess
                     {
                         if (skipped.Contains(personId)) continue;
                         Add(personId, $"Open commitment for {name}: {title}.");
+                    }
+                }
+                else if (signal == "companyMembers")
+                {
+                    // Organization members by exact identity (never substring),
+                    // ordered by urgency, with canonical state as the reason.
+                    var orgs = await UserOrganizationNamesAsync();
+                    var org = orgs.FirstOrDefault(o => string.Equals(o, (companyName ?? string.Empty).Trim(), StringComparison.OrdinalIgnoreCase));
+                    if (org == null)
+                    {
+                        var known = orgs.Count == 0 ? "no organizations yet" : string.Join(", ", orgs.Take(8));
+                        throw new ArgumentException(
+                            companyName == null
+                                ? $"Which organization? Your organizations: {known}."
+                                : $"Unknown organization '{companyName.Trim()}'. Your organizations: {known}.", nameof(companyName));
+                    }
+                    var states = queue.ToDictionary(q => q.PersonId);
+                    var memberIds = (await _persons.ListAffinitiesAsync())
+                        .Where(a => a.CircleNames.Any(c => string.Equals(c.Trim(), org, StringComparison.OrdinalIgnoreCase)))
+                        .Select(a => a.PersonId)
+                        .Distinct()
+                        .ToList();
+                    foreach (var id in memberIds
+                        .OrderByDescending(id => states.TryGetValue(id, out var s) ? s.UrgencyScore : -1))
+                    {
+                        if (skipped.Contains(id)) continue;
+                        Add(id, states.TryGetValue(id, out var row)
+                            ? $"Member of {org}. {QueueReason(row)}"
+                            : $"Member of {org}.");
                     }
                 }
 

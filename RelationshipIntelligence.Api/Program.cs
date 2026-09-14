@@ -77,19 +77,11 @@ builder.Services.AddScoped<AiProviderSettingsRepositoryContract, AiProviderSetti
 builder.Services.AddDataProtection();
 builder.Services.AddScoped<KernelFactory>();
 builder.Services.AddScoped<RelationshipPlugin>();
-var copilotMode = builder.Configuration["Copilot:Mode"];
-if (string.Equals(copilotMode, "Stub", StringComparison.OrdinalIgnoreCase))
-{
-    builder.Services.AddScoped<ICopilotService, StubCopilotService>();
-    builder.Services.AddScoped<IMeetingExtractor, StubMeetingExtractor>();
-    builder.Services.AddScoped<ICopilotAgent, StubCopilotAgent>();
-}
-else
-{
-    builder.Services.AddScoped<ICopilotService, CopilotService>();
-    builder.Services.AddScoped<IMeetingExtractor, MeetingExtractor>();
-    builder.Services.AddScoped<ICopilotAgent, CopilotAgent>();
-}
+// Single production AI path: the LLM agent with tools. There is no
+// legacy/non-LLM agent and no mode switch.
+builder.Services.AddScoped<ICopilotService, CopilotService>();
+builder.Services.AddScoped<IMeetingExtractor, MeetingExtractor>();
+builder.Services.AddScoped<ICopilotAgent, CopilotAgent>();
 builder.Services.AddSingleton<IAgentSessionStore, AgentSessionStore>();
 builder.Services.AddScoped<RelationshipQueryPlugin>();
 builder.Services.AddScoped<PlanningPlugin>();

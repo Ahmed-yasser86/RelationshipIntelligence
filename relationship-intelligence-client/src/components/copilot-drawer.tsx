@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { EvidenceChip } from "@/components/evidence-chip";
+import { AssistantMarkdown } from "@/components/markdown";
 import { ApiError, api } from "@/lib/api";
 import { useCopilot } from "@/lib/copilot";
 import type { AiProviderSettings, ChatTurn } from "@/lib/types";
@@ -356,7 +357,11 @@ export function CopilotDrawer() {
             {m.role === "assistant" && (
               <EvidenceChip kind="suggested" label="Assistant" className="self-start" title="AI interpretation over your data — observed facts, derived scores, and suggestions are labeled inside" />
             )}
-            <p className="whitespace-pre-wrap">{m.text}</p>
+            {m.role === "assistant" ? (
+              <AssistantMarkdown text={m.text} />
+            ) : (
+              <p className="whitespace-pre-wrap">{m.text}</p>
+            )}
             {(m.activity ?? []).length > 0 && (
               <p className="text-[11px] text-muted-foreground" title="What the assistant checked — activity states, not reasoning">
                 Checked: {(m.activity ?? []).join(" · ")}

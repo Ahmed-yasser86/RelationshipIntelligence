@@ -290,7 +290,7 @@ namespace CRUDTests
         }
 
         [Fact]
-        public async Task Process_WithStubExtractor_SucceedsEndToEnd()
+        public async Task Process_WithExtractor_SucceedsEndToEnd()
         {
             ArrangeStore();
             var salmaId = Guid.NewGuid();
@@ -300,26 +300,25 @@ namespace CRUDTests
             }.AsEnumerable());
             _memoryMock.Setup(m => m.ListForPersonAsync(It.IsAny<Guid>()))
                 .ReturnsAsync(new List<ServiceContracts.DTOs.MemoryDTOs.MemoryEntryResponse>());
+            _extractorMock.Setup(e => e.ExtractAsync(It.IsAny<MeetingExtractionInput>()))
+                .ReturnsAsync(new MeetingExtraction
+                {
+                    Summary = "Salma El-Sayed joined.",
+                    Topics = new List<string>(),
+                    Decisions = new List<string>(),
+                    Findings = new List<ExtractedFinding>
+                    {
+                        new() { Kind = FindingKind.Commitment, Title = "She will send the notes.", PersonName = "Salma El-Sayed", SourceExcerpt = "She will send the notes." }
+                    },
+                    DetectedPeople = new List<string> { "Salma El-Sayed" }
+                });
 
             var meeting = CreatePrep();
             meeting.Status = MeetingStatus.Draft;
             meeting.RawNotes = "Salma El-Sayed joined. She will send the notes.";
             _store.Add(meeting);
 
-            var service = new MeetingService(
-                _meetingsMock.Object,
-                _memoryRepoMock.Object,
-                _personsMock.Object,
-                _interactionsMock.Object,
-                _memoryMock.Object,
-                _eventsMock.Object,
-                _scoringMock.Object,
-                new RelationshipIntelligence.AI.StubMeetingExtractor(),
-                _uowMock.Object,
-                _userMock.Object,
-                Mock.Of<ILogger<MeetingService>>());
-
-            var result = await service.ProcessAsync(meeting.MeetingId);
+            var result = await Service().ProcessAsync(meeting.MeetingId);
 
             result.Status.Should().Be(MeetingStatus.Processed);
             result.People.Should().ContainSingle(p => p.DetectedName == "Salma El-Sayed");

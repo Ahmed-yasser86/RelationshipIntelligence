@@ -7,6 +7,7 @@ using Moq;
 using Repositories;
 using RepositryContracts;
 using ServiceContracts;
+using ServiceContracts.DTOs.MeetingDTOs;
 using Servicess;
 using System;
 using System.Collections.Generic;
@@ -101,11 +102,24 @@ namespace CRUDTests
             var eventsService = new EventService(
                 Mock.Of<RelationshipEventRepositoryContract>(), personsMock.Object, uow, userMock.Object,
                 Mock.Of<ILogger<EventService>>());
+            var extractorMock = new Mock<IMeetingExtractor>();
+            extractorMock.Setup(e => e.ExtractAsync(It.IsAny<MeetingExtractionInput>()))
+                .ReturnsAsync(new MeetingExtraction
+                {
+                    Summary = "Salma El-Sayed joined.",
+                    Topics = new List<string>(),
+                    Decisions = new List<string>(),
+                    Findings = new List<ExtractedFinding>
+                    {
+                        new() { Kind = FindingKind.Commitment, Title = "She will send the notes.", PersonName = "Salma El-Sayed", SourceExcerpt = "She will send the notes." }
+                    },
+                    DetectedPeople = new List<string> { "Salma El-Sayed" }
+                });
             return new MeetingService(
                 meetings, memoryRepo, personsMock.Object,
                 Mock.Of<IInteractionService>(), memoryService, eventsService,
                 Mock.Of<IRelationshipScoringService>(),
-                new RelationshipIntelligence.AI.StubMeetingExtractor(),
+                extractorMock.Object,
                 uow, userMock.Object, Mock.Of<ILogger<MeetingService>>());
         }
 

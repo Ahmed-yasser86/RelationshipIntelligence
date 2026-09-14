@@ -7,7 +7,37 @@ test.describe("co-pilot", () => {
     await expectSignedIn(page);
   });
 
-  test("provider settings save without ever revealing the key", async ({ page }) => {
+  test("provider settings save without ever revealing the key", async ({ page, request }) => {
+    // Isolated user: saving a fake key here must never clobber shared
+    // credentials used by every other test.
+    const stamp = Date.now();
+    const email = `e2e-settings-${stamp}@example.com`;
+    const reg = await request.post(`${API_URL}/api/Account/PostRegister`, {
+      data: {
+        PersonName: "E2E Settings",
+        Email: email,
+        Phone: "01000000000",
+        Password: "Test123!",
+        ConfirmPassword: "Test123!",
+        UserType: 0,
+      },
+    });
+    expect(reg.ok()).toBeTruthy();
+    const login = await request.post(`${API_URL}/api/Account/PostLogin`, {
+      data: { Email: email, Password: "Test123!" },
+    });
+    const body = await login.json();
+    await page.goto("/");
+    await page.evaluate(
+      ([token, mail]) => {
+        localStorage.setItem("ri.token", token);
+        localStorage.setItem("ri.email", mail);
+        localStorage.setItem("ri.onboarded", "1");
+      },
+      [body.token as string, email],
+    );
+    await page.reload();
+    await expect(page.getByRole("heading", { name: "Today", exact: true })).toBeVisible();
     await page.getByRole("button", { name: "Ask co-pilot" }).click();
     await page.getByRole("button", { name: "Setup" }).click();
     await page.getByLabel("Model").fill("gemini-3.1-flash-lite");
@@ -21,7 +51,9 @@ test.describe("co-pilot", () => {
     await page.getByRole("button", { name: "Ask co-pilot" }).click();
     await page.getByLabel("Ask the co-pilot").fill("Who is losing touch right now?");
     await page.getByRole("button", { name: "Send", exact: true }).click();
-    await expect(page.getByText(/deserving attention now/i).first()).toBeVisible();
+    // Behavior contract across modes: real relationship signals, evidence
+    // on demand, and a path into the queue — never raw internal records.
+    await expect(page.getByText(/urgency|drifting|critical|at risk|silence/i).first()).toBeVisible({ timeout: 60_000 });
     await expect(page.getByText(/Why\? Show evidence/i).first()).toBeVisible();
     await expect(page.getByRole("button", { name: "Open attention queue" })).toBeVisible();
   });
@@ -37,7 +69,8 @@ test.describe("co-pilot", () => {
     await expect(page.getByRole("link", { name: "Salma El-Sayed" })).toBeVisible();
     await page.getByLabel("Ask the co-pilot").fill("Why does that matter?");
     await page.getByRole("button", { name: "Send", exact: true }).click();
-    await expect(page.getByText(/Salma El-Sayed.*(urgency|rhythm|silence)/i).first()).toBeVisible();
+    await expect(page.getByText(/Salma El-Sayed/i).first()).toBeVisible();
+    await expect(page.getByText(/urgency|rhythm|silence/i).first()).toBeVisible();
   });
 
   test("unknown people get honesty, not invention", async ({ page }) => {

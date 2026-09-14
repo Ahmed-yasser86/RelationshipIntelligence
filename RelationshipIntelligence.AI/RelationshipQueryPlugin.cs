@@ -31,6 +31,7 @@ namespace RelationshipIntelligence.AI
         private readonly IPersonSearcherService _searcher;
         private readonly IPersonGetterService _persons;
         private readonly IMeetingService _meetings;
+        private readonly IDigestService _digest;
 
         public RelationshipQueryPlugin(
             IRelationshipScoringService scoring,
@@ -40,7 +41,8 @@ namespace RelationshipIntelligence.AI
             INetworkAnalysisService network,
             IPersonSearcherService searcher,
             IPersonGetterService persons,
-            IMeetingService meetings)
+            IMeetingService meetings,
+            IDigestService digest)
         {
             _scoring = scoring;
             _interactions = interactions;
@@ -50,6 +52,7 @@ namespace RelationshipIntelligence.AI
             _searcher = searcher;
             _persons = persons;
             _meetings = meetings;
+            _digest = digest;
         }
 
         private static Guid? ParseId(string value) =>
@@ -443,6 +446,73 @@ namespace RelationshipIntelligence.AI
                 snapshots = history,
                 note = "Band and urgency reflect the latest recomputation; snapshots show the path."
             }, Json);
+        }
+
+        [KernelFunction, Description("Get the weekly digest: relationships to protect with suggestions and network health. Deterministic. Read-only.")]
+        public async Task<string> GetDigestAsync()
+        {
+            var payload = await _digest.BuildAsync(string.Empty);
+            return JsonSerializer.Serialize(new
+            {
+                weekStartUtc = payload.WeekStartUtc,
+                networkHealth = payload.NetworkHealth,
+                entries = payload.Entries.Select(e => new
+                {
+                    personId = e.Health.PersonId,
+                    personName = e.Health.Name,
+                    band = e.Health.Band,
+                    urgency = Math.Round(e.Health.UrgencyScore),
+                    e.Suggestion
+                })
+            }, Json);
+        }
+
+        [KernelFunction, Description("Get unapproved AI proposals awaiting review: suggested memory entries and suggested meeting findings. Nothing here is durable truth. Read-only.")]
+        public async Task<string> GetPendingReviewAsync()
+        {
+            var suggestions = new List<object>();
+            var people = await _persons.GetAllPersons();
+            foreach (var person in people.Where(p => p != null).Take(200))
+            {
+                List<ServiceContracts.DTOs.MemoryDTOs.MemoryEntryResponse> entries;
+                try
+                {
+                    entries = await _memory.ListForPersonAsync(person!.PersonId);
+                }
+                catch (KeyNotFoundException)
+                {
+                    continue;
+                }
+                foreach (var entry in entries
+                    .Where(e => e.Status == 0 && e.Provenance == Entities.MemoryProvenance.AiSuggested)
+                    .Take(5))
+                    suggestions.Add(new
+                    {
+                        type = "memory",
+                        person = person!.Name,
+                        personId = person.PersonId,
+                        kind = entry.Kind.ToString(),
+                        entry.Title
+                    });
+                if (suggestions.Count >= 30) break;
+            }
+            var meetings = await _meetings.ListAsync();
+            foreach (var meeting in meetings.Take(50))
+            {
+                foreach (var finding in meeting.Findings
+                    .Where(f => f.Status == Entities.FindingStatus.Suggested)
+                    .Take(5))
+                    suggestions.Add(new
+                    {
+                        type = "meeting",
+                        person = finding.MappedPersonName,
+                        personId = finding.MappedPersonId,
+                        kind = finding.Kind.ToString(),
+                        title = finding.Title
+                    });
+                if (suggestions.Count >= 50) break;
+            }
+            return JsonSerializer.Serialize(suggestions, Json);
         }
     }
 }

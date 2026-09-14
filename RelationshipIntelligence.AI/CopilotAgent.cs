@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
+using Servicess;
 using ServiceContracts;
 using ServiceContracts.DTOs.AgentDTOs;
 using ServiceContracts.DTOs.CopilotDTOs;
@@ -38,6 +39,7 @@ namespace RelationshipIntelligence.AI
         private readonly ActionPlugin _actions;
         private readonly IRelationshipScoringService _scoring;
         private readonly IPersonGetterService _persons;
+        private readonly ICopilotService _copilot;
         private readonly IOutreachService _outreach;
         private readonly IMeetingService _meetings;
         private readonly ILogger<CopilotAgent> _logger;
@@ -51,6 +53,7 @@ namespace RelationshipIntelligence.AI
             ActionPlugin actions,
             IRelationshipScoringService scoring,
             IPersonGetterService persons,
+            ICopilotService copilot,
             IOutreachService outreach,
             IMeetingService meetings,
             ILogger<CopilotAgent> logger)
@@ -63,6 +66,7 @@ namespace RelationshipIntelligence.AI
             _actions = actions;
             _scoring = scoring;
             _persons = persons;
+            _copilot = copilot;
             _outreach = outreach;
             _meetings = meetings;
             _logger = logger;
@@ -89,12 +93,79 @@ namespace RelationshipIntelligence.AI
             // then skips name extraction because the focus is already resolved.
             AdoptPendingChoice(session, request.Message.Trim());
 
+            // One-word confirmations for a proposed log execute immediately;
+            // anything else that is not more detail releases the proposal so a
+            // later "yes" can never record something abandoned.
+            if (session.PendingLog != null)
+            {
+                var verdict = ClassifyLogReply(request.Message, session.PendingLog);
+                if (verdict == LogReply.Confirm)
+                {
+                    var pending = session.PendingLog;
+                    session.PendingLog = null;
+                    var response0 = new AgentResponse { SessionId = session.SessionId };
+                    try
+                    {
+                        var outcome = await _actions.LogInteractionAsync(
+                            pending.PersonId.ToString(), pending.Type, pending.Title, true);
+                        using var doc = JsonDocument.Parse(outcome);
+                        if (doc.RootElement.TryGetProperty("error", out _))
+                        {
+                            response0.Text = "I couldn't record that — " +
+                                (doc.RootElement.GetProperty("error").GetString() ?? "unknown validation problem.");
+                        }
+                        else
+                        {
+                            var who = await _persons.GetPersonByPersonId(pending.PersonId);
+                            response0.Text = $"Logged a {pending.Type} with {who?.Name ?? "your contact"}: \"{pending.Title}\".";
+                            response0.Actions.Add(new AgentAction { Kind = "open", Label = "Open relationship", Payload = pending.PersonId.ToString() });
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Confirmed interaction log failed");
+                        response0.Text = "I couldn't record that. Nothing was saved — tell me again and I'll retry.";
+                    }
+                    await _sessions.SaveAsync(ownerId, session);
+                    response0.WorkingState = await WorkingStateAsync(session);
+                    return response0;
+                }
+                if (verdict == LogReply.Discard)
+                    session.PendingLog = null;
+                else if (verdict == LogReply.Detail)
+                {
+                    var person = await _persons.GetPersonByPersonId(session.PendingLog.PersonId);
+                    var updated = ProposeLog(session.PendingLog.PersonId, person?.Name ?? "contact", request.Message);
+                    if (updated != null)
+                        session.PendingLog = updated;
+                }
+                else
+                    session.PendingLog = null;
+            }
+
             var kernel = await _kernels.CreateAsync();
             kernel.Plugins.AddFromObject(_query, "relationships");
             kernel.Plugins.AddFromObject(_planning, "planning");
             kernel.Plugins.AddFromObject(_actions, "actions");
 
             var goal = await ClassifyAsync(kernel, session, request);
+            // The classifier is advisory: greet/act/meeting/multistep route as
+            // classified, but any other label with strong flow verbs still
+            // reaches its flow instead of dissolving into chat.
+            if (!string.Equals(goal.Goal, "greet", StringComparison.OrdinalIgnoreCase) &&
+                !string.Equals(goal.Goal, "act", StringComparison.OrdinalIgnoreCase) &&
+                !string.Equals(goal.Goal, "meeting", StringComparison.OrdinalIgnoreCase) &&
+                !string.Equals(goal.Goal, "multistep", StringComparison.OrdinalIgnoreCase))
+            {
+                var fallback = FallbackGoal(request.Message, session.BatchId != null);
+                if (!string.Equals(fallback, "unknown", StringComparison.OrdinalIgnoreCase))
+                    goal.Goal = fallback;
+            }
+            // A lone batch verb ("approve", "continue") inside an open batch is
+            // a refinement, not a cold action: never bounce it to confirmation.
+            if (session.BatchId != null && string.Equals(goal.Goal, "act", StringComparison.OrdinalIgnoreCase) &&
+                !goal.IsExplicitInstruction && IsBatchVerb(request.Message))
+                goal.Goal = "multistep";
             var response = new AgentResponse { SessionId = session.SessionId };
 
             if (goal.SwitchDirection && session.CurrentTask != null)
@@ -102,6 +173,8 @@ namespace RelationshipIntelligence.AI
                 response.Text += $"Switching from {DescribeTask(session)} to your new request. Anything not yet approved stays undone. ";
                 session.CurrentTask = null;
                 session.PendingApprovals.Clear();
+                session.BatchId = null;
+                session.SelectedPersonIds.Clear();
             }
 
             switch (goal.Goal)
@@ -146,6 +219,103 @@ namespace RelationshipIntelligence.AI
 
         private static string DescribeTask(AgentSession session) =>
             string.IsNullOrWhiteSpace(session.CurrentTask) ? "the previous task" : session.CurrentTask;
+
+        private enum LogReply { Confirm, Discard, Detail, Other }
+
+        private static LogReply ClassifyLogReply(string message, PendingLogProposal _)
+        {
+            var lower = message.ToLowerInvariant();
+            if (lower.Contains("forget") || lower.Contains("no ") || lower == "no" ||
+                lower.Contains("cancel") || lower.Contains("never mind") || lower.Contains("drop it"))
+                return LogReply.Discard;
+            if (System.Text.RegularExpressions.Regex.IsMatch(lower,
+                @"\b(yes|yeah|yep|confirm|do it|record it|log it|ok|okay|sure|please do|go ahead)\b"))
+                return LogReply.Confirm;
+            if (lower.Contains("title") || lower.Contains("call") || lower.Contains("email") ||
+                lower.Contains("meeting") || lower.Contains("message") || lower.Contains("text") ||
+                lower.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries).Length > 3)
+                return LogReply.Detail;
+            return LogReply.Other;
+        }
+
+        /// <summary>
+        /// Builds a concrete log proposal from the user's own words: detects
+        /// the type and shapes the rest into a title. Returns null when there
+        /// is not enough to propose, in which case the agent asks once.
+        /// </summary>
+        private static PendingLogProposal? ProposeLog(Guid personId, string name, string message)
+        {
+            var lower = message.ToLowerInvariant();
+            string? type = null;
+            if (lower.Contains("call") || lower.Contains("phone") || lower.Contains("rang") ||
+                lower.Contains("called") || lower.Contains("spoke") || lower.Contains("talked"))
+                type = "Call";
+            else if (lower.Contains("email") || lower.Contains("e-mail") || lower.Contains("mailed"))
+                type = "Email";
+            else if (lower.Contains("meeting") || lower.Contains("met with") || lower.Contains("sat down"))
+                type = "Meeting";
+            else if (lower.Contains("message") || lower.Contains("text") || lower.Contains("whatsapp") ||
+                lower.Contains("sms") || lower.Contains("chatted") || lower.Contains("chat"))
+                type = "Message";
+            if (type == null)
+                return null;
+
+            // Cut the intent preamble through the person's name: everything
+            // before it is instruction ("log an interaction for Salma"),
+            // everything after is the content to record.
+            var title = message.Trim();
+            var nameIdx = title.IndexOf(name, StringComparison.OrdinalIgnoreCase);
+            if (!string.IsNullOrWhiteSpace(name) && nameIdx >= 0)
+                title = title[(nameIdx + name.Length)..];
+            else
+                title = System.Text.RegularExpressions.Regex.Replace(title,
+                    @"^(please\s+)?(log|add|record)\s+(a\s+|an\s+|this\s+|that\s+)?", "",
+                    System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            foreach (var filler in new[] { type, "about", "that", "for me", "with me", "please", "today's", "today", "yesterday" })
+            {
+                if (string.IsNullOrWhiteSpace(filler))
+                    continue;
+                title = System.Text.RegularExpressions.Regex.Replace(title,
+                    @"\b" + System.Text.RegularExpressions.Regex.Escape(filler.Trim()) + @"\b", "",
+                    System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            }
+            title = System.Text.RegularExpressions.Regex.Replace(title.Trim(), @"\s+", " ").Trim(' ', ',', '.', '!', '?', '"', '\'');
+            title = System.Text.RegularExpressions.Regex.Replace(title, @"\s+(in|on|at|for|with|to|of)$", "",
+                System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            if (title.Length == 0)
+                return null;
+            if (title.Length > 100)
+                title = title[..100].Trim();
+            return new PendingLogProposal { PersonId = personId, Type = type, Title = title };
+        }
+
+        private static string FallbackGoal(string message, bool batchActive = false)
+        {
+            var lower = message.ToLowerInvariant();
+            if (lower.Contains("meeting") && (lower.Contains("prepare") || lower.Contains("tomorrow") || lower.Contains("plan")))
+                return "meeting";
+            if (lower.Contains("prepare") || lower.Contains("draft") || lower.Contains("outreach") ||
+                lower.Contains("reconnect") || lower.Contains("follow up with") || lower.Contains("contact them") ||
+                ((lower.Contains("message") || lower.Contains("email") || lower.Contains("batch")) &&
+                 (lower.Contains("everyone") || lower.Contains("all") || lower.Contains("week") || lower.Contains("neglect"))))
+                return "multistep";
+            // Mid-flow refinements ("use LinkedIn", "approve", "continue")
+            // belong to the open batch even when the classifier abstains.
+            if (batchActive && (lower.Contains("linkedin") || lower.Contains("channel") ||
+                lower.Contains("approve") || lower.Contains("continue") || lower.Contains("remove") ||
+                lower.Contains("generate") || lower.Contains("settings")))
+                return "multistep";
+            return "unknown";
+        }
+
+        private static bool IsBatchVerb(string message)
+        {
+            var lower = message.ToLowerInvariant();
+            return lower.Contains("approve") || lower.Contains("continue") || lower.Contains("generate") ||
+                lower.Contains("prepare") || lower.Contains("channel") || lower.Contains("remove") ||
+                lower.Contains("settings") || lower.Contains("draft") || lower.Contains("linkedin") ||
+                lower.Contains("email") || lower.Contains("text message") || lower.Contains("call prep");
+        }
 
         private sealed class GoalClassification
         {
@@ -350,7 +520,7 @@ namespace RelationshipIntelligence.AI
             catch (Exception ex)
             {
                 _logger.LogWarning(ex, "Agent conversational call failed");
-                throw new CopilotUnavailableException("The assistant could not reach the language model.", ex);
+                throw CopilotErrors.FromModelFailure(ex);
             }
 
             if (string.IsNullOrWhiteSpace(text))
@@ -361,12 +531,58 @@ namespace RelationshipIntelligence.AI
             {
                 var person = await _persons.GetPersonByPersonId(session.PersonId);
                 response.Citations.Add(new CopilotCitation { Kind = "person", Id = session.PersonId, Label = person?.Name ?? "contact" });
+                // Deterministic evidence behind the answer: canonical state for
+                // the person in focus, so the drawer always has something to show.
+                try
+                {
+                    var queue = await _scoring.GetQueueAsync(200);
+                    var state = queue.FirstOrDefault(q => q.PersonId == session.PersonId);
+                    response.Evidence.Add(new AgentEvidence
+                    {
+                        Title = person?.Name ?? "contact",
+                        Detail = state == null
+                            ? "No ranked state — too little history to score."
+                            : $"Band {state.Band}, urgency {Math.Round(state.UrgencyScore)}, " +
+                              $"{state.InteractionCount} interactions" +
+                              (state.LastContactAtUtc == null ? ", no contact recorded."
+                              : $", quiet {TieDecayModel.SilenceDays(state.LastContactAtUtc, DateTime.UtcNow)}d."),
+                        Kind = "derived",
+                        RefId = session.PersonId,
+                        RefKind = "person"
+                    });
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogDebug(ex, "Evidence enrichment skipped for person {PersonId}", session.PersonId);
+                }
                 response.Actions.Add(new AgentAction { Kind = "open", Label = "Open relationship", Payload = session.PersonId.ToString() });
                 response.Actions.Add(new AgentAction { Kind = "log", Label = "Log interaction", Payload = session.PersonId.ToString() });
                 response.Actions.Add(new AgentAction { Kind = "explain", Label = "Explain score", Payload = session.PersonId.ToString() });
             }
             else
             {
+                // Queue-level evidence for unfocused answers so "Why?" always
+                // has something truthful to open.
+                try
+                {
+                    var queue = await _scoring.GetQueueAsync(3);
+                    foreach (var q in queue)
+                    {
+                        response.Evidence.Add(new AgentEvidence
+                        {
+                            Title = q.Name,
+                            Detail = $"Band {q.Band}, urgency {Math.Round(q.UrgencyScore)}, {q.InteractionCount} interactions.",
+                            Kind = "derived",
+                            RefId = q.PersonId,
+                            RefKind = "person"
+                        });
+                        response.Citations.Add(new CopilotCitation { Kind = "person", Id = q.PersonId, Label = q.Name });
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogDebug(ex, "Queue evidence enrichment skipped.");
+                }
                 response.Actions.Add(new AgentAction { Kind = "open-queue", Label = "Open attention queue" });
             }
         }
@@ -414,8 +630,21 @@ namespace RelationshipIntelligence.AI
             switch (goal.ActionVerb)
             {
                 case "log":
-                    response.Text += $"Ready to log an interaction with {name}. Tell me the type and what it was about — for example \"log a call about the proposal\" — and I'll record it.";
-                    session.PendingApprovals.Add("log:" + session.PersonId);
+                    var proposal = ProposeLog(session.PersonId.Value, name, request.Message);
+                    if (proposal != null)
+                    {
+                        session.PendingLog = proposal;
+                        response.Text += $"I'll log a {proposal.Type} with {name} titled \"{proposal.Title}\". Say yes and I'll record it.";
+                        response.NeedsInput = new AgentClarification
+                        {
+                            Prompt = "Record this interaction?",
+                            Options = new List<string> { "Yes, log it", "No, forget it" }
+                        };
+                    }
+                    else
+                    {
+                        response.Text += $"Ready to log an interaction with {name}. Tell me the type and what it was about — for example \"log a call about the proposal\" — and I'll record it.";
+                    }
                     response.Actions.Add(new AgentAction { Kind = "log", Label = $"Log interaction with {name}", Payload = session.PersonId.ToString() });
                     break;
                 case "create-event":
@@ -479,7 +708,7 @@ namespace RelationshipIntelligence.AI
 
             if (session.BatchId == null)
             {
-                var parsed = OutreachIntentMatcher.Match(message);
+                var parsed = await _copilot.ParseOutreachIntentAsync(message);
                 if (parsed.NeedsClarification)
                 {
                     response.Text += parsed.ClarificationPrompt ?? "Tell me who you want to reach.";
@@ -488,13 +717,23 @@ namespace RelationshipIntelligence.AI
                     return;
                 }
 
-                var batch = await _outreach.BuildFromSignalsAsync(new ServiceContracts.DTOs.OutreachDTOs.BuildBatchFromSignalsRequest
+                ServiceContracts.DTOs.OutreachDTOs.OutreachBatchResponse batch;
+                try
                 {
-                    SignalFilters = parsed.SignalFilters,
-                    TimeWindowDays = parsed.TimeWindowDays,
-                    MaxMembers = 12,
-                    Intent = string.IsNullOrWhiteSpace(parsed.IntentText) ? "Reconnect" : parsed.IntentText
-                });
+                    batch = await _outreach.BuildFromSignalsAsync(new ServiceContracts.DTOs.OutreachDTOs.BuildBatchFromSignalsRequest
+                    {
+                        SignalFilters = parsed.SignalFilters,
+                        TimeWindowDays = parsed.TimeWindowDays,
+                        MaxMembers = 12,
+                        Intent = string.IsNullOrWhiteSpace(parsed.IntentText) ? "Reconnect" : parsed.IntentText,
+                        CompanyName = parsed.CompanyName
+                    });
+                }
+                catch (ArgumentException ex)
+                {
+                    response.Text += ex.Message;
+                    return;
+                }
                 session.BatchId = batch.OutreachBatchId;
                 session.CurrentTask = "outreach";
                 session.SelectedPersonIds.Clear();

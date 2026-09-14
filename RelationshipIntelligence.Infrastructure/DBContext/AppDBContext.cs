@@ -361,7 +361,11 @@ namespace Entities
                 }
             );
 
-            // pass is test@123456
+            // NOTE: this seed hash no longer matches any known password (it was
+            // historically documented as test@123456). The e2e suite uses
+            // Test123! (see relationship-intelligence-client/tests/e2e/helpers.ts).
+            // Do not "fix" by editing the hash here: rotating the seed password
+            // requires a migration + updating every e2e consumer at once.
             modelBuilder.Entity<Microsoft.AspNetCore.Identity.IdentityUserRole<Guid>>().HasData(
                 new Microsoft.AspNetCore.Identity.IdentityUserRole<Guid>
                 {

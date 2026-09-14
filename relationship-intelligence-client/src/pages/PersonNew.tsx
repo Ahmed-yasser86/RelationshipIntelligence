@@ -119,13 +119,20 @@ export function PersonNew() {
       const batch = await submitAndProcess(IngestionSources.PersonText, pasted.trim());
       navigate(`/found?batch=${batch.ingestionBatchId}`);
     } catch (err) {
-      setPastedError(
-        err instanceof ApiError
-          ? err.status === 503 || err.status === 409
-            ? `The assistant could not process the text (${err.body || err.message}). Check co-pilot settings and try again.`
-            : err.body || err.message
-          : "Could not process the text.",
-      );
+      if (err instanceof ApiError && err.status === 503) {
+        // Provider-side outage (see api log "Ingestion extraction model call
+        // failed"): the batch is already saved, so send the user to review it
+        // — processing can be retried from /found once the provider recovers.
+        navigate(`/found`);
+      } else {
+        setPastedError(
+          err instanceof ApiError
+            ? err.status === 409
+              ? `The assistant could not process the text (${err.body || err.message}). Check co-pilot settings and try again.`
+              : err.body || err.message
+            : "Could not process the text.",
+        );
+      }
     } finally {
       setBusy(false);
     }

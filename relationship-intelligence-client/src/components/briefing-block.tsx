@@ -36,7 +36,7 @@ export function BriefingBlock() {
     let cancelled = false;
     (async () => {
       try {
-        const payload = await api.post<BriefingPayload>("/api/Copilot/PostBriefing");
+        const payload = await api.post<BriefingPayload>("/api/Copilot/PostBriefing", {});
         if (cancelled) return;
         setBriefing(payload);
         try {
@@ -60,7 +60,7 @@ export function BriefingBlock() {
     setLoading(true);
     setError(null);
     try {
-      const payload = await api.post<BriefingPayload>("/api/Copilot/PostBriefing");
+      const payload = await api.post<BriefingPayload>("/api/Copilot/PostBriefing", {});
       setBriefing(payload);
       try {
         localStorage.setItem(CACHE_KEY, JSON.stringify({ at: Date.now(), payload } satisfies Cached));

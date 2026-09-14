@@ -231,13 +231,13 @@ export function ReminderCard({ personId, personName }: { personId: string; perso
             )}
           </p>
           <div className="mt-2 flex flex-wrap gap-1.5">
-            <Button size="sm" variant="outline" disabled={busy} onClick={() => void run(() => api.post<RelationshipPreference>(`/api/Preference/PostSnooze?personId=${personId}&days=7`), "Snoozed for 7 days.")}>
+            <Button size="sm" variant="outline" disabled={busy} onClick={() => void run(() => api.post<RelationshipPreference>(`/api/Preference/PostSnooze?personId=${personId}&days=7`, {}), "Snoozed for 7 days.")}>
               Snooze 7d
             </Button>
-            <Button size="sm" variant="outline" disabled={busy} onClick={() => void run(() => api.post<RelationshipPreference>(`/api/Preference/PostSkip?personId=${personId}`), "Skipped this round.")}>
+            <Button size="sm" variant="outline" disabled={busy} onClick={() => void run(() => api.post<RelationshipPreference>(`/api/Preference/PostSkip?personId=${personId}`, {}), "Skipped this round.")}>
               Skip
             </Button>
-            <Button size="sm" variant="outline" disabled={busy} onClick={() => void run(() => api.post<RelationshipPreference>(`/api/Preference/PostComplete?personId=${personId}`), "Marked done — log a real interaction separately if you connected.")}>
+            <Button size="sm" variant="outline" disabled={busy} onClick={() => void run(() => api.post<RelationshipPreference>(`/api/Preference/PostComplete?personId=${personId}`, {}), "Marked done — log a real interaction separately if you connected.")}>
               Done
             </Button>
             <Button size="sm" variant="ghost" disabled={busy} onClick={() => void run(() => api.del<RelationshipPreference>(`/api/Preference/DeleteReminder?personId=${personId}`), "Reminder turned off.")}>

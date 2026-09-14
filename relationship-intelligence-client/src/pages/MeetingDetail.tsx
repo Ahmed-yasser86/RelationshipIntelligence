@@ -349,9 +349,11 @@ export function MeetingDetail() {
                   try {
                     const batch = await api.post<{ ingestionBatchId: string }>(
                       `/api/Ingestion/PostSubmitForMeeting?meetingId=${meeting.meetingId}`,
+                      {},
                     );
                     const processed = await api.post<{ ingestionBatchId: string }>(
                       `/api/Ingestion/PostProcess?id=${batch.ingestionBatchId}`,
+                      {},
                     );
                     navigate(`/found?batch=${processed.ingestionBatchId}`);
                   } catch (err) {

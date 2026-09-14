@@ -29,7 +29,14 @@ export function sourceHint(sourceType: number): string {
   }
 }
 
-/** Submit raw text, then run extraction. Returns the processed batch. */
+/**
+ * Submit raw text, then run extraction. Returns the processed batch.
+ * NOTE: every POST here must carry a JSON body (even `{}`): the API
+ * has a global Consumes("application/json") filter, so a bodyless POST is
+ * rejected with 415 before it ever reaches the controller.
+ */
+const EMPTY_JSON = {};
+
 export async function submitAndProcess(
   sourceType: number,
   rawText: string,
@@ -40,13 +47,20 @@ export async function submitAndProcess(
     RawText: rawText,
     SourceMeetingId: sourceMeetingId ?? null,
   });
-  return api.post<IngestionBatch>(`/api/Ingestion/PostProcess?id=${batch.ingestionBatchId}`);
+  return api.post<IngestionBatch>(
+    `/api/Ingestion/PostProcess?id=${batch.ingestionBatchId}`,
+    EMPTY_JSON,
+  );
 }
 
 /** Submit a meeting's actual content server-side (transcript + notes only). */
 export async function submitMeetingForReview(meetingId: string): Promise<IngestionBatch> {
   const batch = await api.post<IngestionBatch>(
     `/api/Ingestion/PostSubmitForMeeting?meetingId=${meetingId}`,
+    EMPTY_JSON,
   );
-  return api.post<IngestionBatch>(`/api/Ingestion/PostProcess?id=${batch.ingestionBatchId}`);
+  return api.post<IngestionBatch>(
+    `/api/Ingestion/PostProcess?id=${batch.ingestionBatchId}`,
+    EMPTY_JSON,
+  );
 }

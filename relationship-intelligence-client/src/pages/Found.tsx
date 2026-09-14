@@ -426,6 +426,7 @@ export function Found() {
     try {
       const result = await api.post<IngestionApplyResult>(
         `/api/Ingestion/PostApproveBatch?id=${selected.ingestionBatchId}`,
+        {},
       );
       setApplyResult(result);
       await loadBatch(selected.ingestionBatchId);

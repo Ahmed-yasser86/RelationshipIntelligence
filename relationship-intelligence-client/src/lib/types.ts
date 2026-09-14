@@ -297,6 +297,8 @@ export interface RelationshipHealth {
   interactionCount: number;
   evidenceStatus: string;
   cadenceReferenceDays: number | null;
+  desiredCadenceDays?: number | null;
+  keepInTouchIntentionally?: boolean;
   silenceQuantile: number | null;
   urgencyScore: number;
   band: string;
@@ -355,3 +357,95 @@ export interface CountryResponse {
 }
 
 export const InteractionTypes = ["Call", "Email", "Meeting", "Message"] as const;
+
+// Unified ingestion ("Things I Found"). Wire format is camelCase; finding
+// state fields arrive as strings, sourceType as a number.
+export const IngestionSourceTypes = ["PersonText", "ConversationUpdate", "GroupText", "MeetingText"] as const;
+
+export interface ResolutionCandidate {
+  personId: string | null;
+  name: string;
+  organization: string | null;
+  role: string | null;
+  evidence: string | null;
+  isNew: boolean;
+}
+
+export interface IngestionFinding {
+  ingestionFindingId: string;
+  ingestionBatchId: string;
+  subjectPersonId: string | null;
+  subjectPersonName: string | null;
+  subjectIsNew: boolean;
+  subjectName: string | null;
+  objectName: string | null;
+  objectOrg: string | null;
+  relationKind: string | null;
+  targetField: string | null;
+  memoryKind: string | null;
+  eventKind: string | null;
+  title: string;
+  detail: string | null;
+  sourceExcerpt: string | null;
+  confidence: string;
+  uncertaintyReason: string | null;
+  conflictType: string;
+  existingValue: string | null;
+  proposalAction: string;
+  status: string;
+  candidates: ResolutionCandidate[];
+}
+
+export interface IngestionBatch {
+  ingestionBatchId: string;
+  sourceType: number;
+  sourceMeetingId: string | null;
+  status: string;
+  isNoOp: boolean;
+  noOpReason: string | null;
+  findingCount: number;
+  pendingCount: number;
+  createdAtUtc: string;
+  findings: IngestionFinding[];
+}
+
+export interface IngestionApplyResult {
+  appliedCount: number;
+  skippedCount: number;
+  applied: string[];
+  skipped: string[];
+}
+
+// User-controlled relationship parameters, in human terms.
+export interface RelationshipPreference {
+  personId: string;
+  personName: string | null;
+  desiredCadenceDays: number | null;
+  importance: number;
+  priority: number;
+  keepInTouchIntentionally: boolean;
+  excludeFromSuggestions: boolean;
+  reminderEnabled: boolean;
+  reminderIntervalDays: number | null;
+  reminderStrict: boolean;
+  snoozedUntilUtc: string | null;
+  lastCompletedAtUtc: string | null;
+}
+
+export interface ReminderDue {
+  personId: string;
+  personName: string | null;
+  intervalDays: number;
+  strict: boolean;
+  silenceDays: number | null;
+  sourceLabel: string;
+}
+
+export const CadencePresets = [
+  { label: "Daily", days: 1 },
+  { label: "Every 3 days", days: 3 },
+  { label: "Weekly", days: 7 },
+  { label: "Every 10 days", days: 10 },
+  { label: "Every 2 weeks", days: 14 },
+  { label: "Monthly", days: 30 },
+] as const;

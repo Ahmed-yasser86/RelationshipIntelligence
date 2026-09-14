@@ -333,9 +333,36 @@ export function MeetingDetail() {
           </div>
         )}
         {meeting.status === 1 && (
-          <div className="mt-2">
+          <div className="mt-2 flex flex-wrap gap-2">
             <Button size="sm" disabled={busy || (!meeting.hasTranscript && !meeting.hasNotes)} onClick={() => void run(() => api.post<MeetingResponse>(`/api/Meeting/PostMeetingProcess?id=${meeting.meetingId}`))}>
               {busy ? "Processing…" : "Process with co-pilot"}
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={busy || (!meeting.hasTranscript && !meeting.hasNotes)}
+              title="Send the transcript and notes — actual evidence only, never the agenda — into the unified review queue."
+              onClick={() =>
+                void (async () => {
+                  setError(null);
+                  setBusy(true);
+                  try {
+                    const batch = await api.post<{ ingestionBatchId: string }>(
+                      `/api/Ingestion/PostSubmitForMeeting?meetingId=${meeting.meetingId}`,
+                    );
+                    const processed = await api.post<{ ingestionBatchId: string }>(
+                      `/api/Ingestion/PostProcess?id=${batch.ingestionBatchId}`,
+                    );
+                    navigate(`/found?batch=${processed.ingestionBatchId}`);
+                  } catch (err) {
+                    setError(err instanceof ApiError ? err.body || err.message : "Operation failed.");
+                  } finally {
+                    setBusy(false);
+                  }
+                })()
+              }
+            >
+              Send actual notes to review
             </Button>
           </div>
         )}

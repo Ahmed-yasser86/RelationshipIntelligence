@@ -29,17 +29,20 @@ namespace RelationshipIntelligence.AI
         private readonly IRelationshipMemoryService _memory;
         private readonly IInteractionService _interactions;
         private readonly IMeetingService _meetings;
+        private readonly IRelationshipPreferenceService _preferences;
 
         public ActionPlugin(
             IEventService events,
             IRelationshipMemoryService memory,
             IInteractionService interactions,
-            IMeetingService meetings)
+            IMeetingService meetings,
+            IRelationshipPreferenceService preferences)
         {
             _events = events;
             _memory = memory;
             _interactions = interactions;
             _meetings = meetings;
+            _preferences = preferences;
         }
 
         private static string NeedConfirmation(string what) =>
@@ -217,6 +220,109 @@ namespace RelationshipIntelligence.AI
                 return JsonSerializer.Serialize(new { reviewed.MeetingId, findingId, decision }, Json);
             }
             catch (Exception ex) when (ex is KeyNotFoundException || ex is ArgumentException || ex is InvalidOperationException)
+            {
+                return JsonSerializer.Serialize(new { error = ex.Message }, Json);
+            }
+        }
+
+        [KernelFunction, Description("Save relationship preferences for a person: desired contact cadence in days, importance (0/1), priority (0/1), intentional contact (true/false), exclusion from proactive suggestions (true/false). Human terms only — never scores or weights. Requires confirmation.")]
+        public async Task<string> SavePreferenceAsync(
+            [Description("The person's id (Guid).")] string personId,
+            [Description("Desired contact cadence in days (1-365), or -1 to leave unchanged.")] int cadenceDays = -1,
+            [Description("Importance 0 or 1, or -1 to leave unchanged.")] int importance = -1,
+            [Description("Priority 0 or 1, or -1 to leave unchanged.")] int priority = -1,
+            [Description("Keep in touch intentionally (special contact).")] bool intentional = false,
+            [Description("Set true to change the intentional-contact flag.")] bool changeIntentional = false,
+            [Description("Exclude from proactive suggestions.")] bool excludeFromSuggestions = false,
+            [Description("Set true to change the suggestion-inclusion flag.")] bool changeExclusion = false,
+            [Description("Set true only after the user confirmed.")] bool confirmed = false)
+        {
+            if (!confirmed)
+                return NeedConfirmation("save those relationship preferences");
+            if (!Guid.TryParse(personId, out var id))
+                return JsonSerializer.Serialize(new { error = "Invalid person id." }, Json);
+            try
+            {
+                var saved = await _preferences.SaveAsync(new ServiceContracts.DTOs.PreferenceDTOs.PreferenceSaveRequest
+                {
+                    PersonId = id,
+                    DesiredCadenceDays = cadenceDays < 0 ? null : cadenceDays,
+                    Importance = importance < 0 ? null : importance,
+                    Priority = priority < 0 ? null : priority,
+                    KeepInTouchIntentionally = changeIntentional ? intentional : null,
+                    ExcludeFromSuggestions = changeExclusion ? excludeFromSuggestions : null
+                });
+                return JsonSerializer.Serialize(saved, Json);
+            }
+            catch (Exception ex) when (ex is KeyNotFoundException || ex is ArgumentException)
+            {
+                return JsonSerializer.Serialize(new { error = ex.Message }, Json);
+            }
+        }
+
+        [KernelFunction, Description("Set a per-person reminder: remind the user about this person every N days. A reminder is intention, not urgency — it never changes the relationship score. Requires confirmation.")]
+        public async Task<string> SetReminderAsync(
+            [Description("The person's id (Guid).")] string personId,
+            [Description("Reminder interval in days (1-365).")] int intervalDays,
+            [Description("Strict reminders surface exactly on schedule.")] bool strict = false,
+            [Description("Set true only after the user confirmed.")] bool confirmed = false)
+        {
+            if (!confirmed)
+                return NeedConfirmation($"remind about this person every {intervalDays} days");
+            if (!Guid.TryParse(personId, out var id))
+                return JsonSerializer.Serialize(new { error = "Invalid person id." }, Json);
+            try
+            {
+                var saved = await _preferences.SetReminderAsync(new ServiceContracts.DTOs.PreferenceDTOs.ReminderSetRequest
+                {
+                    PersonId = id,
+                    IntervalDays = intervalDays,
+                    Strict = strict
+                });
+                return JsonSerializer.Serialize(saved, Json);
+            }
+            catch (Exception ex) when (ex is KeyNotFoundException || ex is ArgumentException)
+            {
+                return JsonSerializer.Serialize(new { error = ex.Message }, Json);
+            }
+        }
+
+        [KernelFunction, Description("Snooze a person's reminder for N days. Viewing or snoozing never records an interaction. Requires confirmation.")]
+        public async Task<string> SnoozeReminderAsync(
+            [Description("The person's id (Guid).")] string personId,
+            [Description("Snooze length in days (1-90).")] int days,
+            [Description("Set true only after the user confirmed.")] bool confirmed = false)
+        {
+            if (!confirmed)
+                return NeedConfirmation($"snooze that reminder for {days} days");
+            if (!Guid.TryParse(personId, out var id))
+                return JsonSerializer.Serialize(new { error = "Invalid person id." }, Json);
+            try
+            {
+                var saved = await _preferences.SnoozeAsync(id, days);
+                return JsonSerializer.Serialize(saved, Json);
+            }
+            catch (Exception ex) when (ex is KeyNotFoundException || ex is ArgumentException)
+            {
+                return JsonSerializer.Serialize(new { error = ex.Message }, Json);
+            }
+        }
+
+        [KernelFunction, Description("Disable a person's reminder entirely. Requires confirmation.")]
+        public async Task<string> DisableReminderAsync(
+            [Description("The person's id (Guid).")] string personId,
+            [Description("Set true only after the user confirmed.")] bool confirmed = false)
+        {
+            if (!confirmed)
+                return NeedConfirmation("turn off that reminder");
+            if (!Guid.TryParse(personId, out var id))
+                return JsonSerializer.Serialize(new { error = "Invalid person id." }, Json);
+            try
+            {
+                var saved = await _preferences.DisableReminderAsync(id);
+                return JsonSerializer.Serialize(saved, Json);
+            }
+            catch (KeyNotFoundException ex)
             {
                 return JsonSerializer.Serialize(new { error = ex.Message }, Json);
             }

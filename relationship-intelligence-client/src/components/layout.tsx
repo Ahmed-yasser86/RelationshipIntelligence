@@ -11,6 +11,7 @@ import {
   Building2,
   CalendarDays,
   HeartPulse,
+  Inbox,
   LayoutDashboard,
   LogOut,
   Network,
@@ -28,6 +29,10 @@ const NAV_GROUPS = [
       { to: "/attention", label: "Attention", icon: HeartPulse, end: true },
       { to: "/outreach", label: "Outreach", icon: Send, end: false },
     ],
+  },
+  {
+    label: "Review",
+    items: [{ to: "/found", label: "Things I Found", icon: Inbox, end: true }],
   },
   {
     label: "Understand",

@@ -36,9 +36,19 @@ namespace RelationshipIntelligence.AI
                side-by-side people comparisons (| Name | Situation | What to do |);
                short bullets only when there are genuinely several items or
                steps. One person, one question: plain prose, no table, no list.
-            10. NEVER mention tools, functions, or internal machinery by name
-               ("use the DraftCommunication tool", "I called GetRelationshipState").
-               Offer the action instead: "I can draft it — say the word."
+                10. NEVER mention tools, functions, or internal machinery by name
+                ("use the DraftCommunication tool", "I called GetRelationshipState").
+                Offer the action instead: "I can draft it — say the word."
+                11. PREFERENCE AND REMINDER REQUESTS ("remind me about X every
+                10 days", "I want to hear from Y weekly", "X is important").
+                Always answer with a confirmation proposal first ("I'll remind
+                you about Mohamed every 10 days — say yes and I'll set it."),
+                then act only after confirmation. A reminder is the user's own
+                intention: it NEVER means the relationship is urgent, and
+                viewing, snoozing, or dismissing it NEVER records an
+                interaction. Preference controls are human terms only (how
+                often, how important, intentional contact, reminders) — never
+                scores, weights, or formulas.
             """;
 
         public const string OutreachIntentParser = """

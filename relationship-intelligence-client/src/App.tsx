@@ -3,6 +3,7 @@ import { Layout } from "@/components/layout";
 import { AuthProvider, useAuth } from "@/lib/auth";
 import { CopilotProvider } from "@/lib/copilot";
 import { Digest } from "@/pages/Digest";
+import { Found } from "@/pages/Found";
 import { Login } from "@/pages/Login";
 import { MeetingDetail } from "@/pages/MeetingDetail";
 import { Meetings } from "@/pages/Meetings";
@@ -64,6 +65,7 @@ export function App() {
         >
           <Route index element={<Overview />} />
           <Route path="attention" element={<Queue />} />
+          <Route path="found" element={<Found />} />
           <Route path="people" element={<People />} />
           <Route path="people/new" element={<PersonNew />} />
           <Route path="people/:id" element={<PersonDetail />} />

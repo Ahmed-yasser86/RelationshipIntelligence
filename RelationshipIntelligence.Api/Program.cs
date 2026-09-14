@@ -72,6 +72,11 @@ builder.Services.AddScoped<IRelationshipMemoryService, RelationshipMemoryService
 builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddScoped<RelationshipMemoryRepositoryContract, RelationshipMemoryRepository>();
 builder.Services.AddScoped<RelationshipEventRepositoryContract, RelationshipEventRepository>();
+builder.Services.AddScoped<IngestionRepositoryContract, IngestionRepository>();
+builder.Services.AddScoped<RelationshipPreferenceRepositoryContract, RelationshipPreferenceRepository>();
+builder.Services.AddScoped<IIngestionService, IngestionService>();
+builder.Services.AddScoped<IRelationshipPreferenceService, RelationshipPreferenceService>();
+builder.Services.AddScoped<IIngestionExtractor, IngestionExtractor>();
 builder.Services.AddScoped<IAiProviderSettingsService, AiProviderSettingsService>();
 builder.Services.AddScoped<AiProviderSettingsRepositoryContract, AiProviderSettingsRepository>();
 builder.Services.AddDataProtection();
@@ -106,7 +111,8 @@ builder.Services.AddScoped<IDigestService>(sp => new DigestService(
     sp.GetRequiredService<IEmailSender>(),
     sp.GetRequiredService<IUnitOfWork>(),
     sp.GetRequiredService<IConfiguration>()["Digest:Secret"] ?? "dev-secret-change-in-production",
-    sp.GetRequiredService<ILogger<DigestService>>()));
+    sp.GetRequiredService<ILogger<DigestService>>(),
+    sp.GetRequiredService<RelationshipPreferenceRepositoryContract>()));
 builder.Services.AddHostedService<RelationshipIntelligence.Api.Workers.RelationshipMaintenanceJob>();
 builder.Services.AddScoped<IInteractionService, InteractionService>();
 builder.Services.AddScoped<InteractionRepositoryContract, InteractionRepository>();
@@ -138,15 +144,24 @@ builder.Services.AddAuthentication(options =>
     options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
 }).AddJwtBearer(options =>
 {
+    // appsettings.json uses lowercase keys ("jwt:key", "jwt:issuer",
+    // "jwt:audience"). The old code read PascalCase "Jwt:key", which resolves
+    // ONLY when the config provider is case-insensitive (dotnet run from the
+    // project dir). Launched as a DLL (Production content root) the lookup
+    // returns null -> GetBytes(null) throws on EVERY request, even anonymous
+    // ones, because the JwtBearer options are built lazily per request.
+    var jwtKey = builder.Configuration.GetValue<string>("jwt:key") ?? string.Empty;
+    var jwtIssuer = builder.Configuration.GetValue<string>("jwt:issuer");
+    var jwtAudience = builder.Configuration.GetValue<string>("jwt:audience");
     options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
     {
         ValidateIssuer = true,
         ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        ValidIssuer = builder.Configuration["Jwt:issuer"],
-        ValidAudience = builder.Configuration["Jwt:audience"],
-        IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(builder.Configuration["Jwt:key"]))
+        ValidIssuer = jwtIssuer,
+        ValidAudience = jwtAudience,
+        IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(jwtKey))
     };
 });
 

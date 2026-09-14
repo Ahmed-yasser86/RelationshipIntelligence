@@ -46,6 +46,9 @@ namespace Entities
         public virtual DbSet<OutreachBatch> OutreachBatches { get; set; }
         public virtual DbSet<OutreachBatchMember> OutreachBatchMembers { get; set; }
         public virtual DbSet<CommunicationDraft> CommunicationDrafts { get; set; }
+        public virtual DbSet<IngestionBatch> IngestionBatches { get; set; }
+        public virtual DbSet<IngestionFinding> IngestionFindings { get; set; }
+        public virtual DbSet<RelationshipPreference> RelationshipPreferences { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -177,6 +180,41 @@ namespace Entities
                 .HasOne(d => d.Person)
                 .WithMany()
                 .HasForeignKey(d => d.PersonId)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<IngestionBatch>().ToTable("IngestionBatches");
+            modelBuilder.Entity<IngestionBatch>()
+                .HasIndex(b => new { b.ApplicationUserId, b.Status });
+            modelBuilder.Entity<IngestionBatch>()
+                .HasIndex(b => new { b.ApplicationUserId, b.SourceTextHash });
+            modelBuilder.Entity<IngestionBatch>()
+                .HasQueryFilter(b => b.ApplicationUserId == _currentUserId);
+            modelBuilder.Entity<IngestionFinding>().ToTable("IngestionFindings");
+            modelBuilder.Entity<IngestionFinding>()
+                .HasIndex(f => new { f.IngestionBatchId, f.SubjectPersonId });
+            modelBuilder.Entity<IngestionFinding>()
+                .HasIndex(f => new { f.ApplicationUserId, f.Status });
+            modelBuilder.Entity<IngestionFinding>()
+                .HasQueryFilter(f => f.ApplicationUserId == _currentUserId);
+            modelBuilder.Entity<IngestionFinding>()
+                .HasOne(f => f.Batch)
+                .WithMany(b => b.Findings)
+                .HasForeignKey(f => f.IngestionBatchId)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<IngestionFinding>()
+                .HasOne(f => f.SubjectPerson)
+                .WithMany()
+                .HasForeignKey(f => f.SubjectPersonId)
+                .OnDelete(DeleteBehavior.SetNull);
+            modelBuilder.Entity<RelationshipPreference>().ToTable("RelationshipPreferences");
+            modelBuilder.Entity<RelationshipPreference>()
+                .HasIndex(p => new { p.ApplicationUserId, p.PersonId })
+                .IsUnique();
+            modelBuilder.Entity<RelationshipPreference>()
+                .HasQueryFilter(p => p.ApplicationUserId == _currentUserId);
+            modelBuilder.Entity<RelationshipPreference>()
+                .HasOne(p => p.Person)
+                .WithMany()
+                .HasForeignKey(p => p.PersonId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Person>()

@@ -6,6 +6,7 @@ using SerilogTimings;
 using ServiceContracts;
 using ServiceContracts.DTOs;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
@@ -28,6 +29,7 @@ namespace Servicess
         private readonly IUnitOfWork _unitOfWork;
         private readonly string _secret;
         private readonly ILogger<DigestService> _logger;
+        private readonly RelationshipPreferenceRepositoryContract? _preferences;
 
         public DigestService(
             IRelationshipScoringService scoring,
@@ -39,7 +41,8 @@ namespace Servicess
             IEmailSender email,
             IUnitOfWork unitOfWork,
             string digestSecret,
-            ILogger<DigestService> logger)
+            ILogger<DigestService> logger,
+            RelationshipPreferenceRepositoryContract? preferences = null)
         {
             _scoring = scoring;
             _persons = persons;
@@ -51,6 +54,7 @@ namespace Servicess
             _unitOfWork = unitOfWork;
             _secret = digestSecret;
             _logger = logger;
+            _preferences = preferences;
         }
 
         public async Task<DigestPreference> GetPreferenceAsync()
@@ -98,7 +102,26 @@ namespace Servicess
                 var queue = await _scoring.GetQueueAsync(200);
                 var now = DateTime.UtcNow;
 
+                // Proactive-suggestion exclusion is user intent: excluded
+                // people never appear in the digest, but stay in Attention.
+                HashSet<Guid> excluded = new();
+                if (_preferences != null)
+                {
+                    try
+                    {
+                        excluded = (await _preferences.ListForOwnerAsync(ownerId.Value))
+                            .Where(p => p.ExcludeFromSuggestions)
+                            .Select(p => p.PersonId)
+                            .ToHashSet();
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogDebug(ex, "Suggestion exclusion skipped for digest.");
+                    }
+                }
+
                 var selected = queue
+                    .Where(q => !excluded.Contains(q.PersonId))
                     .Where(q => q.UrgencyScore >= preference.Threshold)
                     .Where(q => q.LastContactAtUtc == null || q.LastContactAtUtc < now.AddDays(-7))
                     .Take(preference.Count)

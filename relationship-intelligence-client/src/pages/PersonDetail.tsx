@@ -22,6 +22,8 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { ExplainDrawer } from "@/components/explain-drawer";
+import { IngestDialog } from "@/components/ingest-dialog";
+import { PreferenceCard, ReminderCard } from "@/components/preference-card";
 import { MemorySection } from "@/components/memory-section";
 import { EventsSection } from "@/components/events-section";
 import { NextStep } from "@/components/next-step";
@@ -449,6 +451,12 @@ export function PersonDetail() {
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
+          <IngestDialog
+            triggerLabel="Update from text"
+            title={`Update ${person.name ?? "contact"} from text`}
+            defaultSource={1}
+            allowSourceChoice
+          />
           <ImportDialog personId={person.personId} onDone={() => void reload()} />
           {state && (
             <Button size="sm" variant="outline" onClick={() => setExplaining(true)}>
@@ -613,6 +621,8 @@ export function PersonDetail() {
           )}
           <MemorySection personId={person.personId} />
           <EventsSection personId={person.personId} />
+          <PreferenceCard personId={person.personId} personName={person.name ?? "this contact"} />
+          <ReminderCard personId={person.personId} personName={person.name ?? "this contact"} />
           {(person.connectionChannels ?? []).length > 0 && (
             <section>
               <h3 className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">

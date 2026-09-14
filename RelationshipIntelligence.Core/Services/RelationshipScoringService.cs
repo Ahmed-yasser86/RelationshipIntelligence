@@ -20,6 +20,7 @@ namespace Servicess
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<RelationshipScoringService> _logger;
         private readonly IEventService? _events;
+        private readonly RelationshipPreferenceRepositoryContract? _preferences;
 
         public RelationshipScoringService(
             PersonRepositryContract persons,
@@ -27,7 +28,8 @@ namespace Servicess
             ICurrentUserService currentUser,
             IUnitOfWork unitOfWork,
             ILogger<RelationshipScoringService> logger,
-            IEventService? eventService = null)
+            IEventService? eventService = null,
+            RelationshipPreferenceRepositoryContract? preferences = null)
         {
             _persons = persons;
             _states = states;
@@ -35,6 +37,7 @@ namespace Servicess
             _unitOfWork = unitOfWork;
             _logger = logger;
             _events = eventService;
+            _preferences = preferences;
         }
 
         public async Task<int> RecomputeForCurrentUserAsync()
@@ -206,10 +209,29 @@ namespace Servicess
             var states = await _states.ListForOwnerAsync(userId.Value);
 
             var now = DateTime.UtcNow;
+            // User intent constrains attention surfacing only: scores, bands,
+            // and ordering inputs stay model-owned. Desired cadence narrows the
+            // event-signal threshold; priority breaks urgency ties. Reminders
+            // never enter this path — they live in RelationshipPreferenceService.
+            Dictionary<Guid, RelationshipPreference> intent = new();
+            if (_preferences != null)
+            {
+                try
+                {
+                    intent = (await _preferences.ListForOwnerAsync(userId.Value))
+                        .GroupBy(p => p.PersonId)
+                        .ToDictionary(g => g.Key, g => g.First());
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogDebug(ex, "Preference intent skipped for queue.");
+                }
+            }
             var queue = states
                 .Where(s => people.ContainsKey(s.PersonId))
                 .Where(s => s.EvidenceStatus != EvidenceStatus.NoHistory)
                 .OrderByDescending(s => s.UrgencyScore)
+                .ThenByDescending(s => PreferencePriority(s.PersonId, intent))
                 .ThenByDescending(s => IsImportant(people[s.PersonId]))
                 .ThenBy(s => s.LastContactAtUtc ?? DateTime.MinValue)
                 .Take(top <= 0 ? 7 : top)
@@ -223,23 +245,35 @@ namespace Servicess
                     InteractionCount = s.InteractionCount,
                     EvidenceStatus = s.EvidenceStatus.ToString(),
                     CadenceReferenceDays = s.CadenceReferenceDays,
+                    DesiredCadenceDays = intent.TryGetValue(s.PersonId, out var pref) ? pref.DesiredCadenceDays : null,
+                    KeepInTouchIntentionally = intent.TryGetValue(s.PersonId, out var pref2) && pref2.KeepInTouchIntentionally,
                     SilenceQuantile = s.SilenceQuantile,
                     UrgencyScore = s.UrgencyScore,
                     Band = CapBandForEvidence(TieDecayModel.BandFor(s.UrgencyScore), s.EvidenceStatus).ToString(),
                     IsBridge = s.IsBridge,
-                    IsImportant = IsImportant(people[s.PersonId])
+                    IsImportant = IsImportant(people[s.PersonId]) || PreferenceImportant(s.PersonId, intent)
                 })
                 .ToList();
 
-            await EnrichWithUpcomingEventsAsync(queue);
+            await EnrichWithUpcomingEventsAsync(queue, intent);
             return queue;
         }
 
+        private static int PreferencePriority(Guid personId, Dictionary<Guid, RelationshipPreference> intent) =>
+            intent.TryGetValue(personId, out var pref) ? pref.Priority : 0;
+
+        private static bool PreferenceImportant(Guid personId, Dictionary<Guid, RelationshipPreference> intent) =>
+            intent.TryGetValue(personId, out var pref) && pref.Importance == 1;
+
         /// <summary>
         /// Attaches upcoming event occurrences to queue rows. Enrichment only:
-        /// scores, bands, and ordering are never changed here.
+        /// scores, bands, and ordering are never changed here. The only intent
+        /// input is the event-signal threshold: an explicit user cadence
+        /// narrows it (min of measured rhythm and desired cadence).
         /// </summary>
-        private async Task EnrichWithUpcomingEventsAsync(List<RelationshipHealthResponse> queue)
+        private async Task EnrichWithUpcomingEventsAsync(
+            List<RelationshipHealthResponse> queue,
+            Dictionary<Guid, RelationshipPreference>? intent = null)
         {
             if (_events == null || queue.Count == 0)
                 return;
@@ -259,9 +293,17 @@ namespace Servicess
                 var silenceDays = row.LastContactAtUtc == null
                     ? (double?)null
                     : (now.ToUniversalTime() - row.LastContactAtUtc.Value.ToUniversalTime()).TotalDays;
+                // User cadence constrains the threshold without touching the
+                // model: an explicit "every N days" can only surface sooner.
+                double? threshold = row.CadenceReferenceDays;
+                if (intent != null && intent.TryGetValue(row.PersonId, out var pref)
+                    && pref.DesiredCadenceDays != null)
+                    threshold = threshold == null
+                        ? pref.DesiredCadenceDays.Value
+                        : Math.Min(threshold.Value, pref.DesiredCadenceDays.Value);
                 row.HasEventSignal = personEvents.Any(e => e.InDays <= 7)
                     && (row.UrgencyScore > 65
-                        || (silenceDays != null && row.CadenceReferenceDays != null && silenceDays > row.CadenceReferenceDays));
+                        || (silenceDays != null && threshold != null && silenceDays > threshold));
             }
         }
 

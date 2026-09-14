@@ -16,6 +16,7 @@ import { ChannelEditor } from "@/components/channel-editor";
 import { OrganizationPicker } from "@/components/organization-picker";
 import { NavButton } from "@/components/states";
 import { ApiError, api } from "@/lib/api";
+import { IngestionSources, submitAndProcess } from "@/lib/ingestion";
 import type { ContactChannelRequest, CountryResponse, SystemStatusTagResponse } from "@/lib/types";
 
 function splitList(v: string): string[] | null {
@@ -107,6 +108,29 @@ export function PersonNew() {
     }
   }
 
+  const [pasted, setPasted] = useState("");
+  const [pastedError, setPastedError] = useState<string | null>(null);
+
+  async function submitFromText(e: React.FormEvent) {
+    e.preventDefault();
+    setPastedError(null);
+    setBusy(true);
+    try {
+      const batch = await submitAndProcess(IngestionSources.PersonText, pasted.trim());
+      navigate(`/found?batch=${batch.ingestionBatchId}`);
+    } catch (err) {
+      setPastedError(
+        err instanceof ApiError
+          ? err.status === 503 || err.status === 409
+            ? `The assistant could not process the text (${err.body || err.message}). Check co-pilot settings and try again.`
+            : err.body || err.message
+          : "Could not process the text.",
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function submitFull(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
@@ -160,6 +184,7 @@ export function PersonNew() {
         <TabsList>
           <TabsTrigger value="quick">Quick add</TabsTrigger>
           <TabsTrigger value="full">Full profile</TabsTrigger>
+          <TabsTrigger value="text">From text</TabsTrigger>
         </TabsList>
         <TabsContent value="quick">
           <form onSubmit={submitQuick} className="flex flex-col gap-3 pt-2">
@@ -279,6 +304,29 @@ export function PersonNew() {
             {error && <p className="text-sm text-destructive">{error}</p>}
             <Button type="submit" disabled={busy}>
               {busy ? "Adding…" : "Add person"}
+            </Button>
+          </form>
+        </TabsContent>
+        <TabsContent value="text">
+          <form onSubmit={submitFromText} className="flex flex-col gap-3 pt-2">
+            <p className="text-sm text-muted-foreground">
+              Paste anything you already have — a LinkedIn profile, an email signature, a bio, notes. The AI
+              extracts every identifiable field, then you review and approve each change.
+            </p>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="paste-profile">Pasted information</Label>
+              <Textarea
+                id="paste-profile"
+                rows={10}
+                required
+                value={pasted}
+                onChange={(e) => setPasted(e.target.value)}
+                placeholder={"Sara Ali — Engineering Manager at Microsoft, Cairo. Prefers WhatsApp. Met at RiseUp 2025…"}
+              />
+            </div>
+            {pastedError && <p className="text-sm text-destructive">{pastedError}</p>}
+            <Button type="submit" disabled={busy || pasted.trim() === ""}>
+              {busy ? "Understanding…" : "Understand this text"}
             </Button>
           </form>
         </TabsContent>

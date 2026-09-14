@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { EmptyState, ErrorState, NavButton } from "@/components/states";
 import { AttentionRow } from "@/components/attention-row";
 import { BriefingBlock } from "@/components/briefing-block";
+import { DueReminders } from "@/components/preference-card";
 import { QuickLog } from "@/components/quick-log";
 import { ApiError, api } from "@/lib/api";
 import { useCopilot } from "@/lib/copilot";
@@ -146,6 +147,7 @@ export function Overview() {
           </ol>
         </section>
       )}
+      <DueReminders />
       {snapshot !== null && (
         <section aria-label="This week">
           <h2 className="mb-2 font-display text-xl font-semibold">This week in your network</h2>

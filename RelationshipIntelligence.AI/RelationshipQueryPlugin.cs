@@ -32,6 +32,7 @@ namespace RelationshipIntelligence.AI
         private readonly IPersonGetterService _persons;
         private readonly IMeetingService _meetings;
         private readonly IDigestService _digest;
+        private readonly IRelationshipPreferenceService _preferences;
 
         public RelationshipQueryPlugin(
             IRelationshipScoringService scoring,
@@ -42,7 +43,8 @@ namespace RelationshipIntelligence.AI
             IPersonSearcherService searcher,
             IPersonGetterService persons,
             IMeetingService meetings,
-            IDigestService digest)
+            IDigestService digest,
+            IRelationshipPreferenceService preferences)
         {
             _scoring = scoring;
             _interactions = interactions;
@@ -53,6 +55,7 @@ namespace RelationshipIntelligence.AI
             _persons = persons;
             _meetings = meetings;
             _digest = digest;
+            _preferences = preferences;
         }
 
         private static Guid? ParseId(string value) =>
@@ -465,6 +468,33 @@ namespace RelationshipIntelligence.AI
                     e.Suggestion
                 })
             }, Json);
+        }
+
+        [KernelFunction, Description("Get one person's relationship preferences and reminder state: desired cadence, importance, priority, intentional contact, suggestion inclusion, reminder interval and snooze. User intent, not relationship verdict. Read-only.")]
+        public async Task<string> GetPreferenceAsync(
+            [Description("The person's id (Guid).")] string personId)
+        {
+            var id = ParseId(personId);
+            if (id == null)
+                return JsonSerializer.Serialize(new { error = "Invalid person id." }, Json);
+            try
+            {
+                var preference = await _preferences.GetAsync(id.Value);
+                if (preference == null)
+                    return JsonSerializer.Serialize(new { observed = false, note = "No preferences set. Defaults apply." }, Json);
+                return JsonSerializer.Serialize(preference, Json);
+            }
+            catch (KeyNotFoundException)
+            {
+                return JsonSerializer.Serialize(new { observed = false, note = "No such contact." }, Json);
+            }
+        }
+
+        [KernelFunction, Description("List due user-configured reminders: who the user asked to be reminded about, at what interval. Intention, not urgency — a due reminder never means the relationship is urgent. Read-only.")]
+        public async Task<string> ListDueRemindersAsync()
+        {
+            var due = await _preferences.ListDueAsync();
+            return JsonSerializer.Serialize(due, Json);
         }
 
         [KernelFunction, Description("Get unapproved AI proposals awaiting review: suggested memory entries and suggested meeting findings. Nothing here is durable truth. Read-only.")]

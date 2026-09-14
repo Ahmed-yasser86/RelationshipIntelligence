@@ -33,7 +33,8 @@ namespace CRUDTests
             Mock.Of<IPersonSearcherService>(),
             _personsMock.Object,
             _meetingsMock.Object,
-            _digestMock.Object);
+            _digestMock.Object,
+            Mock.Of<IRelationshipPreferenceService>());
 
         [Fact]
         public async Task ExplainAttentionSignal_UnknownId_RevealsNothing()
@@ -83,7 +84,8 @@ namespace CRUDTests
                 searcherMock.Object,
                 Mock.Of<IPersonGetterService>(),
                 Mock.Of<IMeetingService>(),
-                Mock.Of<IDigestService>());
+                Mock.Of<IDigestService>(),
+                Mock.Of<IRelationshipPreferenceService>());
 
             var raw = await plugin.SearchPeopleAsync("Mohamed");
 

@@ -82,8 +82,8 @@ namespace CRUDTests.ControllersTest
         [Fact]
         public async Task PostComplete_RequiresRealInteraction_ReturnsConflict()
         {
-            // V6 scenario 12 surfaces as 409 with guidance, never a silent
-            // completion and never a fake interaction.
+            // Completion-without-interaction surfaces as 409 with guidance,
+            // never a silent completion and never a fake interaction.
             var personId = Guid.NewGuid();
             _serviceMock.Setup(s => s.CompleteAsync(personId))
                 .ThrowsAsync(new InvalidOperationException("Log the actual interaction first."));

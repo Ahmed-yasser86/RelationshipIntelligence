@@ -104,13 +104,59 @@ Meetings → Outreach → Network → Digest, with the Copilot drawer
 everywhere. Full screen-by-screen tour with the AI's role on each:
 [user-experience](docs/user-experience.md).
 
-## Technical architecture
+## Technical architecture: the clean stack
 
-Core (domain + scoring + services) → AI (Semantic Kernel agent,
-~40 tools) → Infrastructure (EF Core, SQL Server) → Api (10
-controllers, JWT, composition root) → React client. Boundaries enforced
-by project references and architecture tests. Details:
-[architecture](docs/architecture.md) · [data](docs/data.md) ·
+**Core** (`RelationshipIntelligence.Core`, references nothing) —
+`Domain/Entities` (Person, Interaction, RelationshipState, memory,
+event, meeting, outreach, ingestion, preference entities — 31 tables),
+`Services` (scoring, interactions, memory, events, meetings, outreach,
+digest, ingestion, preferences, search, orgs — one class per file,
+behind `ServiceContracts` + `RepositryContracts` interfaces), `DTOs`
+(wire shapes per area).
+
+**AI** (`RelationshipIntelligence.AI`, references Core only) —
+`CopilotAgent` (classify → route → tool-call loop),
+`RelationshipQueryPlugin` (~40 read tools: contacts, interactions,
+orgs, events, meetings, outreach, memories, queue, digest, reminders,
+preferences), `PlanningPlugin` (briefs, batches, drafts, plans),
+`ActionPlugin` (confirmation-gated writes), `CopilotService` (legacy
+single-shot Q&A kept for briefing/plan/draft helpers),
+`IngestionExtractor` + `MeetingExtractor` (LLM → strict contract),
+`KernelFactory`, `AgentSessionStore`, `PersonNameExtractor`
+(typo-tolerant similarity), `PreferenceScheduleParser` (natural
+language → supported days).
+
+**Infrastructure** (`RelationshipIntelligence.Infrastructure`) — EF
+Core `AppDBContext` (31 `DbSet`s, per-user global query filters on
+every user table), one repository class per contract (`Repositries/`),
+30 migrations. SQL Server (`Contect_Manager`); seeds (1 user, 10
+persons + lookups, 11-contact demo workspace).
+
+**Api** (`RelationshipIntelligence.Api`, the composition root) — 10
+controllers (`Account`, `Contacts`, `Copilot`, `Digest`, `Ingestion`,
+`Meeting`, `Network`, `Outreach`, `Preference`, + `CustomWebController`
+base with global auth filter), JWT Bearer (lowercase `jwt:` keys),
+person/meeting ownership filters, CORS, `RelationshipMaintenanceJob`
+(nightly recompute). All DI wiring lives in `Program.cs`.
+
+**Client** (`relationship-intelligence-client/src`) — `pages/` (16:
+Overview, Queue, Found, People, PersonNew/Detail/Edit, Organizations,
+Meetings/Detail, Outreach/Detail, Network, Digest, Login, Register),
+`components/` (attention-row, explain-drawer, briefing-block,
+preference-card, ingest-dialog, copilot-drawer, …), `lib/` (`api.ts`
+token `ri.token` + 401 handling, `auth.tsx`, `copilot.tsx`,
+`ingestion.ts`, `format.ts` canonical silence mirror, `types.ts`
+camelCase wire shapes). React 19 + TypeScript + Vite + Tailwind;
+`VITE_API_URL` defaults to `http://localhost:5156`.
+
+**Tests** (296 total: 272 + 24) — `RelationshipIntelligence.Tests`
+(27 files) and `RelationshipIntelligence.ControllerTests` (4 files),
+one class per area: scoring math, preferences/reminders, ingestion,
+meetings, outreach, digest, network, search, Copilot plugins,
+ownership isolation, architecture boundaries.
+
+Boundaries enforced by project references plus `ArchitectureTests`.
+Details: [architecture](docs/architecture.md) · [data](docs/data.md) ·
 [api](docs/api.md).
 
 ## Copilot

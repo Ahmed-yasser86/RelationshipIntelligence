@@ -1,15 +1,18 @@
 # Product vision
 
-Relationship Intelligence is a **research-grade relationship system with a
-real product implementation**. The research question is how personal and
-professional relationship attention can be supported computationally
-without corrupting the evidence it runs on: what was logged, what was
-derived, and what the user asked for — kept strictly apart. The product —
-a working system with UI and API — operationalizes that idea and tests it
-against real contact history every day. That is why the product is
-designed around provenance, determinism, confirmation gates, and honest
-empty states: the research question demands them, and the product proves
-they can be engineered.
+Relationship Intelligence is a **working product built on sound
+methodology**. The guiding question is
+how personal and professional relationship attention can be supported
+computationally without corrupting the evidence it runs on: what was
+logged, what was derived, and what the user asked for — kept strictly
+apart. The product — a working system with UI and API — implements those
+ideas and exercises them against real contact history every day. That is
+why it is built around provenance, determinism, confirmation gates, and
+honest empty states: sound method demands them, and the product shows
+they can be engineered. It claims no validated measures, fitted
+parameters, or evaluated outcomes — see
+[for-researchers](for-researchers.md) for exactly what can and cannot be
+cited.
 
 It began with a simple question: **which of my relationships needs me
 this week, and how do I know?** That leads past contact storage. A real

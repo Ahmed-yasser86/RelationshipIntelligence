@@ -48,3 +48,13 @@ appsettings.*.local.json
 .env.*
 !.env.example
 .opencode
+
+# Internal working/planning notes — never publish these.
+# Keep them local; they are not part of the product or its docs.
+/v2 user stories.md
+/v4 optimizatiion.md
+/v5.md
+/v6.md
+/proplems v3.md
+/copiliot pro plan.md
+.playwright-mcp/

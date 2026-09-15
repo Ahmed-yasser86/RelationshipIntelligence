@@ -73,8 +73,8 @@ namespace CRUDTests
         [Fact]
         public async Task LogAsync_WithEnabledReminder_ClearsCycleViaRealInteraction()
         {
-            // V6 scenario 12/28: the canonical pipeline is the sole path that
-            // completes a reminder cycle. No fake interaction, no 409.
+            // The canonical pipeline is the sole path that completes a
+            // reminder cycle. No fake interaction, no silent completion.
             _userMock.Setup(u => u.UserId).Returns(_userA);
             var person = OwnedPerson();
             _personsMock.Setup(r => r.GetPersonById(person.PersonId)).ReturnsAsync(person);

@@ -104,7 +104,7 @@ Meetings → Outreach → Network → Digest, with the Copilot drawer
 everywhere. Full screen-by-screen tour with the AI's role on each:
 [user-experience](docs/user-experience.md).
 
-## Technical architecture: the clean stack
+## Technical architecture: Clean Architecture + SOLID
 
 **Core** (`RelationshipIntelligence.Core`, references nothing) —
 `Domain/Entities` (Person, Interaction, RelationshipState, memory,
@@ -156,8 +156,11 @@ meetings, outreach, digest, network, search, Copilot plugins,
 ownership isolation, architecture boundaries.
 
 Boundaries enforced by project references plus `ArchitectureTests`.
-Details: [architecture](docs/architecture.md) · [data](docs/data.md) ·
-[api](docs/api.md).
+Design: Repository + Unit of Work for data, Plugin/Tool + Agent loop
+for the Copilot, derived state machines for reminders/meetings/batches,
+ownership filters + global query filters for isolation. Full SOLID
+account + pattern inventory: [architecture](docs/architecture.md) ·
+[data](docs/data.md) · [api](docs/api.md).
 
 ## Copilot
 

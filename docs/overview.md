@@ -39,6 +39,18 @@ yourself asked for — and keep those three strictly separated.**
 - **Approval is the only path** from AI suggestion to trusted state. Every
   applied change keeps provenance back to its source.
 
+## Screens
+
+The two central views — the morning briefing and the ranked attention queue —
+look like this in the running app:
+
+![Today: briefing and top attention](screenshots/02-overview-top.png)
+
+![Needs attention: ranked reasons](screenshots/04-attention-queue.png)
+
+The full walkthrough, including drawers, drafts and the Copilot, is in the
+[screenshot gallery](screenshots/README.md).
+
 ## What it does not do
 
 - It does not send messages, book meetings, or act externally. Approval

@@ -9,6 +9,13 @@ The golden rule across all screens: **the system watches, organizes, and
 proposes; the user decides.** Nothing on any screen writes trusted state,
 contacts anyone, or records contact without an explicit user action.
 
+Every screen described below has a real capture in the
+[screenshot gallery](screenshots/README.md). Two anchors:
+
+![The attention queue with a ranked reason on every row](screenshots/04-attention-queue.png)
+
+![A meeting where planned material never becomes evidence](screenshots/19-meeting-detail.png)
+
 ## Today (`/` — Overview)
 
 The morning screen. Three questions answered at a glance: who needs me,

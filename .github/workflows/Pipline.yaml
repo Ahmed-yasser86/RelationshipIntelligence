@@ -4,8 +4,16 @@ on:
   workflow_dispatch:  
   push:
     branches: [master, dev, relationship-intelligence-main]
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - '**/*.md'
   pull_request:
-    branches: [master]
+    branches: [master, relationship-intelligence-main]
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - '**/*.md'
     types:
       - opened
       - edited

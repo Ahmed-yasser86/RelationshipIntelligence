@@ -50,6 +50,13 @@ flowchart LR
   explained never recomputed, user memory canonical, concise human
   voice, tools never named.
 
+The user-facing result looks like this: an answer over the user's own queue,
+followed by an expandable list of the exact contacts the agent checked.
+
+![Copilot answer about follow-ups](screenshots/08-copilot-answer.png)
+
+![The evidence behind the answer](screenshots/09-copilot-citations.png)
+
 ## Business: why it matters
 
 - **Leverage, not automation.** The Copilot turns "I have 200 contacts"

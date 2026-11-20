@@ -79,6 +79,38 @@ Not features — the outputs the system produces, each with provenance:
   contacts by any combination, tolerates typos via suggestions, and
   proposes before mutating — confirmation-gated, always
 
+## Visual showcase
+
+Every image is a real capture from the running app against the local seeded
+database — no mock charts, placeholder people, or fabricated answers. Long
+screens are split into several shots. The complete catalogue is in
+[docs/screenshots](docs/screenshots/README.md).
+
+| | |
+|---|---|
+| ![Today](docs/screenshots/02-overview-top.png) | ![Attention queue](docs/screenshots/04-attention-queue.png) |
+| Today — briefing, attention, follow-ups | Attention — ranked reasons, not bare scores |
+
+| | |
+|---|---|
+| ![Explain drawer](docs/screenshots/05-attention-explain-drawer.png) | ![Person dossier](docs/screenshots/12-person-story.png) |
+| Explain — observed facts vs derived measures | Person — the story so far, with provenance |
+
+| | |
+|---|---|
+| ![Network map](docs/screenshots/15-network-map.png) | ![Outreach drafts](docs/screenshots/22-outreach-drafts.png) |
+| Network — shared context, never observed contact | Outreach — grounded drafts, approval contacts nobody |
+
+| | |
+|---|---|
+| ![Copilot answer](docs/screenshots/08-copilot-answer.png) | ![Copilot evidence](docs/screenshots/09-copilot-citations.png) |
+| Copilot — a real answer | Copilot — the evidence it used |
+
+| | |
+|---|---|
+| ![Review queue](docs/screenshots/24-found-findings.png) | ![Weekly digest](docs/screenshots/25-digest.png) |
+| Things I Found — proposals wait for approval | Digest — preview before anything sends |
+
 ## Methodology at a glance
 
 **Tie strength as decayed history.** Each event boosts 1.0, decaying
@@ -201,6 +233,7 @@ Sign in with `testuser@contactsmanager.dev` / `Test123!`. Details:
 | [Development](docs/development.md) | Setup, scripts, conventions | Devs |
 | [CI/CD](docs/ci-cd.md) | Pipeline, gates, delivery | Devs, owners |
 | [Evidence ledger](docs/documentation-evidence-ledger.md) | Claim → source → status | Researchers |
+| [Screenshots](docs/screenshots/README.md) | Real UI captures of every screen | Everyone |
 | [Existing methodology](docs/METHODOLOGY.md) | Original method record | Researchers |
 | [Architecture decisions](docs/architecture-decisions/) | ADRs 01–07 | Devs |
 

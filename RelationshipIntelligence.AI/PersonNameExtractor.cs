@@ -37,6 +37,68 @@ namespace RelationshipIntelligence.AI
 
         public static bool DismissesPerson(string lower) =>
             lower.Contains("forget") || lower.Contains("never mind") || lower.Contains("drop it");
+
+        /// <summary>
+        /// Typo-tolerant similarity for "did you mean" suggestions. Token-set
+        /// based: compares the best-matching token pair so "Dina Smair" still
+        /// finds "Dina Samir", while unrelated names score near zero.
+        /// Pure function, no I/O. Threshold lives with the caller.
+        /// </summary>
+        public static double Similarity(string a, string b)
+        {
+            var at = Tokenize(a);
+            var bt = Tokenize(b);
+            if (at.Count == 0 || bt.Count == 0)
+                return 0;
+            // Average of best-match-per-token both directions: tolerant to one
+            // mistyped token, strict about wholly different names.
+            double Forward(IReadOnlyList<string> x, IReadOnlyList<string> y) =>
+                x.Average(t => y.Max(u => TokenSimilarity(t, u)));
+            return (Forward(at, bt) + Forward(bt, at)) / 2;
+        }
+
+        private static List<string> Tokenize(string value) =>
+            System.Text.RegularExpressions.Regex.Matches(value.ToLowerInvariant(), @"[a-z]+")
+                .Select(m => m.Value)
+                .Where(t => t.Length >= 2)
+                .ToList();
+
+        private static double TokenSimilarity(string a, string b)
+        {
+            if (a == b)
+                return 1;
+            var distance = Levenshtein(a, b);
+            var max = Math.Max(a.Length, b.Length);
+            if (max == 0)
+                return 1;
+            var score = 1.0 - (double)distance / max;
+            // Single-edit typos ("smair" vs "samir") score high; require a
+            // shared prefix or big overlap so "omar"/"sara" stay near zero.
+            if (distance == 1)
+                return 0.9;
+            if (score < 0.5)
+                return 0;
+            if (a[0] != b[0])
+                return score * 0.5;
+            return score;
+        }
+
+        private static int Levenshtein(string a, string b)
+        {
+            var prev = new int[b.Length + 1];
+            for (var j = 0; j <= b.Length; j++)
+                prev[j] = j;
+            for (var i = 1; i <= a.Length; i++)
+            {
+                var cur = new int[b.Length + 1];
+                cur[0] = i;
+                for (var j = 1; j <= b.Length; j++)
+                    cur[j] = Math.Min(Math.Min(cur[j - 1] + 1, prev[j] + 1),
+                        prev[j - 1] + (a[i - 1] == b[j - 1] ? 0 : 1));
+                prev = cur;
+            }
+            return prev[b.Length];
+        }
     }
 
     /// <summary>

@@ -5,8 +5,8 @@ using Xunit;
 namespace CRUDTests
 {
     /// <summary>
-    /// V6 scenarios 21-23: natural-language schedules map only to supported
-    /// day intervals; anything else returns null so Copilot rejects honestly.
+    /// Natural-language schedules map only to supported day intervals;
+    /// anything else returns null so Copilot rejects honestly.
     /// </summary>
     public class PreferenceScheduleParserTests
     {

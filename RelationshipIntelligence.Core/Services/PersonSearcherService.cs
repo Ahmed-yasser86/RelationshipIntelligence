@@ -369,6 +369,29 @@ namespace Servicess
                     if (!string.IsNullOrWhiteSpace(filter.UserDefinedTagName))
                         predicate = predicate.And(p => p.UserDefinedTags.Any(t => t.TagName.Contains(filter.UserDefinedTagName)));
 
+                    if (!string.IsNullOrWhiteSpace(filter.InteractionType)
+                        && Enum.TryParse<ContactsManger.Core.Domain.Entities.EEnums.EnInteractionType>(
+                            filter.InteractionType.Trim(), true, out var interactionType))
+                    {
+                        if (filter.ContactedSinceUtc != null)
+                        {
+                            var since = filter.ContactedSinceUtc.Value.ToUniversalTime();
+                            predicate = predicate.And(p => p.Interactions.Any(i =>
+                                i.InteractionType == interactionType && i.TimeOfInteraction >= since));
+                        }
+                        else
+                        {
+                            predicate = predicate.And(p => p.Interactions.Any(i =>
+                                i.InteractionType == interactionType));
+                        }
+                    }
+                    else if (filter.ContactedSinceUtc != null)
+                    {
+                        var sinceOnly = filter.ContactedSinceUtc.Value.ToUniversalTime();
+                        predicate = predicate.And(p => p.Interactions.Any(i =>
+                            i.TimeOfInteraction >= sinceOnly));
+                    }
+
                     // Single call, single combined predicate -- GetFilteredPersonsPaged
                     // doesn't need to know or care how many conditions went into it.
                     var (people, totalCount) = await PersonRipository.GetFilteredPersonsPaged(pageNumber, pageSize, predicate);

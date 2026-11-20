@@ -173,7 +173,7 @@ namespace CRUDTests
         [Fact]
         public async Task CompleteAsync_AlwaysRequiresRealInteraction()
         {
-            // V6 scenario 12: the endpoint can never mark a cycle complete.
+            // The endpoint can never mark a cycle complete.
             // Only InteractionService.LogAsync writes LastCompletedAtUtc.
             var person = OwnedPerson(_userA);
             AsUserA(person);

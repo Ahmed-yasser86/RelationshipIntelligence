@@ -188,11 +188,17 @@ export function People() {
     data != null ? Math.max(1, Math.ceil(data.totalCount / data.pageSize)) : 1;
 
   const [searchParams, setSearchParams] = useSearchParams();
+  // Organization deep-link (?org=Proceedit): show a banner with who/where,
+  // and let the Eye toggle between the org members and the full network.
+  // MemberCount from the Organizations tab is the authority on the total —
+  // pagination below never hides members, it only pages them.
+  const [orgScope, setOrgScope] = useState<string | null>(null);
   useEffect(() => {
     const org = (searchParams.get("org") ?? "").trim();
     if (org === "") return;
     setSearchParams({}, { replace: true });
     setShowFilters(true);
+    setOrgScope(org);
     const next = {
       Name: "",
       Email: "",
@@ -206,6 +212,22 @@ export function People() {
     void loadComposite(1, "", next);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  function clearOrgScope() {
+    setOrgScope(null);
+    const cleared = {
+      Name: "",
+      Email: "",
+      Phone: "",
+      CircleName: "",
+      ContactItemRole: "",
+      SystemStatusTagName: "",
+      UserDefinedTagName: "",
+    };
+    setComposite(cleared);
+    setQuery("");
+    void load(1, "");
+  }
 
   return (
     <div>
@@ -341,6 +363,26 @@ export function People() {
             </Button>
           </div>
         </form>
+      )}
+
+      {orgScope !== null && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="mb-4 flex flex-wrap items-center gap-2 rounded-lg border bg-card px-4 py-2.5 text-sm"
+        >
+          <span>
+            Showing everyone at <strong>{orgScope}</strong>
+            {data !== null && (
+              <span className="text-muted-foreground">
+                {" "}· {data.totalCount} member{data.totalCount === 1 ? "" : "s"} in your contacts
+              </span>
+            )}
+          </span>
+          <Button type="button" variant="ghost" size="sm" className="ml-auto" onClick={clearOrgScope}>
+            Show full network
+          </Button>
+        </div>
       )}
 
       {error && <ErrorState message={error} onRetry={() => void load(page)} />}

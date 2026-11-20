@@ -84,7 +84,8 @@ Not features — the outputs the system produces, each with provenance:
 Every image is a real capture from the running app against the local seeded
 database — no mock charts, placeholder people, or fabricated answers. Long
 screens are split into several shots. The complete catalogue is in
-[docs/screenshots](docs/screenshots/README.md).
+[docs/screenshots](docs/screenshots/README.md), or browse every image in one
+scroll in the [full gallery](docs/screenshots/GALLERY.md).
 
 | | |
 |---|---|
@@ -234,6 +235,7 @@ Sign in with `testuser@contactsmanager.dev` / `Test123!`. Details:
 | [CI/CD](docs/ci-cd.md) | Pipeline, gates, delivery | Devs, owners |
 | [Evidence ledger](docs/documentation-evidence-ledger.md) | Claim → source → status | Researchers |
 | [Screenshots](docs/screenshots/README.md) | Real UI captures of every screen | Everyone |
+| [Full image gallery](docs/screenshots/GALLERY.md) | Every screenshot in one scroll | Everyone |
 | [Existing methodology](docs/METHODOLOGY.md) | Original method record | Researchers |
 | [Architecture decisions](docs/architecture-decisions/) | ADRs 01–07 | Devs |
 

@@ -1,5 +1,7 @@
 # Screenshot gallery
 
+For a single scrolling view of every image, open [GALLERY.md](GALLERY.md).
+
 Real UI captures from the running Relationship Intelligence app, logged into
 the seeded demo workspace. Every screen shows data that already exists in the
 application's own store; no placeholder records, mock charts, or fabricated

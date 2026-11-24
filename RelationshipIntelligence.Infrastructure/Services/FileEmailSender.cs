@@ -23,8 +23,8 @@ namespace RelationshipIntelligence.Infrastructure.Services
         {
             Directory.CreateDirectory(_outputDirectory);
             string path = Path.Combine(_outputDirectory, $"{DateTime.UtcNow:yyyyMMdd-HHmmss}-{Guid.NewGuid():N}.html");
-            await File.WriteAllTextAsync(path, $"<!-- To: {to} | Subject: {subject} -->\n{htmlBody}");
-            _logger.LogInformation("Digest email for {To} written to {Path}", to, path);
+            await File.WriteAllTextAsync(path, $"<!-- Subject: {subject} -->\n{htmlBody}");
+            _logger.LogInformation("Digest email written to {Path}", path);
         }
     }
 }

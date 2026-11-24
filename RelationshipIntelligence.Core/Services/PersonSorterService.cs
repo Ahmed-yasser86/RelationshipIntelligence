@@ -109,7 +109,7 @@ namespace Servicess
                         _ => persons
                     };
 
-                    _logger.LogInformation("{MethodName} completed successfully. Sorted {Count} persons by {SortBy} ({SortOrder})",
+                    _logger.LogDebug("{MethodName} completed successfully. Sorted {Count} persons by {SortBy} ({SortOrder})",
                         nameof(getPersonsSorted), sortedPersons.Count, sortBy, sortOrder);
 
                     return sortedPersons;

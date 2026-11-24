@@ -28,7 +28,7 @@ namespace Repositories
 
             using (Operation.Time("GetConnectionChannelsByNames database query for {Count} names", nameList.Count))
             {
-                _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Names: {@Names}",
+                _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Names: {Names}",
                     nameof(GetConnectionChannelsByNames), DateTime.UtcNow, nameList);
 
                 try
@@ -43,14 +43,14 @@ namespace Repositories
                         .Where(c => nameList.Contains(c.ConnectionChannelName))
                         .ToListAsync();
 
-                    _logger.LogInformation("{MethodName} completed successfully. Found {FoundCount} of {RequestedCount} requested names",
+                    _logger.LogDebug("{MethodName} completed successfully. Found {FoundCount} of {RequestedCount} requested names",
                         nameof(GetConnectionChannelsByNames), channels.Count, nameList.Count);
 
                     return channels;
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Error occurred in {MethodName} for names: {@Names}",
+                    _logger.LogError(ex, "Error occurred in {MethodName} for names: {Names}",
                         nameof(GetConnectionChannelsByNames), nameList);
                     throw;
                 }
@@ -62,7 +62,7 @@ namespace Repositories
         {
             using (Operation.Time("AddConnectionChannel staged for: {ChannelName}", channel?.ConnectionChannelName))
             {
-                _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Channel: {@ConnectionChannel}",
+                _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Channel: {ConnectionChannel}",
                     nameof(AddConnectionChannel), DateTime.UtcNow, channel);
 
                 try
@@ -82,7 +82,7 @@ namespace Repositories
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Unexpected error occurred in {MethodName} for channel: {@ConnectionChannel}",
+                    _logger.LogError(ex, "Unexpected error occurred in {MethodName} for channel: {ConnectionChannel}",
                         nameof(AddConnectionChannel), channel);
                     throw;
                 }
@@ -163,13 +163,13 @@ namespace Repositories
         {
             using (Operation.Time("GetAllConnectionChannels database operation"))
             {
-                _logger.LogInformation("Executing {MethodName} method at {Timestamp}", nameof(GetAllConnectionChannels), DateTime.UtcNow);
+                _logger.LogDebug("Executing {MethodName} method at {Timestamp}", nameof(GetAllConnectionChannels), DateTime.UtcNow);
 
                 try
                 {
                     var channels = await _db.ConnectionChannels.ToListAsync();
 
-                    _logger.LogInformation("{MethodName} completed successfully. Retrieved {Count} channels",
+                    _logger.LogDebug("{MethodName} completed successfully. Retrieved {Count} channels",
                         nameof(GetAllConnectionChannels), channels.Count);
 
                     return channels;

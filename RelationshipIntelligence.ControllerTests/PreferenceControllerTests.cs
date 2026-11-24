@@ -1,5 +1,6 @@
-using ContactsManager.API.Controllers;
+﻿using ContactsManager.API.Controllers;
 using FluentAssertions;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using ServiceContracts;
@@ -41,7 +42,9 @@ namespace CRUDTests.ControllersTest
                 DesiredCadenceDays = 999
             });
 
-            result.Should().BeOfType<BadRequestObjectResult>();
+            result.Should().BeOfType<ObjectResult>();
+            ((ObjectResult)result).StatusCode.Should().Be(StatusCodes.Status400BadRequest);
+            ((ObjectResult)result).Value.Should().BeOfType<ProblemDetails>();
         }
 
         [Fact]
@@ -53,7 +56,9 @@ namespace CRUDTests.ControllersTest
 
             var result = await Controller().PostSnooze(personId, 3);
 
-            result.Should().BeOfType<NotFoundObjectResult>();
+            result.Should().BeOfType<ObjectResult>();
+            ((ObjectResult)result).StatusCode.Should().Be(StatusCodes.Status404NotFound);
+            ((ObjectResult)result).Value.Should().BeOfType<ProblemDetails>();
         }
 
         [Fact]
@@ -76,7 +81,9 @@ namespace CRUDTests.ControllersTest
 
             var result = await Controller().DeleteReminder(personId);
 
-            result.Should().BeOfType<NotFoundObjectResult>();
+            result.Should().BeOfType<ObjectResult>();
+            ((ObjectResult)result).StatusCode.Should().Be(StatusCodes.Status404NotFound);
+            ((ObjectResult)result).Value.Should().BeOfType<ProblemDetails>();
         }
 
         [Fact]
@@ -90,7 +97,9 @@ namespace CRUDTests.ControllersTest
 
             var result = await Controller().PostComplete(personId);
 
-            result.Should().BeOfType<ConflictObjectResult>();
+            result.Should().BeOfType<ObjectResult>();
+            ((ObjectResult)result).StatusCode.Should().Be(StatusCodes.Status409Conflict);
+            ((ObjectResult)result).Value.Should().BeOfType<ProblemDetails>();
         }
 
         [Fact]
@@ -125,7 +134,9 @@ namespace CRUDTests.ControllersTest
 
             var result = await Controller().PutGlobalDefaults(new GlobalDefaultsSaveRequest { DefaultCadenceDays = 999 });
 
-            result.Should().BeOfType<BadRequestObjectResult>();
+            result.Should().BeOfType<ObjectResult>();
+            ((ObjectResult)result).StatusCode.Should().Be(StatusCodes.Status400BadRequest);
+            ((ObjectResult)result).Value.Should().BeOfType<ProblemDetails>();
         }
     }
 }

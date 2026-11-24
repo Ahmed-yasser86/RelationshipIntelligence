@@ -22,7 +22,7 @@ namespace Repositories
         {
             using (Operation.Time("AddCountry staged for Country: {CountryName}", country?.CountryName))
             {
-                _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Country: {@Country}",
+                _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Country: {Country}",
                     nameof(AddCountry), DateTime.UtcNow, country);
 
                 try
@@ -45,7 +45,7 @@ namespace Repositories
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Unexpected error occurred in {MethodName} for country: {@Country}",
+                    _logger.LogError(ex, "Unexpected error occurred in {MethodName} for country: {Country}",
                         nameof(AddCountry), country);
                     throw;
                 }
@@ -56,7 +56,7 @@ namespace Repositories
         {
             using (Operation.Time("UpdateCountry staged for Country: {CountryName}", country?.CountryName))
             {
-                _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Country: {@Country}",
+                _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Country: {Country}",
                     nameof(UpdateCountry), DateTime.UtcNow, country);
 
                 try
@@ -88,7 +88,7 @@ namespace Repositories
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Unexpected error occurred in {MethodName} for country: {@Country}",
+                    _logger.LogError(ex, "Unexpected error occurred in {MethodName} for country: {Country}",
                         nameof(UpdateCountry), country);
                     throw;
                 }
@@ -99,14 +99,14 @@ namespace Repositories
         {
             using (Operation.Time("GetAllCountries database operation"))
             {
-                _logger.LogInformation("Executing {MethodName} method at {Timestamp}",
+                _logger.LogDebug("Executing {MethodName} method at {Timestamp}",
                     nameof(GetAllCountries), DateTime.UtcNow);
 
                 try
                 {
                     var countries = await _db.Countries.ToListAsync();
 
-                    _logger.LogInformation("{MethodName} completed successfully. Retrieved {Count} countries",
+                    _logger.LogDebug("{MethodName} completed successfully. Retrieved {Count} countries",
                         nameof(GetAllCountries), countries.Count);
 
                     return countries;

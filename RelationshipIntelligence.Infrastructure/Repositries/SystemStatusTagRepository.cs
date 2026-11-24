@@ -26,7 +26,7 @@ namespace Repositories
 
             using (Operation.Time("GetSystemStatusTagsByEnums database query for {Count} values", idList.Count))
             {
-                _logger.LogInformation("Executing {MethodName} method at {Timestamp}. StatusTagIds: {@StatusTagIds}",
+                _logger.LogInformation("Executing {MethodName} method at {Timestamp}. StatusTagIds: {StatusTagIds}",
                     nameof(GetSystemStatusTagsByEnums), DateTime.UtcNow, idList);
 
                 try
@@ -45,17 +45,17 @@ namespace Repositories
                     {
                         var foundIds = tags.Select(t => t.StatusTagId).ToHashSet();
                         var missing = idList.Where(id => !foundIds.Contains(id));
-                        _logger.LogWarning("Some SystemStatusTag reference rows are missing for enum values: {@MissingIds}. Seed data may need to be applied.", missing);
+                        _logger.LogWarning("Some SystemStatusTag reference rows are missing for enum values: {MissingIds}. Seed data may need to be applied.", missing);
                     }
 
-                    _logger.LogInformation("{MethodName} completed successfully. Found {FoundCount} of {RequestedCount} requested values",
+                    _logger.LogDebug("{MethodName} completed successfully. Found {FoundCount} of {RequestedCount} requested values",
                         nameof(GetSystemStatusTagsByEnums), tags.Count, idList.Count);
 
                     return tags;
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Error occurred in {MethodName} for values: {@StatusTagIds}",
+                    _logger.LogError(ex, "Error occurred in {MethodName} for values: {StatusTagIds}",
                         nameof(GetSystemStatusTagsByEnums), idList);
                     throw;
                 }
@@ -96,13 +96,13 @@ namespace Repositories
         {
             using (Operation.Time("GetAllSystemStatusTags database operation"))
             {
-                _logger.LogInformation("Executing {MethodName} method at {Timestamp}", nameof(GetAllSystemStatusTags), DateTime.UtcNow);
+                _logger.LogDebug("Executing {MethodName} method at {Timestamp}", nameof(GetAllSystemStatusTags), DateTime.UtcNow);
 
                 try
                 {
                     var tags = await _db.SystemStatusTags.ToListAsync();
 
-                    _logger.LogInformation("{MethodName} completed successfully. Retrieved {Count} tags",
+                    _logger.LogDebug("{MethodName} completed successfully. Retrieved {Count} tags",
                         nameof(GetAllSystemStatusTags), tags.Count);
 
                     return tags;

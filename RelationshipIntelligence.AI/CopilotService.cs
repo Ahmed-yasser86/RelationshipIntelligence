@@ -320,7 +320,7 @@ namespace RelationshipIntelligence.AI
                 "Two to four steps. Human voice throughout: no band/score jargon, no tool names, no section labels. The user decides; you only recommend.", null);
 
             var person = await _persons.GetPersonByPersonId(personId);
-            var actions = ParsePlanSteps(text, personId, person?.Name);
+            var actions = ParsePlanSteps(text, personId, person?.Name, _logger);
             if (actions.Count == 0)
                 actions.Add(await FallbackPlanActionAsync(personId, person?.Name, text));
             return new PlanSuggestionDto
@@ -332,7 +332,7 @@ namespace RelationshipIntelligence.AI
             };
         }
 
-        private static List<PlanActionDto> ParsePlanSteps(string text, Guid personId, string? personName)
+        private static List<PlanActionDto> ParsePlanSteps(string text, Guid personId, string? personName, ILogger? logger = null)
         {
             try
             {
@@ -361,8 +361,9 @@ namespace RelationshipIntelligence.AI
                     });
                 return steps;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                logger?.LogWarning(ex, "Plan generation failed; returning an empty plan.");
                 return new List<PlanActionDto>();
             }
         }

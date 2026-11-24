@@ -286,7 +286,7 @@ namespace Servicess
             }
             catch (Exception ex)
             {
-                _logger.LogDebug(ex, "Suggestion exclusion skipped for outreach.");
+                _logger.LogWarning(ex, "Suggestion exclusion failed for outreach; suggestions may include excluded people.");
             }
 
             foreach (var signal in signals)

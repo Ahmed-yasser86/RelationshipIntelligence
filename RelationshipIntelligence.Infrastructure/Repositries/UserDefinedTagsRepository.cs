@@ -27,7 +27,7 @@ namespace Repositories
 
             using (Operation.Time("GetUserDefinedTagsByNames database query for {Count} names", nameList.Count))
             {
-                _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Names: {@Names}",
+                _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Names: {Names}",
                     nameof(GetUserDefinedTagsByNames), DateTime.UtcNow, nameList);
 
                 try
@@ -42,14 +42,14 @@ namespace Repositories
                         .Where(t => nameList.Contains(t.TagName))
                         .ToListAsync();
 
-                    _logger.LogInformation("{MethodName} completed successfully. Found {FoundCount} of {RequestedCount} requested names",
+                    _logger.LogDebug("{MethodName} completed successfully. Found {FoundCount} of {RequestedCount} requested names",
                         nameof(GetUserDefinedTagsByNames), tags.Count, nameList.Count);
 
                     return tags;
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Error occurred in {MethodName} for names: {@Names}",
+                    _logger.LogError(ex, "Error occurred in {MethodName} for names: {Names}",
                         nameof(GetUserDefinedTagsByNames), nameList);
                     throw;
                 }
@@ -61,7 +61,7 @@ namespace Repositories
         {
             using (Operation.Time("AddUserDefinedTag staged for: {TagName}", tag?.TagName))
             {
-                _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Tag: {@UserDefinedTags}",
+                _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Tag: {UserDefinedTags}",
                     nameof(AddUserDefinedTag), DateTime.UtcNow, tag);
 
                 try
@@ -81,7 +81,7 @@ namespace Repositories
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Unexpected error occurred in {MethodName} for tag: {@UserDefinedTags}",
+                    _logger.LogError(ex, "Unexpected error occurred in {MethodName} for tag: {UserDefinedTags}",
                         nameof(AddUserDefinedTag), tag);
                     throw;
                 }
@@ -160,13 +160,13 @@ namespace Repositories
         {
             using (Operation.Time("GetAllUserDefinedTags database operation"))
             {
-                _logger.LogInformation("Executing {MethodName} method at {Timestamp}", nameof(GetAllUserDefinedTags), DateTime.UtcNow);
+                _logger.LogDebug("Executing {MethodName} method at {Timestamp}", nameof(GetAllUserDefinedTags), DateTime.UtcNow);
 
                 try
                 {
                     var tags = await _db.UserDefinedTags.ToListAsync();
 
-                    _logger.LogInformation("{MethodName} completed successfully. Retrieved {Count} tags",
+                    _logger.LogDebug("{MethodName} completed successfully. Retrieved {Count} tags",
                         nameof(GetAllUserDefinedTags), tags.Count);
 
                     return tags;

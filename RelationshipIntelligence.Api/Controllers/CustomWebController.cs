@@ -8,7 +8,6 @@ namespace ContactsManager.API.Controllers
     [Route("api/[controller]/[action]")]
     [ApiController]
     [Authorize]
-    [TypeFilter(typeof(GlobalExceptionFilter))]
     public class CustomWebController : ControllerBase
     {
 

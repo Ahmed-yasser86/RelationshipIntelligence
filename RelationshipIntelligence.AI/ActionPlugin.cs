@@ -1,4 +1,5 @@
 using Entities;
+using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel;
 using ServiceContracts;
 using ServiceContracts.DTOs;
@@ -31,6 +32,7 @@ namespace RelationshipIntelligence.AI
         private readonly IMeetingService _meetings;
         private readonly IRelationshipPreferenceService _preferences;
         private readonly IPersonSearcherService _searcher;
+        private readonly ILogger<ActionPlugin> _logger;
 
         public ActionPlugin(
             IEventService events,
@@ -38,6 +40,7 @@ namespace RelationshipIntelligence.AI
             IInteractionService interactions,
             IMeetingService meetings,
             IRelationshipPreferenceService preferences,
+            ILogger<ActionPlugin> logger,
             IPersonSearcherService? searcher = null)
         {
             _events = events;
@@ -46,6 +49,7 @@ namespace RelationshipIntelligence.AI
             _meetings = meetings;
             _preferences = preferences;
             _searcher = searcher!;
+            _logger = logger;
         }
 
         private async Task<List<(Guid PersonId, string Name)>> MatchPeopleAsync(string name)
@@ -59,9 +63,10 @@ namespace RelationshipIntelligence.AI
                 foreach (var item in page.Items.Take(5))
                     result.Add((item.PersonId, item.Name ?? "contact"));
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 // Search failure surfaces as "no match", never as a write.
+                _logger.LogWarning(ex, "Person search failed; reporting no match.");
             }
             return result;
         }

@@ -23,7 +23,7 @@ namespace Repositories
         {
             using (Operation.Time("AddContactItemRole staged for Role: {Role}", role?.Role))
             {
-                _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Role: {@ContactItemRole}",
+                _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Role: {ContactItemRole}",
                     nameof(AddContactItemRole), DateTime.UtcNow, role);
 
                 try
@@ -43,7 +43,7 @@ namespace Repositories
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Unexpected error occurred in {MethodName} for role: {@ContactItemRole}",
+                    _logger.LogError(ex, "Unexpected error occurred in {MethodName} for role: {ContactItemRole}",
                         nameof(AddContactItemRole), role);
                     throw;
                 }
@@ -131,7 +131,7 @@ namespace Repositories
                         .Where(r => r.PersonId == personId)
                         .ToListAsync();
 
-                    _logger.LogInformation("{MethodName} completed successfully. Retrieved {Count} roles for PersonId: {PersonId}",
+                    _logger.LogDebug("{MethodName} completed successfully. Retrieved {Count} roles for PersonId: {PersonId}",
                         nameof(GetAllContactItemRolesForPerson), roles.Count, personId);
 
                     return roles;

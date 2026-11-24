@@ -1,4 +1,4 @@
-using ContactsManager.API.Controllers;
+﻿using ContactsManager.API.Controllers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ServiceContracts;
@@ -42,7 +42,7 @@ namespace RelationshipIntelligence.Api.Controllers
         {
             var email = User.FindFirstValue(ClaimTypes.Email);
             if (string.IsNullOrEmpty(email))
-                return BadRequest("No email address on file.");
+                return Problem(detail: "No email address on file.", statusCode: StatusCodes.Status400BadRequest);
 
             return Ok(await _digest.PreviewAsync($"{Request.Scheme}://{Request.Host}", email, customNote));
         }
@@ -52,7 +52,7 @@ namespace RelationshipIntelligence.Api.Controllers
         {
             var email = User.FindFirstValue(ClaimTypes.Email);
             if (string.IsNullOrEmpty(email))
-                return BadRequest("No email address on file.");
+                return Problem(detail: "No email address on file.", statusCode: StatusCodes.Status400BadRequest);
 
             var payload = await _digest.DeliverAsync(
                 $"{Request.Scheme}://{Request.Host}", email, request?.CustomNote);

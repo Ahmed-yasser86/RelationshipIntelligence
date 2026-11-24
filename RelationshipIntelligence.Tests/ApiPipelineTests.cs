@@ -1,5 +1,6 @@
 using Entities;
 using FluentAssertions;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -7,7 +8,11 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System.Net;
+using System.Security.Claims;
+using System.Text.Encodings.Web;
 using System.Net.Http.Json;
 
 namespace CRUDTests
@@ -38,6 +43,12 @@ namespace CRUDTests
         [InlineData("/api/Preference/GetGlobalDefaults")]
         [InlineData("/api/Preference/GetDueReminders")]
         [InlineData("/api/Network/GetNetworkGraph")]
+        [InlineData("/api/Outreach/GetBatches")]
+        [InlineData("/api/Ingestion/GetBatches")]
+        [InlineData("/api/Ingestion/GetPending")]
+        [InlineData("/api/Preference/GetPreference?personId=00000000-0000-0000-0000-000000000001")]
+        [InlineData("/api/Meeting/GetMeeting?id=00000000-0000-0000-0000-000000000001")]
+        [InlineData("/api/Digest/GetDigestPreview")]
         public async Task GetEndpoint_ExecutesPipelineAndReturnsClientOrSuccessStatus(string path)
         {
             var client = _factory.CreateClient();
@@ -89,7 +100,33 @@ namespace CRUDTests
                     services.AddDbContext<AppDBContext>(options =>
                         options.UseInMemoryDatabase("pipeline-tests"));
                     services.Configure<MvcOptions>(options => options.Filters.Clear());
+                    services.AddAuthentication(TestAuthHandler.SchemeName)
+                        .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(
+                            TestAuthHandler.SchemeName, _ => { });
                 });
+            }
+        }
+
+        private sealed class TestAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
+        {
+            public const string SchemeName = "PipelineTest";
+
+            public TestAuthHandler(
+                IOptionsMonitor<AuthenticationSchemeOptions> options,
+                ILoggerFactory logger,
+                UrlEncoder encoder)
+                : base(options, logger, encoder) { }
+
+            protected override Task<AuthenticateResult> HandleAuthenticateAsync()
+            {
+                var identity = new ClaimsIdentity(new[]
+                {
+                    new Claim(ClaimTypes.NameIdentifier, Guid.NewGuid().ToString()),
+                    new Claim(ClaimTypes.Email, "pipeline@example.com")
+                }, SchemeName);
+                var principal = new ClaimsPrincipal(identity);
+                return Task.FromResult(AuthenticateResult.Success(
+                    new AuthenticationTicket(principal, SchemeName)));
             }
         }
     }

@@ -3,6 +3,9 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using RepositryContracts;
 using ServiceContracts;
 
+namespace RelationshipIntelligence.Api.Filters;
+
+
 /// <summary>
 /// this action filter is used to validate the ownership of a person entity based on the current user.
 /// its used with an action method that has a parameter named "id" of type Guid, which represents the person id.

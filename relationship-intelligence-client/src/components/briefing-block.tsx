@@ -34,7 +34,7 @@ export function BriefingBlock() {
   useEffect(() => {
     if (briefing !== null) return;
     let cancelled = false;
-    (async () => {
+    void (async () => {
       try {
         const payload = await api.post<BriefingPayload>("/api/Copilot/PostBriefing", {});
         if (cancelled) return;

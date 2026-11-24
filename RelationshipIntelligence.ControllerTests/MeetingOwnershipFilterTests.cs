@@ -1,4 +1,5 @@
-using Entities;
+﻿using Entities;
+using RelationshipIntelligence.Api.Filters;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

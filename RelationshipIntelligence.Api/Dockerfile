@@ -17,5 +17,6 @@ RUN dotnet publish "RelationshipIntelligence.Api.csproj" -c Release -o /app/publ
 
 FROM base AS final
 WORKDIR /app
-COPY --from=publish /app/publish .
+COPY --from=publish --chown=app:app /app/publish .
+USER app
 ENTRYPOINT ["dotnet", "RelationshipIntelligence.Api.dll"]

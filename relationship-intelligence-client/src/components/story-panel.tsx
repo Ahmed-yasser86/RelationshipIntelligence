@@ -49,7 +49,7 @@ export function StoryPanel({
 
   useEffect(() => {
     let cancelled = false;
-    (async () => {
+    void (async () => {
       try {
         const [m, e] = await Promise.all([
           api.get<MemoryEntryResponse[]>(`/api/Contacts/GetRelationshipMemory?personId=${person.personId}`),

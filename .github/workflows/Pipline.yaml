@@ -47,7 +47,7 @@ jobs:
         uses: ./.github/actions/CacheDependencies
 
       - name: Run linters
-        uses: wearerequired/lint-action@v2.3.0
+        uses: wearerequired/lint-action@548d8a7c4b04d3553d32ed5b6e91eb171e10e7bb # v2.3.0
         with:
           github_token: ${{ github.token }}
           dotnet_format: true

@@ -1,4 +1,5 @@
 ﻿using ContactsManager.API.Filters;
+using RelationshipIntelligence.Api.Filters;
 using ContactsManger.Core.Domain.IdentityEntities;
 using ContactsManger.Core.ServiceContracts;
 using ContactsManger.Core.Services;
@@ -320,4 +321,7 @@ app.MapControllers();
 
 
 app.Run();
-public partial class Program { }
+public partial class Program
+{
+    protected Program() { }
+}

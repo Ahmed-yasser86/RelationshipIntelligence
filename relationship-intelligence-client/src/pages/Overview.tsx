@@ -54,7 +54,7 @@ export function Overview() {
 
   useEffect(() => {
     let cancelled = false;
-    (async () => {
+    void (async () => {
       try {
         const [queue, graph, digest] = await Promise.all([
           loadQueue(),

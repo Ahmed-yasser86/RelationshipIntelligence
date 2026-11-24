@@ -22,8 +22,7 @@ const PAGE_SIZE = 10;
 function lastContact(p: PersonView): string {
   const times = (p.interactions ?? [])
     .map((i) => i.timeOfInteraction)
-    .sort()
-    .reverse();
+    .sort((a, b) => b.localeCompare(a));
   return times.length > 0 ? timeAgo(times[0]) : "no contact yet";
 }
 

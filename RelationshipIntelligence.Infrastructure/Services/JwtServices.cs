@@ -18,7 +18,7 @@ namespace RelationshipIntelligence.Infrastructure.Services
             _configuration = configuration;
         }
 
-        private string GenerateRefreshToken()
+        private static string GenerateRefreshToken()
         {
             var randomNumber = new byte[32];
             using (var rng = RandomNumberGenerator.Create())
@@ -42,7 +42,12 @@ namespace RelationshipIntelligence.Infrastructure.Services
                 new Claim(ClaimTypes.Name, personName ?? string.Empty),
             };
 
-            SymmetricSecurityKey key = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+            var signingKey = _configuration["Jwt:Key"];
+            if (string.IsNullOrWhiteSpace(signingKey))
+                throw new InvalidOperationException(
+                    "JWT signing key is not configured. Set the 'Jwt:Key' setting through environment variables or a secret store.");
+
+            SymmetricSecurityKey key = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(Encoding.UTF8.GetBytes(signingKey));
 
             SigningCredentials credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
             JwtSecurityToken token = new JwtSecurityToken(
@@ -59,8 +64,8 @@ namespace RelationshipIntelligence.Infrastructure.Services
             return new AuthentocationRespones
             {
                 token = tokenString,
-                personeName = personName,
-                personeEmail = email,
+                personeName = personName ?? string.Empty,
+                personeEmail = email ?? string.Empty,
                 ExpirationTime = expiration,
                 refreshToken = GenerateRefreshToken(),
                 RefreshTokenExpirationTime = DateTime.UtcNow.AddMinutes(Convert.ToDouble(_configuration["RefreshToken:expiration_minutes"]))

@@ -140,7 +140,10 @@ builder.Services.AddAuthentication(options =>
     // project dir). Launched as a DLL (Production content root) the lookup
     // returns null -> GetBytes(null) throws on EVERY request, even anonymous
     // ones, because the JwtBearer options are built lazily per request.
-    var jwtKey = builder.Configuration.GetValue<string>("jwt:key") ?? string.Empty;
+    var jwtKey = builder.Configuration.GetValue<string>("jwt:key");
+    if (string.IsNullOrWhiteSpace(jwtKey))
+        throw new InvalidOperationException(
+            "JWT signing key is not configured. Set the 'jwt:key' setting through environment variables or a secret store.");
     var jwtIssuer = builder.Configuration.GetValue<string>("jwt:issuer");
     var jwtAudience = builder.Configuration.GetValue<string>("jwt:audience");
     options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters

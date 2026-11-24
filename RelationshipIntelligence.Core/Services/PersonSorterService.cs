@@ -2,7 +2,6 @@
 using ContactsManger.Core.DTOs.PersonDTOs;
 using Microsoft.Extensions.Logging;
 using RepositryContracts;
-using SerilogTimings;
 using ServiceContracts;
 using ServiceContracts.DTOs;
 using ServiceContracts.DTOs.Enums;
@@ -66,7 +65,6 @@ namespace Servicess
         /// <returns></returns>
         public async Task<List<PersonViewDTO>> getPersonsSorted(List<PersonViewDTO> persons, string? sortBy, sortedListOp sortOrder)
         {
-            using (Operation.Time("Sort {Count} persons by {SortBy} ({SortOrder})", persons?.Count ?? 0, sortBy ?? "none", sortOrder))
             {
                 _logger.LogInformation("Executing {MethodName} method at {Timestamp}. SortBy: {SortBy}, SortOrder: {SortOrder}, PersonsCount: {PersonsCount}",
                     nameof(getPersonsSorted), DateTime.UtcNow, sortBy, sortOrder, persons?.Count ?? 0);

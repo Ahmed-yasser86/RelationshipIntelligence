@@ -1,7 +1,6 @@
-using Entities;
+﻿using Entities;
 using Microsoft.Extensions.Logging;
 using RepositryContracts;
-using SerilogTimings;
 using ServiceContracts;
 using ServiceContracts.DTOs.EventDTOs;
 using System;
@@ -51,7 +50,6 @@ namespace Servicess
 
         public async Task<List<EventResponse>> ListForPersonAsync(Guid personId)
         {
-            using (Operation.Time("List relationship events"))
             {
                 var ownerId = OwnerId();
                 var person = await RequireOwnedPersonAsync(ownerId, personId);
@@ -62,7 +60,6 @@ namespace Servicess
 
         public async Task<List<EventOccurrenceDto>> GetUpcomingAsync(int days)
         {
-            using (Operation.Time("Get upcoming event occurrences"))
             {
                 if (days < 1) days = 1;
                 if (days > 366) days = 366;
@@ -133,7 +130,6 @@ namespace Servicess
 
         public async Task<EventResponse> CreateAsync(EventCreateRequest request)
         {
-            using (Operation.Time("Create relationship event"))
             {
                 if (request == null)
                     throw new ArgumentNullException(nameof(request));
@@ -179,7 +175,6 @@ namespace Servicess
 
         public async Task<EventResponse> UpdateAsync(EventUpdateRequest request)
         {
-            using (Operation.Time("Update relationship event"))
             {
                 if (request == null)
                     throw new ArgumentNullException(nameof(request));
@@ -218,7 +213,6 @@ namespace Servicess
 
         public async Task DeleteAsync(Guid eventId)
         {
-            using (Operation.Time("Delete relationship event"))
             {
                 var ownerId = OwnerId();
                 var relationshipEvent = await _events.GetAsync(ownerId, eventId);

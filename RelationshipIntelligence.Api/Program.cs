@@ -13,6 +13,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using RelationshipIntelligence.AI;
+using RelationshipIntelligence.Api.Services;
+using RelationshipIntelligence.Infrastructure.Services;
 using Repositories;
 using RepositryContracts;
 using ServiceContracts;
@@ -33,10 +35,7 @@ builder.Services.AddControllers(options =>
     options.Filters.Add(new AuthorizeFilter(policy));
 });
 
-builder.Services.AddTransient<IjwtAuthentication, JwtServices>();
-
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddScoped<ServiceContracts.ICurrentUserService, Servicess.CurrentUserService>();
 //builder.Services.AddScoped<IPersonQuickAdderService, PersonQuickAdderService  >();
 builder.Services.AddScoped<IPersonSearcherService, PersonSearcherService>();
 builder.Services.AddScoped<IPersonQuickAdderService, PersonQuickAdderService>();
@@ -47,23 +46,16 @@ builder.Services.AddScoped<ICountryAdderService, CountryAdderService>();
 builder.Services.AddScoped<ICountryGetterService, CountryGetterService>();
 builder.Services.AddScoped<IPersonAdderService, PersonAdderService>();
 builder.Services.AddScoped<CountryRepositryContract, CountryRepository>();
-builder.Services.AddScoped<PersonRepositryContract, PersonRepository>();
-builder.Services.AddScoped<CircleRepositryContract, CircleRepository>();
-builder.Services.AddScoped<CountryRepositryContract, CountryRepository>();
 
 builder.Services.AddScoped<ContactItemRoleRepositryContract, ContactItemRoleRepository>();
 builder.Services.AddScoped<ConnectionChannelRepositryContract, ConnectionChannelRepository>();
 builder.Services.AddScoped<SocialMediaAccountRepositryContract, SocialMediaAccountRepository>();
 builder.Services.AddScoped<SystemStatusTagRepositryContract, SystemStatusTagRepository>();
-builder.Services.AddScoped<UserDefinedTagsRepositryContract, UserDefinedTagsRepository>(); builder.Services.AddScoped<IPersonGetterService, PersonGetterService>();
-builder.Services.AddScoped<SystemStatusTagRepositryContract, SystemStatusTagRepository>();
+builder.Services.AddScoped<UserDefinedTagsRepositryContract, UserDefinedTagsRepository>();
 builder.Services.AddScoped<ISystemTagsGetter, SystemTagsGetterService>();
-builder.Services.AddScoped<IPersonAdderService, PersonAdderService>();
 builder.Services.AddScoped<IPersonUpdaterService, PersonUpdaterService>();
 builder.Services.AddScoped<IPersonGetterService, PersonGetterService>();
-builder.Services.AddScoped<IPersonSearcherService, PersonSearcherService>();
 builder.Services.AddScoped<IPersonSorterService, PersonSorterService>();
-builder.Services.AddScoped<IPersonQuickAdderService, PersonQuickAdderService>();
 builder.Services.AddScoped<IPersonDeleterService, PersonDeleterService>();
 builder.Services.AddScoped<IRelationshipScoringService, RelationshipScoringService>();
 builder.Services.AddScoped<IDemoWorkspaceService, DemoWorkspaceService>();
@@ -82,6 +74,7 @@ builder.Services.AddScoped<IIngestionExtractor, IngestionExtractor>();
 builder.Services.AddScoped<IAiProviderSettingsService, AiProviderSettingsService>();
 builder.Services.AddScoped<AiProviderSettingsRepositoryContract, AiProviderSettingsRepository>();
 builder.Services.AddDataProtection();
+builder.Services.AddSingleton<IApiKeyProtector, ApiKeyProtector>();
 builder.Services.AddScoped<KernelFactory>();
 builder.Services.AddScoped<RelationshipPlugin>();
 // Single production AI path: the LLM agent with tools. There is no
@@ -115,17 +108,12 @@ builder.Services.AddScoped<IDigestService>(sp => new DigestService(
     sp.GetRequiredService<IConfiguration>()["Digest:Secret"] ?? "dev-secret-change-in-production",
     sp.GetRequiredService<ILogger<DigestService>>(),
     sp.GetRequiredService<RelationshipPreferenceRepositoryContract>()));
+builder.Services.AddScoped<MaintenanceScoringFactory>();
 builder.Services.AddHostedService<RelationshipIntelligence.Api.Workers.RelationshipMaintenanceJob>();
 builder.Services.AddScoped<IInteractionService, InteractionService>();
 builder.Services.AddScoped<InteractionRepositoryContract, InteractionRepository>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-builder.Services.AddScoped<ICountryAdderService, CountryAdderService>();
-builder.Services.AddScoped<ICountryGetterService, CountryGetterService>();
-
-builder.Services.AddScoped<ISystemTagsGetter, SystemTagsGetterService>();
-
 builder.Services.AddScoped<IjwtAuthentication, JwtServices>();
-builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddScoped<PersonOwnershipFilter>();
 builder.Services.AddScoped<MeetingOwnershipFilter>();
 builder.Services.AddDbContext<AppDBContext>(options =>

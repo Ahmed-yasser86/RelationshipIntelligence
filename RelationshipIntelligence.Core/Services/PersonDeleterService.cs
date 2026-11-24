@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using ServiceContracts;
 using RepositryContracts;
-using SerilogTimings;
 
 namespace Servicess
 {
@@ -24,7 +23,6 @@ namespace Servicess
 
         public async Task<bool> DeletePersonByPersonId(Guid? personId)
         {
-            using (Operation.Time("Delete person operation for ID: {PersonId}", personId))
             {
                 _logger.LogInformation("Executing {MethodName} method at {Timestamp}. PersonId: {PersonId}",
                     nameof(DeletePersonByPersonId), DateTime.UtcNow, personId);

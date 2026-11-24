@@ -1,8 +1,7 @@
-using ContactsManger.Core.Domain.Entities;
+﻿using ContactsManger.Core.Domain.Entities;
 using Entities;
 using Microsoft.Extensions.Logging;
 using RepositryContracts;
-using SerilogTimings;
 using ServiceContracts;
 using ServiceContracts.DTOs;
 using System;
@@ -85,7 +84,6 @@ namespace Servicess
 
         public async Task<DigestPayload> BuildAsync(string baseUrl)
         {
-            using (Operation.Time("Build digest"))
             {
                 var ownerId = _currentUser.UserId;
                 var payload = new DigestPayload { WeekStartUtc = WeekStart(DateTime.UtcNow) };

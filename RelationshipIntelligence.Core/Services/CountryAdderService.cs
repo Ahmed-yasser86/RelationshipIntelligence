@@ -3,7 +3,6 @@ using ServiceContracts;
 using ServiceContracts.DTOs;
 using RepositryContracts;
 using Microsoft.Extensions.Logging;
-using SerilogTimings;
 
 namespace Servicess
 {
@@ -27,7 +26,6 @@ namespace Servicess
 
         public async Task<CountryResponse> AddCountryRequest(CountryAddRequest? countryAddRequest)
         {
-            using (Operation.Time("Add country operation for: {CountryName}", countryAddRequest?.CountryName ?? "null"))
             {
                 _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Request data: {@CountryAddRequest}",
                     nameof(AddCountryRequest), DateTime.UtcNow, countryAddRequest);

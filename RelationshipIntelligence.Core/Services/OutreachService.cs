@@ -1,7 +1,6 @@
-using Entities;
+﻿using Entities;
 using Microsoft.Extensions.Logging;
 using RepositryContracts;
-using SerilogTimings;
 using ServiceContracts;
 using ServiceContracts.DTOs;
 using ServiceContracts.DTOs.CopilotDTOs;
@@ -133,7 +132,6 @@ namespace Servicess
 
         public async Task<OutreachBatchResponse> BuildFromSignalsAsync(BuildBatchFromSignalsRequest request)
         {
-            using (Operation.Time("Build outreach batch from signals"))
             {
                 if (request == null)
                     throw new ArgumentNullException(nameof(request));
@@ -158,7 +156,6 @@ namespace Servicess
 
         public async Task<OutreachBatchResponse> BuildFromPersonsAsync(BuildBatchFromPersonsRequest request)
         {
-            using (Operation.Time("Build outreach batch from persons"))
             {
                 if (request == null)
                     throw new ArgumentNullException(nameof(request));
@@ -186,7 +183,6 @@ namespace Servicess
 
         public async Task<OutreachBatchResponse> BuildFromIntentAsync(BatchIntentDto intent)
         {
-            using (Operation.Time("Build outreach batch from intent"))
             {
                 if (intent == null)
                     throw new ArgumentNullException(nameof(intent));
@@ -466,7 +462,6 @@ namespace Servicess
 
         public async Task<OutreachBatchResponse> UpdateSettingsAsync(Guid batchId, BatchSettingsRequest request)
         {
-            using (Operation.Time("Update outreach batch settings"))
             {
                 if (request == null)
                     throw new ArgumentNullException(nameof(request));
@@ -496,7 +491,6 @@ namespace Servicess
 
         public async Task<OutreachBatchResponse> UpdateMemberAsync(Guid batchId, Guid memberId, MemberOverrideRequest request)
         {
-            using (Operation.Time("Update outreach batch member"))
             {
                 if (request == null)
                     throw new ArgumentNullException(nameof(request));
@@ -566,7 +560,6 @@ namespace Servicess
 
         public async Task<OutreachBatchResponse> GenerateDraftsAsync(Guid batchId)
         {
-            using (Operation.Time("Generate outreach drafts"))
             {
                 var ownerId = OwnerId();
                 var batch = await RequireBatchAsync(ownerId, batchId);
@@ -714,7 +707,6 @@ namespace Servicess
 
         public async Task<CommunicationDraftDto> ReviewDraftAsync(Guid draftId, DraftReviewRequest request)
         {
-            using (Operation.Time("Review communication draft"))
             {
                 if (request == null)
                     throw new ArgumentNullException(nameof(request));
@@ -824,7 +816,6 @@ namespace Servicess
 
         public async Task<CommunicationDraftDto> RegenerateDraftAsync(Guid draftId, string? customInstruction)
         {
-            using (Operation.Time("Regenerate communication draft"))
             {
                 var ownerId = OwnerId();
                 var draft = await FindDraftAsync(ownerId, draftId);
@@ -866,7 +857,6 @@ namespace Servicess
 
         public async Task<OutreachBatchResponse> ApproveAsync(Guid batchId, List<Guid>? draftIds)
         {
-            using (Operation.Time("Approve outreach batch"))
             {
                 var ownerId = OwnerId();
                 var batch = await RequireBatchAsync(ownerId, batchId);
@@ -897,7 +887,6 @@ namespace Servicess
 
         public async Task DiscardBatchAsync(Guid batchId)
         {
-            using (Operation.Time("Discard outreach batch"))
             {
                 var ownerId = OwnerId();
                 var batch = await RequireBatchAsync(ownerId, batchId);

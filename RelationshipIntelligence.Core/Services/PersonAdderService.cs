@@ -11,7 +11,6 @@ using ServiceContracts;
 using ServiceContracts.DTOs;
 using Servicess.Helpers;
 using RepositryContracts;
-using SerilogTimings;
 
 namespace Servicess
 {
@@ -50,7 +49,6 @@ namespace Servicess
         }
         public async Task<PersonRespones> AddPerson(PersonAddRequest? personAddRequest)
         {
-            using (Operation.Time("Add person operation for: {PersonName}", personAddRequest?.Name ?? "null"))
             {
                 _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Request data: {@PersonAddRequest}",
                     nameof(AddPerson), DateTime.UtcNow, personAddRequest);

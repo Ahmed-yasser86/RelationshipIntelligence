@@ -44,5 +44,62 @@ namespace CRUDTests
             typeof(ServiceContracts.ICopilotService).Assembly.GetName().Name
                 .Should().Contain("RelationshipIntelligence.Core");
         }
+
+        [Fact]
+        public void Core_ReferencesOnlyPermittedFrameworkAssemblies()
+        {
+            var forbidden = new[]
+            {
+                "Microsoft.EntityFrameworkCore",
+                "Microsoft.AspNetCore",
+                "Serilog",
+                "SerilogTimings",
+                "Microsoft.Extensions.Configuration",
+                "Microsoft.Extensions.Identity"
+            };
+
+            var referenced = CoreAssembly().GetReferencedAssemblies()
+                .Select(a => a.Name ?? string.Empty)
+                .ToList();
+
+            foreach (var prefix in forbidden)
+            {
+                referenced.Should().NotContain(n => n.StartsWith(prefix, StringComparison.Ordinal),
+                    $"because Core must not depend on implementation framework '{prefix}'");
+            }
+        }
+
+        [Fact]
+        public void Core_DoesNotContainInfrastructureOrWebImplementations()
+        {
+            var names = CoreAssembly().GetTypes()
+                .Where(t => t.FullName != null)
+                .Select(t => t.FullName!)
+                .ToList();
+
+            names.Should().NotContain(n => n.EndsWith(".JwtServices", StringComparison.Ordinal));
+            names.Should().NotContain(n => n.EndsWith(".CurrentUserService", StringComparison.Ordinal));
+            names.Should().NotContain(n => n.EndsWith(".FileEmailSender", StringComparison.Ordinal));
+            names.Should().NotContain(n => n.EndsWith(".ApiKeyProtector", StringComparison.Ordinal));
+        }
+
+        [Fact]
+        public void CoreDtos_HaveNoMvcAttributes()
+        {
+            var dtos = CoreAssembly().GetTypes()
+                .Where(t => t.FullName != null && t.FullName.Contains(".DTOs", StringComparison.Ordinal))
+                .ToList();
+
+            dtos.Should().NotBeEmpty();
+
+            foreach (var dto in dtos)
+            {
+                var mvcAttributes = dto.GetCustomAttributesData()
+                    .Where(a => a.AttributeType.FullName != null &&
+                                a.AttributeType.FullName.StartsWith("Microsoft.AspNetCore.Mvc", StringComparison.Ordinal))
+                    .ToList();
+                mvcAttributes.Should().BeEmpty($"because {dto.Name} is a framework-neutral Core DTO");
+            }
+        }
     }
 }

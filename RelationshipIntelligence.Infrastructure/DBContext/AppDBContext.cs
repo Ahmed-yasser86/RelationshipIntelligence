@@ -233,7 +233,7 @@ namespace Entities
                 .HasQueryFilter(d => d.ApplicationUserId == _currentUserId);
 
             modelBuilder.Entity<Person>()
-                .HasOne(p => p.ApplicationUser)
+                .HasOne<ApplicationUser>()
                 .WithMany()
                 .HasForeignKey(p => p.ApplicationUserId)
                 .OnDelete(DeleteBehavior.Restrict);

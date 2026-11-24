@@ -10,8 +10,6 @@ using ServiceContracts;
 using ServiceContracts.DTOs;
 using Servicess.Helpers;
 using RepositryContracts;
-using SerilogTimings;
-using Microsoft.EntityFrameworkCore;
 
 namespace Servicess
 {
@@ -51,7 +49,6 @@ namespace Servicess
 
         public async Task<PersonRespones?> UpdatePerson(PersonUpdateRequest? personUpdateRequest)
         {
-            using (Operation.Time("Update person operation for ID: {PersonId}", personUpdateRequest?.PersonId))
             {
                 _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Request data: {@PersonUpdateRequest}",
                     nameof(UpdatePerson), DateTime.UtcNow, personUpdateRequest);
@@ -148,23 +145,6 @@ namespace Servicess
                         result.PersonId, result.Name);
 
                     return result;
-                }
-                catch (DbUpdateConcurrencyException ex)
-                {
-                    foreach (var entry in ex.Entries)
-                    {
-                        Console.WriteLine($"Entity: {entry.Entity.GetType().Name}");
-                        Console.WriteLine($"State : {entry.State}");
-
-                        foreach (var property in entry.Properties)
-                        {
-                            Console.WriteLine($"{property.Metadata.Name} = {property.CurrentValue}");
-                        }
-
-                        Console.WriteLine("------------------------");
-                    }
-
-                    throw;
                 }
                 catch (ArgumentException ex)
                 {

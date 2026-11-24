@@ -1,5 +1,4 @@
 ﻿using ContactsManger.Core.Domain.Entities;
-using ContactsManger.Core.Domain.IdentityEntities;
 using Entities;
 using System;
 using System.Collections.Generic;
@@ -73,9 +72,6 @@ namespace Entities
         /// </summary>
         [Required]
         public Guid ApplicationUserId { get; set; }
-
-        [ForeignKey("ApplicationUserId")]
-        public ApplicationUser ApplicationUser { get; set; }
 
         public ICollection<SocialMediaAccount> OtherSocialMediaAccounts { get; set; } = new List<SocialMediaAccount>();
         public ICollection<Note> Notes { get; set; } = new List<Note>();

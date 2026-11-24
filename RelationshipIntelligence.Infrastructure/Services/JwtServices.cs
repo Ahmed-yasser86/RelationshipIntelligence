@@ -1,20 +1,14 @@
-﻿using ContactsManger.Core.Domain.IdentityEntities;
 using ContactsManger.Core.DTOs;
 using ContactsManger.Core.ServiceContracts;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.VisualBasic;
 using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 
-
-namespace ContactsManger.Core.Services
+namespace RelationshipIntelligence.Infrastructure.Services
 {
     public class JwtServices : IjwtAuthentication
     {
@@ -23,7 +17,6 @@ namespace ContactsManger.Core.Services
         {
             _configuration = configuration;
         }
-
 
         private string GenerateRefreshToken()
         {
@@ -35,20 +28,19 @@ namespace ContactsManger.Core.Services
             }
         }
 
-        public AuthentocationRespones Authenticate(ApplicationUser user)
+        public AuthentocationRespones Authenticate(Guid userId, string? email, string? personName)
         {
             var expiration = DateTime.UtcNow.AddMinutes(Convert.ToDouble(_configuration["Jwt:expiration_minutes"]));
 
             Claim[] claims = new Claim[]
             {
-                new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+                new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64),                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
-                new Claim(ClaimTypes.Name, user.PersonName ?? string.Empty),
-
+                new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64),
+                new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
+                new Claim(ClaimTypes.Email, email ?? string.Empty),
+                new Claim(ClaimTypes.Name, personName ?? string.Empty),
             };
-
 
             SymmetricSecurityKey key = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
 
@@ -64,13 +56,11 @@ new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds()
             JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
             var tokenString = tokenHandler.WriteToken(token);
 
-
-
             return new AuthentocationRespones
             {
                 token = tokenString,
-                personeName = user.PersonName,
-                personeEmail = user.Email,
+                personeName = personName,
+                personeEmail = email,
                 ExpirationTime = expiration,
                 refreshToken = GenerateRefreshToken(),
                 RefreshTokenExpirationTime = DateTime.UtcNow.AddMinutes(Convert.ToDouble(_configuration["RefreshToken:expiration_minutes"]))

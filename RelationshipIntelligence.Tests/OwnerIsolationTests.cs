@@ -51,7 +51,7 @@ namespace CRUDTests
                 PersonName = "Owner"
             };
 
-            var response = new ContactsManger.Core.Services.JwtServices(config.Object).Authenticate(user);
+            var response = new RelationshipIntelligence.Infrastructure.Services.JwtServices(config.Object).Authenticate(user.Id, user.Email, user.PersonName);
             var handler = new JwtSecurityTokenHandler();
             var token = handler.ReadJwtToken(response.token);
 

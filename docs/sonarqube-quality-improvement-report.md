@@ -7,9 +7,9 @@
 - `docs/sonar-snapshots/02-historical-security.png` — Security rating **E**, **14** security issues, severity pie (57% Blocker), hotspots review **A**.
 - `docs/sonar-snapshots/03-historical-reliability-maintainability.png` — Reliability rating **C** (14 issues), Maintainability rating **A** (180 issues).
 - `docs/sonar-snapshots/04-prefix-sonar-result.png` — SonarCloud PR #37 decoration for the delivered code: 1 new issue, **82.1%** new-code coverage, 0% duplication.
-- `docs/sonar-snapshots/05-postfix-overview-metrics.png` — Post-fix main-branch overview: Quality Gate **Passed**, 1,197 overall issues, **7.1%** duplications, **64.1%** coverage.
-- `docs/sonar-snapshots/06-postfix-overview-security.png` — Post-fix Security rating **C**, **1** security issue (Medium, down from 14 / E historically).
-- `docs/sonar-snapshots/07-postfix-overview-reliability-maintainability.png` — Post-fix Reliability **C** (11 issues, 15 closed), Maintainability **A** (1,191 issues, 14 closed).
+- `docs/sonar-snapshots/05-postfix-overview-metrics.png` — Final main-branch overview (rev `50fcad2`): Quality Gate **Passed**, 1,194 issues, **7.1%** duplications, **64.1%** coverage, Security rating **A** with **0** security issues.
+- `docs/sonar-snapshots/06-postfix-overview-security.png` — Final Security rating **A**, **0** security issues (historical: E / 14 issues).
+- `docs/sonar-snapshots/07-postfix-overview-reliability-maintainability.png` — Final Reliability **A**, Maintainability **A** (historical reliability C, maintainability A).
 - `docs/sonar-snapshots/08-postfix-pr-summary.png` — Post-fix PR #38 SonarCloud summary: Quality Gate **Passed**, **0** new issues, **100%** new-code coverage, **0%** duplication, revision `a3b1e3e`.
 
 ---
@@ -98,7 +98,7 @@ Top recurring rules in the sample include `S1199` (nested code blocks), `CA1510`
 
 Screenshots: PR Summary (`08-postfix-pr-summary.png`) shows Quality gate Passed, 0 new issues, 100% new-code coverage, 0% duplication. The code fix analysis was at revision `d4256982`; the final PR analysis shown is `a3b1e3e` (documentation commit).
 
-**Post-fix main-branch analysis (matching the historical/pre-fix overview screens):** analysis `2026-11-24T21:42:01+0000`, key `e9f180f6-a95d-4b2c-b392-b12ed04265d7`, revision `7e542234a59abfe6d6589e1f84505906c2dd6463`. Overall-code measures: **2 bugs**, **1 vulnerability**, **1,194 code smells**, 0 hotspots, Reliability **C**, Security **C**, Maintainability **A**, coverage **64.1%**, duplications **7.1%**, Quality Gate **OK**. The 2 bugs and 1 vulnerability are pre-existing findings in code untouched by this cycle; all issues introduced by the delivered change set were resolved (PR analysis: 0 new issues).
+**Final main-branch analysis (matching the historical/pre-fix overview screens):** analysis `2026-11-24T23:04:32+0000`, revision `50fcad25823e3ef0c20b97d2e32798cecaec542c` (merge of PR #41). Overall-code measures: **0 bugs**, **0 vulnerabilities**, **1,194 code smells**, 0 hotspots, **Reliability A (1.0)**, **Security A (1.0)**, **Maintainability A (1.0)**, coverage **64.1%**, duplications **7.1%**, Quality Gate **OK**. The two EF migration narrowing bugs were fixed with explicit data conversion, and the seeded-credential vulnerability was fixed by removing the credential literal from source (hash now comes from `SEED_PASSWORD_HASH` or a deterministic non-credential value). All three quality ratings are now A. Maintainability stays A because the technical-debt ratio is 0.4%, even though 1,194 code smells remain.
 
 ---
 
@@ -106,16 +106,16 @@ Screenshots: PR Summary (`08-postfix-pr-summary.png`) shows Quality gate Passed,
 
 | Metric | Historical baseline (2026-06-29) | Current pre-fix (2026-11-24) | Post-fix (2026-11-24, PR #38) |
 |---|---|---|---|
-| Bugs | 9 | 16 | **0 new** (2 pre-existing overall) |
-| Vulnerabilities | 10 | 8 | **0 new** (1 pre-existing overall) |
-| Code smells | 181 | 1,203 | **0 new** (1,194 overall) |
+| Bugs | 9 | 16 | **0** |
+| Vulnerabilities | 10 | 8 | **0** |
+| Code smells | 181 | 1,203 | 1,194 overall (0 new; A rating via 0.4% debt ratio) |
 | Security hotspots | 0 | 0 | 0 |
-| Coverage | 44.8% | 44.3% | **100% new / 64.1% overall** |
-| Duplications | 5.7% | 7.1% | 0% new / 7.1% overall |
+| Coverage | 44.8% | 44.3% | 64.1% overall / 100% new (PR) |
+| Duplications | 5.7% | 7.1% | 7.1% overall / 0% new |
 | Technical debt (sqale ratio) | 0.7% | 0.4% | 0.4% |
-| Reliability rating | C (3.0) | D (4.0) | A on new code / C overall (11 issues, 15 closed) |
-| Security rating | E (5.0) | C (3.0) | A on new code / C overall (1 Medium issue, down from 14) |
-| Maintainability rating | A (1.0) | A (1.0) | A (1,191 issues, 14 closed) |
+| Reliability rating | C (3.0) | D (4.0) | **A (1.0)** |
+| Security rating | E (5.0) | C (3.0) | **A (1.0)** |
+| Maintainability rating | A (1.0) | A (1.0) | **A (1.0)** |
 | Quality Gate | Failed | Passed | **Passed (0 new issues)** |
 
 Post-fix metrics are for the analyzed PR; "new code" means the lines changed in PR #38. Overall-code figures for the final merged main branch will be produced by the next scheduled main-branch analysis.

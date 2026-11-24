@@ -73,7 +73,7 @@ namespace ContactsManager.API.Controllers
                 return Unauthorized(new { message = "Invalid email or password." });
 
             var result = await _signInManager.CheckPasswordSignInAsync(
-                user, loginDTO.Password, lockoutOnFailure: true);
+                user, loginDTO.Password ?? string.Empty, lockoutOnFailure: true);
             if (!result.Succeeded)
                 return Unauthorized(new { message = "Invalid email or password." });
 

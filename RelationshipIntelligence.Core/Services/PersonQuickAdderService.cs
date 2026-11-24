@@ -39,7 +39,7 @@ namespace Servicess
         {
 
             {
-                _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Request data: {@PersonQuickAddRequest}",
+                _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Request data: {PersonQuickAddRequest}",
                     nameof(QuickAddPerson), DateTime.UtcNow, personQuickAddRequest);
 
                 try
@@ -86,12 +86,12 @@ namespace Servicess
                 }
                 catch (ValidationException ex)
                 {
-                    _logger.LogWarning(ex, "Validation error in QuickAddPerson for request: {@PersonQuickAddRequest}", personQuickAddRequest);
+                    _logger.LogWarning(ex, "Validation error in QuickAddPerson for request: {PersonQuickAddRequest}", personQuickAddRequest);
                     throw;
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Unexpected error occurred in QuickAddPerson for request: {@PersonQuickAddRequest}", personQuickAddRequest);
+                    _logger.LogError(ex, "Unexpected error occurred in QuickAddPerson for request: {PersonQuickAddRequest}", personQuickAddRequest);
                     throw;
                 }
             }

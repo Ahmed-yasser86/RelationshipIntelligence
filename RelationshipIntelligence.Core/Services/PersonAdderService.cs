@@ -50,7 +50,7 @@ namespace Servicess
         public async Task<PersonRespones> AddPerson(PersonAddRequest? personAddRequest)
         {
             {
-                _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Request data: {@PersonAddRequest}",
+                _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Request data: {PersonAddRequest}",
                     nameof(AddPerson), DateTime.UtcNow, personAddRequest);
 
                 try
@@ -126,12 +126,12 @@ namespace Servicess
                 }
                 catch (ValidationException ex)
                 {
-                    _logger.LogWarning(ex, "Validation error in AddPerson for request: {@PersonAddRequest}", personAddRequest);
+                    _logger.LogWarning(ex, "Validation error in AddPerson for request: {PersonAddRequest}", personAddRequest);
                     throw;
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Unexpected error occurred in AddPerson for request: {@PersonAddRequest}", personAddRequest);
+                    _logger.LogError(ex, "Unexpected error occurred in AddPerson for request: {PersonAddRequest}", personAddRequest);
                     throw;
                 }
             }

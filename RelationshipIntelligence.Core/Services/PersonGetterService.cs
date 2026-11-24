@@ -52,7 +52,7 @@ namespace Servicess
                         PageSize = pageSize
                     };
 
-                    _logger.LogInformation("{MethodName} completed successfully. Retrieved {Count} of {TotalCount} persons (page {PageNumber})",
+                    _logger.LogDebug("{MethodName} completed successfully. Retrieved {Count} of {TotalCount} persons (page {PageNumber})",
                         nameof(GetPersonsViewBatched), result.Items.Count, totalCount, pageNumber);
 
                     return result;
@@ -72,7 +72,7 @@ namespace Servicess
         public async Task<List<PersonRespones>> GetAllPersons()
         {
             {
-                _logger.LogInformation("Executing {MethodName} method at {Timestamp}",
+                _logger.LogDebug("Executing {MethodName} method at {Timestamp}",
                     nameof(GetAllPersons), DateTime.UtcNow);
 
                 try
@@ -80,7 +80,7 @@ namespace Servicess
                     var list = await PersonRipository.GetAllPersons();
                     var result = list.Select(p => p.ConvertToPersonRespons()).ToList();
 
-                    _logger.LogInformation("{MethodName} completed successfully. Retrieved {Count} persons",
+                    _logger.LogDebug("{MethodName} completed successfully. Retrieved {Count} persons",
                         nameof(GetAllPersons), result.Count);
 
                     return result;

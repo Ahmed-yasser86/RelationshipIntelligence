@@ -23,7 +23,7 @@ namespace Repositories
         {
             using (Operation.Time("AddSocialMediaAccount staged for URL: {Url}", account?.Url))
             {
-                _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Account: {@SocialMediaAccount}",
+                _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Account: {SocialMediaAccount}",
                     nameof(AddSocialMediaAccount), DateTime.UtcNow, account);
 
                 try
@@ -43,7 +43,7 @@ namespace Repositories
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Unexpected error occurred in {MethodName} for account: {@SocialMediaAccount}",
+                    _logger.LogError(ex, "Unexpected error occurred in {MethodName} for account: {SocialMediaAccount}",
                         nameof(AddSocialMediaAccount), account);
                     throw;
                 }
@@ -139,7 +139,7 @@ namespace Repositories
                         .Where(a => a.People.Any(p => p.PersonId == personId))
                         .ToListAsync();
 
-                    _logger.LogInformation("{MethodName} completed successfully. Retrieved {Count} accounts for PersonId: {PersonId}",
+                    _logger.LogDebug("{MethodName} completed successfully. Retrieved {Count} accounts for PersonId: {PersonId}",
                         nameof(GetAllSocialMediaAccountsForPerson), accounts.Count, personId);
 
                     return accounts;

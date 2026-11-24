@@ -28,7 +28,7 @@ namespace Repositories
 
             using (Operation.Time("GetCirclesByNames database query for {Count} names", nameList.Count))
             {
-                _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Names: {@Names}",
+                _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Names: {Names}",
                     nameof(GetCirclesByNames), DateTime.UtcNow, nameList);
 
                 try
@@ -43,14 +43,14 @@ namespace Repositories
                         .Where(c => nameList.Contains(c.Name))
                         .ToListAsync();
 
-                    _logger.LogInformation("{MethodName} completed successfully. Found {FoundCount} of {RequestedCount} requested names",
+                    _logger.LogDebug("{MethodName} completed successfully. Found {FoundCount} of {RequestedCount} requested names",
                         nameof(GetCirclesByNames), circles.Count, nameList.Count);
 
                     return circles;
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Error occurred in {MethodName} for names: {@Names}",
+                    _logger.LogError(ex, "Error occurred in {MethodName} for names: {Names}",
                         nameof(GetCirclesByNames), nameList);
                     throw;
                 }
@@ -62,7 +62,7 @@ namespace Repositories
         {
             using (Operation.Time("AddCircle staged for Circle: {CircleName}", circle?.Name))
             {
-                _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Circle: {@Circle}",
+                _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Circle: {Circle}",
                     nameof(AddCircle), DateTime.UtcNow, circle);
 
                 try
@@ -87,7 +87,7 @@ namespace Repositories
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Unexpected error occurred in {MethodName} for circle: {@Circle}",
+                    _logger.LogError(ex, "Unexpected error occurred in {MethodName} for circle: {Circle}",
                         nameof(AddCircle), circle);
                     throw;
                 }
@@ -167,13 +167,13 @@ namespace Repositories
         {
             using (Operation.Time("GetAllCircles database operation"))
             {
-                _logger.LogInformation("Executing {MethodName} method at {Timestamp}", nameof(GetAllCircles), DateTime.UtcNow);
+                _logger.LogDebug("Executing {MethodName} method at {Timestamp}", nameof(GetAllCircles), DateTime.UtcNow);
 
                 try
                 {
                     var circles = await _db.Circles.ToListAsync();
 
-                    _logger.LogInformation("{MethodName} completed successfully. Retrieved {Count} circles",
+                    _logger.LogDebug("{MethodName} completed successfully. Retrieved {Count} circles",
                         nameof(GetAllCircles), circles.Count);
 
                     return circles;

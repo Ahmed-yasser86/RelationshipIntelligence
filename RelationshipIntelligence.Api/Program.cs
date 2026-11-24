@@ -1,4 +1,5 @@
-﻿using ContactsManger.Core.Domain.IdentityEntities;
+﻿using ContactsManager.API.Filters;
+using ContactsManger.Core.Domain.IdentityEntities;
 using ContactsManger.Core.ServiceContracts;
 using ContactsManger.Core.Services;
 using Entities;
@@ -21,8 +22,31 @@ using ServiceContracts;
 using Servicess;
 using System;
 using System.Reflection;
+using System.Threading.RateLimiting;
+using Serilog;
+using Serilog.Context;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Host.UseSerilog((context, services, configuration) => configuration
+    .ReadFrom.Configuration(context.Configuration)
+    .ReadFrom.Services(services)
+    .Enrich.FromLogContext());
+
+var contactDbConnection = Environment.GetEnvironmentVariable("ConnectionStrings__ContactDb")
+    ?? builder.Configuration.GetConnectionString("ContactDb");
+if (string.IsNullOrWhiteSpace(contactDbConnection))
+    throw new InvalidOperationException(
+        "Database connection string is not configured. Set ConnectionStrings__ContactDb from a secret store.");
+
+var jwtKey = Environment.GetEnvironmentVariable("JWT_KEY");
+if (string.IsNullOrWhiteSpace(jwtKey))
+    throw new InvalidOperationException(
+        "JWT signing key is not configured. Set JWT_KEY from a secret store.");
+
+var digestSecret = Environment.GetEnvironmentVariable("DIGEST_SECRET");
+if (string.IsNullOrWhiteSpace(digestSecret))
+    throw new InvalidOperationException(
+        "Digest secret is not configured. Set DIGEST_SECRET from a secret store.");
 
 builder.Services.AddControllers(options =>
 {
@@ -35,6 +59,42 @@ builder.Services.AddControllers(options =>
     options.Filters.Add(new AuthorizeFilter(policy));
 });
 
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.OnRejected = async (context, token) =>
+    {
+        var problem = new ProblemDetails
+        {
+            Status = StatusCodes.Status429TooManyRequests,
+            Title = "Too many requests",
+            Instance = context.HttpContext.Request.Path
+        };
+        problem.Extensions["traceId"] = context.HttpContext.TraceIdentifier;
+        context.HttpContext.Response.Headers.RetryAfter = "60";
+        await context.HttpContext.Response.WriteAsJsonAsync(problem, token);
+    };
+
+    options.AddPolicy("Auth", context => RateLimitPartition.GetFixedWindowLimiter(
+        context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+        _ => new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = 10,
+            Window = TimeSpan.FromMinutes(1),
+            QueueLimit = 0
+        }));
+    options.AddPolicy("Ai", context => RateLimitPartition.GetFixedWindowLimiter(
+        context.User.Identity?.Name ?? context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+        _ => new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = 60,
+            Window = TimeSpan.FromMinutes(1),
+            QueueLimit = 0
+        }));
+});
+
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
 builder.Services.AddHttpContextAccessor();
 //builder.Services.AddScoped<IPersonQuickAdderService, PersonQuickAdderService  >();
 builder.Services.AddScoped<IPersonSearcherService, PersonSearcherService>();
@@ -105,7 +165,7 @@ builder.Services.AddScoped<IDigestService>(sp => new DigestService(
     sp.GetRequiredService<ICurrentUserService>(),
     sp.GetRequiredService<IEmailSender>(),
     sp.GetRequiredService<IUnitOfWork>(),
-    sp.GetRequiredService<IConfiguration>()["Digest:Secret"] ?? "dev-secret-change-in-production",
+    digestSecret,
     sp.GetRequiredService<ILogger<DigestService>>(),
     sp.GetRequiredService<RelationshipPreferenceRepositoryContract>()));
 builder.Services.AddScoped<MaintenanceScoringFactory>();
@@ -118,10 +178,20 @@ builder.Services.AddScoped<PersonOwnershipFilter>();
 builder.Services.AddScoped<MeetingOwnershipFilter>();
 builder.Services.AddDbContext<AppDBContext>(options =>
 {
-    options.UseSqlServer(builder.Configuration.GetConnectionString("ContactDb"));
+    options.UseSqlServer(contactDbConnection);
 });
 
-builder.Services.AddIdentity<ApplicationUser, ApplicationRole>()
+builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
+{
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
+    options.Lockout.MaxFailedAccessAttempts = 5;
+    options.Lockout.AllowedForNewUsers = true;
+    options.Password.RequiredLength = 8;
+    options.Password.RequireDigit = true;
+    options.Password.RequireLowercase = true;
+    options.Password.RequireUppercase = true;
+    options.Password.RequireNonAlphanumeric = true;
+})
     .AddEntityFrameworkStores<AppDBContext>()
     .AddDefaultTokenProviders()
     .AddUserStore<UserStore<ApplicationUser, ApplicationRole, AppDBContext, Guid>>()
@@ -134,16 +204,7 @@ builder.Services.AddAuthentication(options =>
     options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
 }).AddJwtBearer(options =>
 {
-    // appsettings.json uses lowercase keys ("jwt:key", "jwt:issuer",
-    // "jwt:audience"). The old code read PascalCase "Jwt:key", which resolves
-    // ONLY when the config provider is case-insensitive (dotnet run from the
-    // project dir). Launched as a DLL (Production content root) the lookup
-    // returns null -> GetBytes(null) throws on EVERY request, even anonymous
-    // ones, because the JwtBearer options are built lazily per request.
-    var jwtKey = Environment.GetEnvironmentVariable("JWT_KEY");
-    if (string.IsNullOrWhiteSpace(jwtKey))
-        throw new InvalidOperationException(
-            "JWT signing key is not configured. Set the 'JWT_KEY' environment variable from a secret store.");
+    // The signing key is validated at startup above; issuer/audience come from config.
     var jwtIssuer = builder.Configuration.GetValue<string>("jwt:issuer");
     var jwtAudience = builder.Configuration.GetValue<string>("jwt:audience");
     options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
@@ -152,6 +213,8 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
+        ValidAlgorithms = new[] { Microsoft.IdentityModel.Tokens.SecurityAlgorithms.HmacSha256 },
+        ClockSkew = TimeSpan.FromMinutes(1),
         ValidIssuer = jwtIssuer,
         ValidAudience = jwtAudience,
         IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(jwtKey))
@@ -208,19 +271,13 @@ builder.Services.AddCors(options =>
     options.AddPolicy("CorsPolicy", policyBuilder =>
     {
         var allowedOrigins = builder.Configuration.GetSection("allowOrigins").Get<List<string>>();
+        if (allowedOrigins == null || allowedOrigins.Count == 0)
+            throw new InvalidOperationException(
+                "CORS origins are not configured. Set 'allowOrigins'; wildcard origins are not permitted.");
 
-        if (allowedOrigins != null && allowedOrigins.Count > 0)
-        {
-            policyBuilder.WithOrigins(allowedOrigins.ToArray())
-                         .AllowAnyHeader()
-                         .AllowAnyMethod();
-        }
-        else
-        {
-            policyBuilder.AllowAnyOrigin()
-                         .AllowAnyHeader()
-                         .AllowAnyMethod();
-        }
+        policyBuilder.WithOrigins(allowedOrigins.ToArray())
+                     .AllowAnyHeader()
+                     .AllowAnyMethod();
     });
 });
 
@@ -243,8 +300,17 @@ if (useHttpsRedirection)
     app.UseHttpsRedirection();
 }
 
+app.Use(async (context, next) =>
+{
+    using (LogContext.PushProperty("TraceId", context.TraceIdentifier))
+    {
+        await next();
+    }
+});
+app.UseExceptionHandler();
 app.UseRouting();
 app.UseCors("CorsPolicy");
+app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 

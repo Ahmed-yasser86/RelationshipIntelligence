@@ -1,10 +1,17 @@
 import { Page, expect } from "@playwright/test";
 
+export function requireEnv(name: string): string {
+  const value = process.env[name];
+  if (!value) {
+    throw new Error(`Missing required environment variable ${name}. See .env.example for configuration.`);
+  }
+  return value;
+}
+
 export const API_URL =
   process.env.E2E_API_URL ?? "http://127.0.0.1:5156";
-export const TEST_EMAIL =
-  process.env.E2E_EMAIL ?? "testuser@contactsmanager.dev";
-export const TEST_PASSWORD = process.env.E2E_PASSWORD ?? "Test123!";
+export const TEST_EMAIL = requireEnv("E2E_EMAIL");
+export const TEST_PASSWORD = requireEnv("E2E_PASSWORD");
 
 export async function loginViaApi(page: Page): Promise<void> {
   const res = await page.request.post(`${API_URL}/api/Account/PostLogin`, {

@@ -174,7 +174,7 @@ namespace Servicess
                             }
                     }
 
-                    _logger.LogInformation("{MethodName} completed successfully. Found {Count} results for SearchBy: {SearchBy}, Parameter: {Parameter}",
+                    _logger.LogDebug("{MethodName} completed successfully. Found {Count} results for SearchBy: {SearchBy}, Parameter: {Parameter}",
                         nameof(SearchPersonsBy_Batched), MatchingResults.Count, SearchBy, PersonParamter);
 
                     return new PagedResult<PersonViewDTO>
@@ -300,7 +300,7 @@ namespace Servicess
                             }
                     }
 
-                    _logger.LogInformation("{MethodName} completed successfully. Found {Count} results for SearchBy: {SearchBy}, Parameter: {Parameter}",
+                    _logger.LogDebug("{MethodName} completed successfully. Found {Count} results for SearchBy: {SearchBy}, Parameter: {Parameter}",
                         nameof(SearchPersonsBy), MatchingResults.Count, SearchBy, PersonParamter);
 
                     return MatchingResults;
@@ -320,7 +320,7 @@ namespace Servicess
             PersonCompositeFilter filter, int pageNumber, int pageSize)
         {
             {
-                _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Filter: {@Filter}",
+                _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Filter: {Filter}",
                     nameof(SearchPersonsByCompositeFilter), DateTime.UtcNow, filter);
 
                 try
@@ -400,14 +400,14 @@ namespace Servicess
                         PageSize = pageSize
                     };
 
-                    _logger.LogInformation("{MethodName} completed successfully. Found {Count} of {TotalCount} results",
+                    _logger.LogDebug("{MethodName} completed successfully. Found {Count} of {TotalCount} results",
                         nameof(SearchPersonsByCompositeFilter), result.Items.Count, totalCount);
 
                     return result;
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Error occurred in {MethodName} method. Filter: {@Filter}", nameof(SearchPersonsByCompositeFilter), filter);
+                    _logger.LogError(ex, "Error occurred in {MethodName} method. Filter: {Filter}", nameof(SearchPersonsByCompositeFilter), filter);
                     throw;
                 }
             }

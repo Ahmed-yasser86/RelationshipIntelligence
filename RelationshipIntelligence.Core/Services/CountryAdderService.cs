@@ -27,7 +27,7 @@ namespace Servicess
         public async Task<CountryResponse> AddCountryRequest(CountryAddRequest? countryAddRequest)
         {
             {
-                _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Request data: {@CountryAddRequest}",
+                _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Request data: {CountryAddRequest}",
                     nameof(AddCountryRequest), DateTime.UtcNow, countryAddRequest);
 
                 try

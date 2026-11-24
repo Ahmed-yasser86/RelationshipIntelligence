@@ -50,7 +50,7 @@ namespace Servicess
         public async Task<PersonRespones?> UpdatePerson(PersonUpdateRequest? personUpdateRequest)
         {
             {
-                _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Request data: {@PersonUpdateRequest}",
+                _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Request data: {PersonUpdateRequest}",
                     nameof(UpdatePerson), DateTime.UtcNow, personUpdateRequest);
 
                 try
@@ -80,15 +80,6 @@ namespace Servicess
 
                     if (personUpdateRequest.DateOfBirth != null && person.DateOfBirth != personUpdateRequest.DateOfBirth)
                         _logger.LogDebug("Updating DateOfBirth from '{OldValue}' to '{NewValue}'", person.DateOfBirth, personUpdateRequest.DateOfBirth);
-
-                    if (personUpdateRequest.email != null && person.email != personUpdateRequest.email)
-                        _logger.LogDebug("Updating Email from '{OldValue}' to '{NewValue}'", person.email, personUpdateRequest.email);
-
-                    if (personUpdateRequest.phone != null && person.phone != personUpdateRequest.phone)
-                        _logger.LogDebug("Updating Phone from '{OldValue}' to '{NewValue}'", person.phone, personUpdateRequest.phone);
-
-                    if (personUpdateRequest.Address != null && person.Address != personUpdateRequest.Address)
-                        _logger.LogDebug("Updating Address from '{OldValue}' to '{NewValue}'", person.Address, personUpdateRequest.Address);
 
                     person.Name = personUpdateRequest.Name ?? person.Name;
                     person.DateOfBirth = personUpdateRequest.DateOfBirth ?? person.DateOfBirth;
@@ -154,12 +145,12 @@ namespace Servicess
                 }
                 catch (ValidationException ex)
                 {
-                    _logger.LogWarning(ex, "Validation error in UpdatePerson for request: {@PersonUpdateRequest}", personUpdateRequest);
+                    _logger.LogWarning(ex, "Validation error in UpdatePerson for request: {PersonUpdateRequest}", personUpdateRequest);
                     throw;
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Unexpected error occurred in UpdatePerson for request: {@PersonUpdateRequest}", personUpdateRequest);
+                    _logger.LogError(ex, "Unexpected error occurred in UpdatePerson for request: {PersonUpdateRequest}", personUpdateRequest);
                     throw;
                 }
             }

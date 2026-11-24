@@ -114,7 +114,7 @@ namespace Servicess
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogDebug(ex, "Suggestion exclusion skipped for digest.");
+                        _logger.LogWarning(ex, "Suggestion exclusion failed for digest; excluded people may appear.");
                     }
                 }
 

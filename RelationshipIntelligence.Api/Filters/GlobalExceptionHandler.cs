@@ -30,7 +30,7 @@ namespace ContactsManager.API.Filters
             problem.Extensions["traceId"] = traceId;
 
             httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
-            await httpContext.Response.WriteAsJsonAsync(problem, cancellationToken);
+            await Results.Problem(problem).ExecuteAsync(httpContext);
             return true;
         }
     }

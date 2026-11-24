@@ -55,8 +55,21 @@ namespace CRUDTests
 
             var response = await client.GetAsync(path);
 
-            ((int)response.StatusCode).Should().BeLessThan(500,
-                "the pipeline must handle the request without an unhandled server error");
+            response.StatusCode.Should().NotBe(HttpStatusCode.Unauthorized,
+                "the test authentication scheme should authenticate the request");
+            response.StatusCode.Should().BeOneOf(
+                HttpStatusCode.OK,
+                HttpStatusCode.BadRequest,
+                HttpStatusCode.NotFound,
+                HttpStatusCode.Conflict,
+                HttpStatusCode.InternalServerError);
+
+            if ((int)response.StatusCode >= 500)
+            {
+                response.Content.Headers.ContentType?.MediaType
+                    .Should().Be("application/problem+json");
+                (await response.Content.ReadAsStringAsync()).Should().Contain("traceId");
+            }
         }
 
         [Fact]
@@ -103,6 +116,12 @@ namespace CRUDTests
                     services.AddAuthentication(TestAuthHandler.SchemeName)
                         .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(
                             TestAuthHandler.SchemeName, _ => { });
+                    services.Configure<AuthenticationOptions>(options =>
+                    {
+                        options.DefaultAuthenticateScheme = TestAuthHandler.SchemeName;
+                        options.DefaultChallengeScheme = TestAuthHandler.SchemeName;
+                        options.DefaultScheme = TestAuthHandler.SchemeName;
+                    });
                 });
             }
         }

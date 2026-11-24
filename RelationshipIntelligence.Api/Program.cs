@@ -72,7 +72,7 @@ builder.Services.AddRateLimiter(options =>
         };
         problem.Extensions["traceId"] = context.HttpContext.TraceIdentifier;
         context.HttpContext.Response.Headers.RetryAfter = "60";
-        await context.HttpContext.Response.WriteAsJsonAsync(problem, token);
+        await Results.Problem(problem).ExecuteAsync(context.HttpContext);
     };
 
     options.AddPolicy("Auth", context => RateLimitPartition.GetFixedWindowLimiter(

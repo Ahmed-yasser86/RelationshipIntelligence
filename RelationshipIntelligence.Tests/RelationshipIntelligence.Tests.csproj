@@ -23,6 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\RelationshipIntelligence.Api\RelationshipIntelligence.Api.csproj" />
     <ProjectReference Include="..\RelationshipIntelligence.Infrastructure\RelationshipIntelligence.Infrastructure.csproj" />
     <ProjectReference Include="..\RelationshipIntelligence.Core\RelationshipIntelligence.Core.csproj" />
     <ProjectReference Include="..\RelationshipIntelligence.AI\RelationshipIntelligence.AI.csproj" />

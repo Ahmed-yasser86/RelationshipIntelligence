@@ -51,7 +51,8 @@ namespace CRUDTests
                 PersonName = "Owner"
             };
 
-            var response = new RelationshipIntelligence.Infrastructure.Services.JwtServices(config.Object).Authenticate(user.Id, user.Email, user.PersonName);
+            var response = new RelationshipIntelligence.Infrastructure.Services.JwtServices(
+                config.Object, "this-is-a-test-signing-key-with-enough-length-123456").Authenticate(user.Id, user.Email, user.PersonName);
             var handler = new JwtSecurityTokenHandler();
             var token = handler.ReadJwtToken(response.token);
 

@@ -13,9 +13,12 @@ namespace RelationshipIntelligence.Infrastructure.Services
     public class JwtServices : IjwtAuthentication
     {
         private readonly IConfiguration _configuration;
-        public JwtServices(IConfiguration configuration)
+        private readonly string? _signingKeyOverride;
+
+        public JwtServices(IConfiguration configuration, string? signingKeyOverride = null)
         {
             _configuration = configuration;
+            _signingKeyOverride = signingKeyOverride;
         }
 
         private static string GenerateRefreshToken()
@@ -42,10 +45,10 @@ namespace RelationshipIntelligence.Infrastructure.Services
                 new Claim(ClaimTypes.Name, personName ?? string.Empty),
             };
 
-            var signingKey = _configuration["Jwt:Key"];
+            var signingKey = _signingKeyOverride ?? Environment.GetEnvironmentVariable("JWT_KEY");
             if (string.IsNullOrWhiteSpace(signingKey))
                 throw new InvalidOperationException(
-                    "JWT signing key is not configured. Set the 'Jwt:Key' setting through environment variables or a secret store.");
+                    "JWT signing key is not configured. Set the 'JWT_KEY' environment variable from a secret store.");
 
             SymmetricSecurityKey key = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(Encoding.UTF8.GetBytes(signingKey));
 

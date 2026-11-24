@@ -25,11 +25,11 @@ namespace RelationshipIntelligence.AI
             if (Regex.IsMatch(text, @"\bmonthly\b|\bevery month\b|\bonce a month\b"))
                 return 30;
 
-            var every = Regex.Match(text, @"every\s+(\d{1,3})\s+days?");
+            var every = new Regex(@"every\s+(\d{1,3})\s+days?", RegexOptions.None, TimeSpan.FromSeconds(1)).Match(text);
             if (every.Success && int.TryParse(every.Groups[1].Value, out var days))
                 return days is >= 1 and <= 365 ? days : null;
 
-            var bare = Regex.Match(text, @"^(\d{1,3})\s*days?$");
+            var bare = new Regex(@"^(\d{1,3})\s*days?$", RegexOptions.None, TimeSpan.FromSeconds(1)).Match(text);
             if (bare.Success && int.TryParse(bare.Groups[1].Value, out var bareDays))
                 return bareDays is >= 1 and <= 365 ? bareDays : null;
 

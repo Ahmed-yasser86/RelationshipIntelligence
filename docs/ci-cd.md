@@ -251,6 +251,8 @@ flowchart TB
 
 **Why SonarCloud:** Free for open source, integrates with GitHub PRs, enforces quality automatically.
 
+**Coverage scope (approved 2026-11-24):** unit coverage is measured on application/domain services and filters. Composition root (`Program.cs`), controllers, DTOs, infrastructure repositories, EF migrations and Playwright e2e helpers are excluded from the *unit* coverage calculation via `sonar.coverage.exclusions` in `.github/actions/SonarCloud/SonarScane/action.yaml`. Those areas are exercised by the controller test suite, the API pipeline integration tests and the e2e suite instead; they are not excluded from static analysis or issue detection.
+
 ---
 
 ### 4.5 Security Scans (Parallel)

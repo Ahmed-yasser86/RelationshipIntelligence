@@ -214,6 +214,21 @@ dotnet test RelationshipIntelligence.sln
 Sign in with `testuser@contactsmanager.dev` / `Test123!`. Details:
 [development](docs/development.md) · [reproducibility](docs/reproducibility.md).
 
+## SonarCloud quality evidence
+
+Verified three-snapshot history (see [report](docs/sonarqube-quality-improvement-report.md) and [screenshots](docs/sonar-snapshots/)):
+
+| Metric | Historical (2026-06-29) | Delivered pre-fix (2026-11-24) | Post-fix (PR #38) |
+|---|---|---|---|
+| Bugs | 9 | 16 | **0** |
+| Vulnerabilities | 10 | 8 | **0** |
+| Quality Gate | Failed | Passed | **Passed, 0 new issues** |
+| Reliability rating | C | D | **A** |
+| Security rating | E | C | **A** |
+| New-code coverage | – | 82.1% | **100%** |
+
+The historical snapshot is the genuine SonarCloud analysis of project `ai-ContactsManager` (revision `bd506797…`); the delivered and post-fix snapshots are from project `RelationshipIntelligence` (revisions `eb5f5da…` and `d4256982…`). No values are estimated.
+
 ## Documentation index
 
 | Document | What it covers | For whom |
@@ -234,6 +249,7 @@ Sign in with `testuser@contactsmanager.dev` / `Test123!`. Details:
 | [Development](docs/development.md) | Setup, scripts, conventions | Devs |
 | [CI/CD](docs/ci-cd.md) | Pipeline, gates, delivery | Devs, owners |
 | [Evidence ledger](docs/documentation-evidence-ledger.md) | Claim → source → status | Researchers |
+| [SonarCloud quality history](docs/sonarqube-quality-improvement-report.md) | Verified before/after quality snapshots | Everyone |
 | [Screenshots](docs/screenshots/README.md) | Real UI captures of every screen | Everyone |
 | [Full image gallery](docs/screenshots/GALLERY.md) | Every screenshot in one scroll | Everyone |
 | [Existing methodology](docs/METHODOLOGY.md) | Original method record | Researchers |

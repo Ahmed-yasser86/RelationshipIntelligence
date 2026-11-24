@@ -33,7 +33,7 @@ export function PreferenceCard({ personId, personName }: { personId: string; per
 
   useEffect(() => {
     let cancelled = false;
-    (async () => {
+    void (async () => {
       try {
         const p = await api.get<RelationshipPreference>(`/api/Preference/GetPreference?personId=${personId}`);
         if (cancelled) return;

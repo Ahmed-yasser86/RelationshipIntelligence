@@ -21,18 +21,14 @@ namespace RelationshipIntelligence.AI
         /// </summary>
         public static string? ExtractUnknownName(string message)
         {
-            var first = true;
-            foreach (System.Text.RegularExpressions.Match match in System.Text.RegularExpressions.Regex.Matches(message, @"\b[A-Z][a-z]{2,}\b"))
-            {
-                if (first)
-                {
-                    first = false;
-                    continue;
-                }
-                if (!NonNames.Contains(match.Value))
-                    return match.Value;
-            }
-            return null;
+            return new System.Text.RegularExpressions.Regex(
+                    @"\b[A-Z][a-z]{2,}\b",
+                    System.Text.RegularExpressions.RegexOptions.None,
+                    TimeSpan.FromSeconds(1))
+                .Matches(message)
+                .Skip(1)
+                .Select(match => match.Value)
+                .FirstOrDefault(value => !NonNames.Contains(value));
         }
 
         public static bool DismissesPerson(string lower) =>
@@ -58,7 +54,8 @@ namespace RelationshipIntelligence.AI
         }
 
         private static List<string> Tokenize(string value) =>
-            System.Text.RegularExpressions.Regex.Matches(value.ToLowerInvariant(), @"[a-z]+")
+            new System.Text.RegularExpressions.Regex(@"[a-z]+", System.Text.RegularExpressions.RegexOptions.None, TimeSpan.FromSeconds(1))
+                .Matches(value.ToLowerInvariant())
                 .Select(m => m.Value)
                 .Where(t => t.Length >= 2)
                 .ToList();
@@ -145,7 +142,7 @@ namespace RelationshipIntelligence.AI
         {
             var s = (value ?? string.Empty).Trim().ToLowerInvariant()
                 .Replace('—', '-').Replace('–', '-');
-            return System.Text.RegularExpressions.Regex.Replace(s, @"\s+", " ");
+            return new System.Text.RegularExpressions.Regex(@"\s+", System.Text.RegularExpressions.RegexOptions.None, TimeSpan.FromSeconds(1)).Replace(s, " ");
         }
     }
 }

@@ -27,7 +27,7 @@ export function NextStep({
 
   useEffect(() => {
     let cancelled = false;
-    (async () => {
+    void (async () => {
       try {
         const [upcoming, memory] = await Promise.all([
           api.get<EventOccurrence[]>("/api/Contacts/GetUpcomingEvents?days=21"),

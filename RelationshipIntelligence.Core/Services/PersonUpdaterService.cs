@@ -65,7 +65,7 @@ namespace Servicess
                     ValidationHelpers.ValidationFunction(personUpdateRequest);
 
                     _logger.LogDebug("Retrieving existing person with ID: {PersonId}", personUpdateRequest.PersonId);
-                    var person = await PersonRipository?.GetPersonById(personUpdateRequest.PersonId);
+                    var person = await PersonRipository.GetPersonById(personUpdateRequest.PersonId);
 
                     if (person == null)
                     {

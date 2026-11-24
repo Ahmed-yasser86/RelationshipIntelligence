@@ -21,7 +21,8 @@ namespace Repositories
         private IQueryable<Meeting> WithDetails() => _db.Meetings
             .Include(m => m.People)
             .Include(m => m.Findings)
-            .Include(m => m.Brief);
+            .Include(m => m.Brief)
+            .AsSplitQuery();
 
         public async Task<List<Meeting>> ListAsync(Guid ownerId)
         {

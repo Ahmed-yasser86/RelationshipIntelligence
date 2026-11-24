@@ -411,6 +411,8 @@ namespace Servicess
                 };
             }
 
+            var lastContact = times[^1];
+
             return new RelationshipState
             {
                 ApplicationUserId = ownerId,
@@ -422,9 +424,7 @@ namespace Servicess
                     ? EvidenceStatus.Established
                     : EvidenceStatus.Insufficient,
                 CadenceReferenceDays = gaps.Count == 0 ? null : TieDecayModel.CadenceReference(gaps, prior),
-                SilenceQuantile = last == null
-                    ? null
-                    : TieDecayModel.SilenceQuantile(gaps, (now - last.Value).TotalDays),
+                SilenceQuantile = TieDecayModel.SilenceQuantile(gaps, (now - lastContact).TotalDays),
                 IsBridge = false,
                 UrgencyScore = TieDecayModel.Urgency(strength, maxStrength),
                 UpdatedAtUtc = now

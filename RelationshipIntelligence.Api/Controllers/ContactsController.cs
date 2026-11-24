@@ -1,4 +1,5 @@
 ﻿using ContactsManager.API.Filters.ContactsManager.API.Filters;
+using RelationshipIntelligence.Api.Filters;
 using ContactsManger.Core.Domain.IdentityEntities;
 using ContactsManger.Core.DTOs.PersonDTOs;
 using ContactsManger.Core.ServiceContracts;

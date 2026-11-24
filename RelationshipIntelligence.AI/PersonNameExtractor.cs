@@ -21,19 +21,14 @@ namespace RelationshipIntelligence.AI
         /// </summary>
         public static string? ExtractUnknownName(string message)
         {
-            var first = true;
-            foreach (System.Text.RegularExpressions.Match match in
-                new System.Text.RegularExpressions.Regex(@"\b[A-Z][a-z]{2,}\b", System.Text.RegularExpressions.RegexOptions.None, TimeSpan.FromSeconds(1)).Matches(message))
-            {
-                if (first)
-                {
-                    first = false;
-                    continue;
-                }
-                if (!NonNames.Contains(match.Value))
-                    return match.Value;
-            }
-            return null;
+            return new System.Text.RegularExpressions.Regex(
+                    @"\b[A-Z][a-z]{2,}\b",
+                    System.Text.RegularExpressions.RegexOptions.None,
+                    TimeSpan.FromSeconds(1))
+                .Matches(message)
+                .Skip(1)
+                .Select(match => match.Value)
+                .FirstOrDefault(value => !NonNames.Contains(value));
         }
 
         public static bool DismissesPerson(string lower) =>

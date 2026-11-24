@@ -8,8 +8,8 @@
 - `docs/sonar-snapshots/03-historical-reliability-maintainability.png` — Reliability rating **C** (14 issues), Maintainability rating **A** (180 issues).
 - `docs/sonar-snapshots/04-prefix-sonar-result.png` — SonarCloud PR #37 decoration for the delivered code: 1 new issue, **82.1%** new-code coverage, 0% duplication.
 - `docs/sonar-snapshots/05-postfix-overview-metrics.png` — Final main-branch overview (rev `50fcad2`): Quality Gate **Passed**, 1,194 issues, **7.1%** duplications, **64.1%** coverage, Security rating **A** with **0** security issues.
-- `docs/sonar-snapshots/06-postfix-overview-security.png` — Final Security rating **A**, **0** security issues (historical: E / 14 issues).
-- `docs/sonar-snapshots/07-postfix-overview-reliability-maintainability.png` — Final Reliability **A**, Maintainability **A** (historical reliability C, maintainability A).
+- `docs/sonar-snapshots/06-postfix-overview-security.png` — Final Security review rating **A**, **0** security hotspots, Reliability rating **A** with 9 low/medium issues (historical: reliability C / 14 issues, security E / 14 issues).
+- `docs/sonar-snapshots/07-postfix-overview-reliability-maintainability.png` — Final Maintainability rating **A** with 1,191 issues and its trend chart fully rendered (historical maintainability A / 180 issues).
 - `docs/sonar-snapshots/08-postfix-pr-summary.png` — Post-fix PR #38 SonarCloud summary: Quality Gate **Passed**, **0** new issues, **100%** new-code coverage, **0%** duplication, revision `a3b1e3e`.
 
 ---

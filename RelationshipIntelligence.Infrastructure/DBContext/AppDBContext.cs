@@ -360,6 +360,13 @@ namespace Entities
                 }
             );
 
+            // No credential literal is stored in source. Deployments supply a real
+            // Identity password hash via SEED_PASSWORD_HASH; tests get a deterministic
+            // non-credential placeholder so the seeded user's FK remains available.
+            var seedPasswordHash = Environment.GetEnvironmentVariable("SEED_PASSWORD_HASH")
+                ?? Convert.ToBase64String(System.Security.Cryptography.SHA256.HashData(
+                    System.Text.Encoding.UTF8.GetBytes(seedUserId.ToString())));
+
             modelBuilder.Entity<ApplicationUser>().HasData(
                 new ApplicationUser
                 {
@@ -372,15 +379,10 @@ namespace Entities
                     PersonName = "Test User",
                     SecurityStamp = "STATIC-SEED-SECURITY-STAMP-0001",
                     ConcurrencyStamp = "STATIC-SEED-CONCURRENCY-STAMP-0001",
-                    PasswordHash = "AQAAAAIAAYagAAAAEP9N9FETj6XBlr2nCwBktgDVpDvbmOXLKGisPywjI8prNBnxoqoHbJ5eYAlzc98QUw=="
+                    PasswordHash = seedPasswordHash
                 }
             );
 
-            // NOTE: this seed hash no longer matches any known password (it was
-            // historically documented as test@123456). The e2e suite uses
-            // Test123! (see relationship-intelligence-client/tests/e2e/helpers.ts).
-            // Do not "fix" by editing the hash here: rotating the seed password
-            // requires a migration + updating every e2e consumer at once.
             modelBuilder.Entity<Microsoft.AspNetCore.Identity.IdentityUserRole<Guid>>().HasData(
                 new Microsoft.AspNetCore.Identity.IdentityUserRole<Guid>
                 {

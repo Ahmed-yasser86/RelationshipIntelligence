@@ -4,7 +4,6 @@ using ContactsManger.Core.Helpers;
 using Entities;
 using Microsoft.Extensions.Logging;
 using RepositryContracts;
-using SerilogTimings;
 using ServiceContracts;
 using ServiceContracts.DTOs;
 using System;
@@ -56,7 +55,6 @@ namespace Servicess
 
         public async Task<PagedResult<PersonViewDTO>> SearchPersonsBy_Batched(string? PersonParamter, string SearchBy, int pageNumber, int pageSize)
         {
-            using (Operation.Time("Search persons by {SearchBy} with parameter: {Parameter}", SearchBy ?? "none", PersonParamter ?? "null"))
             {
                 _logger.LogInformation("Executing {MethodName} method at {Timestamp}. SearchBy: {SearchBy}, Parameter: {Parameter}",
                     nameof(SearchPersonsBy_Batched), DateTime.UtcNow, SearchBy, PersonParamter);
@@ -201,7 +199,6 @@ namespace Servicess
         [Obsolete]
         public async Task<List<PersonRespones>> SearchPersonsBy(string? PersonParamter, string SearchBy)
         {
-            using (Operation.Time("Search persons by {SearchBy} with parameter: {Parameter}", SearchBy ?? "none", PersonParamter ?? "null"))
             {
                 _logger.LogInformation("Executing {MethodName} method at {Timestamp}. SearchBy: {SearchBy}, Parameter: {Parameter}",
                     nameof(SearchPersonsBy), DateTime.UtcNow, SearchBy, PersonParamter);
@@ -322,7 +319,6 @@ namespace Servicess
         public async Task<PagedResult<PersonViewDTO>> SearchPersonsByCompositeFilter(
             PersonCompositeFilter filter, int pageNumber, int pageSize)
         {
-            using (Operation.Time("Composite filter search. Page: {PageNumber}, Size: {PageSize}", pageNumber, pageSize))
             {
                 _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Filter: {@Filter}",
                     nameof(SearchPersonsByCompositeFilter), DateTime.UtcNow, filter);

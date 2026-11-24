@@ -1,7 +1,6 @@
-using Entities;
+﻿using Entities;
 using Microsoft.Extensions.Logging;
 using RepositryContracts;
-using SerilogTimings;
 using ServiceContracts;
 using ServiceContracts.DTOs.IngestionDTOs;
 using System;
@@ -93,7 +92,6 @@ namespace Servicess
 
         public async Task<IngestionBatchDto> SubmitAsync(IngestionSubmitRequest request)
         {
-            using (Operation.Time("Submit ingestion"))
             {
                 if (request == null)
                     throw new ArgumentNullException(nameof(request));
@@ -140,7 +138,6 @@ namespace Servicess
 
         public async Task<IngestionBatchDto> SubmitForMeetingAsync(Guid meetingId)
         {
-            using (Operation.Time("Submit meeting ingestion"))
             {
                 var ownerId = OwnerId();
                 var meeting = await _meetings.GetAsync(ownerId, meetingId);
@@ -170,7 +167,6 @@ namespace Servicess
 
         public async Task<IngestionBatchDto> ProcessAsync(Guid batchId)
         {
-            using (Operation.Time("Process ingestion"))
             {
                 var ownerId = OwnerId();
                 var batch = await RequireBatchAsync(ownerId, batchId);
@@ -467,7 +463,6 @@ namespace Servicess
 
         public async Task DiscardAsync(Guid batchId)
         {
-            using (Operation.Time("Discard ingestion"))
             {
                 var ownerId = OwnerId();
                 var batch = await RequireBatchAsync(ownerId, batchId);
@@ -481,7 +476,6 @@ namespace Servicess
 
         public async Task<IngestionFindingDto> ReviewAsync(IngestionFindingReviewRequest request)
         {
-            using (Operation.Time("Review ingestion finding"))
             {
                 if (request == null)
                     throw new ArgumentNullException(nameof(request));

@@ -1,8 +1,6 @@
-using Entities;
-using Microsoft.AspNetCore.DataProtection;
+﻿using Entities;
 using Microsoft.Extensions.Logging;
 using RepositryContracts;
-using SerilogTimings;
 using ServiceContracts;
 using ServiceContracts.DTOs.CopilotDTOs;
 using System;
@@ -12,27 +10,25 @@ namespace Servicess
 {
     public class AiProviderSettingsService : IAiProviderSettingsService
     {
-        private const string ProtectorPurpose = "AiProviderKey.v1";
-
         private static readonly string[] KnownProviders = { "OpenAI", "Gemini", "Custom" };
 
         private readonly AiProviderSettingsRepositoryContract _settings;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ICurrentUserService _currentUser;
-        private readonly IDataProtector _protector;
+        private readonly IApiKeyProtector _protector;
         private readonly ILogger<AiProviderSettingsService> _logger;
 
         public AiProviderSettingsService(
             AiProviderSettingsRepositoryContract settings,
             IUnitOfWork unitOfWork,
             ICurrentUserService currentUser,
-            IDataProtectionProvider protectionProvider,
+            IApiKeyProtector protector,
             ILogger<AiProviderSettingsService> logger)
         {
             _settings = settings;
             _unitOfWork = unitOfWork;
             _currentUser = currentUser;
-            _protector = protectionProvider.CreateProtector(ProtectorPurpose);
+            _protector = protector;
             _logger = logger;
         }
 
@@ -63,7 +59,6 @@ namespace Servicess
 
         public async Task<AiProviderSettingsResponse> SaveAsync(AiProviderSettingsSaveRequest request)
         {
-            using (Operation.Time("Save AI provider settings"))
             {
                 if (request == null)
                     throw new ArgumentNullException(nameof(request));

@@ -79,7 +79,7 @@ namespace ContactsManager.API.Controllers
                 });
             }
 
-            var authenticationInformationObject = _jwtServices.Authenticate(user);
+            var authenticationInformationObject = _jwtServices.Authenticate(user.Id, user.Email, user.PersonName);
 
             user.RefreshToken = authenticationInformationObject.refreshToken;
             user.RefreshTokenExpirationTime = authenticationInformationObject.RefreshTokenExpirationTime;
@@ -134,7 +134,7 @@ namespace ContactsManager.API.Controllers
                     await _userManager.AddToRoleAsync(applicationUser, UserTypeOptions.User.ToString());
                 }
 
-                var authenticationInformationObject = _jwtServices.Authenticate(applicationUser);
+                var authenticationInformationObject = _jwtServices.Authenticate(applicationUser.Id, applicationUser.Email, applicationUser.PersonName);
                 applicationUser.RefreshToken = authenticationInformationObject.refreshToken;
                 applicationUser.RefreshTokenExpirationTime = authenticationInformationObject.RefreshTokenExpirationTime;
 

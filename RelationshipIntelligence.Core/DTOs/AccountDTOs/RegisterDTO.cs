@@ -1,5 +1,4 @@
 ﻿using ContactsManger.Core.DTOs.Enums;
-using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 
 namespace ServiceContracts.DTOs
@@ -13,12 +12,6 @@ namespace ServiceContracts.DTOs
 
         [Required(ErrorMessage = "Email can't be blank")]
         [EmailAddress(ErrorMessage = "Email should be in a proper email address format")]
-        [Remote(
-    action: "VerifayUserByEmail",
-    controller: "Account",
-    areaName: "Contacts",
-    ErrorMessage = "This email already exists"
-)]
         public string Email { get; set; }
 
 

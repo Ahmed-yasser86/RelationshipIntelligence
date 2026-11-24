@@ -4,7 +4,7 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace Servicess
+namespace RelationshipIntelligence.Infrastructure.Services
 {
     public class FileEmailSender : IEmailSender
     {

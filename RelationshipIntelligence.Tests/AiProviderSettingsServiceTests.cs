@@ -1,6 +1,5 @@
 using Entities;
 using FluentAssertions;
-using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.Logging;
 using Moq;
 using RepositryContracts;
@@ -16,10 +15,8 @@ namespace CRUDTests
 {
     public class AiProviderSettingsServiceTests
     {
-        private sealed class FakeProtector : IDataProtector
+        private sealed class FakeProtector : IApiKeyProtector
         {
-            public IDataProtector CreateProtector(string purpose) => this;
-
             public byte[] Protect(byte[] plaintext) => System.Text.Encoding.UTF8.GetBytes(
                 "PROTECTED:" + System.Text.Encoding.UTF8.GetString(plaintext));
 
@@ -30,11 +27,6 @@ namespace CRUDTests
                     throw new CryptographicException("Bad payload.");
                 return System.Text.Encoding.UTF8.GetBytes(s["PROTECTED:".Length..]);
             }
-        }
-
-        private sealed class FakeProtectionProvider : IDataProtectionProvider
-        {
-            public IDataProtector CreateProtector(string purpose) => new FakeProtector();
         }
 
         private readonly Guid _userA = Guid.NewGuid();
@@ -49,7 +41,7 @@ namespace CRUDTests
             _repoMock.Object,
             _uowMock.Object,
             _userMock.Object,
-            new FakeProtectionProvider(),
+            new FakeProtector(),
             Mock.Of<ILogger<AiProviderSettingsService>>());
 
         [Fact]

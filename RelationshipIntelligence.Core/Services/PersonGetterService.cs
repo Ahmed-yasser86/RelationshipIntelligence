@@ -2,7 +2,6 @@
 using Entities;
 using Microsoft.Extensions.Logging;
 using RepositryContracts;
-using SerilogTimings;
 using ServiceContracts;
 using ServiceContracts.DTOs;
 using System;
@@ -25,7 +24,6 @@ namespace Servicess
 
         public async Task<PagedResult<PersonViewDTO>> GetPersonsViewBatched(int pageNumber, int pageSize)
         {
-            using (Operation.Time("Get paged persons operation. Page: {PageNumber}, Size: {PageSize}", pageNumber, pageSize))
             {
                 _logger.LogInformation("Executing {MethodName} method at {Timestamp}. PageNumber: {PageNumber}, PageSize: {PageSize}",
                     nameof(GetPersonsViewBatched), DateTime.UtcNow, pageNumber, pageSize);
@@ -73,7 +71,6 @@ namespace Servicess
 
         public async Task<List<PersonRespones>> GetAllPersons()
         {
-            using (Operation.Time("Get all persons operation"))
             {
                 _logger.LogInformation("Executing {MethodName} method at {Timestamp}",
                     nameof(GetAllPersons), DateTime.UtcNow);
@@ -98,7 +95,6 @@ namespace Servicess
 
         public async Task<PersonRespones?> GetPersonByPersonId(Guid? personId)
         {
-            using (Operation.Time("Get person by ID operation for: {PersonId}", personId))
             {
                 _logger.LogInformation("Executing {MethodName} method at {Timestamp}. PersonId: {PersonId}",
                     nameof(GetPersonByPersonId), DateTime.UtcNow, personId);

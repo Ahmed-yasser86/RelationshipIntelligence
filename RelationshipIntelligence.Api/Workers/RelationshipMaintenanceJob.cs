@@ -1,14 +1,10 @@
-using Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Repositories;
-using RepositryContracts;
-using ServiceContracts;
-using Servicess;
+using RelationshipIntelligence.Infrastructure.Services;
 using System;
-using System.Linq;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -49,12 +45,10 @@ namespace RelationshipIntelligence.Api.Workers
         private async Task RecomputeAllAsync(CancellationToken token)
         {
             using var scope = _scopes.CreateScope();
-            var provider = scope.ServiceProvider;
-            var options = provider.GetRequiredService<DbContextOptions<AppDBContext>>();
-            var loggerFactory = provider.GetRequiredService<ILoggerFactory>();
+            var factory = scope.ServiceProvider.GetRequiredService<MaintenanceScoringFactory>();
 
             List<Guid> ownerIds;
-            using (var db = new AppDBContext(options, new FixedUserService(null)))
+            using (var db = factory.CreateEnumerationContext())
             {
                 ownerIds = await db.Persons
                     .IgnoreQueryFilters()
@@ -68,15 +62,11 @@ namespace RelationshipIntelligence.Api.Workers
                 if (token.IsCancellationRequested)
                     return;
 
-                using var db = new AppDBContext(options, new FixedUserService(ownerId));
-                var scoring = new RelationshipScoringService(
-                    new PersonRepository(db),
-                    new RelationshipStateRepository(
-                        db, loggerFactory.CreateLogger<RelationshipStateRepository>()),
-                    new FixedUserService(ownerId),
-                    new UnitOfWork(db),
-                    loggerFactory.CreateLogger<RelationshipScoringService>());
-                await scoring.RecomputeForOwnerAsync(ownerId);
+                var (db, scoring) = factory.CreateForOwner(ownerId);
+                using (db)
+                {
+                    await scoring.RecomputeForOwnerAsync(ownerId);
+                }
             }
 
             _logger.LogInformation("Recomputed relationship states for {Count} owners", ownerIds.Count);

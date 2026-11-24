@@ -1,8 +1,7 @@
-using ContactsManger.Core.Domain.Entities.EEnums;
+﻿using ContactsManger.Core.Domain.Entities.EEnums;
 using Entities;
 using Microsoft.Extensions.Logging;
 using RepositryContracts;
-using SerilogTimings;
 using ServiceContracts;
 using ServiceContracts.DTOs;
 using ServiceContracts.DTOs.MeetingDTOs;
@@ -132,7 +131,6 @@ namespace Servicess
 
         public async Task<List<MeetingResponse>> ListAsync()
         {
-            using (Operation.Time("List meetings"))
             {
                 var ownerId = OwnerId();
                 var meetings = await _meetings.ListAsync(ownerId);
@@ -144,7 +142,6 @@ namespace Servicess
 
         public async Task<List<MeetingResponse>> ListMeetingsForPersonAsync(Guid personId)
         {
-            using (Operation.Time("List meetings for person"))
             {
                 var ownerId = OwnerId();
                 await RequireOwnedPersonAsync(ownerId, personId);
@@ -163,7 +160,6 @@ namespace Servicess
 
         public async Task<MeetingResponse> CreatePrepAsync(MeetingCreateRequest request)
         {
-            using (Operation.Time("Create meeting preparation"))
             {
                 if (request == null)
                     throw new ArgumentNullException(nameof(request));
@@ -209,7 +205,6 @@ namespace Servicess
 
         public async Task<MeetingResponse> CreateDraftAsync(MeetingCreateRequest request)
         {
-            using (Operation.Time("Create meeting draft"))
             {
                 if (request == null)
                     throw new ArgumentNullException(nameof(request));
@@ -245,7 +240,6 @@ namespace Servicess
 
         public async Task<MeetingResponse> BeginLoggingAsync(Guid meetingId, DateTime? actualOccurredAtUtc = null)
         {
-            using (Operation.Time("Begin meeting logging"))
             {
                 var ownerId = OwnerId();
                 var meeting = await RequireMeetingAsync(ownerId, meetingId);
@@ -264,7 +258,6 @@ namespace Servicess
 
         public async Task<MeetingResponse> SetTranscriptAsync(MeetingTranscriptRequest request)
         {
-            using (Operation.Time("Set meeting transcript"))
             {
                 if (request == null)
                     throw new ArgumentNullException(nameof(request));
@@ -289,7 +282,6 @@ namespace Servicess
 
         public async Task<MeetingResponse> ProcessAsync(Guid meetingId)
         {
-            using (Operation.Time("Process meeting"))
             {
                 var ownerId = OwnerId();
                 var meeting = await RequireMeetingAsync(ownerId, meetingId);
@@ -440,7 +432,6 @@ namespace Servicess
 
         public async Task<MeetingResponse> UpdateMappingsAsync(Guid meetingId, List<PersonMappingRequest> mappings)
         {
-            using (Operation.Time("Update meeting mappings"))
             {
                 if (mappings == null)
                     throw new ArgumentNullException(nameof(mappings));
@@ -480,7 +471,6 @@ namespace Servicess
 
         public async Task<MeetingResponse> ReviewFindingAsync(FindingReviewRequest request)
         {
-            using (Operation.Time("Review meeting finding"))
             {
                 if (request == null)
                     throw new ArgumentNullException(nameof(request));
@@ -587,7 +577,6 @@ namespace Servicess
 
         public async Task<MeetingResponse> SaveBriefAsync(BriefSaveRequest request)
         {
-            using (Operation.Time("Save meeting brief"))
             {
                 if (request == null)
                     throw new ArgumentNullException(nameof(request));
@@ -634,7 +623,6 @@ namespace Servicess
 
         public async Task<MeetingResponse> GenerateBriefAsync(Guid meetingId)
         {
-            using (Operation.Time("Generate meeting brief"))
             {
                 var ownerId = OwnerId();
                 var meeting = await RequireMeetingAsync(ownerId, meetingId);
@@ -807,7 +795,6 @@ namespace Servicess
 
         public async Task<MeetingResponse> ConfirmAsync(MeetingConfirmRequest request)
         {
-            using (Operation.Time("Confirm meeting"))
             {
                 if (request == null)
                     throw new ArgumentNullException(nameof(request));
@@ -879,7 +866,6 @@ namespace Servicess
 
         public async Task DeleteAsync(Guid meetingId)
         {
-            using (Operation.Time("Delete meeting"))
             {
                 var ownerId = OwnerId();
                 var meeting = await RequireMeetingAsync(ownerId, meetingId);

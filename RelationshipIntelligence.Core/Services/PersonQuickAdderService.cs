@@ -10,7 +10,6 @@ using ServiceContracts;
 using ServiceContracts.DTOs;
 using Servicess.Helpers;
 using RepositryContracts;
-using SerilogTimings;
 
 namespace Servicess
 {
@@ -39,7 +38,6 @@ namespace Servicess
         public async Task<PersonRespones> QuickAddPerson(PersonQuickAddRequest? personQuickAddRequest)
         {
 
-            using (Operation.Time("Quick add person operation for: {PersonName}", personQuickAddRequest?.Name ?? "null"))
             {
                 _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Request data: {@PersonQuickAddRequest}",
                     nameof(QuickAddPerson), DateTime.UtcNow, personQuickAddRequest);

@@ -1,7 +1,6 @@
-using ContactsManger.Core.Domain.Entities;
+﻿using ContactsManger.Core.Domain.Entities;
 using Microsoft.Extensions.Logging;
 using RepositryContracts;
-using SerilogTimings;
 using ServiceContracts;
 using ServiceContracts.DTOs.OrganizationDTOs;
 using System;
@@ -29,7 +28,6 @@ namespace Servicess
 
         public async Task<List<OrganizationResponse>> GetAllAsync()
         {
-            using (Operation.Time("List organizations"))
             {
                 var circles = await _circles.GetCirclesWithMembers();
                 return circles
@@ -41,7 +39,6 @@ namespace Servicess
 
         public async Task<OrganizationResponse> CreateAsync(string? name)
         {
-            using (Operation.Time("Create organization {Name}", name ?? "null"))
             {
                 var clean = CleanName(name);
 
@@ -60,7 +57,6 @@ namespace Servicess
 
         public async Task<OrganizationResponse> RenameAsync(Guid id, string? name)
         {
-            using (Operation.Time("Rename organization {CircleId}", id))
             {
                 var clean = CleanName(name);
 
@@ -83,7 +79,6 @@ namespace Servicess
 
         public async Task DeleteAsync(Guid id)
         {
-            using (Operation.Time("Delete organization {CircleId}", id))
             {
                 var circles = await _circles.GetCirclesWithMembers();
                 var circle = circles.FirstOrDefault(c => c.CircleId == id);

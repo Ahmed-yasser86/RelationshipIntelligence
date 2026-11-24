@@ -1,8 +1,7 @@
-using ContactsManger.Core.Domain.Entities.EEnums;
+﻿using ContactsManger.Core.Domain.Entities.EEnums;
 using Entities;
 using Microsoft.Extensions.Logging;
 using RepositryContracts;
-using SerilogTimings;
 using ServiceContracts;
 using ServiceContracts.DTOs;
 using System;
@@ -54,7 +53,6 @@ namespace Servicess
 
         public async Task<int> RecomputeForOwnerAsync(Guid ownerId)
         {
-            using (Operation.Time("Recompute relationship states"))
             {
                 if (ownerId == Guid.Empty)
                     return 0;

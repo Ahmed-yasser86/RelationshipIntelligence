@@ -2,7 +2,12 @@
 
 **Purpose:** a traceable record of three SonarCloud snapshots for the RelationshipIntelligence repository. All figures below were retrieved from SonarCloud Web APIs (`/api/measures/component`, `/api/measures/search_history`, `/api/issues/search`, `/api/qualitygates/project_status`, `/api/project_analyses/search`) or the SonarCloud UI. Nothing is estimated or reconstructed.
 
-**Screenshots:** `docs/sonar-snapshots/01-historical-baseline.png` (legacy project overview), `02-prefix-gh-pr.png` (PR #37 Sonar bot result), `03-current-prefix-overview.png` (fresh main-branch analysis).
+**Screenshots (all taken from SonarCloud / SonarCloud PR decoration):**
+- `docs/sonar-snapshots/01-historical-metrics.png` — legacy project overview: *Last analysis 4 months ago*, Quality Gate **Failed**, **200** issues, **5.7%** duplications, **44.8%** coverage.
+- `docs/sonar-snapshots/02-historical-security.png` — Security rating **E**, **14** security issues, severity pie (57% Blocker), hotspots review **A**.
+- `docs/sonar-snapshots/03-historical-reliability-maintainability.png` — Reliability rating **C** (14 issues), Maintainability rating **A** (180 issues).
+- `docs/sonar-snapshots/04-prefix-sonar-result.png` — SonarCloud PR #37 decoration for the delivered code: 1 new issue, **82.1%** new-code coverage, 0% duplication.
+- `docs/sonar-snapshots/05-postfix-sonar-summary.png` — Post-fix PR #38 SonarCloud summary: Quality Gate **Passed**, **0** new issues, **100%** new-code coverage, **0%** duplication, revision `a3b1e3e`.
 
 ---
 
@@ -88,7 +93,7 @@ Top recurring rules in the sample include `S1199` (nested code blocks), `CA1510`
 | Duplications | 7.1% overall; 0.0% on new code |
 | Quality Gate | **OK / Passed** (0 new issues) |
 
-Screenshot: `docs/sonar-snapshots/04-postfix-analysis.png` shows the SonarCloud PR Summary with Quality gate Passed, 0 new issues, 100% new-code coverage, revision `d4256982`.
+Screenshots: `docs/sonar-snapshots/05-postfix-sonar-summary.png` shows the SonarCloud PR Summary with Quality gate Passed, 0 new issues, 100% new-code coverage, 0% duplication. The code fix analysis was at revision `d4256982`; the final PR analysis shown in the screenshot is `a3b1e3e` (documentation commit).
 
 ---
 

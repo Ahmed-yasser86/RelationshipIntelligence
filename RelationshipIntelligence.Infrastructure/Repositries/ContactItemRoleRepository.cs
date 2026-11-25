@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using RepositryContracts;
 using SerilogTimings;
+using Servicess.Helpers;
 
 namespace Repositories
 {
@@ -24,7 +25,7 @@ namespace Repositories
             using (Operation.Time("AddContactItemRole staged for Role: {Role}", role?.Role))
             {
                 _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Role: {ContactItemRole}",
-                    nameof(AddContactItemRole), DateTime.UtcNow, role);
+                    nameof(AddContactItemRole), DateTime.UtcNow, LogSanitizer.Sanitize(role));
 
                 try
                 {
@@ -37,14 +38,14 @@ namespace Repositories
                     _db.ContactItemRoles.Add(role);
 
                     _logger.LogInformation("Successfully staged ContactItemRole for insert. ID: {ContactsRoleId}, Role: {Role}",
-                        role.ContactsRoleId, role.Role);
+                        LogSanitizer.Sanitize(role.ContactsRoleId), LogSanitizer.Sanitize(role.Role));
 
                     return role;
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Unexpected error occurred in {MethodName} for role: {ContactItemRole}",
-                        nameof(AddContactItemRole), role);
+                        nameof(AddContactItemRole), LogSanitizer.Sanitize(role));
                     throw;
                 }
             }
@@ -55,30 +56,30 @@ namespace Repositories
             using (Operation.Time("GetContactItemRoleById database query for ID: {ContactsRoleId}", id))
             {
                 _logger.LogInformation("Executing {MethodName} method at {Timestamp}. ContactsRoleId: {ContactsRoleId}",
-                    nameof(GetContactItemRoleById), DateTime.UtcNow, id);
+                    nameof(GetContactItemRoleById), DateTime.UtcNow, LogSanitizer.Sanitize(id));
 
                 try
                 {
                     if (id == null || id == Guid.Empty)
                     {
-                        _logger.LogWarning("GetContactItemRoleById called with invalid ID: {ContactsRoleId}", id);
+                        _logger.LogWarning("GetContactItemRoleById called with invalid ID: {ContactsRoleId}", LogSanitizer.Sanitize(id));
                         return null;
                     }
 
                     var role = await _db.ContactItemRoles.FindAsync(id);
 
                     if (role == null)
-                        _logger.LogInformation("No ContactItemRole found with ID: {ContactsRoleId}", id);
+                        _logger.LogInformation("No ContactItemRole found with ID: {ContactsRoleId}", LogSanitizer.Sanitize(id));
                     else
                         _logger.LogInformation("Successfully retrieved ContactItemRole with ID: {ContactsRoleId}, Role: {Role}",
-                            role.ContactsRoleId, role.Role);
+                            LogSanitizer.Sanitize(role.ContactsRoleId), LogSanitizer.Sanitize(role.Role));
 
                     return role;
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Error occurred in {MethodName} for ContactsRoleId: {ContactsRoleId}",
-                        nameof(GetContactItemRoleById), id);
+                        nameof(GetContactItemRoleById), LogSanitizer.Sanitize(id));
                     throw;
                 }
             }
@@ -89,7 +90,7 @@ namespace Repositories
             using (Operation.Time("GetContactItemRoleByPersonAndRole database query for PersonId: {PersonId}, Role: {Role}", personId, role))
             {
                 _logger.LogInformation("Executing {MethodName} method at {Timestamp}. PersonId: {PersonId}, Role: {Role}",
-                    nameof(GetContactItemRoleByPersonAndRole), DateTime.UtcNow, personId, role);
+                    nameof(GetContactItemRoleByPersonAndRole), DateTime.UtcNow, LogSanitizer.Sanitize(personId), LogSanitizer.Sanitize(role));
 
                 try
                 {
@@ -103,16 +104,16 @@ namespace Repositories
                         .FirstOrDefaultAsync(r => r.PersonId == personId && r.Role == role);
 
                     if (existingRole == null)
-                        _logger.LogInformation("No ContactItemRole found for PersonId: {PersonId}, Role: {Role}", personId, role);
+                        _logger.LogInformation("No ContactItemRole found for PersonId: {PersonId}, Role: {Role}", LogSanitizer.Sanitize(personId), LogSanitizer.Sanitize(role));
                     else
-                        _logger.LogInformation("Successfully retrieved ContactItemRole with ID: {ContactsRoleId}", existingRole.ContactsRoleId);
+                        _logger.LogInformation("Successfully retrieved ContactItemRole with ID: {ContactsRoleId}", LogSanitizer.Sanitize(existingRole.ContactsRoleId));
 
                     return existingRole;
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Error occurred in {MethodName} for PersonId: {PersonId}, Role: {Role}",
-                        nameof(GetContactItemRoleByPersonAndRole), personId, role);
+                        nameof(GetContactItemRoleByPersonAndRole), LogSanitizer.Sanitize(personId), LogSanitizer.Sanitize(role));
                     throw;
                 }
             }
@@ -123,7 +124,7 @@ namespace Repositories
             using (Operation.Time("GetAllContactItemRolesForPerson database operation for PersonId: {PersonId}", personId))
             {
                 _logger.LogInformation("Executing {MethodName} method at {Timestamp}. PersonId: {PersonId}",
-                    nameof(GetAllContactItemRolesForPerson), DateTime.UtcNow, personId);
+                    nameof(GetAllContactItemRolesForPerson), DateTime.UtcNow, LogSanitizer.Sanitize(personId));
 
                 try
                 {
@@ -132,14 +133,14 @@ namespace Repositories
                         .ToListAsync();
 
                     _logger.LogDebug("{MethodName} completed successfully. Retrieved {Count} roles for PersonId: {PersonId}",
-                        nameof(GetAllContactItemRolesForPerson), roles.Count, personId);
+                        nameof(GetAllContactItemRolesForPerson), LogSanitizer.Sanitize(roles.Count), LogSanitizer.Sanitize(personId));
 
                     return roles;
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Error occurred in {MethodName} for PersonId: {PersonId}",
-                        nameof(GetAllContactItemRolesForPerson), personId);
+                        nameof(GetAllContactItemRolesForPerson), LogSanitizer.Sanitize(personId));
                     throw;
                 }
             }

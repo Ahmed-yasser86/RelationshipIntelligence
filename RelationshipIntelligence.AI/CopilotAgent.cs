@@ -1,4 +1,4 @@
-using Entities;
+﻿using Entities;
 using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
@@ -313,7 +313,7 @@ namespace RelationshipIntelligence.AI
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogDebug(ex, "Evidence enrichment skipped for person {PersonId}", session.PersonId);
+                    _logger.LogDebug(ex, "Evidence enrichment skipped for person {PersonId}", Servicess.Helpers.LogSanitizer.Sanitize(session.PersonId));
                 }
                 response.Actions.Add(new AgentAction { Kind = "open", Label = "Open relationship", Payload = session.PersonId.ToString() });
                 response.Actions.Add(new AgentAction { Kind = "log", Label = "Log interaction", Payload = session.PersonId.ToString() });

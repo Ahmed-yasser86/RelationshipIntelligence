@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using RepositryContracts;
 using ServiceContracts;
 using ServiceContracts.DTOs.OrganizationDTOs;
+using Servicess.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -50,7 +51,7 @@ namespace Servicess
                 await _circles.AddCircle(circle);
                 await _unitOfWork.SaveChangesAsync();
 
-                _logger.LogInformation("Created organization {Name} ({CircleId})", clean, circle.CircleId);
+                _logger.LogInformation("Created organization {Name} ({CircleId})", LogSanitizer.Sanitize(clean), LogSanitizer.Sanitize(circle.CircleId));
                 return OrganizationResponse.FromCircle(circle);
             }
         }
@@ -93,7 +94,7 @@ namespace Servicess
                 await _circles.RemoveCircle(circle);
                 await _unitOfWork.SaveChangesAsync();
 
-                _logger.LogInformation("Deleted organization {Name} ({CircleId})", circle.Name, id);
+                _logger.LogInformation("Deleted organization {Name} ({CircleId})", LogSanitizer.Sanitize(circle.Name), LogSanitizer.Sanitize(id));
             }
         }
 

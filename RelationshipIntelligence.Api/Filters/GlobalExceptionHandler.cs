@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Servicess.Helpers;
 
 namespace ContactsManager.API.Filters
 {
@@ -19,7 +20,7 @@ namespace ContactsManager.API.Filters
         {
             var traceId = httpContext.TraceIdentifier;
             _logger.LogError(exception, "Unhandled exception on {Path} (trace {TraceId})",
-                httpContext.Request.Path, traceId);
+                LogSanitizer.Sanitize(httpContext.Request.Path), traceId);
 
             var problem = new ProblemDetails
             {

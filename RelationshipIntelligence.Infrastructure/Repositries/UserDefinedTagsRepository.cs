@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using RepositryContracts;
 using SerilogTimings;
+using Servicess.Helpers;
 
 namespace Repositories
 {
@@ -28,7 +29,7 @@ namespace Repositories
             using (Operation.Time("GetUserDefinedTagsByNames database query for {Count} names", nameList.Count))
             {
                 _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Names: {Names}",
-                    nameof(GetUserDefinedTagsByNames), DateTime.UtcNow, nameList);
+                    nameof(GetUserDefinedTagsByNames), DateTime.UtcNow, LogSanitizer.Sanitize(nameList));
 
                 try
                 {
@@ -43,14 +44,14 @@ namespace Repositories
                         .ToListAsync();
 
                     _logger.LogDebug("{MethodName} completed successfully. Found {FoundCount} of {RequestedCount} requested names",
-                        nameof(GetUserDefinedTagsByNames), tags.Count, nameList.Count);
+                        nameof(GetUserDefinedTagsByNames), LogSanitizer.Sanitize(tags.Count), LogSanitizer.Sanitize(nameList.Count));
 
                     return tags;
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Error occurred in {MethodName} for names: {Names}",
-                        nameof(GetUserDefinedTagsByNames), nameList);
+                        nameof(GetUserDefinedTagsByNames), LogSanitizer.Sanitize(nameList));
                     throw;
                 }
             }
@@ -62,7 +63,7 @@ namespace Repositories
             using (Operation.Time("AddUserDefinedTag staged for: {TagName}", tag?.TagName))
             {
                 _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Tag: {UserDefinedTags}",
-                    nameof(AddUserDefinedTag), DateTime.UtcNow, tag);
+                    nameof(AddUserDefinedTag), DateTime.UtcNow, LogSanitizer.Sanitize(tag));
 
                 try
                 {
@@ -75,14 +76,14 @@ namespace Repositories
                     _db.UserDefinedTags.Add(tag);
 
                     _logger.LogInformation("Successfully staged UserDefinedTag for insert. ID: {TagId}, Name: {TagName}",
-                        tag.TagId, tag.TagName);
+                        LogSanitizer.Sanitize(tag.TagId), LogSanitizer.Sanitize(tag.TagName));
 
                     return tag;
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Unexpected error occurred in {MethodName} for tag: {UserDefinedTags}",
-                        nameof(AddUserDefinedTag), tag);
+                        nameof(AddUserDefinedTag), LogSanitizer.Sanitize(tag));
                     throw;
                 }
             }
@@ -93,30 +94,30 @@ namespace Repositories
             using (Operation.Time("GetUserDefinedTagById database query for ID: {TagId}", id))
             {
                 _logger.LogInformation("Executing {MethodName} method at {Timestamp}. TagId: {TagId}",
-                    nameof(GetUserDefinedTagById), DateTime.UtcNow, id);
+                    nameof(GetUserDefinedTagById), DateTime.UtcNow, LogSanitizer.Sanitize(id));
 
                 try
                 {
                     if (id == null || id == Guid.Empty)
                     {
-                        _logger.LogWarning("GetUserDefinedTagById called with invalid ID: {TagId}", id);
+                        _logger.LogWarning("GetUserDefinedTagById called with invalid ID: {TagId}", LogSanitizer.Sanitize(id));
                         return null;
                     }
 
                     var tag = await _db.UserDefinedTags.FindAsync(id);
 
                     if (tag == null)
-                        _logger.LogInformation("No UserDefinedTag found with ID: {TagId}", id);
+                        _logger.LogInformation("No UserDefinedTag found with ID: {TagId}", LogSanitizer.Sanitize(id));
                     else
                         _logger.LogInformation("Successfully retrieved UserDefinedTag with ID: {TagId}, Name: {TagName}",
-                            tag.TagId, tag.TagName);
+                            LogSanitizer.Sanitize(tag.TagId), LogSanitizer.Sanitize(tag.TagName));
 
                     return tag;
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Error occurred in {MethodName} for TagId: {TagId}",
-                        nameof(GetUserDefinedTagById), id);
+                        nameof(GetUserDefinedTagById), LogSanitizer.Sanitize(id));
                     throw;
                 }
             }
@@ -127,7 +128,7 @@ namespace Repositories
             using (Operation.Time("GetUserDefinedTagByName database query for name: {TagName}", name))
             {
                 _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Tag name: {TagName}",
-                    nameof(GetUserDefinedTagByName), DateTime.UtcNow, name);
+                    nameof(GetUserDefinedTagByName), DateTime.UtcNow, LogSanitizer.Sanitize(name));
 
                 try
                 {
@@ -140,17 +141,17 @@ namespace Repositories
                     var tag = await _db.UserDefinedTags.FirstOrDefaultAsync(t => t.TagName == name);
 
                     if (tag == null)
-                        _logger.LogInformation("No UserDefinedTag found with name: {TagName}", name);
+                        _logger.LogInformation("No UserDefinedTag found with name: {TagName}", LogSanitizer.Sanitize(name));
                     else
                         _logger.LogInformation("Successfully retrieved UserDefinedTag with ID: {TagId}, Name: {TagName}",
-                            tag.TagId, tag.TagName);
+                            LogSanitizer.Sanitize(tag.TagId), LogSanitizer.Sanitize(tag.TagName));
 
                     return tag;
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Error occurred in {MethodName} for tag name: {TagName}",
-                        nameof(GetUserDefinedTagByName), name);
+                        nameof(GetUserDefinedTagByName), LogSanitizer.Sanitize(name));
                     throw;
                 }
             }

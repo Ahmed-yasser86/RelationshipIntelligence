@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using RepositryContracts;
 using ServiceContracts;
 using ServiceContracts.DTOs.CopilotDTOs;
+using Servicess.Helpers;
 using System;
 using System.Threading.Tasks;
 
@@ -112,7 +113,7 @@ namespace Servicess
                 });
                 await _unitOfWork.SaveChangesAsync();
 
-                _logger.LogInformation("Saved AI provider settings for owner {OwnerId} (provider {Provider}, model {Model})", ownerId, provider, model);
+                _logger.LogInformation("Saved AI provider settings for owner {OwnerId} (provider {Provider}, model {Model})", LogSanitizer.Sanitize(ownerId), LogSanitizer.Sanitize(provider), LogSanitizer.Sanitize(model));
                 return await GetAsync();
             }
         }
@@ -131,7 +132,7 @@ namespace Servicess
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Stored AI provider key could not be unprotected for owner {OwnerId}", ownerId);
+                _logger.LogWarning(ex, "Stored AI provider key could not be unprotected for owner {OwnerId}", LogSanitizer.Sanitize(ownerId));
                 return null;
             }
         }

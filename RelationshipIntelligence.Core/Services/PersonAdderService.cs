@@ -51,7 +51,7 @@ namespace Servicess
         {
             {
                 _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Request data: {PersonAddRequest}",
-                    nameof(AddPerson), DateTime.UtcNow, personAddRequest);
+                    nameof(AddPerson), DateTime.UtcNow, LogSanitizer.Sanitize(personAddRequest));
 
                 try
                 {
@@ -108,7 +108,7 @@ namespace Servicess
                     await ResolveSocialMediaAccounts(person, personAddRequest.SocialMediaAccounts);
 
                     _logger.LogDebug("Adding new person with ID: {PersonId}, Name: {PersonName}",
-                        person.PersonId, person.Name);
+                        LogSanitizer.Sanitize(person.PersonId), LogSanitizer.Sanitize(person.Name));
 
                     // Stage changes only
                     await PersonRipository.AddPerson(person);
@@ -120,18 +120,18 @@ namespace Servicess
                     result.CountryName = person.Country?.CountryName;
 
                     _logger.LogInformation("Successfully added new person. ID: {PersonId}, Name: {PersonName}, Country: {CountryName}",
-                        result.PersonId, result.Name, result.CountryName);
+                        LogSanitizer.Sanitize(result.PersonId), LogSanitizer.Sanitize(result.Name), LogSanitizer.Sanitize(result.CountryName));
 
                     return result;
                 }
                 catch (ValidationException ex)
                 {
-                    _logger.LogWarning(ex, "Validation error in AddPerson for request: {PersonAddRequest}", personAddRequest);
+                    _logger.LogWarning(ex, "Validation error in AddPerson for request: {PersonAddRequest}", LogSanitizer.Sanitize(personAddRequest));
                     throw;
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Unexpected error occurred in AddPerson for request: {PersonAddRequest}", personAddRequest);
+                    _logger.LogError(ex, "Unexpected error occurred in AddPerson for request: {PersonAddRequest}", LogSanitizer.Sanitize(personAddRequest));
                     throw;
                 }
             }

@@ -76,7 +76,7 @@ namespace Servicess
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogWarning(ex, "Reminder completion failed for person {PersonId}", request.PersonId);
+                        _logger.LogWarning(ex, "Reminder completion failed for person {PersonId}", LogSanitizer.Sanitize(request.PersonId));
                     }
                 }
                 await _unitOfWork.SaveChangesAsync();

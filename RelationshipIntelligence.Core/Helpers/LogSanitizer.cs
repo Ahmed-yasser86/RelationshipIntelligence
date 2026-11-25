@@ -24,7 +24,24 @@ namespace Servicess.Helpers
                     chars[i] = ' ';
             }
 
-            text = System.Text.RegularExpressions.Regex.Replace(new string(chars), @"\s{2,}", " ").Trim();
+            var raw = new string(chars).Trim();
+            var collapsed = new System.Text.StringBuilder(raw.Length);
+            var pendingSpace = false;
+            foreach (var c in raw)
+            {
+                if (char.IsWhiteSpace(c))
+                {
+                    pendingSpace = collapsed.Length > 0;
+                    continue;
+                }
+                if (pendingSpace)
+                {
+                    collapsed.Append(' ');
+                    pendingSpace = false;
+                }
+                collapsed.Append(c);
+            }
+            text = collapsed.ToString();
             return text.Length <= MaxLength ? text : text[..MaxLength];
         }
     }

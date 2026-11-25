@@ -158,5 +158,26 @@ namespace CRUDTests
 
             result.Items.Should().ContainSingle(i => i.Name == "Salma El-Sayed");
         }
+
+        [Theory]
+        [InlineData("Name")]
+        [InlineData("email")]
+        [InlineData("phone")]
+        [InlineData("DateOfBirth")]
+        [InlineData("Circles")]
+        [InlineData("ContactItemRoles")]
+        [InlineData("SystemStatusTags")]
+        [InlineData("UserDefinedTags")]
+        [InlineData("Unknown")]
+        public async Task SearchPersonsBy_Batched_AllCriteria_ExecuteSanitizedLogging(string searchBy)
+        {
+            ArrangePeople(PersonWithCircles("Salma", "Proceedit"));
+
+            var result = await Service().SearchPersonsBy_Batched("Salma", searchBy, 1, 10);
+
+            result.Should().NotBeNull();
+            result.PageNumber.Should().Be(1);
+            result.PageSize.Should().Be(10);
+        }
     }
 }

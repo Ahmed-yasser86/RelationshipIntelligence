@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using RepositryContracts;
 using ServiceContracts;
 using ServiceContracts.DTOs;
+using Servicess.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,19 +27,19 @@ namespace Servicess
         {
             {
                 _logger.LogInformation("Executing {MethodName} method at {Timestamp}. PageNumber: {PageNumber}, PageSize: {PageSize}",
-                    nameof(GetPersonsViewBatched), DateTime.UtcNow, pageNumber, pageSize);
+                    nameof(GetPersonsViewBatched), DateTime.UtcNow, LogSanitizer.Sanitize(pageNumber), LogSanitizer.Sanitize(pageSize));
 
                 try
                 {
                     if (pageNumber < 1)
                     {
-                        _logger.LogWarning("GetPersonsViewBatched called with invalid PageNumber: {PageNumber}. Clamping to 1.", pageNumber);
+                        _logger.LogWarning("GetPersonsViewBatched called with invalid PageNumber: {PageNumber}. Clamping to 1.", LogSanitizer.Sanitize(pageNumber));
                         pageNumber = 1;
                     }
 
                     if (pageSize < 1)
                     {
-                        _logger.LogWarning("GetPersonsViewBatched called with invalid PageSize: {PageSize}. Clamping to 1.", pageSize);
+                        _logger.LogWarning("GetPersonsViewBatched called with invalid PageSize: {PageSize}. Clamping to 1.", LogSanitizer.Sanitize(pageSize));
                         pageSize = 1;
                     }
 
@@ -53,14 +54,14 @@ namespace Servicess
                     };
 
                     _logger.LogDebug("{MethodName} completed successfully. Retrieved {Count} of {TotalCount} persons (page {PageNumber})",
-                        nameof(GetPersonsViewBatched), result.Items.Count, totalCount, pageNumber);
+                        nameof(GetPersonsViewBatched), LogSanitizer.Sanitize(result.Items.Count), LogSanitizer.Sanitize(totalCount), LogSanitizer.Sanitize(pageNumber));
 
                     return result;
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Error occurred in {MethodName} method. PageNumber: {PageNumber}, PageSize: {PageSize}",
-                        nameof(GetPersonsViewBatched), pageNumber, pageSize);
+                        nameof(GetPersonsViewBatched), LogSanitizer.Sanitize(pageNumber), LogSanitizer.Sanitize(pageSize));
                     throw;
                 }
             }
@@ -81,7 +82,7 @@ namespace Servicess
                     var result = list.Select(p => p.ConvertToPersonRespons()).ToList();
 
                     _logger.LogDebug("{MethodName} completed successfully. Retrieved {Count} persons",
-                        nameof(GetAllPersons), result.Count);
+                        nameof(GetAllPersons), LogSanitizer.Sanitize(result.Count));
 
                     return result;
                 }
@@ -97,34 +98,34 @@ namespace Servicess
         {
             {
                 _logger.LogInformation("Executing {MethodName} method at {Timestamp}. PersonId: {PersonId}",
-                    nameof(GetPersonByPersonId), DateTime.UtcNow, personId);
+                    nameof(GetPersonByPersonId), DateTime.UtcNow, LogSanitizer.Sanitize(personId));
 
                 try
                 {
                     if (personId == Guid.Empty || personId == null)
                     {
-                        _logger.LogWarning("GetPersonByPersonId called with invalid PersonId: {PersonId}", personId);
+                        _logger.LogWarning("GetPersonByPersonId called with invalid PersonId: {PersonId}", LogSanitizer.Sanitize(personId));
                         return null;
                     }
 
-                    _logger.LogDebug("Retrieving person with ID: {PersonId}", personId);
+                    _logger.LogDebug("Retrieving person with ID: {PersonId}", LogSanitizer.Sanitize(personId));
                     Person? person = await PersonRipository.GetPersonById(personId);
 
                     if (person == null)
                     {
-                        _logger.LogWarning("No person found with ID: {PersonId}", personId);
+                        _logger.LogWarning("No person found with ID: {PersonId}", LogSanitizer.Sanitize(personId));
                         return null;
                     }
 
                     var result = person.ConvertToPersonRespons();
                     _logger.LogInformation("Successfully retrieved person with ID: {PersonId}, Name: {PersonName}",
-                        result.PersonId, result.Name);
+                        LogSanitizer.Sanitize(result.PersonId), LogSanitizer.Sanitize(result.Name));
 
                     return result;
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Error occurred in GetPersonByPersonId for PersonId: {PersonId}", personId);
+                    _logger.LogError(ex, "Error occurred in GetPersonByPersonId for PersonId: {PersonId}", LogSanitizer.Sanitize(personId));
                     throw;
                 }
             }

@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using RepositryContracts;
 using SerilogTimings;
+using Servicess.Helpers;
 
 namespace Repositories
 {
@@ -29,7 +30,7 @@ namespace Repositories
             using (Operation.Time("GetCirclesByNames database query for {Count} names", nameList.Count))
             {
                 _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Names: {Names}",
-                    nameof(GetCirclesByNames), DateTime.UtcNow, nameList);
+                    nameof(GetCirclesByNames), DateTime.UtcNow, LogSanitizer.Sanitize(nameList));
 
                 try
                 {
@@ -44,14 +45,14 @@ namespace Repositories
                         .ToListAsync();
 
                     _logger.LogDebug("{MethodName} completed successfully. Found {FoundCount} of {RequestedCount} requested names",
-                        nameof(GetCirclesByNames), circles.Count, nameList.Count);
+                        nameof(GetCirclesByNames), LogSanitizer.Sanitize(circles.Count), LogSanitizer.Sanitize(nameList.Count));
 
                     return circles;
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Error occurred in {MethodName} for names: {Names}",
-                        nameof(GetCirclesByNames), nameList);
+                        nameof(GetCirclesByNames), LogSanitizer.Sanitize(nameList));
                     throw;
                 }
             }
@@ -63,7 +64,7 @@ namespace Repositories
             using (Operation.Time("AddCircle staged for Circle: {CircleName}", circle?.Name))
             {
                 _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Circle: {Circle}",
-                    nameof(AddCircle), DateTime.UtcNow, circle);
+                    nameof(AddCircle), DateTime.UtcNow, LogSanitizer.Sanitize(circle));
 
                 try
                 {
@@ -81,14 +82,14 @@ namespace Repositories
                     _db.Circles.Add(circle);
 
                     _logger.LogInformation("Successfully staged circle for insert. ID: {CircleId}, Name: {CircleName}",
-                        circle.CircleId, circle.Name);
+                        LogSanitizer.Sanitize(circle.CircleId), LogSanitizer.Sanitize(circle.Name));
 
                     return circle;
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Unexpected error occurred in {MethodName} for circle: {Circle}",
-                        nameof(AddCircle), circle);
+                        nameof(AddCircle), LogSanitizer.Sanitize(circle));
                     throw;
                 }
             }
@@ -100,30 +101,30 @@ namespace Repositories
             using (Operation.Time("GetCircleById database query for ID: {CircleId}", id))
             {
                 _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Circle ID: {CircleId}",
-                    nameof(GetCircleById), DateTime.UtcNow, id);
+                    nameof(GetCircleById), DateTime.UtcNow, LogSanitizer.Sanitize(id));
 
                 try
                 {
                     if (id == null || id == Guid.Empty)
                     {
-                        _logger.LogWarning("GetCircleById called with invalid ID: {CircleId}", id);
+                        _logger.LogWarning("GetCircleById called with invalid ID: {CircleId}", LogSanitizer.Sanitize(id));
                         return null;
                     }
 
                     var circle = await _db.Circles.FindAsync(id);
 
                     if (circle == null)
-                        _logger.LogInformation("No circle found with ID: {CircleId}", id);
+                        _logger.LogInformation("No circle found with ID: {CircleId}", LogSanitizer.Sanitize(id));
                     else
                         _logger.LogInformation("Successfully retrieved circle with ID: {CircleId}, Name: {CircleName}",
-                            circle.CircleId, circle.Name);
+                            LogSanitizer.Sanitize(circle.CircleId), LogSanitizer.Sanitize(circle.Name));
 
                     return circle;
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Error occurred in {MethodName} for circle ID: {CircleId}",
-                        nameof(GetCircleById), id);
+                        nameof(GetCircleById), LogSanitizer.Sanitize(id));
                     throw;
                 }
             }
@@ -134,7 +135,7 @@ namespace Repositories
             using (Operation.Time("GetCircleByName database query for name: {CircleName}", name))
             {
                 _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Circle name: {CircleName}",
-                    nameof(GetCircleByName), DateTime.UtcNow, name);
+                    nameof(GetCircleByName), DateTime.UtcNow, LogSanitizer.Sanitize(name));
 
                 try
                 {
@@ -147,17 +148,17 @@ namespace Repositories
                     var circle = await _db.Circles.FirstOrDefaultAsync(c => c.Name == name);
 
                     if (circle == null)
-                        _logger.LogInformation("No circle found with name: {CircleName}", name);
+                        _logger.LogInformation("No circle found with name: {CircleName}", LogSanitizer.Sanitize(name));
                     else
                         _logger.LogInformation("Successfully retrieved circle with ID: {CircleId}, Name: {CircleName}",
-                            circle.CircleId, circle.Name);
+                            LogSanitizer.Sanitize(circle.CircleId), LogSanitizer.Sanitize(circle.Name));
 
                     return circle;
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Error occurred in {MethodName} for circle name: {CircleName}",
-                        nameof(GetCircleByName), name);
+                        nameof(GetCircleByName), LogSanitizer.Sanitize(name));
                     throw;
                 }
             }

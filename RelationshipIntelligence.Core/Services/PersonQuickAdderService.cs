@@ -40,7 +40,7 @@ namespace Servicess
 
             {
                 _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Request data: {PersonQuickAddRequest}",
-                    nameof(QuickAddPerson), DateTime.UtcNow, personQuickAddRequest);
+                    nameof(QuickAddPerson), DateTime.UtcNow, LogSanitizer.Sanitize(personQuickAddRequest));
 
                 try
                 {
@@ -69,7 +69,7 @@ namespace Servicess
                     await ResolveContactItemRoles(person, personQuickAddRequest.CurrentRoles);
 
                     _logger.LogDebug("Quick-adding new person with ID: {PersonId}, Name: {PersonName}",
-                        person.PersonId, person.Name);
+                        LogSanitizer.Sanitize(person.PersonId), LogSanitizer.Sanitize(person.Name));
 
                     await PersonRipository.AddPerson(person);
                     await _unitOfWork.SaveChangesAsync();
@@ -78,7 +78,7 @@ namespace Servicess
                     result.CountryName = person.Country?.CountryName;
 
                     _logger.LogInformation("Successfully quick-added new person. ID: {PersonId}, Name: {PersonName}",
-                        result.PersonId, result.Name);
+                        LogSanitizer.Sanitize(result.PersonId), LogSanitizer.Sanitize(result.Name));
 
                     return result;
 
@@ -86,12 +86,12 @@ namespace Servicess
                 }
                 catch (ValidationException ex)
                 {
-                    _logger.LogWarning(ex, "Validation error in QuickAddPerson for request: {PersonQuickAddRequest}", personQuickAddRequest);
+                    _logger.LogWarning(ex, "Validation error in QuickAddPerson for request: {PersonQuickAddRequest}", LogSanitizer.Sanitize(personQuickAddRequest));
                     throw;
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Unexpected error occurred in QuickAddPerson for request: {PersonQuickAddRequest}", personQuickAddRequest);
+                    _logger.LogError(ex, "Unexpected error occurred in QuickAddPerson for request: {PersonQuickAddRequest}", LogSanitizer.Sanitize(personQuickAddRequest));
                     throw;
                 }
             }

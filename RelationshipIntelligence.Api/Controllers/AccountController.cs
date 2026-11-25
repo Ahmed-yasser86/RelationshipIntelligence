@@ -122,10 +122,7 @@ namespace ContactsManager.API.Controllers
         [TypeFilter(typeof(ModelValidationActionFilter))]
         public async Task<IActionResult> PostRefresh(RefreshRequest request)
         {
-            if (request == null || string.IsNullOrWhiteSpace(request.Token) ||
-                string.IsNullOrWhiteSpace(request.RefreshToken))
-                return BadRequest(new { message = "Token and refresh token are required." });
-
+            // [ApiController] validates [Required] members before this action runs.
             var userId = GetUserIdFromExpiredToken(request.Token);
             if (userId == null)
                 return Unauthorized(new { message = "Invalid token." });

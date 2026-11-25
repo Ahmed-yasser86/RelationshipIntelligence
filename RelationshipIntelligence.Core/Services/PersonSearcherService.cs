@@ -4,9 +4,9 @@ using ContactsManger.Core.Helpers;
 using Entities;
 using Microsoft.Extensions.Logging;
 using RepositryContracts;
-using SerilogTimings;
 using ServiceContracts;
 using ServiceContracts.DTOs;
+using Servicess.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -56,10 +56,9 @@ namespace Servicess
 
         public async Task<PagedResult<PersonViewDTO>> SearchPersonsBy_Batched(string? PersonParamter, string SearchBy, int pageNumber, int pageSize)
         {
-            using (Operation.Time("Search persons by {SearchBy} with parameter: {Parameter}", SearchBy ?? "none", PersonParamter ?? "null"))
             {
                 _logger.LogInformation("Executing {MethodName} method at {Timestamp}. SearchBy: {SearchBy}, Parameter: {Parameter}",
-                    nameof(SearchPersonsBy_Batched), DateTime.UtcNow, SearchBy, PersonParamter);
+                    nameof(SearchPersonsBy_Batched), DateTime.UtcNow, LogSanitizer.Sanitize(SearchBy), LogSanitizer.Sanitize(PersonParamter));
 
                 try
                 {
@@ -71,7 +70,7 @@ namespace Servicess
                     {
                         case nameof(PersonRespones.Name):
                             {
-                                _logger.LogDebug("Searching persons by Name containing: {Parameter}", PersonParamter);
+                                _logger.LogDebug("Searching persons by Name containing: {Parameter}", LogSanitizer.Sanitize(PersonParamter));
                                 // Name queries are never case-sensitive: explicit
                                 // lower-casing on both sides, independent of collation.
                                 var nameParam = (PersonParamter ?? string.Empty).ToLower();
@@ -85,7 +84,7 @@ namespace Servicess
                             }
                         case nameof(PersonRespones.email):
                             {
-                                _logger.LogDebug("Searching persons by Email containing: {Parameter}", PersonParamter);
+                                _logger.LogDebug("Searching persons by Email containing: {Parameter}", LogSanitizer.Sanitize(PersonParamter));
                                 var emailParam = (PersonParamter ?? string.Empty).ToLower();
                                 var (people, count) = await PersonRipository.GetFilteredPersonsPaged(pageNumber, pageSize, p => p.email != null && p.email.ToLower().Contains(emailParam));
                                 totalCount = count;
@@ -97,7 +96,7 @@ namespace Servicess
                             }
                         case nameof(PersonRespones.phone):
                             {
-                                _logger.LogDebug("Searching persons by Phone containing: {Parameter}", PersonParamter);
+                                _logger.LogDebug("Searching persons by Phone containing: {Parameter}", LogSanitizer.Sanitize(PersonParamter));
                                 var (people, count) = await PersonRipository.GetFilteredPersonsPaged(pageNumber, pageSize, p => p.phone != null && p.phone.Contains(PersonParamter));
                                 totalCount = count;
                                 MatchingResults = people
@@ -108,7 +107,7 @@ namespace Servicess
                             }
                         case nameof(PersonRespones.DateOfBirth):
                             {
-                                _logger.LogDebug("Searching persons by DateOfBirth containing: {Parameter}", PersonParamter);
+                                _logger.LogDebug("Searching persons by DateOfBirth containing: {Parameter}", LogSanitizer.Sanitize(PersonParamter));
                                 var (people, count) = await PersonRipository.GetFilteredPersonsPaged(pageNumber, pageSize, p => p.DateOfBirth != null && p.DateOfBirth.Value.ToString("yyyy-MM-dd").Contains(PersonParamter));
                                 totalCount = count;
                                 MatchingResults = people
@@ -119,7 +118,7 @@ namespace Servicess
                             }
                         case nameof(Person.Circles):
                             {
-                                _logger.LogDebug("Searching persons by Circles containing: {Parameter}", PersonParamter);
+                                _logger.LogDebug("Searching persons by Circles containing: {Parameter}", LogSanitizer.Sanitize(PersonParamter));
 
                                 var (people, count) = await PersonRipository.GetFilteredPersonsPaged(pageNumber, pageSize, p => p.Circles.Any(c => c.Name.Contains(PersonParamter)));
                                 totalCount = count;
@@ -131,7 +130,7 @@ namespace Servicess
                             }
                         case nameof(Person.ContactItemRoles):
                             {
-                                _logger.LogDebug("Searching persons by Role containing: {Parameter}", PersonParamter);
+                                _logger.LogDebug("Searching persons by Role containing: {Parameter}", LogSanitizer.Sanitize(PersonParamter));
                                 var (people, count) = await PersonRipository.GetFilteredPersonsPaged(pageNumber, pageSize, p => p.ContactItemRoles.Any(c => c.Role.Contains(PersonParamter)));
                                 totalCount = count;
                                 MatchingResults = people
@@ -142,7 +141,7 @@ namespace Servicess
                             }
                         case nameof(Person.SystemStatusTags):
                             {
-                                _logger.LogDebug("Searching persons by SystemStatusTags containing: {Parameter}", PersonParamter);
+                                _logger.LogDebug("Searching persons by SystemStatusTags containing: {Parameter}", LogSanitizer.Sanitize(PersonParamter));
                                 var (people, count) = await PersonRipository.GetFilteredPersonsPaged(pageNumber, pageSize, p => p.SystemStatusTags.Any(c => c.Name.Contains(PersonParamter)));
                                 totalCount = count;
                                 MatchingResults = people
@@ -153,7 +152,7 @@ namespace Servicess
                             }
                         case nameof(Person.UserDefinedTags):
                             {
-                                _logger.LogDebug("Searching persons by UserDefinedTags containing: {Parameter}", PersonParamter);
+                                _logger.LogDebug("Searching persons by UserDefinedTags containing: {Parameter}", LogSanitizer.Sanitize(PersonParamter));
                                 var (people, count) = await PersonRipository.GetFilteredPersonsPaged(pageNumber, pageSize, p => p.UserDefinedTags.Any(c => c.TagName.Contains(PersonParamter)));
                                 totalCount = count;
                                 MatchingResults = people
@@ -164,7 +163,7 @@ namespace Servicess
                             }
                         default:
                             {
-                                _logger.LogWarning("Unknown search criteria: {SearchBy}. Returning all persons paginated.", SearchBy);
+                                _logger.LogWarning("Unknown search criteria: {SearchBy}. Returning all persons paginated.", LogSanitizer.Sanitize(SearchBy));
                                 // Pass a 'true' predicate to get all records, but still respect pagination
                                 var (people, count) = await PersonRipository.GetFilteredPersonsPaged(pageNumber, pageSize, p => true);
                                 totalCount = count;
@@ -176,8 +175,8 @@ namespace Servicess
                             }
                     }
 
-                    _logger.LogInformation("{MethodName} completed successfully. Found {Count} results for SearchBy: {SearchBy}, Parameter: {Parameter}",
-                        nameof(SearchPersonsBy_Batched), MatchingResults.Count, SearchBy, PersonParamter);
+                    _logger.LogDebug("{MethodName} completed successfully. Found {Count} results for SearchBy: {SearchBy}, Parameter: {Parameter}",
+                        nameof(SearchPersonsBy_Batched), LogSanitizer.Sanitize(MatchingResults.Count), LogSanitizer.Sanitize(SearchBy), LogSanitizer.Sanitize(PersonParamter));
 
                     return new PagedResult<PersonViewDTO>
                     {
@@ -190,7 +189,7 @@ namespace Servicess
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Error occurred in {MethodName} method. SearchBy: {SearchBy}, Parameter: {Parameter}",
-                        nameof(SearchPersonsBy_Batched), SearchBy, PersonParamter);
+                        nameof(SearchPersonsBy_Batched), LogSanitizer.Sanitize(SearchBy), LogSanitizer.Sanitize(PersonParamter));
                     throw;
                 }
             }
@@ -201,10 +200,9 @@ namespace Servicess
         [Obsolete]
         public async Task<List<PersonRespones>> SearchPersonsBy(string? PersonParamter, string SearchBy)
         {
-            using (Operation.Time("Search persons by {SearchBy} with parameter: {Parameter}", SearchBy ?? "none", PersonParamter ?? "null"))
             {
                 _logger.LogInformation("Executing {MethodName} method at {Timestamp}. SearchBy: {SearchBy}, Parameter: {Parameter}",
-                    nameof(SearchPersonsBy), DateTime.UtcNow, SearchBy, PersonParamter);
+                    nameof(SearchPersonsBy), DateTime.UtcNow, LogSanitizer.Sanitize(SearchBy), LogSanitizer.Sanitize(PersonParamter));
 
                 try
                 {
@@ -214,7 +212,7 @@ namespace Servicess
                     {
                         case nameof(PersonRespones.Name):
                             {
-                                _logger.LogDebug("Searching persons by Name containing: {Parameter}", PersonParamter);
+                                _logger.LogDebug("Searching persons by Name containing: {Parameter}", LogSanitizer.Sanitize(PersonParamter));
                                 var filteredPersons = await PersonRipository.GetFilteredPersons(p => p.Name != null && p.Name.Contains(PersonParamter));
                                 MatchingResults = filteredPersons
                                     .Where(p => p != null)
@@ -224,7 +222,7 @@ namespace Servicess
                             }
                         case nameof(PersonRespones.email):
                             {
-                                _logger.LogDebug("Searching persons by Email containing: {Parameter}", PersonParamter);
+                                _logger.LogDebug("Searching persons by Email containing: {Parameter}", LogSanitizer.Sanitize(PersonParamter));
                                 var filteredPersons = await PersonRipository.GetFilteredPersons(p => p.email != null && p.email.Contains(PersonParamter));
                                 MatchingResults = filteredPersons
                                     .Where(p => p != null)
@@ -234,7 +232,7 @@ namespace Servicess
                             }
                         case nameof(PersonRespones.phone):
                             {
-                                _logger.LogDebug("Searching persons by Phone containing: {Parameter}", PersonParamter);
+                                _logger.LogDebug("Searching persons by Phone containing: {Parameter}", LogSanitizer.Sanitize(PersonParamter));
                                 var filteredPersons = await PersonRipository.GetFilteredPersons(p => p.phone != null && p.phone.Contains(PersonParamter));
                                 MatchingResults = filteredPersons
                                     .Where(p => p != null)
@@ -244,7 +242,7 @@ namespace Servicess
                             }
                         case nameof(PersonRespones.DateOfBirth):
                             {
-                                _logger.LogDebug("Searching persons by DateOfBirth containing: {Parameter}", PersonParamter);
+                                _logger.LogDebug("Searching persons by DateOfBirth containing: {Parameter}", LogSanitizer.Sanitize(PersonParamter));
                                 var filteredPersons = await PersonRipository.GetFilteredPersons(p => p.DateOfBirth != null && p.DateOfBirth.Value.ToString("yyyy-MM-dd").Contains(PersonParamter));
                                 MatchingResults = filteredPersons
                                     .Where(p => p != null)
@@ -254,7 +252,7 @@ namespace Servicess
                             }
                         case nameof(Person.Circles):
                             {
-                                _logger.LogDebug("Searching persons by Circles containing: {Parameter}", PersonParamter);
+                                _logger.LogDebug("Searching persons by Circles containing: {Parameter}", LogSanitizer.Sanitize(PersonParamter));
                                 var filteredPersons = await PersonRipository.GetFilteredPersons(p => p.Circles.Any(c => c.Name.Contains(PersonParamter)));
                                 MatchingResults = filteredPersons
                                     .Where(p => p != null)
@@ -264,7 +262,7 @@ namespace Servicess
                             }
                         case nameof(Person.ContactItemRoles):
                             {
-                                _logger.LogDebug("Searching persons by Role containing: {Parameter}", PersonParamter);
+                                _logger.LogDebug("Searching persons by Role containing: {Parameter}", LogSanitizer.Sanitize(PersonParamter));
                                 var filteredPersons = await PersonRipository.GetFilteredPersons(p => p.ContactItemRoles.Any(c => c.Role.Contains(PersonParamter)));
                                 MatchingResults = filteredPersons
                                     .Where(p => p != null)
@@ -274,7 +272,7 @@ namespace Servicess
                             }
                         case nameof(Person.SystemStatusTags):
                             {
-                                _logger.LogDebug("Searching persons by SystemStatusTags containing: {Parameter}", PersonParamter);
+                                _logger.LogDebug("Searching persons by SystemStatusTags containing: {Parameter}", LogSanitizer.Sanitize(PersonParamter));
                                 var filteredPersons = await PersonRipository.GetFilteredPersons(p => p.SystemStatusTags.Any(c => c.Name.Contains(PersonParamter)));
                                 MatchingResults = filteredPersons
                                     .Where(p => p != null)
@@ -284,7 +282,7 @@ namespace Servicess
                             }
                         case nameof(Person.UserDefinedTags):
                             {
-                                _logger.LogDebug("Searching persons by UserDefinedTags containing: {Parameter}", PersonParamter);
+                                _logger.LogDebug("Searching persons by UserDefinedTags containing: {Parameter}", LogSanitizer.Sanitize(PersonParamter));
                                 var filteredPersons = await PersonRipository.GetFilteredPersons(p => p.UserDefinedTags.Any(c => c.TagName.Contains(PersonParamter)));
                                 MatchingResults = filteredPersons
                                     .Where(p => p != null)
@@ -294,7 +292,7 @@ namespace Servicess
                             }
                         default:
                             {
-                                _logger.LogWarning("Unknown search criteria: {SearchBy}. Returning all persons.", SearchBy);
+                                _logger.LogWarning("Unknown search criteria: {SearchBy}. Returning all persons.", LogSanitizer.Sanitize(SearchBy));
                                 var Persons = await PersonRipository.GetAllPersons();
                                 MatchingResults = Persons
                                     .Select(p => p!.ConvertToPersonRespons())
@@ -303,15 +301,15 @@ namespace Servicess
                             }
                     }
 
-                    _logger.LogInformation("{MethodName} completed successfully. Found {Count} results for SearchBy: {SearchBy}, Parameter: {Parameter}",
-                        nameof(SearchPersonsBy), MatchingResults.Count, SearchBy, PersonParamter);
+                    _logger.LogDebug("{MethodName} completed successfully. Found {Count} results for SearchBy: {SearchBy}, Parameter: {Parameter}",
+                        nameof(SearchPersonsBy), LogSanitizer.Sanitize(MatchingResults.Count), LogSanitizer.Sanitize(SearchBy), LogSanitizer.Sanitize(PersonParamter));
 
                     return MatchingResults;
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Error occurred in {MethodName} method. SearchBy: {SearchBy}, Parameter: {Parameter}",
-                        nameof(SearchPersonsBy), SearchBy, PersonParamter);
+                        nameof(SearchPersonsBy), LogSanitizer.Sanitize(SearchBy), LogSanitizer.Sanitize(PersonParamter));
                     throw;
                 }
             }
@@ -322,10 +320,9 @@ namespace Servicess
         public async Task<PagedResult<PersonViewDTO>> SearchPersonsByCompositeFilter(
             PersonCompositeFilter filter, int pageNumber, int pageSize)
         {
-            using (Operation.Time("Composite filter search. Page: {PageNumber}, Size: {PageSize}", pageNumber, pageSize))
             {
-                _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Filter: {@Filter}",
-                    nameof(SearchPersonsByCompositeFilter), DateTime.UtcNow, filter);
+                _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Filter: {Filter}",
+                    nameof(SearchPersonsByCompositeFilter), DateTime.UtcNow, LogSanitizer.Sanitize(filter));
 
                 try
                 {
@@ -369,6 +366,29 @@ namespace Servicess
                     if (!string.IsNullOrWhiteSpace(filter.UserDefinedTagName))
                         predicate = predicate.And(p => p.UserDefinedTags.Any(t => t.TagName.Contains(filter.UserDefinedTagName)));
 
+                    if (!string.IsNullOrWhiteSpace(filter.InteractionType)
+                        && Enum.TryParse<ContactsManger.Core.Domain.Entities.EEnums.EnInteractionType>(
+                            filter.InteractionType.Trim(), true, out var interactionType))
+                    {
+                        if (filter.ContactedSinceUtc != null)
+                        {
+                            var since = filter.ContactedSinceUtc.Value.ToUniversalTime();
+                            predicate = predicate.And(p => p.Interactions.Any(i =>
+                                i.InteractionType == interactionType && i.TimeOfInteraction >= since));
+                        }
+                        else
+                        {
+                            predicate = predicate.And(p => p.Interactions.Any(i =>
+                                i.InteractionType == interactionType));
+                        }
+                    }
+                    else if (filter.ContactedSinceUtc != null)
+                    {
+                        var sinceOnly = filter.ContactedSinceUtc.Value.ToUniversalTime();
+                        predicate = predicate.And(p => p.Interactions.Any(i =>
+                            i.TimeOfInteraction >= sinceOnly));
+                    }
+
                     // Single call, single combined predicate -- GetFilteredPersonsPaged
                     // doesn't need to know or care how many conditions went into it.
                     var (people, totalCount) = await PersonRipository.GetFilteredPersonsPaged(pageNumber, pageSize, predicate);
@@ -381,14 +401,14 @@ namespace Servicess
                         PageSize = pageSize
                     };
 
-                    _logger.LogInformation("{MethodName} completed successfully. Found {Count} of {TotalCount} results",
-                        nameof(SearchPersonsByCompositeFilter), result.Items.Count, totalCount);
+                    _logger.LogDebug("{MethodName} completed successfully. Found {Count} of {TotalCount} results",
+                        nameof(SearchPersonsByCompositeFilter), LogSanitizer.Sanitize(result.Items.Count), LogSanitizer.Sanitize(totalCount));
 
                     return result;
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Error occurred in {MethodName} method. Filter: {@Filter}", nameof(SearchPersonsByCompositeFilter), filter);
+                    _logger.LogError(ex, "Error occurred in {MethodName} method. Filter: {Filter}", nameof(SearchPersonsByCompositeFilter), LogSanitizer.Sanitize(filter));
                     throw;
                 }
             }

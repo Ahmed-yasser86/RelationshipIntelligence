@@ -1,4 +1,4 @@
-using Entities;
+﻿using Entities;
 using Microsoft.AspNetCore.Mvc;
 using ServiceContracts;
 using ServiceContracts.DTOs.PreferenceDTOs;
@@ -34,7 +34,7 @@ namespace ContactsManager.API.Controllers
             }
             catch (KeyNotFoundException ex)
             {
-                return NotFound(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status404NotFound);
             }
         }
 
@@ -47,11 +47,11 @@ namespace ContactsManager.API.Controllers
             }
             catch (KeyNotFoundException ex)
             {
-                return NotFound(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status404NotFound);
             }
             catch (ArgumentException ex)
             {
-                return BadRequest(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
             }
         }
 
@@ -64,11 +64,11 @@ namespace ContactsManager.API.Controllers
             }
             catch (KeyNotFoundException ex)
             {
-                return NotFound(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status404NotFound);
             }
             catch (ArgumentException ex)
             {
-                return BadRequest(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
             }
         }
 
@@ -81,11 +81,11 @@ namespace ContactsManager.API.Controllers
             }
             catch (KeyNotFoundException ex)
             {
-                return NotFound(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status404NotFound);
             }
             catch (ArgumentException ex)
             {
-                return BadRequest(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
             }
         }
 
@@ -98,7 +98,7 @@ namespace ContactsManager.API.Controllers
             }
             catch (KeyNotFoundException ex)
             {
-                return NotFound(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status404NotFound);
             }
         }
 
@@ -111,13 +111,13 @@ namespace ContactsManager.API.Controllers
             }
             catch (KeyNotFoundException ex)
             {
-                return NotFound(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status404NotFound);
             }
             catch (InvalidOperationException ex)
             {
                 // Completion requires a real logged interaction: the client
                 // must call the interaction pipeline, not this endpoint.
-                return Conflict(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status409Conflict);
             }
         }
 
@@ -127,13 +127,13 @@ namespace ContactsManager.API.Controllers
             try
             {
                 if (!Enum.TryParse<PreferenceChangeSource>(source, true, out var parsed))
-                    return BadRequest("Source must be User, Copilot, Import, or Default.");
+                    return Problem(detail: "Source must be User, Copilot, Import, or Default.", statusCode: StatusCodes.Status400BadRequest);
                 await _preferences.RemoveAsync(personId, parsed);
                 return Ok(true);
             }
             catch (KeyNotFoundException ex)
             {
-                return NotFound(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status404NotFound);
             }
         }
 
@@ -146,7 +146,7 @@ namespace ContactsManager.API.Controllers
             }
             catch (KeyNotFoundException ex)
             {
-                return NotFound(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status404NotFound);
             }
         }
 
@@ -159,7 +159,7 @@ namespace ContactsManager.API.Controllers
             }
             catch (KeyNotFoundException ex)
             {
-                return NotFound(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status404NotFound);
             }
         }
 
@@ -176,16 +176,16 @@ namespace ContactsManager.API.Controllers
             try
             {
                 if (!Enum.TryParse<PreferenceChangeSource>(source, true, out var parsed))
-                    return BadRequest("Source must be User, Copilot, Import, or Default.");
+                    return Problem(detail: "Source must be User, Copilot, Import, or Default.", statusCode: StatusCodes.Status400BadRequest);
                 return Ok(await _preferences.SaveGlobalDefaultsAsync(request, parsed));
             }
             catch (ArgumentException ex)
             {
-                return BadRequest(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
             }
             catch (InvalidOperationException ex)
             {
-                return BadRequest(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
             }
         }
 
@@ -198,7 +198,7 @@ namespace ContactsManager.API.Controllers
             }
             catch (KeyNotFoundException ex)
             {
-                return NotFound(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status404NotFound);
             }
         }
 

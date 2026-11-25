@@ -1,4 +1,6 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using RelationshipIntelligence.Api.Filters;
+using Microsoft.AspNetCore.RateLimiting;
 using ServiceContracts;
 using ServiceContracts.DTOs.MeetingDTOs;
 using System;
@@ -45,7 +47,7 @@ namespace ContactsManager.API.Controllers
             }
             catch (ArgumentException ex)
             {
-                return BadRequest(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
             }
         }
 
@@ -58,7 +60,7 @@ namespace ContactsManager.API.Controllers
             }
             catch (ArgumentException ex)
             {
-                return BadRequest(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
             }
         }
 
@@ -76,7 +78,7 @@ namespace ContactsManager.API.Controllers
             }
             catch (InvalidOperationException ex)
             {
-                return BadRequest(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
             }
         }
 
@@ -94,11 +96,11 @@ namespace ContactsManager.API.Controllers
             }
             catch (ArgumentException ex)
             {
-                return BadRequest(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
             }
             catch (InvalidOperationException ex)
             {
-                return BadRequest(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
             }
         }
 
@@ -116,11 +118,11 @@ namespace ContactsManager.API.Controllers
             }
             catch (RelationshipIntelligence.AI.CopilotUnavailableException ex)
             {
-                return StatusCode(503, ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status503ServiceUnavailable);
             }
             catch (InvalidOperationException ex)
             {
-                return BadRequest(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
             }
         }
 
@@ -138,11 +140,11 @@ namespace ContactsManager.API.Controllers
             }
             catch (ArgumentException ex)
             {
-                return BadRequest(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
             }
             catch (InvalidOperationException ex)
             {
-                return BadRequest(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
             }
         }
 
@@ -159,11 +161,11 @@ namespace ContactsManager.API.Controllers
             }
             catch (ArgumentException ex)
             {
-                return BadRequest(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
             }
             catch (InvalidOperationException ex)
             {
-                return BadRequest(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
             }
         }
 
@@ -181,11 +183,11 @@ namespace ContactsManager.API.Controllers
             }
             catch (ArgumentException ex)
             {
-                return BadRequest(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
             }
             catch (InvalidOperationException ex)
             {
-                return BadRequest(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
             }
         }
 
@@ -203,7 +205,7 @@ namespace ContactsManager.API.Controllers
             }
             catch (InvalidOperationException ex)
             {
-                return BadRequest(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
             }
         }
 
@@ -220,11 +222,11 @@ namespace ContactsManager.API.Controllers
             }
             catch (ArgumentException ex)
             {
-                return BadRequest(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
             }
             catch (InvalidOperationException ex)
             {
-                return BadRequest(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
             }
         }
 
@@ -243,7 +245,7 @@ namespace ContactsManager.API.Controllers
             }
             catch (InvalidOperationException ex)
             {
-                return Conflict(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status409Conflict);
             }
         }
     }

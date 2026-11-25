@@ -1,6 +1,5 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using RepositryContracts;
-using SerilogTimings;
 using ServiceContracts;
 using ServiceContracts.DTOs;
 using Servicess;
@@ -37,7 +36,6 @@ namespace Servicess
 
         public async Task<NetworkGraphResponse> GetGraphAsync()
         {
-            using (Operation.Time("Build network graph"))
             {
                 var response = new NetworkGraphResponse();
                 var userId = _currentUser.UserId;

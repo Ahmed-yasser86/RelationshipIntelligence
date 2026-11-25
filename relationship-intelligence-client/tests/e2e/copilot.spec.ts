@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { API_URL, expectSignedIn, loginViaApi } from "./helpers";
+import { API_URL, TEST_PASSWORD, expectSignedIn, loginViaApi } from "./helpers";
 
 test.describe("co-pilot", () => {
   test.beforeEach(async ({ page }) => {
@@ -17,14 +17,14 @@ test.describe("co-pilot", () => {
         PersonName: "E2E Settings",
         Email: email,
         Phone: "01000000000",
-        Password: "Test123!",
-        ConfirmPassword: "Test123!",
+        Password: TEST_PASSWORD,
+        ConfirmPassword: TEST_PASSWORD,
         UserType: 0,
       },
     });
     expect(reg.ok()).toBeTruthy();
     const login = await request.post(`${API_URL}/api/Account/PostLogin`, {
-      data: { Email: email, Password: "Test123!" },
+      data: { Email: email, Password: TEST_PASSWORD },
     });
     const body = await login.json();
     await page.goto("/");

@@ -1,9 +1,9 @@
-using ContactsManger.Core.Domain.Entities;
+﻿using ContactsManger.Core.Domain.Entities;
 using Microsoft.Extensions.Logging;
 using RepositryContracts;
-using SerilogTimings;
 using ServiceContracts;
 using ServiceContracts.DTOs.OrganizationDTOs;
+using Servicess.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,7 +29,6 @@ namespace Servicess
 
         public async Task<List<OrganizationResponse>> GetAllAsync()
         {
-            using (Operation.Time("List organizations"))
             {
                 var circles = await _circles.GetCirclesWithMembers();
                 return circles
@@ -41,7 +40,6 @@ namespace Servicess
 
         public async Task<OrganizationResponse> CreateAsync(string? name)
         {
-            using (Operation.Time("Create organization {Name}", name ?? "null"))
             {
                 var clean = CleanName(name);
 
@@ -53,14 +51,13 @@ namespace Servicess
                 await _circles.AddCircle(circle);
                 await _unitOfWork.SaveChangesAsync();
 
-                _logger.LogInformation("Created organization {Name} ({CircleId})", clean, circle.CircleId);
+                _logger.LogInformation("Created organization {Name} ({CircleId})", LogSanitizer.Sanitize(clean), LogSanitizer.Sanitize(circle.CircleId));
                 return OrganizationResponse.FromCircle(circle);
             }
         }
 
         public async Task<OrganizationResponse> RenameAsync(Guid id, string? name)
         {
-            using (Operation.Time("Rename organization {CircleId}", id))
             {
                 var clean = CleanName(name);
 
@@ -83,7 +80,6 @@ namespace Servicess
 
         public async Task DeleteAsync(Guid id)
         {
-            using (Operation.Time("Delete organization {CircleId}", id))
             {
                 var circles = await _circles.GetCirclesWithMembers();
                 var circle = circles.FirstOrDefault(c => c.CircleId == id);
@@ -98,7 +94,7 @@ namespace Servicess
                 await _circles.RemoveCircle(circle);
                 await _unitOfWork.SaveChangesAsync();
 
-                _logger.LogInformation("Deleted organization {Name} ({CircleId})", circle.Name, id);
+                _logger.LogInformation("Deleted organization {Name} ({CircleId})", LogSanitizer.Sanitize(circle.Name), LogSanitizer.Sanitize(id));
             }
         }
 

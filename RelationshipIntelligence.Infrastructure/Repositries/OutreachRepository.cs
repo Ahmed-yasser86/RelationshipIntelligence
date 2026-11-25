@@ -20,7 +20,8 @@ namespace Repositories
 
         private IQueryable<OutreachBatch> WithDetails() => _db.OutreachBatches
             .Include(b => b.Members)
-            .Include(b => b.Drafts);
+            .Include(b => b.Drafts)
+            .AsSplitQuery();
 
         public async Task<List<OutreachBatch>> ListBatchesAsync(Guid ownerId)
         {

@@ -1,7 +1,6 @@
-using ContactsManger.Core.Domain.Entities;
+﻿using ContactsManger.Core.Domain.Entities;
 using Microsoft.Extensions.Logging;
 using RepositryContracts;
-using SerilogTimings;
 using ServiceContracts;
 using ServiceContracts.DTOs;
 using Servicess.Helpers;
@@ -42,7 +41,6 @@ namespace Servicess
 
         public async Task<InteractionResponse> LogAsync(InteractionAddRequest? request)
         {
-            using (Operation.Time("Log interaction"))
             {
                 if (request == null)
                     throw new ArgumentNullException(nameof(request));
@@ -78,7 +76,7 @@ namespace Servicess
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogDebug(ex, "Reminder completion skipped for person {PersonId}", request.PersonId);
+                        _logger.LogWarning(ex, "Reminder completion failed for person {PersonId}", LogSanitizer.Sanitize(request.PersonId));
                     }
                 }
                 await _unitOfWork.SaveChangesAsync();

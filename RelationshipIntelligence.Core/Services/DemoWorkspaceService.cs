@@ -2,7 +2,6 @@ using ContactsManger.Core.Domain.Entities.EEnums;
 using Entities;
 using Microsoft.Extensions.Logging;
 using RepositryContracts;
-using SerilogTimings;
 using ServiceContracts;
 using ServiceContracts.DTOs;
 using ServiceContracts.DTOs.Enums;
@@ -90,7 +89,6 @@ namespace Servicess
 
         public async Task<int> SeedAsync()
         {
-            using (Operation.Time("Seed demo workspace"))
             {
                 var userId = _currentUser.UserId;
                 if (userId == null || userId == Guid.Empty)
@@ -386,7 +384,6 @@ namespace Servicess
         /// </summary>
         public async Task<int> ClearAsync()
         {
-            using (Operation.Time("Clear demo workspace"))
             {
                 var userId = _currentUser.UserId;
                 if (userId == null || userId == Guid.Empty)

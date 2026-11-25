@@ -1,9 +1,12 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using RepositryContracts;
 using ServiceContracts;
 using System;
 using System.Threading.Tasks;
+
+namespace RelationshipIntelligence.Api.Filters;
+
 
 public class MeetingOwnershipFilter : IAsyncActionFilter
 {

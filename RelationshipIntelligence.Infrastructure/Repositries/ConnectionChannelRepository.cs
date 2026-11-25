@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using RepositryContracts;
 using SerilogTimings;
+using Servicess.Helpers;
 
 namespace Repositories
 {
@@ -28,8 +29,8 @@ namespace Repositories
 
             using (Operation.Time("GetConnectionChannelsByNames database query for {Count} names", nameList.Count))
             {
-                _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Names: {@Names}",
-                    nameof(GetConnectionChannelsByNames), DateTime.UtcNow, nameList);
+                _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Names: {Names}",
+                    nameof(GetConnectionChannelsByNames), DateTime.UtcNow, LogSanitizer.Sanitize(nameList));
 
                 try
                 {
@@ -43,15 +44,15 @@ namespace Repositories
                         .Where(c => nameList.Contains(c.ConnectionChannelName))
                         .ToListAsync();
 
-                    _logger.LogInformation("{MethodName} completed successfully. Found {FoundCount} of {RequestedCount} requested names",
-                        nameof(GetConnectionChannelsByNames), channels.Count, nameList.Count);
+                    _logger.LogDebug("{MethodName} completed successfully. Found {FoundCount} of {RequestedCount} requested names",
+                        nameof(GetConnectionChannelsByNames), LogSanitizer.Sanitize(channels.Count), LogSanitizer.Sanitize(nameList.Count));
 
                     return channels;
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Error occurred in {MethodName} for names: {@Names}",
-                        nameof(GetConnectionChannelsByNames), nameList);
+                    _logger.LogError(ex, "Error occurred in {MethodName} for names: {Names}",
+                        nameof(GetConnectionChannelsByNames), LogSanitizer.Sanitize(nameList));
                     throw;
                 }
             }
@@ -62,8 +63,8 @@ namespace Repositories
         {
             using (Operation.Time("AddConnectionChannel staged for: {ChannelName}", channel?.ConnectionChannelName))
             {
-                _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Channel: {@ConnectionChannel}",
-                    nameof(AddConnectionChannel), DateTime.UtcNow, channel);
+                _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Channel: {ConnectionChannel}",
+                    nameof(AddConnectionChannel), DateTime.UtcNow, LogSanitizer.Sanitize(channel));
 
                 try
                 {
@@ -76,14 +77,14 @@ namespace Repositories
                     _db.ConnectionChannels.Add(channel);
 
                     _logger.LogInformation("Successfully staged ConnectionChannel for insert. ID: {ConnectionChannelId}, Name: {ChannelName}",
-                        channel.ConnectionChannelId, channel.ConnectionChannelName);
+                        LogSanitizer.Sanitize(channel.ConnectionChannelId), LogSanitizer.Sanitize(channel.ConnectionChannelName));
 
                     return channel;
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Unexpected error occurred in {MethodName} for channel: {@ConnectionChannel}",
-                        nameof(AddConnectionChannel), channel);
+                    _logger.LogError(ex, "Unexpected error occurred in {MethodName} for channel: {ConnectionChannel}",
+                        nameof(AddConnectionChannel), LogSanitizer.Sanitize(channel));
                     throw;
                 }
             }
@@ -95,30 +96,30 @@ namespace Repositories
             using (Operation.Time("GetConnectionChannelById database query for ID: {ConnectionChannelId}", id))
             {
                 _logger.LogInformation("Executing {MethodName} method at {Timestamp}. ConnectionChannelId: {ConnectionChannelId}",
-                    nameof(GetConnectionChannelById), DateTime.UtcNow, id);
+                    nameof(GetConnectionChannelById), DateTime.UtcNow, LogSanitizer.Sanitize(id));
 
                 try
                 {
                     if (id == null || id == Guid.Empty)
                     {
-                        _logger.LogWarning("GetConnectionChannelById called with invalid ID: {ConnectionChannelId}", id);
+                        _logger.LogWarning("GetConnectionChannelById called with invalid ID: {ConnectionChannelId}", LogSanitizer.Sanitize(id));
                         return null;
                     }
 
                     var channel = await _db.ConnectionChannels.FindAsync(id);
 
                     if (channel == null)
-                        _logger.LogInformation("No ConnectionChannel found with ID: {ConnectionChannelId}", id);
+                        _logger.LogInformation("No ConnectionChannel found with ID: {ConnectionChannelId}", LogSanitizer.Sanitize(id));
                     else
                         _logger.LogInformation("Successfully retrieved ConnectionChannel with ID: {ConnectionChannelId}, Name: {ChannelName}",
-                            channel.ConnectionChannelId, channel.ConnectionChannelName);
+                            LogSanitizer.Sanitize(channel.ConnectionChannelId), LogSanitizer.Sanitize(channel.ConnectionChannelName));
 
                     return channel;
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Error occurred in {MethodName} for ConnectionChannelId: {ConnectionChannelId}",
-                        nameof(GetConnectionChannelById), id);
+                        nameof(GetConnectionChannelById), LogSanitizer.Sanitize(id));
                     throw;
                 }
             }
@@ -129,7 +130,7 @@ namespace Repositories
             using (Operation.Time("GetConnectionChannelByName database query for name: {ChannelName}", name))
             {
                 _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Channel name: {ChannelName}",
-                    nameof(GetConnectionChannelByName), DateTime.UtcNow, name);
+                    nameof(GetConnectionChannelByName), DateTime.UtcNow, LogSanitizer.Sanitize(name));
 
                 try
                 {
@@ -143,17 +144,17 @@ namespace Repositories
                         .FirstOrDefaultAsync(c => c.ConnectionChannelName == name);
 
                     if (channel == null)
-                        _logger.LogInformation("No ConnectionChannel found with name: {ChannelName}", name);
+                        _logger.LogInformation("No ConnectionChannel found with name: {ChannelName}", LogSanitizer.Sanitize(name));
                     else
                         _logger.LogInformation("Successfully retrieved ConnectionChannel with ID: {ConnectionChannelId}, Name: {ChannelName}",
-                            channel.ConnectionChannelId, channel.ConnectionChannelName);
+                            LogSanitizer.Sanitize(channel.ConnectionChannelId), LogSanitizer.Sanitize(channel.ConnectionChannelName));
 
                     return channel;
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Error occurred in {MethodName} for channel name: {ChannelName}",
-                        nameof(GetConnectionChannelByName), name);
+                        nameof(GetConnectionChannelByName), LogSanitizer.Sanitize(name));
                     throw;
                 }
             }
@@ -163,13 +164,13 @@ namespace Repositories
         {
             using (Operation.Time("GetAllConnectionChannels database operation"))
             {
-                _logger.LogInformation("Executing {MethodName} method at {Timestamp}", nameof(GetAllConnectionChannels), DateTime.UtcNow);
+                _logger.LogDebug("Executing {MethodName} method at {Timestamp}", nameof(GetAllConnectionChannels), DateTime.UtcNow);
 
                 try
                 {
                     var channels = await _db.ConnectionChannels.ToListAsync();
 
-                    _logger.LogInformation("{MethodName} completed successfully. Retrieved {Count} channels",
+                    _logger.LogDebug("{MethodName} completed successfully. Retrieved {Count} channels",
                         nameof(GetAllConnectionChannels), channels.Count);
 
                     return channels;

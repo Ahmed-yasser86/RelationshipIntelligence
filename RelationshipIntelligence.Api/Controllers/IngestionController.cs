@@ -1,4 +1,5 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using ServiceContracts;
 using ServiceContracts.DTOs.IngestionDTOs;
 using System;
@@ -54,11 +55,11 @@ namespace ContactsManager.API.Controllers
             }
             catch (ArgumentException ex)
             {
-                return BadRequest(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
             }
             catch (KeyNotFoundException ex)
             {
-                return NotFound(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status404NotFound);
             }
         }
 
@@ -71,15 +72,15 @@ namespace ContactsManager.API.Controllers
             }
             catch (KeyNotFoundException ex)
             {
-                return NotFound(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status404NotFound);
             }
             catch (ArgumentException ex)
             {
-                return BadRequest(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
             }
             catch (InvalidOperationException ex)
             {
-                return BadRequest(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
             }
         }
 
@@ -96,15 +97,15 @@ namespace ContactsManager.API.Controllers
             }
             catch (KeyNotFoundException ex)
             {
-                return NotFound(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status404NotFound);
             }
             catch (RelationshipIntelligence.AI.CopilotUnavailableException ex)
             {
-                return StatusCode(503, ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status503ServiceUnavailable);
             }
             catch (RelationshipIntelligence.AI.CopilotNotConfiguredException ex)
             {
-                return Conflict(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status409Conflict);
             }
         }
 
@@ -117,15 +118,15 @@ namespace ContactsManager.API.Controllers
             }
             catch (KeyNotFoundException ex)
             {
-                return NotFound(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status404NotFound);
             }
             catch (ArgumentException ex)
             {
-                return BadRequest(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
             }
             catch (InvalidOperationException ex)
             {
-                return BadRequest(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
             }
         }
 
@@ -138,7 +139,7 @@ namespace ContactsManager.API.Controllers
             }
             catch (KeyNotFoundException ex)
             {
-                return NotFound(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status404NotFound);
             }
         }
 
@@ -152,7 +153,7 @@ namespace ContactsManager.API.Controllers
             }
             catch (KeyNotFoundException ex)
             {
-                return NotFound(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status404NotFound);
             }
         }
 
@@ -165,7 +166,7 @@ namespace ContactsManager.API.Controllers
             }
             catch (KeyNotFoundException ex)
             {
-                return NotFound(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status404NotFound);
             }
         }
 
@@ -179,11 +180,11 @@ namespace ContactsManager.API.Controllers
             }
             catch (KeyNotFoundException ex)
             {
-                return NotFound(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status404NotFound);
             }
             catch (InvalidOperationException ex)
             {
-                return Conflict(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status409Conflict);
             }
         }
     }

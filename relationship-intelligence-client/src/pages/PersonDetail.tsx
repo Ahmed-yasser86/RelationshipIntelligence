@@ -400,8 +400,7 @@ export function PersonDetail() {
   const silent = daysSince(
     [...(person.interactions ?? [])]
       .map((i) => i.timeOfInteraction)
-      .sort()
-      .reverse()[0],
+      .sort((a, b) => b.localeCompare(a))[0],
   );
 
   return (

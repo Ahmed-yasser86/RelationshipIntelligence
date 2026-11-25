@@ -96,6 +96,256 @@ namespace CRUDTests
         }
 
         [Fact]
+        public async Task ListOrganizationMembers_ReturnsEveryMember()
+        {
+            // "who works at Proceedit" must list ALL members — the tool pages
+            // 200, not the chat default of 10.
+            var searcherMock = new Mock<IPersonSearcherService>();
+            searcherMock.Setup(s => s.SearchPersonsByCompositeFilter(
+                    It.IsAny<ContactsManger.Core.DTOs.PersonDTOs.PersonCompositeFilter>(), 1, 200))
+                .ReturnsAsync(new ServiceContracts.DTOs.PagedResult<ContactsManger.Core.DTOs.PersonDTOs.PersonViewDTO>
+                {
+                    Items = new List<ContactsManger.Core.DTOs.PersonDTOs.PersonViewDTO>
+                    {
+                        new() { PersonId = Guid.NewGuid(), Name = "Member One" },
+                        new() { PersonId = Guid.NewGuid(), Name = "Member Two" },
+                        new() { PersonId = Guid.NewGuid(), Name = "Member Three" },
+                    },
+                    TotalCount = 16
+                });
+            var plugin = new RelationshipQueryPlugin(
+                _scoringMock.Object,
+                Mock.Of<IInteractionService>(),
+                Mock.Of<IRelationshipMemoryService>(),
+                Mock.Of<IEventService>(),
+                Mock.Of<INetworkAnalysisService>(),
+                searcherMock.Object,
+                Mock.Of<IPersonGetterService>(),
+                Mock.Of<IMeetingService>(),
+                Mock.Of<IDigestService>(),
+                Mock.Of<IRelationshipPreferenceService>());
+
+            var raw = await plugin.ListOrganizationMembersAsync("Proceedit");
+
+            using var doc = System.Text.Json.JsonDocument.Parse(raw);
+            doc.RootElement.GetProperty("count").GetInt32().Should().Be(16);
+            doc.RootElement.GetProperty("members").GetArrayLength().Should().Be(3);
+            raw.Should().Contain("Proceedit");
+        }
+
+        [Fact]
+        public async Task ListOrganizationMembers_EmptyOrg_SaysSoPlainly()
+        {
+            var searcherMock = new Mock<IPersonSearcherService>();
+            searcherMock.Setup(s => s.SearchPersonsByCompositeFilter(
+                    It.IsAny<ContactsManger.Core.DTOs.PersonDTOs.PersonCompositeFilter>(), 1, 200))
+                .ReturnsAsync(new ServiceContracts.DTOs.PagedResult<ContactsManger.Core.DTOs.PersonDTOs.PersonViewDTO>
+                {
+                    Items = new List<ContactsManger.Core.DTOs.PersonDTOs.PersonViewDTO>(),
+                    TotalCount = 0
+                });
+            var plugin = new RelationshipQueryPlugin(
+                _scoringMock.Object,
+                Mock.Of<IInteractionService>(),
+                Mock.Of<IRelationshipMemoryService>(),
+                Mock.Of<IEventService>(),
+                Mock.Of<INetworkAnalysisService>(),
+                searcherMock.Object,
+                Mock.Of<IPersonGetterService>(),
+                Mock.Of<IMeetingService>(),
+                Mock.Of<IDigestService>(),
+                Mock.Of<IRelationshipPreferenceService>());
+
+            var raw = await plugin.ListOrganizationMembersAsync("Nonexistent Corp");
+
+            raw.Should().Contain("Nobody");
+        }
+
+        [Fact]
+        public async Task QueryContacts_FullFilterSet_PassesThroughToSearcher()
+        {
+            // The general contact tool must expose every composite filter the
+            // service supports: any user-named filter reaches the predicate.
+            var searcherMock = new Mock<IPersonSearcherService>();
+            ContactsManger.Core.DTOs.PersonDTOs.PersonCompositeFilter? seen = null;
+            searcherMock.Setup(s => s.SearchPersonsByCompositeFilter(
+                    It.IsAny<ContactsManger.Core.DTOs.PersonDTOs.PersonCompositeFilter>(), 1, 50))
+                .Callback<ContactsManger.Core.DTOs.PersonDTOs.PersonCompositeFilter, int, int>((f, _, __) => seen = f)
+                .ReturnsAsync(new ServiceContracts.DTOs.PagedResult<ContactsManger.Core.DTOs.PersonDTOs.PersonViewDTO>
+                {
+                    Items = new List<ContactsManger.Core.DTOs.PersonDTOs.PersonViewDTO>(),
+                    TotalCount = 0
+                });
+            _scoringMock.Setup(s => s.GetQueueAsync(It.IsAny<int>()))
+                .ReturnsAsync(new List<RelationshipHealthResponse>());
+            var plugin = new RelationshipQueryPlugin(
+                _scoringMock.Object,
+                Mock.Of<IInteractionService>(),
+                Mock.Of<IRelationshipMemoryService>(),
+                Mock.Of<IEventService>(),
+                Mock.Of<INetworkAnalysisService>(),
+                searcherMock.Object,
+                Mock.Of<IPersonGetterService>(),
+                Mock.Of<IMeetingService>(),
+                Mock.Of<IDigestService>(),
+                Mock.Of<IRelationshipPreferenceService>());
+
+            await plugin.QueryContactsAsync(
+                name: "Sara", email: "", phone: "", organization: "Proceedit",
+                role: "", systemTag: "", userTag: "",
+                interactionType: "Call", contactedSince: "2026-09-07");
+
+            seen.Should().NotBeNull();
+            seen!.Name.Should().Be("Sara");
+            seen.CircleName.Should().Be("Proceedit");
+            seen.InteractionType.Should().Be("Call");
+            seen.ContactedSinceUtc.Should().NotBeNull();
+        }
+
+        [Fact]
+        public async Task ListInteractions_FiltersByTypeAndSince()
+        {
+            var personId = Guid.NewGuid();
+            var interactionsMock = new Mock<IInteractionService>();
+            interactionsMock.Setup(i => i.ListForPersonAsync(personId)).ReturnsAsync(
+                new List<ServiceContracts.DTOs.InteractionResponse>
+                {
+                    new() { InteractionId = Guid.NewGuid(), PersonId = personId, InteractionType = ContactsManger.Core.Domain.Entities.EEnums.EnInteractionType.Call, InteractionTitle = "Old call", TimeOfInteraction = new DateTime(2026, 9, 1, 0, 0, 0, DateTimeKind.Utc) },
+                    new() { InteractionId = Guid.NewGuid(), PersonId = personId, InteractionType = ContactsManger.Core.Domain.Entities.EEnums.EnInteractionType.Email, InteractionTitle = "Recent mail", TimeOfInteraction = new DateTime(2026, 9, 12, 0, 0, 0, DateTimeKind.Utc) },
+                });
+            var plugin = new RelationshipQueryPlugin(
+                _scoringMock.Object,
+                interactionsMock.Object,
+                Mock.Of<IRelationshipMemoryService>(),
+                Mock.Of<IEventService>(),
+                Mock.Of<INetworkAnalysisService>(),
+                Mock.Of<IPersonSearcherService>(),
+                Mock.Of<IPersonGetterService>(),
+                Mock.Of<IMeetingService>(),
+                Mock.Of<IDigestService>(),
+                Mock.Of<IRelationshipPreferenceService>());
+
+            var raw = await plugin.ListInteractionsAsync(personId.ToString(), "Email", "2026-09-07");
+
+            using var doc = System.Text.Json.JsonDocument.Parse(raw);
+            doc.RootElement.GetArrayLength().Should().Be(1);
+            doc.RootElement[0].GetProperty("interactionTitle").GetString().Should().Be("Recent mail");
+        }
+
+        [Fact]
+        public async Task ListOrganizations_DelegatesToService()
+        {
+            var orgsMock = new Mock<IOrganizationService>();
+            orgsMock.Setup(o => o.GetAllAsync()).ReturnsAsync(
+                new List<ServiceContracts.DTOs.OrganizationDTOs.OrganizationResponse>
+                {
+                    new() { CircleId = Guid.NewGuid(), Name = "Proceedit", MemberCount = 15 }
+                });
+            var plugin = new RelationshipQueryPlugin(
+                _scoringMock.Object,
+                Mock.Of<IInteractionService>(),
+                Mock.Of<IRelationshipMemoryService>(),
+                Mock.Of<IEventService>(),
+                Mock.Of<INetworkAnalysisService>(),
+                Mock.Of<IPersonSearcherService>(),
+                Mock.Of<IPersonGetterService>(),
+                Mock.Of<IMeetingService>(),
+                Mock.Of<IDigestService>(),
+                Mock.Of<IRelationshipPreferenceService>(),
+                orgsMock.Object);
+
+            var raw = await plugin.ListOrganizationsAsync();
+
+            raw.Should().Contain("Proceedit");
+        }
+
+        [Fact]
+        public async Task ListEvents_ForPerson_FiltersByImportance()
+        {
+            var personId = Guid.NewGuid();
+            var eventsMock = new Mock<IEventService>();
+            eventsMock.Setup(e => e.ListForPersonAsync(personId)).ReturnsAsync(
+                new List<ServiceContracts.DTOs.EventDTOs.EventResponse>
+                {
+                    new() { EventId = Guid.NewGuid(), PersonId = personId, Title = "Trivia", Importance = 1, OccursOn = new DateOnly(2026, 9, 20) },
+                    new() { EventId = Guid.NewGuid(), PersonId = personId, Title = "Proposal", Importance = 3, OccursOn = new DateOnly(2026, 9, 16) },
+                });
+            var plugin = new RelationshipQueryPlugin(
+                _scoringMock.Object,
+                Mock.Of<IInteractionService>(),
+                Mock.Of<IRelationshipMemoryService>(),
+                eventsMock.Object,
+                Mock.Of<INetworkAnalysisService>(),
+                Mock.Of<IPersonSearcherService>(),
+                Mock.Of<IPersonGetterService>(),
+                Mock.Of<IMeetingService>(),
+                Mock.Of<IDigestService>(),
+                Mock.Of<IRelationshipPreferenceService>());
+
+            var raw = await plugin.ListEventsAsync(personId.ToString(), 30, 3);
+
+            raw.Should().Contain("Proposal");
+            raw.Should().NotContain("Trivia");
+        }
+
+        [Fact]
+        public async Task ListMeetings_FiltersByStatusAndSince()
+        {
+            var meetingsMock = new Mock<IMeetingService>();
+            meetingsMock.Setup(m => m.ListAsync()).ReturnsAsync(
+                new List<ServiceContracts.DTOs.MeetingDTOs.MeetingResponse>
+                {
+                    new() { MeetingId = Guid.NewGuid(), Title = "Old draft", Status = Entities.MeetingStatus.Draft, OccurredAtUtc = new DateTime(2026, 8, 1, 0, 0, 0, DateTimeKind.Utc) },
+                    new() { MeetingId = Guid.NewGuid(), Title = "Recent confirmed", Status = Entities.MeetingStatus.Confirmed, OccurredAtUtc = new DateTime(2026, 9, 12, 0, 0, 0, DateTimeKind.Utc) },
+                });
+            var plugin = new RelationshipQueryPlugin(
+                _scoringMock.Object,
+                Mock.Of<IInteractionService>(),
+                Mock.Of<IRelationshipMemoryService>(),
+                Mock.Of<IEventService>(),
+                Mock.Of<INetworkAnalysisService>(),
+                Mock.Of<IPersonSearcherService>(),
+                Mock.Of<IPersonGetterService>(),
+                meetingsMock.Object,
+                Mock.Of<IDigestService>(),
+                Mock.Of<IRelationshipPreferenceService>());
+
+            var raw = await plugin.ListMeetingsAsync("", "Confirmed", "2026-09-01");
+
+            raw.Should().Contain("Recent confirmed");
+            raw.Should().NotContain("Old draft");
+        }
+
+        [Fact]
+        public async Task ListMemories_FiltersByKind()
+        {
+            var personId = Guid.NewGuid();
+            var memoryMock = new Mock<IRelationshipMemoryService>();
+            memoryMock.Setup(m => m.ListForPersonAsync(personId)).ReturnsAsync(
+                new List<ServiceContracts.DTOs.MemoryDTOs.MemoryEntryResponse>
+                {
+                    new() { MemoryEntryId = Guid.NewGuid(), PersonId = personId, Kind = Entities.RelationshipMemoryKind.Commitment, Title = "Send notes", Status = Entities.MemoryEntryStatus.Active },
+                    new() { MemoryEntryId = Guid.NewGuid(), PersonId = personId, Kind = Entities.RelationshipMemoryKind.Fact, Title = "Likes tea", Status = Entities.MemoryEntryStatus.Active },
+                });
+            var plugin = new RelationshipQueryPlugin(
+                _scoringMock.Object,
+                Mock.Of<IInteractionService>(),
+                memoryMock.Object,
+                Mock.Of<IEventService>(),
+                Mock.Of<INetworkAnalysisService>(),
+                Mock.Of<IPersonSearcherService>(),
+                Mock.Of<IPersonGetterService>(),
+                Mock.Of<IMeetingService>(),
+                Mock.Of<IDigestService>(),
+                Mock.Of<IRelationshipPreferenceService>());
+
+            var raw = await plugin.ListMemoriesAsync(personId.ToString(), "Commitment");
+
+            raw.Should().Contain("Send notes");
+            raw.Should().NotContain("Likes tea");
+        }
+
+        [Fact]
         public void ProviderRejection_NamesStatusAndPointsAtSetup()
         {
             var rejected = new Microsoft.SemanticKernel.HttpOperationException("Service request failed.")

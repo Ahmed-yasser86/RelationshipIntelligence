@@ -1,14 +1,17 @@
-﻿using System;
 using Microsoft.AspNetCore.Http;
-namespace Servicess
+using System;
+using System.Security.Claims;
+
+namespace RelationshipIntelligence.Api.Services
 {
     public class CurrentUserService : ServiceContracts.ICurrentUserService
     {
         public Guid? UserId { get; }
+
         public CurrentUserService(IHttpContextAccessor httpContextAccessor)
         {
             var idClaim = httpContextAccessor.HttpContext?.User
-                .FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                .FindFirst(ClaimTypes.NameIdentifier)?.Value;
             UserId = Guid.TryParse(idClaim, out var id) ? id : null;
         }
     }

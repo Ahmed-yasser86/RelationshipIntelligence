@@ -1,8 +1,7 @@
-using ContactsManger.Core.Domain.Entities.EEnums;
+﻿using ContactsManger.Core.Domain.Entities.EEnums;
 using Entities;
 using Microsoft.Extensions.Logging;
 using RepositryContracts;
-using SerilogTimings;
 using ServiceContracts;
 using ServiceContracts.DTOs;
 using System;
@@ -54,7 +53,6 @@ namespace Servicess
 
         public async Task<int> RecomputeForOwnerAsync(Guid ownerId)
         {
-            using (Operation.Time("Recompute relationship states"))
             {
                 if (ownerId == Guid.Empty)
                     return 0;
@@ -413,6 +411,8 @@ namespace Servicess
                 };
             }
 
+            var lastContact = times[^1];
+
             return new RelationshipState
             {
                 ApplicationUserId = ownerId,
@@ -424,9 +424,7 @@ namespace Servicess
                     ? EvidenceStatus.Established
                     : EvidenceStatus.Insufficient,
                 CadenceReferenceDays = gaps.Count == 0 ? null : TieDecayModel.CadenceReference(gaps, prior),
-                SilenceQuantile = last == null
-                    ? null
-                    : TieDecayModel.SilenceQuantile(gaps, (now - last.Value).TotalDays),
+                SilenceQuantile = TieDecayModel.SilenceQuantile(gaps, (now - lastContact).TotalDays),
                 IsBridge = false,
                 UrgencyScore = TieDecayModel.Urgency(strength, maxStrength),
                 UpdatedAtUtc = now

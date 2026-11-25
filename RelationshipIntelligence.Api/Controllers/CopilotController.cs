@@ -1,4 +1,5 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using RelationshipIntelligence.AI;
 using ServiceContracts;
 using ServiceContracts.DTOs.AgentDTOs;
@@ -25,7 +26,7 @@ namespace ContactsManager.API.Controllers
         public async Task<IActionResult> PostAgentChat([FromBody] AgentChatRequest request)
         {
             if (request == null || string.IsNullOrWhiteSpace(request.Message))
-                return BadRequest("Message is required.");
+                return Problem(detail: "Message is required.", statusCode: StatusCodes.Status400BadRequest);
 
             try
             {
@@ -33,19 +34,19 @@ namespace ContactsManager.API.Controllers
             }
             catch (ArgumentException ex)
             {
-                return BadRequest(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Unauthorized(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status401Unauthorized);
             }
             catch (CopilotNotConfiguredException ex)
             {
-                return Conflict(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status409Conflict);
             }
             catch (CopilotUnavailableException ex)
             {
-                return StatusCode(503, ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status503ServiceUnavailable);
             }
         }
 
@@ -53,7 +54,7 @@ namespace ContactsManager.API.Controllers
         public async Task<IActionResult> PostAsk([FromBody] CopilotAskRequest request)
         {
             if (request == null || string.IsNullOrWhiteSpace(request.Question))
-                return BadRequest("Question is required.");
+                return Problem(detail: "Question is required.", statusCode: StatusCodes.Status400BadRequest);
 
             try
             {
@@ -61,11 +62,11 @@ namespace ContactsManager.API.Controllers
             }
             catch (CopilotNotConfiguredException ex)
             {
-                return Conflict(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status409Conflict);
             }
             catch (CopilotUnavailableException ex)
             {
-                return StatusCode(503, ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status503ServiceUnavailable);
             }
         }
 
@@ -73,7 +74,7 @@ namespace ContactsManager.API.Controllers
         public async Task<IActionResult> PostSummarize([FromBody] CopilotAskRequest request)
         {
             if (request?.PersonId == null)
-                return BadRequest("PersonId is required.");
+                return Problem(detail: "PersonId is required.", statusCode: StatusCodes.Status400BadRequest);
 
             try
             {
@@ -81,11 +82,11 @@ namespace ContactsManager.API.Controllers
             }
             catch (CopilotNotConfiguredException ex)
             {
-                return Conflict(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status409Conflict);
             }
             catch (CopilotUnavailableException ex)
             {
-                return StatusCode(503, ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status503ServiceUnavailable);
             }
         }
 
@@ -98,11 +99,11 @@ namespace ContactsManager.API.Controllers
             }
             catch (CopilotNotConfiguredException ex)
             {
-                return Conflict(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status409Conflict);
             }
             catch (CopilotUnavailableException ex)
             {
-                return StatusCode(503, ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status503ServiceUnavailable);
             }
         }
 
@@ -110,7 +111,7 @@ namespace ContactsManager.API.Controllers
         public async Task<IActionResult> PostSuggestPlan([FromBody] PlanRequest request)
         {
             if (request == null || request.PersonId == Guid.Empty)
-                return BadRequest("PersonId is required.");
+                return Problem(detail: "PersonId is required.", statusCode: StatusCodes.Status400BadRequest);
 
             try
             {
@@ -122,11 +123,11 @@ namespace ContactsManager.API.Controllers
             }
             catch (CopilotNotConfiguredException ex)
             {
-                return Conflict(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status409Conflict);
             }
             catch (CopilotUnavailableException ex)
             {
-                return StatusCode(503, ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status503ServiceUnavailable);
             }
         }
 
@@ -134,7 +135,7 @@ namespace ContactsManager.API.Controllers
         public async Task<IActionResult> PostParseOutreachIntent([FromBody] ParseIntentRequest request)
         {
             if (request == null || string.IsNullOrWhiteSpace(request.Text))
-                return BadRequest("Text is required.");
+                return Problem(detail: "Text is required.", statusCode: StatusCodes.Status400BadRequest);
 
             try
             {
@@ -142,11 +143,11 @@ namespace ContactsManager.API.Controllers
             }
             catch (CopilotNotConfiguredException ex)
             {
-                return Conflict(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status409Conflict);
             }
             catch (CopilotUnavailableException ex)
             {
-                return StatusCode(503, ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status503ServiceUnavailable);
             }
         }
 
@@ -159,7 +160,7 @@ namespace ContactsManager.API.Controllers
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Unauthorized(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status401Unauthorized);
             }
         }
 
@@ -167,7 +168,7 @@ namespace ContactsManager.API.Controllers
         public async Task<IActionResult> PutAiSettings([FromBody] AiProviderSettingsSaveRequest request)
         {
             if (request == null)
-                return BadRequest("Settings are required.");
+                return Problem(detail: "Settings are required.", statusCode: StatusCodes.Status400BadRequest);
 
             try
             {
@@ -175,11 +176,11 @@ namespace ContactsManager.API.Controllers
             }
             catch (ArgumentException ex)
             {
-                return BadRequest(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Unauthorized(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status401Unauthorized);
             }
         }
     }

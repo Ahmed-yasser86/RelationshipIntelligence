@@ -26,6 +26,7 @@ namespace CRUDTests
         private readonly Mock<ICurrentUserService> _userMock = new();
         private readonly Mock<IEmailSender> _emailMock = new();
         private readonly Mock<IUnitOfWork> _unitOfWorkMock = new();
+        private readonly Mock<RelationshipPreferenceRepositoryContract> _preferencesMock = new();
 
         private DigestService Service() => new(
             _scoringMock.Object,
@@ -38,6 +39,19 @@ namespace CRUDTests
             _unitOfWorkMock.Object,
             Secret,
             Mock.Of<ILogger<DigestService>>());
+
+        private DigestService ServiceWithPreferences() => new(
+            _scoringMock.Object,
+            _personsMock.Object,
+            _interactionsMock.Object,
+            _digestsMock.Object,
+            _statesMock.Object,
+            _userMock.Object,
+            _emailMock.Object,
+            _unitOfWorkMock.Object,
+            Secret,
+            Mock.Of<ILogger<DigestService>>(),
+            _preferencesMock.Object);
 
         private RelationshipHealthResponse Entry(Guid id, string name, double urgency, DateTime? last)
             => new() { PersonId = id, Name = name, UrgencyScore = urgency, LastContactAtUtc = last, Band = "AtRisk" };
@@ -280,6 +294,20 @@ namespace CRUDTests
             o.Should().Be(owner);
             p.Should().Be(person);
             d.Should().Be(delivery);
+        }
+
+        [Fact]
+        public async Task BuildAsync_PreferenceLookupFailure_DoesNotFailDigest()
+        {
+            ArrangeOwner();
+            _scoringMock.Setup(s => s.GetQueueAsync(200))
+                .ReturnsAsync(new List<RelationshipHealthResponse>());
+            _preferencesMock.Setup(p => p.ListForOwnerAsync(_userA))
+                .ThrowsAsync(new InvalidOperationException("preference store down"));
+
+            var payload = await ServiceWithPreferences().BuildAsync("https://app.test");
+
+            payload.Should().NotBeNull();
         }
     }
 }

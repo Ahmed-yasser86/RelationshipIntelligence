@@ -1,4 +1,5 @@
 using ContactsManger.Core.Domain.Entities;
+using ContactsManger.Core.Domain.Entities.EEnums;
 using Entities;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
@@ -105,6 +106,78 @@ namespace CRUDTests
 
             first.Items.Should().ContainSingle(i => i.Name == "Omar Khalil");
             second.Items.Should().ContainSingle(i => i.Name == "Omar Khalil");
+        }
+
+        [Fact]
+        public async Task CompositeFilter_InteractionTypeAndSince_FiltersByEvidence()
+        {
+            var recent = PersonWithCircles("Recent Sara", "Proceedit");
+            recent.Interactions.Add(new Interaction
+            {
+                InteractionId = Guid.NewGuid(),
+                InteractionTitle = "Call",
+                InteractionType = EnInteractionType.Call,
+                TimeOfInteraction = DateTime.UtcNow.AddDays(-2)
+            });
+            var old = PersonWithCircles("Old Omar", "Proceedit");
+            old.Interactions.Add(new Interaction
+            {
+                InteractionId = Guid.NewGuid(),
+                InteractionTitle = "Call",
+                InteractionType = EnInteractionType.Call,
+                TimeOfInteraction = DateTime.UtcNow.AddDays(-30)
+            });
+            var emailed = PersonWithCircles("Emailed Ali", "Proceedit");
+            emailed.Interactions.Add(new Interaction
+            {
+                InteractionId = Guid.NewGuid(),
+                InteractionTitle = "Mail",
+                InteractionType = EnInteractionType.Email,
+                TimeOfInteraction = DateTime.UtcNow.AddDays(-1)
+            });
+            ArrangePeople(recent, old, emailed);
+
+            var result = await Service().SearchPersonsByCompositeFilter(
+                new PersonCompositeFilter
+                {
+                    CircleName = "Proceedit",
+                    InteractionType = "Call",
+                    ContactedSinceUtc = DateTime.UtcNow.AddDays(-7)
+                }, 1, 10);
+
+            result.Items.Should().ContainSingle(i => i.Name == "Recent Sara");
+        }
+
+        [Fact]
+        public async Task CompositeFilter_BadInteractionType_IgnoredNotFatal()
+        {
+            ArrangePeople(PersonWithCircles("Salma El-Sayed", "Proceedit"));
+
+            var result = await Service().SearchPersonsByCompositeFilter(
+                new PersonCompositeFilter { CircleName = "Proceedit", InteractionType = "Teleport" }, 1, 10);
+
+            result.Items.Should().ContainSingle(i => i.Name == "Salma El-Sayed");
+        }
+
+        [Theory]
+        [InlineData("Name")]
+        [InlineData("email")]
+        [InlineData("phone")]
+        [InlineData("DateOfBirth")]
+        [InlineData("Circles")]
+        [InlineData("ContactItemRoles")]
+        [InlineData("SystemStatusTags")]
+        [InlineData("UserDefinedTags")]
+        [InlineData("Unknown")]
+        public async Task SearchPersonsBy_Batched_AllCriteria_ExecuteSanitizedLogging(string searchBy)
+        {
+            ArrangePeople(PersonWithCircles("Salma", "Proceedit"));
+
+            var result = await Service().SearchPersonsBy_Batched("Salma", searchBy, 1, 10);
+
+            result.Should().NotBeNull();
+            result.PageNumber.Should().Be(1);
+            result.PageSize.Should().Be(10);
         }
     }
 }

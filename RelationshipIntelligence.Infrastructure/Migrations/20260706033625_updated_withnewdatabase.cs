@@ -19,6 +19,8 @@ namespace ContactsManager.Inferastructure.Migrations
                 oldClrType: typeof(string),
                 oldType: "nvarchar(max)");
 
+            migrationBuilder.Sql("UPDATE [Persons] SET [Origin] = LEFT([Origin], 2000) WHERE LEN([Origin]) > 2000");
+
             migrationBuilder.AlterColumn<string>(
                 name: "Origin",
                 table: "Persons",
@@ -28,6 +30,8 @@ namespace ContactsManager.Inferastructure.Migrations
                 oldClrType: typeof(string),
                 oldType: "nvarchar(max)",
                 oldNullable: true);
+
+            migrationBuilder.Sql("UPDATE [Persons] SET [LinkedInProfile] = LEFT([LinkedInProfile], 1000) WHERE LEN([LinkedInProfile]) > 1000");
 
             migrationBuilder.AlterColumn<string>(
                 name: "LinkedInProfile",

@@ -10,8 +10,6 @@ using ServiceContracts;
 using ServiceContracts.DTOs;
 using Servicess.Helpers;
 using RepositryContracts;
-using SerilogTimings;
-using Microsoft.EntityFrameworkCore;
 
 namespace Servicess
 {
@@ -51,10 +49,9 @@ namespace Servicess
 
         public async Task<PersonRespones?> UpdatePerson(PersonUpdateRequest? personUpdateRequest)
         {
-            using (Operation.Time("Update person operation for ID: {PersonId}", personUpdateRequest?.PersonId))
             {
-                _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Request data: {@PersonUpdateRequest}",
-                    nameof(UpdatePerson), DateTime.UtcNow, personUpdateRequest);
+                _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Request data: {PersonUpdateRequest}",
+                    nameof(UpdatePerson), DateTime.UtcNow, LogSanitizer.Sanitize(personUpdateRequest));
 
                 try
                 {
@@ -67,31 +64,22 @@ namespace Servicess
                     _logger.LogDebug("Validating person update request");
                     ValidationHelpers.ValidationFunction(personUpdateRequest);
 
-                    _logger.LogDebug("Retrieving existing person with ID: {PersonId}", personUpdateRequest.PersonId);
-                    var person = await PersonRipository?.GetPersonById(personUpdateRequest.PersonId);
+                    _logger.LogDebug("Retrieving existing person with ID: {PersonId}", LogSanitizer.Sanitize(personUpdateRequest.PersonId));
+                    var person = await PersonRipository.GetPersonById(personUpdateRequest.PersonId);
 
                     if (person == null)
                     {
-                        _logger.LogWarning("Attempted to update non-existent person with ID: {PersonId}", personUpdateRequest.PersonId);
+                        _logger.LogWarning("Attempted to update non-existent person with ID: {PersonId}", LogSanitizer.Sanitize(personUpdateRequest.PersonId));
                         throw new ArgumentException("Given person ID does not exist.");
                     }
 
-                    _logger.LogDebug("Updating person fields for ID: {PersonId}", personUpdateRequest.PersonId);
+                    _logger.LogDebug("Updating person fields for ID: {PersonId}", LogSanitizer.Sanitize(personUpdateRequest.PersonId));
 
                     if (personUpdateRequest.Name != null && person.Name != personUpdateRequest.Name)
-                        _logger.LogDebug("Updating Name from '{OldValue}' to '{NewValue}'", person.Name, personUpdateRequest.Name);
+                        _logger.LogDebug("Updating Name from '{OldValue}' to '{NewValue}'", LogSanitizer.Sanitize(person.Name), LogSanitizer.Sanitize(personUpdateRequest.Name));
 
                     if (personUpdateRequest.DateOfBirth != null && person.DateOfBirth != personUpdateRequest.DateOfBirth)
-                        _logger.LogDebug("Updating DateOfBirth from '{OldValue}' to '{NewValue}'", person.DateOfBirth, personUpdateRequest.DateOfBirth);
-
-                    if (personUpdateRequest.email != null && person.email != personUpdateRequest.email)
-                        _logger.LogDebug("Updating Email from '{OldValue}' to '{NewValue}'", person.email, personUpdateRequest.email);
-
-                    if (personUpdateRequest.phone != null && person.phone != personUpdateRequest.phone)
-                        _logger.LogDebug("Updating Phone from '{OldValue}' to '{NewValue}'", person.phone, personUpdateRequest.phone);
-
-                    if (personUpdateRequest.Address != null && person.Address != personUpdateRequest.Address)
-                        _logger.LogDebug("Updating Address from '{OldValue}' to '{NewValue}'", person.Address, personUpdateRequest.Address);
+                        _logger.LogDebug("Updating DateOfBirth from '{OldValue}' to '{NewValue}'", LogSanitizer.Sanitize(person.DateOfBirth), LogSanitizer.Sanitize(personUpdateRequest.DateOfBirth));
 
                     person.Name = personUpdateRequest.Name ?? person.Name;
                     person.DateOfBirth = personUpdateRequest.DateOfBirth ?? person.DateOfBirth;
@@ -145,41 +133,24 @@ namespace Servicess
                     var result = person.ConvertToPersonRespons();
 
                     _logger.LogInformation("Successfully updated person with ID: {PersonId}, Name: {PersonName}",
-                        result.PersonId, result.Name);
+                        LogSanitizer.Sanitize(result.PersonId), LogSanitizer.Sanitize(result.Name));
 
                     return result;
-                }
-                catch (DbUpdateConcurrencyException ex)
-                {
-                    foreach (var entry in ex.Entries)
-                    {
-                        Console.WriteLine($"Entity: {entry.Entity.GetType().Name}");
-                        Console.WriteLine($"State : {entry.State}");
-
-                        foreach (var property in entry.Properties)
-                        {
-                            Console.WriteLine($"{property.Metadata.Name} = {property.CurrentValue}");
-                        }
-
-                        Console.WriteLine("------------------------");
-                    }
-
-                    throw;
                 }
                 catch (ArgumentException ex)
                 {
                     _logger.LogWarning(ex, "Argument error in UpdatePerson for PersonId: {PersonId}",
-                        personUpdateRequest?.PersonId);
+                        LogSanitizer.Sanitize(personUpdateRequest?.PersonId));
                     throw;
                 }
                 catch (ValidationException ex)
                 {
-                    _logger.LogWarning(ex, "Validation error in UpdatePerson for request: {@PersonUpdateRequest}", personUpdateRequest);
+                    _logger.LogWarning(ex, "Validation error in UpdatePerson for request: {PersonUpdateRequest}", LogSanitizer.Sanitize(personUpdateRequest));
                     throw;
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Unexpected error occurred in UpdatePerson for request: {@PersonUpdateRequest}", personUpdateRequest);
+                    _logger.LogError(ex, "Unexpected error occurred in UpdatePerson for request: {PersonUpdateRequest}", LogSanitizer.Sanitize(personUpdateRequest));
                     throw;
                 }
             }
@@ -411,7 +382,7 @@ namespace Servicess
                 }
                 else
                 {
-                    _logger.LogWarning("SystemStatusTag reference row missing for enum {StatusTagId}; skipping.", statusEnum);
+                    _logger.LogWarning("SystemStatusTag reference row missing for enum {StatusTagId}; skipping.", LogSanitizer.Sanitize(statusEnum));
                 }
             }
         }

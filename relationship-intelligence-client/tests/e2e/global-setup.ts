@@ -1,13 +1,10 @@
 import { request } from "@playwright/test";
-
-const API_URL = process.env.E2E_API_URL ?? "http://127.0.0.1:5156";
-const EMAIL = process.env.E2E_EMAIL ?? "testuser@contactsmanager.dev";
-const PASSWORD = process.env.E2E_PASSWORD ?? "Test123!";
+import { API_URL, TEST_EMAIL, TEST_PASSWORD } from "./helpers";
 
 async function warmup() {
   const ctx = await request.newContext();
   const login = await ctx.post(`${API_URL}/api/Account/PostLogin`, {
-    data: { Email: EMAIL, Password: PASSWORD },
+    data: { Email: TEST_EMAIL, Password: TEST_PASSWORD },
   });
   if (!login.ok()) {
     throw new Error(`Warmup login failed: ${login.status()}`);

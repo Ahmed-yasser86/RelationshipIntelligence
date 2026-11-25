@@ -1,5 +1,6 @@
-using ContactsManager.API.Controllers;
+﻿using ContactsManager.API.Controllers;
 using FluentAssertions;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using RelationshipIntelligence.AI;
@@ -37,7 +38,9 @@ namespace CRUDTests.ControllersTest
 
             var result = await Controller().PostSubmit(new IngestionSubmitRequest { RawText = " " });
 
-            result.Should().BeOfType<BadRequestObjectResult>();
+            result.Should().BeOfType<ObjectResult>();
+            ((ObjectResult)result).StatusCode.Should().Be(StatusCodes.Status400BadRequest);
+            ((ObjectResult)result).Value.Should().BeOfType<ProblemDetails>();
         }
 
         [Fact]
@@ -62,7 +65,9 @@ namespace CRUDTests.ControllersTest
 
             var result = await Controller().PostProcess(id);
 
-            result.Should().BeOfType<ConflictObjectResult>();
+            result.Should().BeOfType<ObjectResult>();
+            ((ObjectResult)result).StatusCode.Should().Be(StatusCodes.Status409Conflict);
+            ((ObjectResult)result).Value.Should().BeOfType<ProblemDetails>();
         }
 
         [Fact]
@@ -74,7 +79,9 @@ namespace CRUDTests.ControllersTest
 
             var result = await Controller().PostSubmitForMeeting(id);
 
-            result.Should().BeOfType<BadRequestObjectResult>();
+            result.Should().BeOfType<ObjectResult>();
+            ((ObjectResult)result).StatusCode.Should().Be(StatusCodes.Status400BadRequest);
+            ((ObjectResult)result).Value.Should().BeOfType<ProblemDetails>();
         }
 
         [Fact]
@@ -86,7 +93,9 @@ namespace CRUDTests.ControllersTest
 
             var result = await Controller().PostApproveFinding(id);
 
-            result.Should().BeOfType<NotFoundObjectResult>();
+            result.Should().BeOfType<ObjectResult>();
+            ((ObjectResult)result).StatusCode.Should().Be(StatusCodes.Status404NotFound);
+            ((ObjectResult)result).Value.Should().BeOfType<ProblemDetails>();
         }
 
         [Fact]

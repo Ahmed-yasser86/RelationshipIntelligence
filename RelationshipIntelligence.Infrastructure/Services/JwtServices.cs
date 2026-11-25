@@ -1,31 +1,27 @@
-﻿using ContactsManger.Core.Domain.IdentityEntities;
 using ContactsManger.Core.DTOs;
 using ContactsManger.Core.ServiceContracts;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.VisualBasic;
 using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 
-
-namespace ContactsManger.Core.Services
+namespace RelationshipIntelligence.Infrastructure.Services
 {
     public class JwtServices : IjwtAuthentication
     {
         private readonly IConfiguration _configuration;
-        public JwtServices(IConfiguration configuration)
+        private readonly string? _signingKeyOverride;
+
+        public JwtServices(IConfiguration configuration, string? signingKeyOverride = null)
         {
             _configuration = configuration;
+            _signingKeyOverride = signingKeyOverride;
         }
 
-
-        private string GenerateRefreshToken()
+        private static string GenerateRefreshToken()
         {
             var randomNumber = new byte[32];
             using (var rng = RandomNumberGenerator.Create())
@@ -35,22 +31,26 @@ namespace ContactsManger.Core.Services
             }
         }
 
-        public AuthentocationRespones Authenticate(ApplicationUser user)
+        public AuthentocationRespones Authenticate(Guid userId, string? email, string? personName)
         {
             var expiration = DateTime.UtcNow.AddMinutes(Convert.ToDouble(_configuration["Jwt:expiration_minutes"]));
 
             Claim[] claims = new Claim[]
             {
-                new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+                new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64),                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
-                new Claim(ClaimTypes.Name, user.PersonName ?? string.Empty),
-
+                new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64),
+                new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
+                new Claim(ClaimTypes.Email, email ?? string.Empty),
+                new Claim(ClaimTypes.Name, personName ?? string.Empty),
             };
 
+            var signingKey = _signingKeyOverride ?? Environment.GetEnvironmentVariable("JWT_KEY");
+            if (string.IsNullOrWhiteSpace(signingKey))
+                throw new InvalidOperationException(
+                    "JWT signing key is not configured. Set the 'JWT_KEY' environment variable from a secret store.");
 
-            SymmetricSecurityKey key = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+            SymmetricSecurityKey key = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(Encoding.UTF8.GetBytes(signingKey));
 
             SigningCredentials credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
             JwtSecurityToken token = new JwtSecurityToken(
@@ -64,13 +64,11 @@ new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds()
             JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
             var tokenString = tokenHandler.WriteToken(token);
 
-
-
             return new AuthentocationRespones
             {
                 token = tokenString,
-                personeName = user.PersonName,
-                personeEmail = user.Email,
+                personeName = personName ?? string.Empty,
+                personeEmail = email ?? string.Empty,
                 ExpirationTime = expiration,
                 refreshToken = GenerateRefreshToken(),
                 RefreshTokenExpirationTime = DateTime.UtcNow.AddMinutes(Convert.ToDouble(_configuration["RefreshToken:expiration_minutes"]))

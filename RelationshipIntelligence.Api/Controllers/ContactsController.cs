@@ -1,4 +1,5 @@
 ﻿using ContactsManager.API.Filters.ContactsManager.API.Filters;
+using RelationshipIntelligence.Api.Filters;
 using ContactsManger.Core.Domain.IdentityEntities;
 using ContactsManger.Core.DTOs.PersonDTOs;
 using ContactsManger.Core.ServiceContracts;
@@ -131,7 +132,7 @@ namespace ContactsManager.API.Controllers
             }
             catch (ArgumentException ex)
             {
-                return BadRequest(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
             }
         }
 
@@ -151,7 +152,7 @@ namespace ContactsManager.API.Controllers
             }
             catch (ArgumentException ex)
             {
-                return BadRequest(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
             }
         }
 
@@ -172,7 +173,7 @@ namespace ContactsManager.API.Controllers
             }
             catch (InvalidOperationException ex)
             {
-                return Conflict(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status409Conflict);
             }
         }
 
@@ -192,7 +193,7 @@ namespace ContactsManager.API.Controllers
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Unauthorized(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status401Unauthorized);
             }
         }
 
@@ -212,7 +213,7 @@ namespace ContactsManager.API.Controllers
             }
             catch (ArgumentException ex)
             {
-                return BadRequest(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
             }
         }
 
@@ -232,7 +233,7 @@ namespace ContactsManager.API.Controllers
             }
             catch (ArgumentException ex)
             {
-                return BadRequest(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
             }
         }
 
@@ -269,7 +270,7 @@ namespace ContactsManager.API.Controllers
             }
             catch (InvalidOperationException ex)
             {
-                return BadRequest(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
             }
         }
 
@@ -290,7 +291,7 @@ namespace ContactsManager.API.Controllers
             }
             catch (InvalidOperationException ex)
             {
-                return BadRequest(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
             }
         }
 
@@ -335,7 +336,7 @@ namespace ContactsManager.API.Controllers
             }
             catch (ArgumentException ex)
             {
-                return BadRequest(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
             }
         }
 
@@ -355,7 +356,7 @@ namespace ContactsManager.API.Controllers
             }
             catch (ArgumentException ex)
             {
-                return BadRequest(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
             }
         }
 
@@ -732,7 +733,7 @@ namespace ContactsManager.API.Controllers
             }
             catch (InvalidOperationException ex)
             {
-                return BadRequest(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
             }
         }
 
@@ -756,7 +757,7 @@ namespace ContactsManager.API.Controllers
             }
             catch (ValidationException ex)
             {
-                return BadRequest(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
             }
         }
 
@@ -770,7 +771,7 @@ namespace ContactsManager.API.Controllers
             }
             catch (ValidationException ex)
             {
-                return BadRequest(ex.Message);
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status400BadRequest);
             }
             catch (ArgumentException)
             {

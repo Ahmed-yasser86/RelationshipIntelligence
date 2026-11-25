@@ -1,7 +1,6 @@
-using Entities;
+﻿using Entities;
 using Microsoft.Extensions.Logging;
 using RepositryContracts;
-using SerilogTimings;
 using ServiceContracts;
 using ServiceContracts.DTOs.PreferenceDTOs;
 using System;
@@ -109,7 +108,6 @@ namespace Servicess
 
         public async Task<RelationshipPreferenceDto> SaveAsync(PreferenceSaveRequest request, PreferenceChangeSource source = PreferenceChangeSource.User)
         {
-            using (Operation.Time("Save relationship preference"))
             {
                 if (request == null)
                     throw new ArgumentNullException(nameof(request));
@@ -171,7 +169,6 @@ namespace Servicess
 
         public async Task<RelationshipPreferenceDto> SetReminderAsync(ReminderSetRequest request, PreferenceChangeSource source = PreferenceChangeSource.User)
         {
-            using (Operation.Time("Set reminder"))
             {
                 if (request == null)
                     throw new ArgumentNullException(nameof(request));
@@ -235,11 +232,11 @@ namespace Servicess
 
         public async Task<RelationshipPreferenceDto> CompleteAsync(Guid personId)
         {
-            // V6 test scenario 12: completion is ONLY allowed via logging an
-            // actual interaction. This endpoint exists for backward
-            // compatibility but no longer marks anything complete: it tells
-            // the caller where to go instead. InteractionService.LogAsync is
-            // the sole writer of LastCompletedAtUtc.
+            // Completion is ONLY allowed via logging an actual interaction.
+            // This endpoint exists for backward compatibility but no longer
+            // marks anything complete: it tells the caller where to go
+            // instead. InteractionService.LogAsync is the sole writer of
+            // LastCompletedAtUtc.
             var ownerId = OwnerId();
             await RequireOwnedPersonAsync(ownerId, personId);
             var preference = await _preferences.GetAsync(ownerId, personId)
@@ -396,7 +393,6 @@ namespace Servicess
 
         public async Task<List<ReminderDueDto>> ListDueAsync()
         {
-            using (Operation.Time("List due reminders"))
             {
                 var ownerId = OwnerId();
                 var now = DateTime.UtcNow;

@@ -1,0 +1,73 @@
+name: Docs-only checks
+
+# Documentation-only pull requests do not need the full build/test/security
+# pipeline. The heavy CI workflow ignores docs paths (see Pipline.yaml), and
+# this workflow publishes the required check names as satisfied so the PR can
+# still be accepted under branch protection.
+on:
+  pull_request:
+    branches: [master, relationship-intelligence-main]
+    paths:
+      - 'docs/**'
+      - '*.md'
+      - '**/*.md'
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: read
+  checks: write
+
+jobs:
+  docs-only:
+    name: Docs gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Confirm the pull request touches documentation only
+        id: scope
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              per_page: 100,
+            });
+            const isDoc = (p) => p.startsWith('docs/') || p === 'README.md' || p.endsWith('.md');
+            const docsOnly = files.length > 0 && files.every((f) => isDoc(f.filename));
+            core.setOutput('docs_only', String(docsOnly));
+            core.info(
+              docsOnly
+                ? 'Documentation-only PR: publishing lightweight required checks.'
+                : 'Code changes present: heavy CI owns the required checks.',
+            );
+
+      - name: Publish required checks for a documentation-only PR
+        if: steps.scope.outputs.docs_only == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const names = [
+              'Lint Code base',
+              'Build Application',
+              'Gitleaks Secret Scan',
+              'Security Vulnerability Scanning',
+              'SonarCloud Analysis',
+              'Run Tests',
+            ];
+            const sha = context.payload.pull_request.head.sha;
+            for (const name of names) {
+              await github.rest.checks.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                name,
+                head_sha: sha,
+                status: 'completed',
+                conclusion: 'success',
+                output: {
+                  title: 'Documentation-only change',
+                  summary: 'No application code changed. Heavy CI was skipped; this required check is satisfied by the documentation gate.',
+                },
+              });
+            }

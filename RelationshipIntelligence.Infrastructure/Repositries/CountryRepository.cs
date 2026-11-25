@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using RepositryContracts;
 using SerilogTimings;
+using Servicess.Helpers;
 
 namespace Repositories
 {
@@ -22,8 +23,8 @@ namespace Repositories
         {
             using (Operation.Time("AddCountry staged for Country: {CountryName}", country?.CountryName))
             {
-                _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Country: {@Country}",
-                    nameof(AddCountry), DateTime.UtcNow, country);
+                _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Country: {Country}",
+                    nameof(AddCountry), DateTime.UtcNow, LogSanitizer.Sanitize(country));
 
                 try
                 {
@@ -34,19 +35,19 @@ namespace Repositories
                     }
 
                     _logger.LogDebug("Staging country with ID: {CountryId}, Name: {CountryName} for insert",
-                        country.CountryId, country.CountryName);
+                        LogSanitizer.Sanitize(country.CountryId), LogSanitizer.Sanitize(country.CountryName));
 
                     _db.Countries.Add(country);
 
                     _logger.LogInformation("Successfully staged country for insert. ID: {CountryId}, Name: {CountryName}",
-                        country.CountryId, country.CountryName);
+                        LogSanitizer.Sanitize(country.CountryId), LogSanitizer.Sanitize(country.CountryName));
 
                     return country;
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Unexpected error occurred in {MethodName} for country: {@Country}",
-                        nameof(AddCountry), country);
+                    _logger.LogError(ex, "Unexpected error occurred in {MethodName} for country: {Country}",
+                        nameof(AddCountry), LogSanitizer.Sanitize(country));
                     throw;
                 }
             }
@@ -56,8 +57,8 @@ namespace Repositories
         {
             using (Operation.Time("UpdateCountry staged for Country: {CountryName}", country?.CountryName))
             {
-                _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Country: {@Country}",
-                    nameof(UpdateCountry), DateTime.UtcNow, country);
+                _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Country: {Country}",
+                    nameof(UpdateCountry), DateTime.UtcNow, LogSanitizer.Sanitize(country));
 
                 try
                 {
@@ -71,14 +72,14 @@ namespace Repositories
 
                     if (existingCountry == null)
                     {
-                        _logger.LogWarning("UpdateCountry called for non-existent Country ID: {CountryId}", country.CountryId);
+                        _logger.LogWarning("UpdateCountry called for non-existent Country ID: {CountryId}", LogSanitizer.Sanitize(country.CountryId));
                         throw new InvalidOperationException($"Country with ID {country.CountryId} does not exist.");
                     }
 
                     _db.Entry(existingCountry).CurrentValues.SetValues(country);
 
                     _logger.LogInformation("Successfully staged country update. ID: {CountryId}, Name: {CountryName}",
-                        existingCountry.CountryId, existingCountry.CountryName);
+                        LogSanitizer.Sanitize(existingCountry.CountryId), LogSanitizer.Sanitize(existingCountry.CountryName));
 
                     return existingCountry;
                 }
@@ -88,8 +89,8 @@ namespace Repositories
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Unexpected error occurred in {MethodName} for country: {@Country}",
-                        nameof(UpdateCountry), country);
+                    _logger.LogError(ex, "Unexpected error occurred in {MethodName} for country: {Country}",
+                        nameof(UpdateCountry), LogSanitizer.Sanitize(country));
                     throw;
                 }
             }
@@ -99,14 +100,14 @@ namespace Repositories
         {
             using (Operation.Time("GetAllCountries database operation"))
             {
-                _logger.LogInformation("Executing {MethodName} method at {Timestamp}",
+                _logger.LogDebug("Executing {MethodName} method at {Timestamp}",
                     nameof(GetAllCountries), DateTime.UtcNow);
 
                 try
                 {
                     var countries = await _db.Countries.ToListAsync();
 
-                    _logger.LogInformation("{MethodName} completed successfully. Retrieved {Count} countries",
+                    _logger.LogDebug("{MethodName} completed successfully. Retrieved {Count} countries",
                         nameof(GetAllCountries), countries.Count);
 
                     return countries;
@@ -124,7 +125,7 @@ namespace Repositories
             using (Operation.Time("GetCountryByName database query for name: {CountryName}", name))
             {
                 _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Country name: {CountryName}",
-                    nameof(GetCountryByName), DateTime.UtcNow, name);
+                    nameof(GetCountryByName), DateTime.UtcNow, LogSanitizer.Sanitize(name));
 
                 try
                 {
@@ -138,12 +139,12 @@ namespace Repositories
 
                     if (country == null)
                     {
-                        _logger.LogInformation("No country found with name: {CountryName}", name);
+                        _logger.LogInformation("No country found with name: {CountryName}", LogSanitizer.Sanitize(name));
                     }
                     else
                     {
                         _logger.LogInformation("Successfully retrieved country with ID: {CountryId}, Name: {CountryName}",
-                            country.CountryId, country.CountryName);
+                            LogSanitizer.Sanitize(country.CountryId), LogSanitizer.Sanitize(country.CountryName));
                     }
 
                     return country;
@@ -151,7 +152,7 @@ namespace Repositories
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Error occurred in {MethodName} for country name: {CountryName}",
-                        nameof(GetCountryByName), name);
+                        nameof(GetCountryByName), LogSanitizer.Sanitize(name));
                     throw;
                 }
             }
@@ -162,13 +163,13 @@ namespace Repositories
             using (Operation.Time("GetCountryById database query for ID: {CountryId}", id))
             {
                 _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Country ID: {CountryId}",
-                    nameof(GetCountryById), DateTime.UtcNow, id);
+                    nameof(GetCountryById), DateTime.UtcNow, LogSanitizer.Sanitize(id));
 
                 try
                 {
                     if (id == null || id == Guid.Empty)
                     {
-                        _logger.LogWarning("GetCountryById called with invalid ID: {CountryId}", id);
+                        _logger.LogWarning("GetCountryById called with invalid ID: {CountryId}", LogSanitizer.Sanitize(id));
                         return null;
                     }
 
@@ -176,12 +177,12 @@ namespace Repositories
 
                     if (country == null)
                     {
-                        _logger.LogInformation("No country found with ID: {CountryId}", id);
+                        _logger.LogInformation("No country found with ID: {CountryId}", LogSanitizer.Sanitize(id));
                     }
                     else
                     {
                         _logger.LogInformation("Successfully retrieved country with ID: {CountryId}, Name: {CountryName}",
-                            country.CountryId, country.CountryName);
+                            LogSanitizer.Sanitize(country.CountryId), LogSanitizer.Sanitize(country.CountryName));
                     }
 
                     return country;
@@ -189,7 +190,7 @@ namespace Repositories
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Error occurred in {MethodName} for country ID: {CountryId}",
-                        nameof(GetCountryById), id);
+                        nameof(GetCountryById), LogSanitizer.Sanitize(id));
                     throw;
                 }
             }

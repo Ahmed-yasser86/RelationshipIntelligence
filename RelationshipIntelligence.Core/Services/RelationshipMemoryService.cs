@@ -1,7 +1,6 @@
-using Entities;
+﻿using Entities;
 using Microsoft.Extensions.Logging;
 using RepositryContracts;
-using SerilogTimings;
 using ServiceContracts;
 using ServiceContracts.DTOs.MemoryDTOs;
 using System;
@@ -51,7 +50,6 @@ namespace Servicess
 
         public async Task<List<MemoryEntryResponse>> ListForPersonAsync(Guid personId)
         {
-            using (Operation.Time("List relationship memory"))
             {
                 var ownerId = OwnerId();
                 await RequireOwnedPersonAsync(ownerId, personId);
@@ -62,7 +60,6 @@ namespace Servicess
 
         public async Task<MemoryEntryResponse> CreateAsync(MemoryEntryCreateRequest request)
         {
-            using (Operation.Time("Create relationship memory entry"))
             {
                 if (request == null)
                     throw new ArgumentNullException(nameof(request));
@@ -105,7 +102,6 @@ namespace Servicess
 
         public async Task<MemoryEntryResponse> SuggestEntryAsync(Guid personId, RelationshipMemoryKind kind, string title, string? detail)
         {
-            using (Operation.Time("Suggest relationship memory entry"))
             {
                 var cleanTitle = (title ?? string.Empty).Trim();
                 if (cleanTitle.Length == 0 || cleanTitle.Length > 200)
@@ -148,7 +144,6 @@ namespace Servicess
 
         public async Task<List<MemoryEntryResponse>> ProposeGapsAsync(Guid personId)
         {
-            using (Operation.Time("Propose relationship memory gaps"))
             {
                 var ownerId = OwnerId();
                 await RequireOwnedPersonAsync(ownerId, personId);
@@ -178,7 +173,6 @@ namespace Servicess
 
         public async Task<MemoryEntryResponse> UpdateAsync(MemoryEntryUpdateRequest request)
         {
-            using (Operation.Time("Update relationship memory entry"))
             {
                 if (request == null)
                     throw new ArgumentNullException(nameof(request));
@@ -222,7 +216,6 @@ namespace Servicess
 
         public async Task DeleteAsync(Guid entryId)
         {
-            using (Operation.Time("Delete relationship memory entry"))
             {
                 var ownerId = OwnerId();
                 var entry = await _entries.GetAsync(ownerId, entryId);
@@ -240,7 +233,6 @@ namespace Servicess
 
         public async Task<MemoryEntryResponse> AcceptSuggestionAsync(Guid entryId, string? correctionNote = null)
         {
-            using (Operation.Time("Accept memory suggestion"))
             {
                 var ownerId = OwnerId();
                 var entry = await _entries.GetAsync(ownerId, entryId);
@@ -265,7 +257,6 @@ namespace Servicess
 
         public async Task RejectSuggestionAsync(Guid entryId)
         {
-            using (Operation.Time("Reject memory suggestion"))
             {
                 var ownerId = OwnerId();
                 var entry = await _entries.GetAsync(ownerId, entryId);

@@ -4,8 +4,16 @@ on:
   workflow_dispatch:  
   push:
     branches: [master, dev, relationship-intelligence-main]
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - '**/*.md'
   pull_request:
-    branches: [master]
+    branches: [master, relationship-intelligence-main]
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - '**/*.md'
     types:
       - opened
       - edited
@@ -39,7 +47,7 @@ jobs:
         uses: ./.github/actions/CacheDependencies
 
       - name: Run linters
-        uses: wearerequired/lint-action@v2.3.0
+        uses: wearerequired/lint-action@548d8a7c4b04d3553d32ed5b6e91eb171e10e7bb # v2.3.0
         with:
           github_token: ${{ github.token }}
           dotnet_format: true
@@ -100,7 +108,8 @@ jobs:
     env:
       GITHUB_TOKEN: ${{ github.token }}
       HAS_SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      Serilog__WriteTo__2__Args__connectionString: ${{ secrets.SERILOG_DB_CONNECTION }}
+      JWT_KEY: ${{ secrets.JWT_KEY }}
+      DIGEST_SECRET: ${{ secrets.DIGEST_SECRET }}
       ConnectionStrings__ContactDb: ${{ secrets.DB_CONNECTION_STRING }}
     permissions:
       contents: read
@@ -131,8 +140,9 @@ jobs:
       contents: read
     env:
       NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
+      JWT_KEY: ${{ secrets.JWT_KEY }}
+      DIGEST_SECRET: ${{ secrets.DIGEST_SECRET }}
       ConnectionStrings__ContactDb: ${{ secrets.DB_CONNECTION_STRING }}
-      Serilog__WriteTo__2__Args__connectionString: ${{ secrets.SERILOG_DB_CONNECTION }}
     steps:
       - name: Check out Git repository
         uses: actions/checkout@v4
@@ -143,6 +153,7 @@ jobs:
       - name: Run Specified Unit and Integration Tests
         run: |
           dotnet test RelationshipIntelligence.Tests/RelationshipIntelligence.Tests.csproj --configuration Release --no-restore --logger "trx;LogFileName=ServiceTests.trx" --results-directory ./TestResults
+          dotnet test RelationshipIntelligence.ControllerTests/RelationshipIntelligence.ControllerTests.csproj --configuration Release --no-restore --logger "trx;LogFileName=ControllerTests.trx" --results-directory ./TestResults
 
       - name: Upload all test results
         uses: actions/upload-artifact@v4
@@ -178,7 +189,6 @@ jobs:
           tags: contacts-manager-api:${{ github.sha }}
           build-args: |
             ConnectionStrings__ContactDb=${{ secrets.DB_CONNECTION_STRING }}
-            Serilog__WriteTo__2__Args__connectionString=${{ secrets.SERILOG_DB_CONNECTION }}
 
   trivy_container_scan:
     name: Trivy Container Vulnerability Scan
@@ -257,7 +267,6 @@ jobs:
           cache-from: type=gha
           build-args: |
             ConnectionStrings__ContactDb=${{ secrets.DB_CONNECTION_STRING }}
-            Serilog__WriteTo__2__Args__connectionString=${{ secrets.SERILOG_DB_CONNECTION }}
 
       - name: Generate Artifact Attestation
         uses: actions/attest-build-provenance@v2

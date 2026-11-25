@@ -3,7 +3,6 @@ using ServiceContracts;
 using ServiceContracts.DTOs;
 using RepositryContracts;
 using Microsoft.Extensions.Logging;
-using SerilogTimings;
 
 namespace Servicess
 {
@@ -20,9 +19,8 @@ namespace Servicess
 
         public async Task<List<CountryResponse>> Countries()
         {
-            using (Operation.Time("Get all countries operation"))
             {
-                _logger.LogInformation("Executing {MethodName} method at {Timestamp}",
+                _logger.LogDebug("Executing {MethodName} method at {Timestamp}",
                     nameof(Countries), DateTime.UtcNow);
 
                 try
@@ -30,7 +28,7 @@ namespace Servicess
                     var countries = await CountriesRipositry.GetAllCountries();
                     var result = countries.Select(country => country.ConvertToDto()).ToList();
 
-                    _logger.LogInformation("{MethodName} completed successfully. Retrieved {Count} countries",
+                    _logger.LogDebug("{MethodName} completed successfully. Retrieved {Count} countries",
                         nameof(Countries), result.Count);
 
                     return result;
@@ -45,7 +43,6 @@ namespace Servicess
 
         public async Task<CountryResponse?> GetCountryByCountryId(Guid? ID)
         {
-            using (Operation.Time("Get country by ID operation for: {CountryId}", ID))
             {
                 _logger.LogInformation("Executing {MethodName} method at {Timestamp}. Looking for country with ID: {CountryId}",
                     nameof(GetCountryByCountryId), DateTime.UtcNow, ID);

@@ -371,7 +371,7 @@ export function Found() {
   }, []);
 
   useEffect(() => {
-    (async () => {
+    void (async () => {
       setLoading(true);
       const list = await loadBatches();
       const focused = searchParams.get("batch");

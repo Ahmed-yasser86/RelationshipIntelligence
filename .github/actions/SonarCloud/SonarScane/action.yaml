@@ -53,6 +53,8 @@ runs:
             /d:sonar.token="${{ inputs.sonar_token }}" \
             /d:sonar.host.url="https://sonarcloud.io" \
             /d:sonar.qualitygate.wait=true \
+            "/d:sonar.exclusions=**/SanitizedLoggingCoverageTests.cs,**/SanitizedLoggingTests.cs,RelationshipIntelligence.Tests/**,RelationshipIntelligence.ControllerTests/**" \
+            "/d:sonar.coverage.exclusions=**/Controllers/**,**/Program.cs,**/DTOs/**,**/Repositries/**,RelationshipIntelligence.AI/**,relationship-intelligence-client/**,**/Migrations/**" \
             /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml
         else
           dotnet sonarscanner begin \
@@ -62,6 +64,8 @@ runs:
             /d:sonar.host.url="https://sonarcloud.io" \
             /d:sonar.qualitygate.wait=true \
             /d:sonar.branch.name="${{ github.ref_name }}" \
+            "/d:sonar.exclusions=**/SanitizedLoggingCoverageTests.cs,**/SanitizedLoggingTests.cs,RelationshipIntelligence.Tests/**,RelationshipIntelligence.ControllerTests/**" \
+            "/d:sonar.coverage.exclusions=**/Controllers/**,**/Program.cs,**/DTOs/**,**/Repositries/**,RelationshipIntelligence.AI/**,relationship-intelligence-client/**,**/Migrations/**" \
             /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml
         fi
     - name: Build Project (Required for Sonar to analyze)

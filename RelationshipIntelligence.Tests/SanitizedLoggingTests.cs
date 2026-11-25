@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using RepositryContracts;
 using ServiceContracts;
+using ServiceContracts.DTOs;
 using Servicess;
 using Servicess.Helpers;
 using System;
@@ -80,6 +81,43 @@ namespace CRUDTests
                 () => service.SearchPersonsBy_Batched("Salma\r\n forged", "Name", 1, 10));
 
             LogSanitizer.Sanitize("Salma\r\n forged").Should().Be("Salma forged");
+        }
+
+        [Fact]
+        public async Task PersonAdder_InvalidRequest_CoversValidationLog()
+        {
+            var service = new PersonAdderService(
+                Mock.Of<PersonRepositryContract>(), Mock.Of<CircleRepositryContract>(),
+                Mock.Of<ContactItemRoleRepositryContract>(), Mock.Of<ConnectionChannelRepositryContract>(),
+                Mock.Of<UserDefinedTagsRepositryContract>(), Mock.Of<SystemStatusTagRepositryContract>(),
+                Mock.Of<ICurrentUserService>(), Mock.Of<IUnitOfWork>(),
+                Mock.Of<ILogger<PersonAdderService>>());
+
+            await Assert.ThrowsAnyAsync<Exception>(() => service.AddPerson(new PersonAddRequest()));
+        }
+
+        [Fact]
+        public async Task PersonQuickAdder_InvalidRequest_CoversValidationLog()
+        {
+            var service = new PersonQuickAdderService(
+                Mock.Of<PersonRepositryContract>(), Mock.Of<CircleRepositryContract>(),
+                Mock.Of<ICurrentUserService>(), Mock.Of<IUnitOfWork>(),
+                Mock.Of<ILogger<PersonQuickAdderService>>());
+
+            await Assert.ThrowsAnyAsync<Exception>(() => service.QuickAddPerson(new PersonQuickAddRequest()));
+        }
+
+        [Fact]
+        public async Task PersonUpdater_InvalidRequest_CoversValidationLog()
+        {
+            var service = new PersonUpdaterService(
+                Mock.Of<PersonRepositryContract>(), Mock.Of<CircleRepositryContract>(),
+                Mock.Of<ContactItemRoleRepositryContract>(), Mock.Of<ConnectionChannelRepositryContract>(),
+                Mock.Of<UserDefinedTagsRepositryContract>(), Mock.Of<SystemStatusTagRepositryContract>(),
+                Mock.Of<ILogger<PersonUpdaterService>>(),
+                Mock.Of<SocialMediaAccountRepositryContract>(), Mock.Of<IUnitOfWork>());
+
+            await Assert.ThrowsAnyAsync<Exception>(() => service.UpdatePerson(new PersonUpdateRequest()));
         }
     }
 }

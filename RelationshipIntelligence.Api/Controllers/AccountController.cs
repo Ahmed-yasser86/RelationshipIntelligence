@@ -123,7 +123,7 @@ namespace ContactsManager.API.Controllers
         public async Task<IActionResult> PostRefresh(RefreshRequest request)
         {
             // [ApiController] validates [Required] members before this action runs.
-            var userId = GetUserIdFromExpiredToken(request!.Token);
+            var userId = GetUserIdFromExpiredToken(request.Token);
             if (userId == null)
                 return Unauthorized(new { message = "Invalid token." });
 

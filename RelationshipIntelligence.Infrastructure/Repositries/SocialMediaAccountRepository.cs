@@ -9,6 +9,8 @@ namespace Repositories
 {
     public class SocialMediaAccountRepository : SocialMediaAccountRepositryContract
     {
+        private const string ExecutingTemplate = "Executing {MethodName} method at {Timestamp}";
+
         private readonly AppDBContext _db;
         private readonly ILogger<SocialMediaAccountRepository> _logger;
 
@@ -22,7 +24,7 @@ namespace Repositories
         {
             using (Operation.Time("AddSocialMediaAccount staged"))
             {
-                _logger.LogInformation("Executing {MethodName} method at {Timestamp}",
+                _logger.LogInformation(ExecutingTemplate,
                     nameof(AddSocialMediaAccount), DateTime.UtcNow);
 
                 try
@@ -52,7 +54,7 @@ namespace Repositories
         {
             using (Operation.Time("DeleteSocialMediaAccount staged"))
             {
-                _logger.LogInformation("Executing {MethodName} method at {Timestamp}",
+                _logger.LogInformation(ExecutingTemplate,
                     nameof(DeleteSocialMediaAccount), DateTime.UtcNow);
 
                 try
@@ -91,7 +93,7 @@ namespace Repositories
         {
             using (Operation.Time("GetSocialMediaAccountById database query"))
             {
-                _logger.LogInformation("Executing {MethodName} method at {Timestamp}",
+                _logger.LogInformation(ExecutingTemplate,
                     nameof(GetSocialMediaAccountById), DateTime.UtcNow);
 
                 try
@@ -124,7 +126,7 @@ namespace Repositories
         {
             using (Operation.Time("GetAllSocialMediaAccountsForPerson database operation"))
             {
-                _logger.LogInformation("Executing {MethodName} method at {Timestamp}",
+                _logger.LogInformation(ExecutingTemplate,
                     nameof(GetAllSocialMediaAccountsForPerson), DateTime.UtcNow);
 
                 try

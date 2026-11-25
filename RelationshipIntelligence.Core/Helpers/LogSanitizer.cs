@@ -24,7 +24,7 @@ namespace Servicess.Helpers
                     chars[i] = ' ';
             }
 
-            text = new string(chars).Trim();
+            text = System.Text.RegularExpressions.Regex.Replace(new string(chars), @"\s{2,}", " ").Trim();
             return text.Length <= MaxLength ? text : text[..MaxLength];
         }
     }
